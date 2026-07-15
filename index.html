@@ -1,52 +1,664 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <meta name="theme-color" content="#0f172a"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="manifest" href="/Fieldy/manifest.json"/>
-  <title>Fieldy — Uri Field Assistant</title>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#0f172a;--bg2:#1e293b;--bg3:#0f172a;--border:#334155;--text:#f1f5f9;--muted:#64748b;--blue:#3b82f6;--cyan:#06b6d4;--red:#ef4444;--orange:#f59e0b;--green:#4ade80}
-    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;direction:rtl;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-    button{font-family:inherit;cursor:pointer;border:none}
-    textarea,select,input{font-family:inherit}
-    #app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
-    .screen{flex:1;display:flex;flex-direction:column;overflow:hidden}
-    .scrollable{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-    ::-webkit-scrollbar{width:3px}
-    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#0f172a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Fieldy"/>
+<link rel="manifest" href="/Fieldy/manifest.json"/>
+<title>Fieldy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#f1f5f9;direction:rtl;height:100vh;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+textarea,select,input{font-family:inherit}
+#app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.hidden{display:none!important}
+/* Nav */
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 0 24px;z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;background:none;border:none;position:relative}
+.nav-icon{font-size:22px}
+.nav-label{font-size:10px;color:#475569;font-weight:400}
+.nav-btn.active .nav-label{color:#3b82f6;font-weight:700}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#ef4444;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
+/* Cards */
+.card{background:#1e293b;border-radius:14px;padding:14px;margin-bottom:8px}
+.card-red{border:1.5px solid #ef444460;background:#ef444418}
+.card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
+.card-green{border:1.5px solid #4ade8060;background:#4ade8018}
+/* Buttons */
+.btn-primary{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-size:15px;font-weight:700;display:block;border:none;cursor:pointer}
+.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #334155;background:transparent;color:#64748b;font-size:14px;cursor:pointer}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#1e293b;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
+/* Form */
+.form-label{font-size:11px;color:#64748b;margin-bottom:4px;display:block}
+.form-input{width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:11px 12px;color:#f1f5f9;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
+.form-select{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px 8px;color:#f1f5f9;font-size:13px;outline:none}
+/* Tags */
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#0f172a;color:#64748b}
+.tag-red{background:#ef444422;color:#ef4444;font-weight:600}
+.tag-orange{background:#f59e0b22;color:#f59e0b;font-weight:600}
+.tag-green{background:#4ade8022;color:#4ade80;font-weight:600}
+.tag-status-open{background:#ef444422;color:#ef4444;font-weight:600}
+.tag-status-pending{background:#f59e0b22;color:#f59e0b;font-weight:600}
+.tag-status-resolved{background:#4ade8022;color:#4ade80;font-weight:600}
+/* Checkbox */
+.cb{width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;transition:all 0.15s;border:2px solid}
+/* Progress */
+.progress-bar{background:#1e293b;border-radius:99px;height:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+/* Screens header */
+.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#1e293b,#0f172a);position:sticky;top:0;z-index:10}
+/* Empty state */
+.empty{text-align:center;padding:60px 0;color:#334155}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-text{font-size:14px}
+/* Action result */
+.action-result{background:#0f172a;border-radius:14px;padding:16px;font-size:14px;color:#e2e8f0;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
+</style>
 </head>
 <body>
-<div id="app"></div>
-<script type="module">
-// ── STORAGE ──────────────────────────────────────────────────────
-const KEY = 'fieldy_v1'
-const load = () => { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null } catch { return null } }
-const save = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch {} }
-const fresh = () => ({ tasks:{now:[],today:[],later:[]}, sites:[], people:[], focus:'', summary:'', updated:null })
+<div id="app">
+  <div id="screen-home" class="screen"></div>
+  <div id="screen-tasks" class="screen hidden"></div>
+  <div id="screen-sites" class="screen hidden"></div>
+  <div id="screen-people" class="screen hidden"></div>
+  <div id="screen-input" class="screen hidden"></div>
+  <div id="screen-action" class="screen hidden"></div>
+  <div id="screen-settings" class="screen hidden"></div>
+  <nav id="nav">
+    <button class="nav-btn active" data-screen="home">
+      <span class="nav-icon">☀️</span>
+      <span class="nav-label">בית</span>
+    </button>
+    <button class="nav-btn" data-screen="tasks">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">משימות</span>
+      <span class="nav-badge hidden" id="badge-tasks">0</span>
+    </button>
+    <button class="nav-btn" data-screen="sites">
+      <span class="nav-icon">📍</span>
+      <span class="nav-label">אתרים</span>
+      <span class="nav-badge hidden" id="badge-sites">0</span>
+    </button>
+    <button class="nav-btn" data-screen="people">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">אנשים</span>
+      <span class="nav-badge hidden" id="badge-people">0</span>
+    </button>
+  </nav>
+</div>
+<div id="modal-container"></div>
 
-// ── STATE ─────────────────────────────────────────────────────────
-let state = load() || fresh()
-let screen = 'home'
-let prevScreen = 'home'
-let actionCtx = null
+<script>
+// ── STATE ─────────────────────────────────────────
+const KEY = 'fieldy_v2'
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],focus:'',updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
+let currentScreen = 'home'
+let actionCtx = null
 
-const setState = (patch) => { state = {...state,...patch,updated:new Date().toISOString()}; save(state); render() }
-const navigate = (to, ctx=null) => { prevScreen=screen; if(ctx) actionCtx=ctx; screen=to; render() }
-const goBack = () => { screen=prevScreen; render() }
+const save = () => { localStorage.setItem(KEY, JSON.stringify(state)) }
+const setState = (patch) => { Object.assign(state, patch, {updated: new Date().toISOString()}); save(); refreshBadges(); renderCurrentScreen() }
 
-// ── CLAUDE API ────────────────────────────────────────────────────
-const SYSTEM = `You are a field operations assistant for Uri, a Regional Manager at Innovative Agro Industry Philippines (Region II). Uri has ADHD. Engineers: Gio and Kenneth. Contractors: ASC Construction (engineer: Dave) and 11-16 Construction.
-Uri sends notes in Hebrew/English/Tagalog mix. Return ONLY valid JSON:
-{"now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"site","province":"province","issue":"issue","contractor":"asc/11-16/null","status":"open/pending/resolved"}],"people":[{"name":"name","role":"contractor/engineer/nia/other","company":"","pending":"what is waiting from them"}],"focus":"ONE Hebrew sentence — most important thing today","summary":"2-sentence Hebrew summary"}
+const ASSIGNEE = {uri:'אני',gio:"ג'יו",kenneth:"קנת'",asc:'ASC','11-16':'11-16'}
+const STATUS_COLOR = {open:'red',pending:'orange',resolved:'green'}
+const STATUS_LABEL = {open:'פתוח',pending:'ממתין',resolved:'נפתר'}
+
+// ── NAVIGATION ────────────────────────────────────
+const NAV_SCREENS = ['home','tasks','sites','people']
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const s = btn.dataset.screen
+    navigateTo(s)
+  })
+})
+
+function navigateTo(screen, ctx=null) {
+  if(ctx) actionCtx = ctx
+
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'))
+  
+  // Show target
+  document.getElementById('screen-' + screen).classList.remove('hidden')
+  
+  // Update nav
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+  const activeBtn = document.querySelector(`.nav-btn[data-screen="${screen}"]`)
+  if(activeBtn) activeBtn.classList.add('active')
+  
+  // Show/hide nav
+  document.getElementById('nav').style.display = NAV_SCREENS.includes(screen) ? 'grid' : 'none'
+  
+  currentScreen = screen
+  renderCurrentScreen()
+  
+  // Scroll to top
+  const el = document.getElementById('screen-' + screen)
+  if(el) el.scrollTop = 0
+}
+
+function goBack() {
+  navigateTo('home')
+}
+
+function renderCurrentScreen() {
+  switch(currentScreen) {
+    case 'home': renderHome(); break
+    case 'tasks': renderTasks(); break
+    case 'sites': renderSites(); break
+    case 'people': renderPeople(); break
+    case 'input': renderInput(); break
+    case 'action': renderAction(); break
+    case 'settings': renderSettings(); break
+  }
+}
+
+// ── BADGES ───────────────────────────────────────
+function refreshBadges() {
+  const urgent = state.tasks.now.filter(t=>!t.done).length
+  const sites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
+  const people = state.people.filter(p=>p.pending).length
+
+  ;[['tasks',urgent],['sites',sites],['people',people]].forEach(([k,v]) => {
+    const b = document.getElementById('badge-'+k)
+    if(b) { b.textContent=v; b.classList.toggle('hidden', v===0) }
+  })
+}
+
+// ── HOME ─────────────────────────────────────────
+function renderHome() {
+  const el = document.getElementById('screen-home')
+  const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const done = all.filter(t=>t.done).length
+  const total = all.length
+  const urgent = state.tasks.now.filter(t=>!t.done).slice(0,3)
+  const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
+  const pendingPeople = state.people.filter(p=>p.pending).length
+  const pct = total ? Math.round((done/total)*100) : 0
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(180deg,#1e3a5f,#0f172a);padding:48px 16px 16px;border-bottom:1px solid #1e293b">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
+          <div style="font-size:22px;font-weight:800;color:#f8fafc">בוקר טוב, אורי ☀️</div>
+          <div style="font-size:11px;color:#475569;margin-top:2px">Region II · Cagayan Valley</div>
+        </div>
+        <button onclick="navigateTo('settings')" style="background:#1e293b;border-radius:10px;padding:8px 10px;color:#64748b;font-size:16px">⚙️</button>
+      </div>
+      ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#f59e0b18;border:1px solid #f59e0b44;border-radius:10px;cursor:pointer;margin-bottom:10px">
+        <div style="font-size:13px;color:#f59e0b;font-weight:600">⚠️ נדרש API Key</div>
+        <div style="font-size:12px;color:#78716c;margin-top:2px">לחץ להגדרות</div>
+      </div>` : ''}
+      ${total > 0 ? `<div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:5px">
+          <span>התקדמות היום</span><span style="color:${done===total?'#4ade80':'#64748b'}">${done}/${total}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#4ade80':'linear-gradient(90deg,#3b82f6,#06b6d4)'}"></div></div>
+      </div>` : ''}
+    </div>
+    <div style="padding:14px 16px">
+      ${state.focus ? `<div style="background:linear-gradient(135deg,#1e3a5f,#1e293b);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid #1e40af33">
+        <div style="font-size:10px;color:#3b82f6;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:14px;color:#f1f5f9;line-height:1.5;font-weight:600">${state.focus}</div>
+      </div>` : ''}
+      ${urgent.length > 0 ? `<div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⚡ עכשיו</div>
+      ${urgent.map(t=>`<div class="card card-red" onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:600;color:#f1f5f9">${t.text}</div>
+        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:5px">
+          ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+          ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+        </div>`:''}
+      </div>`).join('')}` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div class="card" onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border:1px solid ${urgent.length>0?'#ef444433':'transparent'}">
+          <div style="font-size:18px">⚡</div>
+          <div style="font-size:22px;font-weight:800;color:${urgent.length>0?'#ef4444':'#475569'}">${urgent.length}</div>
+          <div style="font-size:10px;color:#475569;margin-top:2px">עכשיו</div>
+        </div>
+        <div class="card" onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border:1px solid ${openSites>0?'#f59e0b33':'transparent'}">
+          <div style="font-size:18px">📍</div>
+          <div style="font-size:22px;font-weight:800;color:${openSites>0?'#f59e0b':'#475569'}">${openSites}</div>
+          <div style="font-size:10px;color:#475569;margin-top:2px">אתרים</div>
+        </div>
+        <div class="card" onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border:1px solid ${pendingPeople>0?'#06b6d433':'transparent'}">
+          <div style="font-size:18px">👥</div>
+          <div style="font-size:22px;font-weight:800;color:${pendingPeople>0?'#06b6d4':'#475569'}">${pendingPeople}</div>
+          <div style="font-size:10px;color:#475569;margin-top:2px">ממתין</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
+      ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
+      </div>`:''}
+    </div>
+  `
+}
+
+// ── INPUT ────────────────────────────────────────
+function renderInput() {
+  const el = document.getElementById('screen-input')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">הוסף הודעות</div>
+      </div>
+      <div style="font-size:13px;color:#475569;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
+      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px;color:#f1f5f9;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <div id="input-error" style="color:#ef4444;font-size:13px;margin-bottom:8px;display:none"></div>
+      ${!apiKey?`<div style="color:#f59e0b;font-size:13px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
+      <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
+    </div>
+  `
+}
+
+async function doAnalyze() {
+  const text = document.getElementById('input-text')?.value?.trim()
+  const btn = document.getElementById('input-btn')
+  const err = document.getElementById('input-error')
+  if(!text || !apiKey) return
+  btn.textContent = '⚙️ מסדר...'
+  btn.style.background = '#1e293b'
+  btn.style.color = '#475569'
+  err.style.display = 'none'
+  try {
+    const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
+    const p = JSON.parse(parsed.replace(/```json|```/g,'').trim())
+    const s = Date.now()
+    const tag = (arr,pfx) => (arr||[]).map((t,i)=>({...t,id:`${pfx}${s}${i}`,done:false}))
+    setState({
+      tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
+      sites: mergeSites(state.sites, p.sites||[]),
+      people: mergePeople(state.people, p.people||[]),
+      focus: p.focus || state.focus
+    })
+    navigateTo('home')
+  } catch(e) {
+    err.textContent = 'שגיאה: ' + e.message
+    err.style.display = 'block'
+    btn.textContent = '⚡ ארגן את היום'
+    btn.style.background = 'linear-gradient(135deg,#3b82f6,#06b6d4)'
+    btn.style.color = '#fff'
+  }
+}
+
+// ── TASKS ────────────────────────────────────────
+let taskBucket = 'now'
+
+function renderTasks() {
+  const el = document.getElementById('screen-tasks')
+  const counts = {now:state.tasks.now.filter(t=>!t.done).length,today:state.tasks.today.filter(t=>!t.done).length,later:state.tasks.later.filter(t=>!t.done).length}
+  const tasks = state.tasks[taskBucket] || []
+  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#64748b'}
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:18px;font-weight:700">משימות</div>
+        <button onclick="showAddTask()" style="background:#1e40af;border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600">+ הוסף</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        ${['now','today','later'].map((b,i)=>`
+          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#1e293b'};color:${taskBucket===b?BCOLS[b]:'#64748b'};cursor:pointer">
+            <div style="font-size:16px">${['⚡','📅','🕐'][i]}</div>
+            <div style="font-size:11px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
+            ${counts[b]>0?`<div style="font-size:13px;font-weight:700">${counts[b]}</div>`:''}
+          </button>`).join('')}
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${tasks.length===0?`<div class="empty"><div class="empty-icon">✓</div><div class="empty-text">ריק — כל הכבוד!</div></div>`:''}
+      ${tasks.map(t=>taskCard(t)).join('')}
+    </div>
+  `
+}
+
+function taskCard(t) {
+  const colors = {red:['#ef444418','#ef444460','#ef4444'],orange:['#f59e0b18','#f59e0b60','#f59e0b'],green:['#4ade8018','#4ade8060','#4ade80']}
+  const c = colors[t.color] || colors.orange
+  return `
+    <div style="background:${t.done?'#0f172a':c[0]};border:1.5px solid ${t.done?'#1e293b':c[1]};border-radius:14px;padding:14px;margin-bottom:8px;opacity:${t.done?'0.45':'1'};transition:opacity 0.2s">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div onclick="toggleTask('${t.id}')" style="width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;background:${t.done?c[2]:'transparent'};border:2px solid ${c[2]};display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">${t.done?'✓':''}</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+            ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+            ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+          </div>
+        </div>
+        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:16px;flex-shrink:0">✍️</button>`:''}
+      </div>
+    </div>`
+}
+
+function setTaskBucket(b) { taskBucket=b; renderTasks() }
+
+function toggleTask(id) {
+  const toggle = arr => arr.map(t=>t.id===id?{...t,done:!t.done}:t)
+  setState({tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}})
+}
+
+function showAddTask() {
+  const modal = document.getElementById('modal-container')
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ משימה חדשה</div>
+        <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none"></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+          <div><label class="form-label">אחראי</label>
+            <select id="add-task-assignee" class="form-select">
+              <option value="uri">אני</option><option value="gio">ג'יו</option>
+              <option value="kenneth">קנת'</option><option value="asc">ASC</option><option value="11-16">11-16</option>
+            </select></div>
+          <div><label class="form-label">מתי</label>
+            <select id="add-task-bucket" class="form-select">
+              <option value="now">עכשיו</option><option value="today">היום</option><option value="later">אחר כך</option>
+            </select></div>
+          <div><label class="form-label">עדיפות</label>
+            <select id="add-task-color" class="form-select">
+              <option value="red">דחוף</option><option value="orange">חשוב</option><option value="green">שוטף</option>
+            </select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddTask()">הוסף</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddTask() {
+  const text = document.getElementById('add-task-text').value.trim()
+  if(!text) return
+  const task = {id:`m${Date.now()}`,text,assignee:document.getElementById('add-task-assignee').value,color:document.getElementById('add-task-color').value,done:false,site:null}
+  const bucket = document.getElementById('add-task-bucket').value
+  setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
+  closeModal()
+}
+
+// ── SITES ────────────────────────────────────────
+let siteFilter = 'open'
+
+function renderSites() {
+  const el = document.getElementById('screen-sites')
+  const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:18px;font-weight:700">אתרים</div>
+        <button onclick="showAddSite()" style="background:#1e40af;border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600">+ הוסף</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#1e40af':'#1e293b'};color:${siteFilter===v?'#fff':'#64748b'};font-size:12px;font-weight:600">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${sites.length===0?`<div class="empty"><div class="empty-icon">📍</div><div class="empty-text">אין אתרים</div></div>`:''}
+      ${sites.map(s=>siteCard(s)).join('')}
+    </div>`
+}
+
+function siteCard(s) {
+  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#64748b'
+  return `
+    <div class="card" style="border:1px solid ${col}33;margin-bottom:8px">
+      <div style="font-size:15px;font-weight:700;color:#f1f5f9">📍 ${s.name}</div>
+      ${s.province?`<div style="font-size:12px;color:#64748b;margin-top:2px">${s.province}</div>`:''}
+      ${s.issue?`<div style="font-size:13px;color:#94a3b8;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
+        <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        ${['open','pending','resolved'].map(st=>`
+          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#0f172a'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#475569'};font-size:11px;font-weight:600">${STATUS_LABEL[st]}</button>`
+        ).join('')}
+        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:14px">✍️</button>
+      </div>
+    </div>`
+}
+
+function setSiteFilter(f) { siteFilter=f; renderSites() }
+function updateSiteStatus(name, status) { setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)}) }
+
+function showAddSite() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ אתר חדש</div>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well"/>
+        <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya"/>
+        <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div><label class="form-label">קבלן</label>
+            <select id="add-site-contractor" class="form-select">
+              <option value="">—</option><option value="asc">ASC</option><option value="11-16">11-16</option>
+            </select></div>
+          <div><label class="form-label">סטטוס</label>
+            <select id="add-site-status" class="form-select">
+              <option value="open">פתוח</option><option value="pending">ממתין</option><option value="resolved">נפתר</option>
+            </select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddSite()">הוסף</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddSite() {
+  const name = document.getElementById('add-site-name').value.trim()
+  if(!name) return
+  setState({sites:[...state.sites,{name,province:document.getElementById('add-site-province').value,issue:document.getElementById('add-site-issue').value,contractor:document.getElementById('add-site-contractor').value,status:document.getElementById('add-site-status').value,id:Date.now()}]})
+  closeModal()
+}
+
+// ── PEOPLE ───────────────────────────────────────
+function renderPeople() {
+  const el = document.getElementById('screen-people')
+  const withP = state.people.filter(p=>p.pending)
+  const withoutP = state.people.filter(p=>!p.pending)
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:18px;font-weight:700">אנשים</div>
+        <button onclick="showAddPerson()" style="background:#1e40af;border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600">+ הוסף</button>
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${state.people.length===0?`<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">אנשים יתווספו מהודעות</div></div>`:''}
+      ${withP.length>0?`<div style="font-size:11px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
+      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:11px;color:#475569;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
+    </div>`
+}
+
+function personCard(p) {
+  const rc = {engineer:'#3b82f6',contractor:'#f59e0b',nia:'#06b6d4',other:'#64748b'}[p.role]||'#64748b'
+  return `
+    <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:8px;flex:1">
+          <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:14px;color:${rc};font-weight:700;flex-shrink:0">${p.name[0]?.toUpperCase()||'?'}</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#f1f5f9">${p.name}</div>
+            ${p.company?`<div style="font-size:12px;color:#64748b">${p.company}</div>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:16px">✍️</button>
+          ${p.pending?`<button onclick="clearPending('${p.name}')" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
+        </div>
+      </div>
+      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
+        <div style="font-size:10px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
+        <div style="font-size:13px;color:#94a3b8;line-height:1.5">${p.pending}</div>
+      </div>`:''}
+    </div>`
+}
+
+function clearPending(name) { setState({people:state.people.map(p=>p.name===name?{...p,pending:''}:p)}) }
+
+function showAddPerson() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ איש קשר</div>
+        <label class="form-label">שם</label><input id="add-person-name" class="form-input" placeholder="Dave"/>
+        <label class="form-label">חברה</label><input id="add-person-company" class="form-input" placeholder="ASC Construction"/>
+        <label class="form-label">ממתין ל...</label><input id="add-person-pending" class="form-input" placeholder="חתימה על waiver"/>
+        <label class="form-label">תפקיד</label>
+        <select id="add-person-role" class="form-select" style="margin-bottom:14px">
+          <option value="contractor">קבלן</option><option value="engineer">מהנדס</option>
+          <option value="nia">NIA</option><option value="other">אחר</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddPerson()">הוסף</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddPerson() {
+  const name = document.getElementById('add-person-name').value.trim()
+  if(!name) return
+  setState({people:[...state.people,{name,company:document.getElementById('add-person-company').value,pending:document.getElementById('add-person-pending').value,role:document.getElementById('add-person-role').value,id:Date.now()}]})
+  closeModal()
+}
+
+// ── ACTION ───────────────────────────────────────
+function openAction(ctx) {
+  actionCtx = ctx
+  navigateTo('action')
+}
+
+function renderAction() {
+  const el = document.getElementById('screen-action')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">צור תוכן</div>
+      </div>
+      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #3b82f6;margin-bottom:20px">
+        <div style="font-size:14px;color:#f1f5f9;line-height:1.5">${actionCtx.text}</div>
+        ${actionCtx.assignee?`<div style="font-size:12px;color:#64748b;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
+      </div>`:''}
+      <div id="action-buttons">
+        ${[['whatsapp','💬','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','📧','מייל','ASC / 11-16 / NIA'],['monday','📋','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
+          <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
+            <div style="font-size:16px;font-weight:600">${i} ${l}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:3px">${s}</div>
+          </div>`).join('')}
+      </div>
+      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#64748b">
+        <div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-size:14px">כותב...</div>
+      </div>
+      <div id="action-result-container" style="display:none">
+        <div id="action-result" class="action-result"></div>
+        <button id="action-copy-btn" class="btn-primary" onclick="copyResult()" style="margin-bottom:10px">📋 העתק</button>
+        <button class="btn-secondary" style="width:100%" onclick="renderAction()">← צור משהו אחר</button>
+      </div>
+    </div>`
+}
+
+async function doAction(type) {
+  document.getElementById('action-buttons').style.display='none'
+  document.getElementById('action-loading').style.display='block'
+  const prompts = {
+    whatsapp:`Write a short WhatsApp message in English from Uri (Regional Manager, IAI Philippines) to ${actionCtx?.assignee||'team member'} about: ${actionCtx?.text}. Max 3 sentences, direct.`,
+    email:`Write a professional email in English from Uri (Regional Manager, Innovative Agro Industry) about: ${actionCtx?.text}. Include subject line. Concise.`,
+    monday:`Write a Monday.com task update in English for: ${actionCtx?.text}. Format: Status / Issue / Next Action / Owner.`
+  }
+  try {
+    const result = await callClaude([{role:'user',content:prompts[type]}])
+    document.getElementById('action-loading').style.display='none'
+    document.getElementById('action-result').textContent=result
+    document.getElementById('action-result-container').style.display='block'
+  } catch(e) {
+    document.getElementById('action-loading').style.display='none'
+    document.getElementById('action-buttons').style.display='block'
+    alert('שגיאה: ' + e.message)
+  }
+}
+
+function copyResult() {
+  const text = document.getElementById('action-result').textContent
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('action-copy-btn')
+    btn.textContent='✓ הועתק!'
+    btn.style.background='#16a34a'
+    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)'},2000)
+  })
+}
+
+// ── SETTINGS ─────────────────────────────────────
+function renderSettings() {
+  const el = document.getElementById('screen-settings')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">הגדרות</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#3b82f6;font-size:12px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
+        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;color:#f1f5f9;font-size:13px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
+        <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
+        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:13px">נקה הכל</button>
+      </div>
+    </div>`
+}
+
+function saveApiKey() {
+  const val = document.getElementById('settings-key').value.trim()
+  apiKey = val
+  localStorage.setItem('fieldy_key', val)
+  const btn = document.getElementById('settings-save-btn')
+  btn.textContent = '✓ נשמר!'
+  btn.style.background = '#16a34a'
+  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)';navigateTo('home')},1500)
+}
+
+let clearConfirm = false
+function confirmClear() {
+  const btn = document.getElementById('clear-btn')
+  if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],focus:'',updated:null}
+  save(); clearConfirm=false; navigateTo('home')
+}
+
+// ── MODAL ─────────────────────────────────────────
+function closeModal() { document.getElementById('modal-container').innerHTML='' }
+
+// ── CLAUDE API ────────────────────────────────────
+const SYSTEM_PROMPT = `You are a field operations assistant for Uri, a Regional Manager at Innovative Agro Industry Philippines (Region II). Uri has ADHD. Engineers: Gio and Kenneth. Contractors: ASC Construction (engineer: Dave) and 11-16 Construction.
+Uri sends notes in Hebrew/English/Tagalog mix. Return ONLY valid JSON (no markdown):
+{"now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"site","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],"focus":"ONE Hebrew sentence"}
 Rules: now MAX 3 tasks. color: red=critical, orange=important, green=routine.`
 
-const callClaude = async (messages, system=null) => {
+async function callClaude(messages, system=null) {
   const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
   if(system) body.system = system
   const r = await fetch('https://api.anthropic.com/v1/messages',{
@@ -59,580 +671,17 @@ const callClaude = async (messages, system=null) => {
   return d.content?.find(b=>b.type==='text')?.text || ''
 }
 
-const parseNotes = async (text) => {
-  const raw = await callClaude([{role:'user',content:text}], SYSTEM)
-  return JSON.parse(raw.replace(/```json|```/g,'').trim())
+// ── MERGE HELPERS ────────────────────────────────
+function mergeSites(ex, inc) {
+  const m={}; ex.forEach(s=>m[s.name]=s); inc.forEach(s=>m[s.name]={...(m[s.name]||{}),...s}); return Object.values(m)
+}
+function mergePeople(ex, inc) {
+  const m={}; ex.forEach(p=>m[p.name]=p); inc.forEach(p=>m[p.name]={...(m[p.name]||{}),...p}); return Object.values(m)
 }
 
-const genAction = async (type, ctx, assignee) => {
-  const prompts = {
-    whatsapp:`Write a short WhatsApp message in English from Uri (Regional Manager, IAI Philippines) to ${assignee||'team member'} about: ${ctx}. Max 3 sentences, direct.`,
-    email:`Write a professional email in English from Uri (Regional Manager, Innovative Agro Industry) about: ${ctx}. Include subject line. Concise.`,
-    monday:`Write a Monday.com task update in English for: ${ctx}. Format: Status / Issue / Next Action / Owner.`
-  }
-  return await callClaude([{role:'user',content:prompts[type]}])
-}
-
-// ── HELPERS ────────────────────────────────────────────────────────
-const COLORS = {red:{bg:'#ef444418',border:'#ef444460',text:'#ef4444',label:'דחוף'},orange:{bg:'#f59e0b18',border:'#f59e0b60',text:'#f59e0b',label:'חשוב'},green:{bg:'#4ade8018',border:'#4ade8060',text:'#4ade80',label:'שוטף'}}
-const ASSIGNEE = {uri:'אני',gio:"ג'יו",kenneth:"קנת'",asc:'ASC','11-16':'11-16'}
-const STATUS_COLOR = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}
-const STATUS_LABEL = {open:'פתוח',pending:'ממתין',resolved:'נפתר'}
-
-const h = (tag, attrs={}, ...children) => {
-  const el = document.createElement(tag)
-  Object.entries(attrs).forEach(([k,v]) => {
-    if(k==='style'&&typeof v==='object') Object.assign(el.style,v)
-    else if(k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(),v)
-    else el.setAttribute(k,v)
-  })
-  children.flat().forEach(c => { if(c!=null) el.appendChild(typeof c==='string'?document.createTextNode(c):c) })
-  return el
-}
-
-const btn = (text, onClick, style={}) => h('button',{onClick,style:{border:'none',cursor:'pointer',fontFamily:'inherit',...style}},text)
-const stamp = () => Date.now()
-
-// ── HOME SCREEN ────────────────────────────────────────────────────
-const renderHome = () => {
-  const allTasks = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
-  const done = allTasks.filter(t=>t.done).length
-  const total = allTasks.length
-  const urgent = state.tasks.now.filter(t=>!t.done)
-  const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
-  const pendingPeople = state.people.filter(p=>p.pending).length
-
-  const el = h('div',{class:'screen'})
-
-  // Header
-  const header = h('div',{style:{background:'linear-gradient(180deg,#1e3a5f,#0f172a)',padding:'48px 16px 16px',borderBottom:'1px solid #1e293b'}})
-  const topRow = h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'12px'}})
-  topRow.appendChild(h('div',{},
-    h('div',{style:{fontSize:'12px',color:'#64748b',marginBottom:'4px'}}, new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})),
-    h('div',{style:{fontSize:'22px',fontWeight:'800',color:'#f8fafc',letterSpacing:'-0.5px'}},'בוקר טוב, אורי ☀️'),
-    h('div',{style:{fontSize:'11px',color:'#475569',marginTop:'2px'}},'Region II · Cagayan Valley')
-  ))
-  topRow.appendChild(btn('⚙️', ()=>navigate('settings'), {background:'#1e293b',borderRadius:'10px',padding:'8px 10px',color:'#64748b',fontSize:'16px'}))
-  header.appendChild(topRow)
-
-  if(!apiKey) {
-    const warn = h('div',{style:{padding:'10px 14px',background:'#f59e0b18',border:'1px solid #f59e0b44',borderRadius:'10px',cursor:'pointer'},onClick:()=>navigate('settings')})
-    warn.appendChild(h('div',{style:{fontSize:'13px',color:'#f59e0b',fontWeight:'600'}},'⚠️ נדרש API Key'))
-    warn.appendChild(h('div',{style:{fontSize:'12px',color:'#78716c',marginTop:'2px'}},'לחץ להגדרות'))
-    header.appendChild(warn)
-  }
-
-  if(total>0) {
-    const prog = h('div',{style:{marginTop:'14px'}})
-    const row = h('div',{style:{display:'flex',justifyContent:'space-between',fontSize:'12px',color:'#475569',marginBottom:'5px'}})
-    row.appendChild(document.createTextNode('התקדמות היום'))
-    row.appendChild(h('span',{style:{color:done===total?'#4ade80':'#64748b'}},`${done}/${total}`))
-    prog.appendChild(row)
-    const bar = h('div',{style:{background:'#1e293b',borderRadius:'99px',height:'5px'}})
-    const fill = h('div',{style:{height:'100%',borderRadius:'99px',width:`${total?(done/total)*100:0}%`,background:done===total?'#4ade80':'linear-gradient(90deg,#3b82f6,#06b6d4)',transition:'width 0.4s'}})
-    bar.appendChild(fill); prog.appendChild(bar); header.appendChild(prog)
-  }
-  el.appendChild(header)
-
-  const body = h('div',{class:'scrollable',style:{padding:'14px 16px',paddingBottom:'90px'}})
-
-  if(state.focus) {
-    const focus = h('div',{style:{background:'linear-gradient(135deg,#1e3a5f,#1e293b)',borderRadius:'14px',padding:'14px 16px',marginBottom:'14px',border:'1px solid #1e40af33'}})
-    focus.appendChild(h('div',{style:{fontSize:'10px',color:'#3b82f6',fontWeight:'700',letterSpacing:'1px',marginBottom:'6px'}},'🎯 הכי חשוב היום'))
-    focus.appendChild(h('div',{style:{fontSize:'14px',color:'#f1f5f9',lineHeight:'1.5',fontWeight:'600'}},state.focus))
-    body.appendChild(focus)
-  }
-
-  if(urgent.length>0) {
-    body.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',fontWeight:'700',letterSpacing:'0.5px',marginBottom:'8px'}},'⚡ עכשיו'))
-    urgent.slice(0,3).forEach(task => {
-      const card = h('div',{style:{background:'#ef444415',border:'1.5px solid #ef444440',borderRadius:'12px',padding:'12px 14px',marginBottom:'8px',cursor:'pointer'},onClick:()=>navigate('tasks')})
-      card.appendChild(h('div',{style:{fontSize:'14px',fontWeight:'600',color:'#f1f5f9'}},task.text))
-      if(task.site||task.assignee) {
-        const tags = h('div',{style:{display:'flex',gap:'8px',marginTop:'5px'}})
-        if(task.site) tags.appendChild(h('span',{style:{fontSize:'11px',color:'#64748b'}},`📍 ${task.site}`))
-        if(task.assignee) tags.appendChild(h('span',{style:{fontSize:'11px',color:'#64748b'}},`👤 ${ASSIGNEE[task.assignee]||task.assignee}`))
-        card.appendChild(tags)
-      }
-      body.appendChild(card)
-    })
-  }
-
-  const stats = h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'8px',marginBottom:'14px'}})
-  ;[
-    {icon:'⚡',label:'עכשיו',value:state.tasks.now.filter(t=>!t.done).length,color:'#ef4444',screen:'tasks'},
-    {icon:'📍',label:'אתרים',value:openSites,color:'#f59e0b',screen:'sites'},
-    {icon:'👥',label:'ממתין',value:pendingPeople,color:'#06b6d4',screen:'people'},
-  ].forEach(s => {
-    const card = h('div',{style:{background:'#1e293b',borderRadius:'12px',padding:'12px 10px',textAlign:'center',cursor:'pointer',border:`1px solid ${s.value>0?s.color+'33':'transparent'}`},onClick:()=>navigate(s.screen)})
-    card.appendChild(h('div',{style:{fontSize:'18px'}},s.icon))
-    card.appendChild(h('div',{style:{fontSize:'22px',fontWeight:'800',color:s.value>0?s.color:'#475569',lineHeight:'1.2'}},String(s.value)))
-    card.appendChild(h('div',{style:{fontSize:'10px',color:'#475569',marginTop:'2px'}},s.label))
-    stats.appendChild(card)
-  })
-  body.appendChild(stats)
-
-  body.appendChild(btn('+ הוסף הודעות מוואטסאפ', ()=>navigate('input'), {
-    width:'100%',padding:'16px',borderRadius:'14px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',
-    color:'#fff',fontSize:'15px',fontWeight:'700',display:'block'
-  }))
-
-  if(total===0&&!state.focus) {
-    const empty = h('div',{style:{textAlign:'center',padding:'40px 0',color:'#334155'}})
-    empty.appendChild(h('div',{style:{fontSize:'36px',marginBottom:'8px'}},'📋'))
-    empty.appendChild(h('div',{style:{fontSize:'14px'}},'הדבק הודעות מוואטסאפ כדי להתחיל'))
-    body.appendChild(empty)
-  }
-
-  if(state.updated) {
-    body.appendChild(h('div',{style:{textAlign:'center',marginTop:'16px',fontSize:'11px',color:'#334155'}},
-      `עודכן ${new Date(state.updated).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}`))
-  }
-
-  el.appendChild(body)
-  el.appendChild(renderNav())
-  return el
-}
-
-// ── INPUT SCREEN ───────────────────────────────────────────────────
-const renderInput = () => {
-  let loading = false
-  const el = h('div',{class:'screen',style:{padding:'48px 16px 24px'}})
-  const backRow = h('div',{style:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'20px'}})
-  backRow.appendChild(btn('←', goBack, {background:'#1e293b',borderRadius:'10px',padding:'10px 14px',color:'#94a3b8',fontSize:'18px'}))
-  backRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'הוסף הודעות'))
-  el.appendChild(backRow)
-
-  el.appendChild(h('div',{style:{fontSize:'13px',color:'#475569',marginBottom:'10px',lineHeight:'1.6'}},'הדבק הודעות מוואטסאפ — בכל שפה.'))
-
-  const ta = h('textarea',{placeholder:'Claveria well — Gio to assess\nהחלפת משאבה בדולרס\nDave needs to sign waiver — Upi 3\nפגישה עם נובי ב-NIA יום שני',style:{flex:'1',width:'100%',minHeight:'200px',background:'#1e293b',border:'1px solid #334155',borderRadius:'12px',padding:'14px',color:'#f1f5f9',fontSize:'15px',resize:'none',outline:'none',lineHeight:'1.7',direction:'rtl',display:'block',marginBottom:'10px'}})
-  el.appendChild(ta)
-
-  const errEl = h('div',{style:{color:'#ef4444',fontSize:'13px',marginBottom:'8px',display:'none'}})
-  el.appendChild(errEl)
-
-  if(!apiKey) el.appendChild(h('div',{style:{color:'#f59e0b',fontSize:'13px',marginBottom:'8px'}},'⚠️ חסר API Key — הגדר בהגדרות'))
-
-  const submitBtn = btn('⚡ ארגן את היום', async () => {
-    if(loading||!ta.value.trim()||!apiKey) return
-    loading=true; submitBtn.textContent='⚙️ מסדר...'; submitBtn.style.background='#1e293b'; submitBtn.style.color='#475569'
-    errEl.style.display='none'
-    try {
-      const p = await parseNotes(ta.value)
-      const s = stamp()
-      const tag = (arr,prefix) => (arr||[]).map((t,i)=>({...t,id:`${prefix}${s}${i}`,done:false}))
-      const mergeSites = (ex,inc) => { const m={}; ex.forEach(s=>m[s.name]=s); (inc||[]).forEach(s=>m[s.name]={...(m[s.name]||{}), ...s}); return Object.values(m) }
-      const mergePeople = (ex,inc) => { const m={}; ex.forEach(p=>m[p.name]=p); (inc||[]).forEach(p=>m[p.name]={...(m[p.name]||{}), ...p}); return Object.values(m) }
-      setState({
-        tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
-        sites:mergeSites(state.sites,p.sites),
-        people:mergePeople(state.people,p.people),
-        focus:p.focus||state.focus,
-        summary:p.summary||state.summary
-      })
-      navigate('home')
-    } catch(e) { errEl.textContent='שגיאה: '+e.message; errEl.style.display='block' }
-    finally { loading=false; submitBtn.textContent='⚡ ארגן את היום'; submitBtn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)'; submitBtn.style.color='#fff' }
-  }, {width:'100%',padding:'16px',borderRadius:'14px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'16px',fontWeight:'700',display:'block'})
-  el.appendChild(submitBtn)
-  return el
-}
-
-// ── TASKS SCREEN ───────────────────────────────────────────────────
-const renderTasks = () => {
-  let bucket = 'now'
-  let showAdd = false
-
-  const BUCKETS = [{key:'now',icon:'⚡',label:'עכשיו',color:'#ef4444'},{key:'today',icon:'📅',label:'היום',color:'#f59e0b'},{key:'later',icon:'🕐',label:'אחר כך',color:'#64748b'}]
-
-  const el = h('div',{class:'screen'})
-
-  const header = h('div',{style:{padding:'48px 16px 12px',background:'linear-gradient(180deg,#1e293b,#0f172a)',position:'sticky',top:'0',zIndex:'10'}})
-  const topRow = h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}})
-  topRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'משימות'))
-  topRow.appendChild(btn('+ הוסף', ()=>{ showAdd=true; rerender() }, {background:'#1e40af',borderRadius:'10px',padding:'8px 14px',color:'#fff',fontSize:'13px',fontWeight:'600'}))
-  header.appendChild(topRow)
-
-  const tabs = h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'6px'}})
-  const rerender = () => { const newEl = renderTasks(); document.getElementById('app').replaceChild(newEl, el) }
-
-  BUCKETS.forEach(b => {
-    const count = state.tasks[b.key].filter(t=>!t.done).length
-    const active = bucket===b.key
-    const t = h('button',{style:{padding:'10px 4px',borderRadius:'10px',border:`1.5px solid ${active?b.color:'transparent'}`,background:active?b.color+'18':'#1e293b',color:active?b.color:'#64748b',cursor:'pointer',textAlign:'center'},onClick:()=>{bucket=b.key; rerender()}})
-    t.appendChild(h('div',{style:{fontSize:'16px'}},b.icon))
-    t.appendChild(h('div',{style:{fontSize:'11px',fontWeight:'600',marginTop:'2px'}},b.label))
-    if(count>0) t.appendChild(h('div',{style:{fontSize:'13px',fontWeight:'700',color:active?b.color:'#475569'}},String(count)))
-    tabs.appendChild(t)
-  })
-  header.appendChild(tabs)
-  el.appendChild(header)
-
-  const body = h('div',{class:'scrollable',style:{padding:'12px 16px',paddingBottom:'90px'}})
-  const tasks = state.tasks[bucket]||[]
-
-  if(tasks.length===0) {
-    const empty = h('div',{style:{textAlign:'center',padding:'60px 0',color:'#334155'}})
-    empty.appendChild(h('div',{style:{fontSize:'36px',marginBottom:'8px'}},'✓'))
-    empty.appendChild(h('div',{style:{fontSize:'14px'}},'ריק — כל הכבוד!'))
-    body.appendChild(empty)
-  }
-
-  tasks.forEach(task => {
-    const c = COLORS[task.color]||COLORS.orange
-    const card = h('div',{style:{background:task.done?'#0f172a':c.bg,border:`1.5px solid ${task.done?'#1e293b':c.border}`,borderRadius:'14px',padding:'14px',marginBottom:'8px',opacity:task.done?'0.45':'1',transition:'opacity 0.2s'}})
-    const row = h('div',{style:{display:'flex',alignItems:'flex-start',gap:'12px'}})
-
-    const cb = h('div',{style:{width:'26px',height:'26px',borderRadius:'8px',flexShrink:'0',cursor:'pointer',background:task.done?c.text:'transparent',border:`2px solid ${c.text}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',color:'#fff',transition:'all 0.15s'},onClick:()=>{
-      const toggle = (arr) => arr.map(t=>t.id===task.id?{...t,done:!t.done}:t)
-      setState({tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}})
-    }})
-    if(task.done) cb.appendChild(document.createTextNode('✓'))
-    row.appendChild(cb)
-
-    const info = h('div',{style:{flex:'1'}})
-    info.appendChild(h('div',{style:{fontSize:'15px',fontWeight:'600',color:'#f1f5f9',textDecoration:task.done?'line-through':'none',lineHeight:'1.4'}},task.text))
-    if(task.site||task.assignee) {
-      const tags = h('div',{style:{display:'flex',gap:'8px',marginTop:'5px',flexWrap:'wrap'}})
-      if(task.site) tags.appendChild(h('span',{style:{fontSize:'11px',color:'#64748b'}},`📍 ${task.site}`))
-      if(task.assignee) tags.appendChild(h('span',{style:{fontSize:'11px',color:'#64748b'}},`👤 ${ASSIGNEE[task.assignee]||task.assignee}`))
-      info.appendChild(tags)
-    }
-    row.appendChild(info)
-
-    if(!task.done) {
-      row.appendChild(btn('✍️', ()=>navigate('action',{text:task.text,assignee:task.assignee}), {background:'#0f172a',borderRadius:'8px',padding:'7px 9px',color:'#64748b',fontSize:'16px',flexShrink:'0'}))
-    }
-    card.appendChild(row); body.appendChild(card)
-  })
-  el.appendChild(body)
-
-  // Add modal
-  if(showAdd) {
-    let addText='', addAssignee='uri', addBucket='now', addColor='orange'
-    const overlay = h('div',{style:{position:'fixed',inset:'0',background:'#000d',zIndex:'100',display:'flex',alignItems:'flex-end'}})
-    const modal = h('div',{style:{background:'#1e293b',width:'100%',maxWidth:'430px',margin:'0 auto',borderRadius:'18px 18px 0 0',padding:'22px 16px 40px'}})
-    modal.appendChild(h('div',{style:{fontSize:'16px',fontWeight:'700',marginBottom:'14px'}},'+ משימה חדשה'))
-    const ta2 = h('textarea',{placeholder:'מה צריך לעשות?',style:{width:'100%',minHeight:'80px',background:'#0f172a',border:'1px solid #334155',borderRadius:'10px',padding:'12px',color:'#f1f5f9',fontSize:'15px',resize:'none',outline:'none',display:'block',marginBottom:'12px'}})
-    ta2.oninput = e => addText = e.target.value
-    modal.appendChild(ta2)
-    const grid = h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'8px',marginBottom:'14px'}})
-    ;[
-      {label:'אחראי',opts:[['uri','אני'],['gio',"ג'יו"],['kenneth',"קנת'"],['asc','ASC'],['11-16','11-16']],set:v=>addAssignee=v},
-      {label:'מתי',opts:[['now','עכשיו'],['today','היום'],['later','אחר כך']],set:v=>addBucket=v},
-      {label:'עדיפות',opts:[['red','דחוף'],['orange','חשוב'],['green','שוטף']],set:v=>addColor=v},
-    ].forEach(f => {
-      const wrap = h('div',{}); wrap.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',marginBottom:'4px'}},f.label))
-      const sel = h('select',{style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'8px',padding:'9px 8px',color:'#f1f5f9',fontSize:'13px',outline:'none'}})
-      f.opts.forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; sel.appendChild(o) })
-      sel.onchange = e => f.set(e.target.value)
-      wrap.appendChild(sel); grid.appendChild(wrap)
-    })
-    modal.appendChild(grid)
-    const btnRow = h('div',{style:{display:'flex',gap:'8px'}})
-    btnRow.appendChild(btn('הוסף', ()=>{
-      if(!addText.trim()) return
-      const task={id:`m${stamp()}`,text:addText.trim(),assignee:addAssignee,color:addColor,done:false,site:null}
-      setState({tasks:{...state.tasks,[addBucket]:[...state.tasks[addBucket],task]}})
-      showAdd=false; navigate('tasks')
-    },{flex:'1',padding:'14px',borderRadius:'12px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'15px',fontWeight:'700'}))
-    btnRow.appendChild(btn('ביטול',()=>{showAdd=false;rerender()},{padding:'14px 18px',borderRadius:'12px',border:'1px solid #334155',background:'transparent',color:'#64748b',fontSize:'14px'}))
-    modal.appendChild(btnRow); overlay.appendChild(modal); el.appendChild(overlay)
-  }
-
-  el.appendChild(renderNav())
-  return el
-}
-
-// ── SITES SCREEN ───────────────────────────────────────────────────
-const renderSites = () => {
-  let filter = 'open', showAdd = false
-  let form = {name:'',province:'',issue:'',contractor:'',status:'open'}
-  const rerender = () => { const newEl = renderSites(); document.getElementById('app').replaceChild(newEl, el) }
-  const el = h('div',{class:'screen'})
-
-  const header = h('div',{style:{padding:'48px 16px 12px',background:'linear-gradient(180deg,#1e293b,#0f172a)',position:'sticky',top:'0',zIndex:'10'}})
-  const topRow = h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}})
-  topRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'אתרים'))
-  topRow.appendChild(btn('+ הוסף',()=>{showAdd=true;rerender()},{background:'#1e40af',borderRadius:'10px',padding:'8px 14px',color:'#fff',fontSize:'13px',fontWeight:'600'}))
-  header.appendChild(topRow)
-
-  const tabs = h('div',{style:{display:'flex',gap:'6px'}})
-  ;[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].forEach(([v,l])=>{
-    tabs.appendChild(btn(l,()=>{filter=v;rerender()},{flex:'1',padding:'8px 4px',borderRadius:'10px',background:filter===v?'#1e40af':'#1e293b',color:filter===v?'#fff':'#64748b',fontSize:'12px',fontWeight:'600'}))
-  })
-  header.appendChild(tabs); el.appendChild(header)
-
-  const body = h('div',{class:'scrollable',style:{padding:'12px 16px',paddingBottom:'90px'}})
-  const sites = filter==='all'?state.sites:state.sites.filter(s=>s.status===filter)
-
-  if(sites.length===0) {
-    const empty=h('div',{style:{textAlign:'center',padding:'60px 0',color:'#334155'}})
-    empty.appendChild(h('div',{style:{fontSize:'36px',marginBottom:'8px'}},'📍'))
-    empty.appendChild(h('div',{style:{fontSize:'14px'}},'אין אתרים'))
-    body.appendChild(empty)
-  }
-
-  sites.forEach(site => {
-    const sc = STATUS_COLOR[site.status]||'#64748b'
-    const card = h('div',{style:{background:'#1e293b',borderRadius:'14px',padding:'14px',marginBottom:'8px',border:`1px solid ${sc}33`}})
-    card.appendChild(h('div',{style:{fontSize:'15px',fontWeight:'700',color:'#f1f5f9'}},`📍 ${site.name}`))
-    if(site.province) card.appendChild(h('div',{style:{fontSize:'12px',color:'#64748b',marginTop:'2px'}},site.province))
-    if(site.issue) card.appendChild(h('div',{style:{fontSize:'13px',color:'#94a3b8',marginTop:'6px',lineHeight:'1.5'}},site.issue))
-    const tags = h('div',{style:{display:'flex',gap:'8px',marginTop:'8px',flexWrap:'wrap'}})
-    if(site.contractor) tags.appendChild(h('span',{style:{fontSize:'11px',padding:'2px 8px',borderRadius:'99px',background:'#0f172a',color:'#64748b'}},site.contractor.toUpperCase()))
-    tags.appendChild(h('span',{style:{fontSize:'11px',padding:'2px 8px',borderRadius:'99px',background:sc+'22',color:sc,fontWeight:'600'}},STATUS_LABEL[site.status]||site.status))
-    card.appendChild(tags)
-    const sbRow = h('div',{style:{display:'flex',gap:'6px',marginTop:'10px'}})
-    ;['open','pending','resolved'].forEach(s=>{
-      sbRow.appendChild(btn(STATUS_LABEL[s],()=>{
-        setState({sites:state.sites.map(si=>si.name===site.name?{...si,status:s}:si)})
-      },{flex:'1',padding:'7px 4px',borderRadius:'8px',background:site.status===s?STATUS_COLOR[s]+'33':'#0f172a',color:site.status===s?STATUS_COLOR[s]:'#475569',fontSize:'11px',fontWeight:'600'}))
-    })
-    card.appendChild(sbRow); body.appendChild(card)
-  })
-  el.appendChild(body)
-
-  if(showAdd) {
-    const overlay = h('div',{style:{position:'fixed',inset:'0',background:'#000d',zIndex:'100',display:'flex',alignItems:'flex-end'}})
-    const modal = h('div',{style:{background:'#1e293b',width:'100%',maxWidth:'430px',margin:'0 auto',borderRadius:'18px 18px 0 0',padding:'22px 16px 40px',maxHeight:'85vh',overflowY:'auto'}})
-    modal.appendChild(h('div',{style:{fontSize:'16px',fontWeight:'700',marginBottom:'14px'}},'+ אתר חדש'))
-    ;[{label:'שם אתר',key:'name',ph:'Nambaran Deep Well'},{label:'מחוז',key:'province',ph:'Nueva Vizcaya'},{label:'בעיה',key:'issue',ph:'Lock Rotor A08'}].forEach(f=>{
-      modal.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',marginBottom:'4px'}},f.label))
-      const inp = h('input',{placeholder:f.ph,style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'10px',padding:'10px 12px',color:'#f1f5f9',fontSize:'14px',outline:'none',display:'block',marginBottom:'10px',direction:'rtl'}})
-      inp.oninput = e => form = {...form,[f.key]:e.target.value}
-      modal.appendChild(inp)
-    })
-    const grid2 = h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'14px'}})
-    ;[{label:'קבלן',key:'contractor',opts:[['','—'],['asc','ASC'],['11-16','11-16']]},{label:'סטטוס',key:'status',opts:[['open','פתוח'],['pending','ממתין'],['resolved','נפתר']]}].forEach(f=>{
-      const wrap=h('div',{})
-      wrap.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',marginBottom:'4px'}},f.label))
-      const sel=h('select',{style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'8px',padding:'10px 8px',color:'#f1f5f9',fontSize:'13px',outline:'none'}})
-      f.opts.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;sel.appendChild(o)})
-      sel.onchange=e=>form={...form,[f.key]:e.target.value}
-      wrap.appendChild(sel); grid2.appendChild(wrap)
-    })
-    modal.appendChild(grid2)
-    const btnRow=h('div',{style:{display:'flex',gap:'8px'}})
-    btnRow.appendChild(btn('הוסף',()=>{
-      if(!form.name.trim()) return
-      setState({sites:[...state.sites,{...form,id:stamp()}]})
-      showAdd=false; navigate('sites')
-    },{flex:'1',padding:'14px',borderRadius:'12px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'15px',fontWeight:'700'}))
-    btnRow.appendChild(btn('ביטול',()=>{showAdd=false;rerender()},{padding:'14px 18px',borderRadius:'12px',border:'1px solid #334155',background:'transparent',color:'#64748b',fontSize:'14px'}))
-    modal.appendChild(btnRow); overlay.appendChild(modal); el.appendChild(overlay)
-  }
-
-  el.appendChild(renderNav()); return el
-}
-
-// ── PEOPLE SCREEN ──────────────────────────────────────────────────
-const renderPeople = () => {
-  let showAdd = false
-  let form = {name:'',role:'contractor',company:'',pending:''}
-  const rerender = () => { const newEl = renderPeople(); document.getElementById('app').replaceChild(newEl, el) }
-  const el = h('div',{class:'screen'})
-  const header = h('div',{style:{padding:'48px 16px 12px',background:'linear-gradient(180deg,#1e293b,#0f172a)',position:'sticky',top:'0',zIndex:'10'}})
-  const topRow = h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}})
-  topRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'אנשים'))
-  topRow.appendChild(btn('+ הוסף',()=>{showAdd=true;rerender()},{background:'#1e40af',borderRadius:'10px',padding:'8px 14px',color:'#fff',fontSize:'13px',fontWeight:'600'}))
-  header.appendChild(topRow); el.appendChild(header)
-
-  const body = h('div',{class:'scrollable',style:{padding:'12px 16px',paddingBottom:'90px'}})
-  const withP = state.people.filter(p=>p.pending), withoutP = state.people.filter(p=>!p.pending)
-
-  if(state.people.length===0) {
-    const empty=h('div',{style:{textAlign:'center',padding:'60px 0',color:'#334155'}})
-    empty.appendChild(h('div',{style:{fontSize:'36px',marginBottom:'8px'}},'👥'))
-    empty.appendChild(h('div',{style:{fontSize:'14px'}},'אנשים יתווספו מהודעות'))
-    body.appendChild(empty)
-  }
-
-  if(withP.length>0) { body.appendChild(h('div',{style:{fontSize:'11px',color:'#f59e0b',fontWeight:'700',letterSpacing:'0.5px',marginBottom:'8px'}},'⏳ ממתין תשובה')); withP.forEach(p=>body.appendChild(personCard(p))) }
-  if(withoutP.length>0) { if(withP.length>0) body.appendChild(h('div',{style:{fontSize:'11px',color:'#475569',fontWeight:'700',letterSpacing:'0.5px',margin:'12px 0 8px'}},'אנשי קשר')); withoutP.forEach(p=>body.appendChild(personCard(p))) }
-
-  el.appendChild(body)
-
-  if(showAdd) {
-    const overlay=h('div',{style:{position:'fixed',inset:'0',background:'#000d',zIndex:'100',display:'flex',alignItems:'flex-end'}})
-    const modal=h('div',{style:{background:'#1e293b',width:'100%',maxWidth:'430px',margin:'0 auto',borderRadius:'18px 18px 0 0',padding:'22px 16px 40px'}})
-    modal.appendChild(h('div',{style:{fontSize:'16px',fontWeight:'700',marginBottom:'14px'}},'+ איש קשר'))
-    ;[{label:'שם',key:'name',ph:'Dave'},{label:'חברה',key:'company',ph:'ASC Construction'},{label:'ממתין ל...',key:'pending',ph:'חתימה על waiver'}].forEach(f=>{
-      modal.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',marginBottom:'4px'}},f.label))
-      const inp=h('input',{placeholder:f.ph,style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'10px',padding:'10px 12px',color:'#f1f5f9',fontSize:'14px',outline:'none',display:'block',marginBottom:'10px',direction:'rtl'}})
-      inp.oninput=e=>form={...form,[f.key]:e.target.value}; modal.appendChild(inp)
-    })
-    modal.appendChild(h('div',{style:{fontSize:'11px',color:'#64748b',marginBottom:'4px'}},'תפקיד'))
-    const sel=h('select',{style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'8px',padding:'10px 8px',color:'#f1f5f9',fontSize:'13px',outline:'none',display:'block',marginBottom:'14px'}})
-    ;[['contractor','קבלן'],['engineer','מהנדס'],['nia','NIA'],['other','אחר']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;sel.appendChild(o)})
-    sel.onchange=e=>form={...form,role:e.target.value}; modal.appendChild(sel)
-    const btnRow=h('div',{style:{display:'flex',gap:'8px'}})
-    btnRow.appendChild(btn('הוסף',()=>{if(!form.name.trim())return; setState({people:[...state.people,{...form,id:stamp()}]}); showAdd=false; navigate('people')},{flex:'1',padding:'14px',borderRadius:'12px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'15px',fontWeight:'700'}))
-    btnRow.appendChild(btn('ביטול',()=>{showAdd=false;rerender()},{padding:'14px 18px',borderRadius:'12px',border:'1px solid #334155',background:'transparent',color:'#64748b',fontSize:'14px'}))
-    modal.appendChild(btnRow); overlay.appendChild(modal); el.appendChild(overlay)
-  }
-  el.appendChild(renderNav()); return el
-}
-
-const personCard = (person) => {
-  const ROLE_COLOR = {engineer:'#3b82f6',contractor:'#f59e0b',nia:'#06b6d4',other:'#64748b'}
-  const rc = ROLE_COLOR[person.role]||'#64748b'
-  const card = h('div',{style:{background:'#1e293b',borderRadius:'14px',padding:'14px',marginBottom:'8px',border:`1px solid ${person.pending?'#f59e0b33':'transparent'}`}})
-  const row = h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}})
-  const left = h('div',{style:{flex:'1'}})
-  const nameRow = h('div',{style:{display:'flex',alignItems:'center',gap:'8px'}})
-  const avatar = h('div',{style:{width:'32px',height:'32px',borderRadius:'50%',background:rc+'22',border:`1.5px solid ${rc}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',color:rc,fontWeight:'700',flexShrink:'0'}},person.name[0]?.toUpperCase()||'?')
-  nameRow.appendChild(avatar)
-  const nameInfo = h('div',{})
-  nameInfo.appendChild(h('div',{style:{fontSize:'15px',fontWeight:'700',color:'#f1f5f9'}},person.name))
-  if(person.company) nameInfo.appendChild(h('div',{style:{fontSize:'12px',color:'#64748b'}},person.company))
-  nameRow.appendChild(nameInfo); left.appendChild(nameRow)
-  if(person.pending) {
-    const pend=h('div',{style:{marginTop:'10px',padding:'8px 10px',background:'#f59e0b11',borderRadius:'8px',border:'1px solid #f59e0b22'}})
-    pend.appendChild(h('div',{style:{fontSize:'10px',color:'#f59e0b',fontWeight:'700',marginBottom:'3px'}},'⏳ ממתין'))
-    pend.appendChild(h('div',{style:{fontSize:'13px',color:'#94a3b8',lineHeight:'1.5'}},person.pending))
-    left.appendChild(pend)
-  }
-  row.appendChild(left)
-  const actions = h('div',{style:{display:'flex',gap:'6px',marginRight:'8px'}})
-  actions.appendChild(btn('✍️',()=>navigate('action',{text:person.pending||person.name,assignee:person.name}),{background:'#0f172a',borderRadius:'8px',padding:'7px 9px',color:'#64748b',fontSize:'16px'}))
-  if(person.pending) {
-    actions.appendChild(btn('✓',()=>setState({people:state.people.map(p=>p.name===person.name?{...p,pending:''}:p)}),{background:'#4ade8022',border:'1px solid #4ade8044',borderRadius:'8px',padding:'7px 9px',color:'#4ade80',fontSize:'14px',fontWeight:'700'}))
-  }
-  row.appendChild(actions); card.appendChild(row); return card
-}
-
-// ── ACTION SCREEN ──────────────────────────────────────────────────
-const renderAction = () => {
-  let result = null, loading = false, copied = false
-  const el = h('div',{class:'screen',style:{padding:'48px 16px 24px'}})
-  const backRow = h('div',{style:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'20px'}})
-  backRow.appendChild(btn('←',goBack,{background:'#1e293b',borderRadius:'10px',padding:'10px 14px',color:'#94a3b8',fontSize:'18px'}))
-  backRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'צור תוכן'))
-  el.appendChild(backRow)
-
-  if(actionCtx?.text) {
-    const preview = h('div',{style:{background:'#1e293b',borderRadius:'12px',padding:'14px',marginBottom:'20px',borderRight:'3px solid #3b82f6'}})
-    preview.appendChild(h('div',{style:{fontSize:'14px',color:'#f1f5f9',lineHeight:'1.5'}},actionCtx.text))
-    if(actionCtx.assignee) preview.appendChild(h('div',{style:{fontSize:'12px',color:'#64748b',marginTop:'4px'}},`👤 ${actionCtx.assignee}`))
-    el.appendChild(preview)
-  }
-
-  const content = h('div',{})
-  el.appendChild(content)
-
-  const rerender = () => {
-    content.innerHTML=''
-    if(!result) {
-      ;[{type:'whatsapp',icon:'💬',label:'הודעת WhatsApp',sub:"לג'יו / קנת' / קבלן"},
-        {type:'email',icon:'📧',label:'מייל',sub:'ASC / 11-16 / NIA'},
-        {type:'monday',icon:'📋',label:'עדכון Monday',sub:'סטטוס + פעולה הבאה'}
-      ].forEach(a => {
-        const b2 = h('div',{style:{padding:'16px',borderRadius:'14px',border:'1px solid #334155',background:'#1e293b',cursor:loading?'default':'pointer',marginBottom:'10px',opacity:loading?'0.6':'1'},onClick:async ()=>{
-          if(loading) return
-          loading=true; rerender()
-          try { result = await genAction(a.type, actionCtx?.text, actionCtx?.assignee) } catch(e) { result='שגיאה: '+e.message }
-          loading=false; rerender()
-        }})
-        b2.appendChild(h('div',{style:{fontSize:'16px',fontWeight:'600'}},`${a.icon} ${a.label}`))
-        b2.appendChild(h('div',{style:{fontSize:'12px',color:'#64748b',marginTop:'3px'}},a.sub))
-        content.appendChild(b2)
-      })
-      if(loading) {
-        const ld=h('div',{style:{textAlign:'center',padding:'40px 0',color:'#64748b'}})
-        ld.appendChild(h('div',{style:{fontSize:'32px',marginBottom:'10px'}},'✍️'))
-        ld.appendChild(h('div',{style:{fontSize:'14px'}},'כותב...'))
-        content.appendChild(ld)
-      }
-    } else {
-      const res=h('div',{style:{background:'#1e293b',borderRadius:'14px',padding:'16px',fontSize:'14px',color:'#e2e8f0',lineHeight:'1.8',whiteSpace:'pre-wrap',marginBottom:'12px',direction:'ltr',textAlign:'left'}},result)
-      content.appendChild(res)
-      content.appendChild(btn(copied?'✓ הועתק!':'📋 העתק',()=>{
-        navigator.clipboard.writeText(result).then(()=>{copied=true;rerender();setTimeout(()=>{copied=false;rerender()},2000)})
-      },{width:'100%',padding:'15px',borderRadius:'14px',background:copied?'#16a34a':'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'16px',fontWeight:'700',display:'block',marginBottom:'10px'}))
-      content.appendChild(btn('← צור משהו אחר',()=>{result=null;rerender()},{width:'100%',padding:'14px',borderRadius:'14px',border:'1px solid #334155',background:'transparent',color:'#64748b',fontSize:'14px',display:'block'}))
-    }
-  }
-  rerender(); return el
-}
-
-// ── SETTINGS SCREEN ────────────────────────────────────────────────
-const renderSettings = () => {
-  const el = h('div',{class:'screen',style:{padding:'48px 16px 24px'}})
-  const backRow = h('div',{style:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'24px'}})
-  backRow.appendChild(btn('←',goBack,{background:'#1e293b',borderRadius:'10px',padding:'10px 14px',color:'#94a3b8',fontSize:'18px'}))
-  backRow.appendChild(h('div',{style:{fontSize:'18px',fontWeight:'700'}},'הגדרות'))
-  el.appendChild(backRow)
-
-  const keyCard = h('div',{style:{background:'#1e293b',borderRadius:'14px',padding:'16px',marginBottom:'14px'}})
-  keyCard.appendChild(h('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'4px'}},'🔑 Anthropic API Key'))
-  const link = h('a',{href:'https://console.anthropic.com/settings/keys',target:'_blank',style:{color:'#3b82f6',fontSize:'12px',display:'block',marginBottom:'12px'}},'קבל מפתח כאן ←')
-  keyCard.appendChild(link)
-  const inp = h('input',{type:'password',placeholder:'sk-ant-...',value:apiKey,style:{width:'100%',background:'#0f172a',border:'1px solid #334155',borderRadius:'10px',padding:'12px',color:'#f1f5f9',fontSize:'13px',outline:'none',direction:'ltr',display:'block',marginBottom:'10px'}})
-  keyCard.appendChild(inp)
-  let saved=false
-  const saveBtn = btn('שמור',()=>{
-    apiKey=inp.value.trim(); localStorage.setItem('fieldy_key',apiKey)
-    saveBtn.textContent='✓ נשמר!'; saveBtn.style.background='#16a34a'
-    setTimeout(()=>{saveBtn.textContent='שמור';saveBtn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)'},2000)
-  },{width:'100%',padding:'12px',borderRadius:'10px',background:'linear-gradient(135deg,#3b82f6,#06b6d4)',color:'#fff',fontSize:'14px',fontWeight:'700',display:'block'})
-  keyCard.appendChild(saveBtn); el.appendChild(keyCard)
-
-  const clearCard = h('div',{style:{background:'#1e293b',borderRadius:'14px',padding:'16px'}})
-  clearCard.appendChild(h('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'4px'}},'🗑 נקה נתוני יום'))
-  clearCard.appendChild(h('div',{style:{fontSize:'12px',color:'#64748b',marginBottom:'12px'}},'מחיקת כל המשימות, אתרים ואנשים.'))
-  let confirm=false
-  const clearBtn = btn('נקה הכל',()=>{
-    if(!confirm){confirm=true;clearBtn.textContent='בטוח? לחץ שוב לאישור';clearBtn.style.background='#ef4444';return}
-    state=fresh(); save(state); navigate('home')
-  },{padding:'10px 16px',borderRadius:'10px',border:'1px solid #ef444444',background:'transparent',color:'#ef4444',fontSize:'13px'})
-  clearCard.appendChild(clearBtn); el.appendChild(clearCard)
-  return el
-}
-
-// ── NAV BAR ────────────────────────────────────────────────────────
-const renderNav = () => {
-  const urgentCount = state.tasks.now.filter(t=>!t.done).length
-  const sitesCount = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
-  const peopleCount = state.people.filter(p=>p.pending).length
-  const nav = h('nav',{style:{position:'fixed',bottom:'0',right:'0',left:'0',background:'#0f172a',borderTop:'1px solid #1e293b',display:'grid',gridTemplateColumns:'repeat(4,1fr)',padding:'8px 0 20px',maxWidth:'430px',margin:'0 auto',zIndex:'50'}})
-  ;[
-    {key:'home',icon:'☀️',label:'בית',badge:0},
-    {key:'tasks',icon:'⚡',label:'משימות',badge:urgentCount},
-    {key:'sites',icon:'📍',label:'אתרים',badge:sitesCount},
-    {key:'people',icon:'👥',label:'אנשים',badge:peopleCount},
-  ].forEach(t => {
-    const active = screen===t.key
-    const b = h('button',{style:{background:'none',border:'none',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',padding:'4px 0',position:'relative'},onClick:()=>navigate(t.key)})
-    const iconWrap = h('div',{style:{position:'relative'}})
-    iconWrap.appendChild(h('span',{style:{fontSize:'22px'}},t.icon))
-    if(t.badge>0) {
-      const badge = h('span',{style:{position:'absolute',top:'-4px',right:'-6px',background:'#ef4444',color:'#fff',borderRadius:'99px',fontSize:'10px',fontWeight:'700',padding:'1px 5px',minWidth:'16px',textAlign:'center'}},String(t.badge))
-      iconWrap.appendChild(badge)
-    }
-    b.appendChild(iconWrap)
-    b.appendChild(h('span',{style:{fontSize:'10px',color:active?'#3b82f6':'#475569',fontWeight:active?'700':'400'}},t.label))
-    nav.appendChild(b)
-  })
-  return nav
-}
-
-// ── RENDER ─────────────────────────────────────────────────────────
-const render = () => {
-  const app = document.getElementById('app')
-  app.innerHTML=''
-  let el
-  if(screen==='home') el=renderHome()
-  else if(screen==='input') el=renderInput()
-  else if(screen==='tasks') el=renderTasks()
-  else if(screen==='sites') el=renderSites()
-  else if(screen==='people') el=renderPeople()
-  else if(screen==='action') el=renderAction()
-  else if(screen==='settings') el=renderSettings()
-  if(el) app.appendChild(el)
-}
-
-render()
+// ── INIT ─────────────────────────────────────────
+refreshBadges()
+renderHome()
 </script>
 </body>
 </html>
