@@ -271,13 +271,32 @@ function getTodayPlus(days) {
 function getToday() { return getTodayPlus(0); }
 function getEvents() { return state.events || []; }
 function buildSystemPrompt() {
-  return 'Field operations assistant for Uri (Regional Manager, IAI Philippines). Engineers: Gio, Kenneth. Contractors: ASC/Dave, 11-16.\n\nTODAY=' + getToday() + ' tomorrow=' + getTodayPlus(1) + ' in2days=' + getTodayPlus(2) + ' nextweek=' + getTodayPlus(7) + ' in2weeks=' + getTodayPlus(14) + ' in3weeks=' + getTodayPlus(21) + ' nextmonth=' + getTodayPlus(30) + '\n\nReturn ONLY JSON (no markdown):\n' +
-    '{"now":[{"id":"n1","text":"task under 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],' +
+  var td = getToday();
+  return 'You are a field assistant for Uri (IAI Philippines Regional Manager). Today=' + td + '\n' +
+    'Dates: tomorrow=' + getTodayPlus(1) + ', in2days=' + getTodayPlus(2) + ', nextweek=' + getTodayPlus(7) + ', in2weeks=' + getTodayPlus(14) + ', in3weeks=' + getTodayPlus(21) + ', nextmonth=' + getTodayPlus(30) + '\n\n' +
+    'CRITICAL: Return ONLY this exact JSON structure, nothing else:\n' +
+    '{' +
+    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],' +
+    '"today":[],' +
+    '"later":[],' +
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
     '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
-    '"events":[{"title":"title","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","notify":"60"}],' +
-    '"focus":"one Hebrew sentence"}\n\nRULES: now=max 3 red tasks. Extract ALL dates/deadlines into events[]. Use the dates above for relative time refs. Every future-dated task in BOTH tasks AND events. notify defaults to 60.';
+    '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60"}],' +
+    '"focus":"Hebrew sentence"' +
+    '}\n\n' +
+    'RULES:\n' +
+    '1. now=urgent max 3 (red), today=do today (orange), later=future no date (green)\n' +
+    '2. EVENTS: Extract EVERY task/meeting/deadline into events[] with EXACT calculated date:\n' +
+    '   - "in 2 weeks" or "בעוד שבועיים" -> date=' + getTodayPlus(14) + '\n' +
+    '   - "tomorrow" or "מחר" -> date=' + getTodayPlus(1) + '\n' +
+    '   - "next week" or "שבוע הבא" -> date=' + getTodayPlus(7) + '\n' +
+    '   - "in 3 weeks" or "בעוד 3 שבועות" -> date=' + getTodayPlus(21) + '\n' +
+    '   - specific date "19.07" -> date=' + td.slice(0,4) + '-07-19\n' +
+    '3. Put EVERY task in events[] with today as default date if no date given\n' +
+    '4. notify always "60" (1 hour before)\n' +
+    '5. events[] must never be empty - add all tasks there too';
 }
+
 
 
 // ── STATE ─────────────────────────────────────────
@@ -449,7 +468,7 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var medHtml = MEDITATIONS.map(function(m, i) {
-    return '<div onclick="startMeditation(' + i + ')" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+    return '<div id="med-btn-' + i + '" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
       '<div style="font-size:15px;font-weight:600;color:#e8f0e4">' + m.icon + ' ' + m.title + '</div>' +
       '<div style="font-size:12px;color:#6090a8;margin-top:3px">' + m.desc + '</div>' +
@@ -482,6 +501,12 @@ function renderTaoChapter(el, idx) {
   var nextBtn = document.getElementById('tao-next');
   if (prevBtn) prevBtn.onclick = function() { renderTaoChapter(el, prevIdx); };
   if (nextBtn) nextBtn.onclick = function() { renderTaoChapter(el, nextIdx); };
+
+  // Bind meditation buttons
+  MEDITATIONS.forEach(function(m, i) {
+    var btn = document.getElementById('med-btn-' + i);
+    if (btn) btn.onclick = function() { startMeditationWithVoice(i); };
+  });
 
   el.scrollTop = 0;
   playWater();
@@ -699,7 +724,9 @@ async function doAnalyze() {
   err.style.display = 'none'
   try {
     const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
+    console.log('AI raw:', parsed.slice(0,500))
     const p = JSON.parse(parsed.replace(/```json|```/g,'').trim())
+    console.log('Events from AI:', JSON.stringify(p.events))
     const s = Date.now()
     const tag = (arr,pfx) => (arr||[]).map((t,i)=>({...t,id:`${pfx}${s}${i}`,done:false}))
     setState({
