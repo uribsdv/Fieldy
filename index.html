@@ -17,7 +17,7 @@ textarea,select,input{font-family:inherit}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns:repeat(6,1fr);padding:8px 0 24px;z-index:100}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 24px;z-index:100}
 .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;background:none;border:none;position:relative}
 .nav-icon{font-size:22px}
 .nav-label{font-size:10px;color:#475569;font-weight:400}
@@ -198,30 +198,28 @@ body::before {
   z-index: 1;
 }
 
-/* ═══ CALENDAR ═══ */
-.cal-header{padding:52px 18px 12px;background:linear-gradient(180deg,rgba(13,23,16,.97),rgba(13,23,16,.85));backdrop-filter:blur(16px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.cal-header{padding:52px 18px 12px;background:linear-gradient(180deg,rgba(13,23,16,.97),rgba(13,23,16,.85));backdrop-filter:blur(16px);border-bottom:1px solid rgba(61,122,53,.18);position:sticky;top:0;z-index:10}
 .cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.cal-nav-btn{background:rgba(13,23,16,.8);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
-.cal-month-title{font-size:18px;font-weight:700;color:var(--t1)}
+.cal-nav-btn{background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.32);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
+.cal-month-title{font-size:18px;font-weight:700;color:var(--t1);text-align:center}
 .cal-view-tabs{display:flex;gap:4px}
 .cal-view-tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
 .cal-view-tab.active{background:rgba(61,122,53,.15);color:var(--sprout);border:1px solid rgba(61,122,53,.3)}
-.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 8px 2px;gap:2px}
-.cal-weekday{font-size:10px;color:var(--t3);text-align:center;font-weight:600;letter-spacing:.5px}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 8px 2px}
+.cal-weekday{font-size:10px;color:var(--t3);text-align:center;font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 8px;gap:2px}
-.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;border:1px solid transparent}
 .cal-day.today{background:rgba(61,122,53,.2);border-color:var(--bamboo)}
 .cal-day.today .cal-dn{color:var(--sprout);font-weight:800}
 .cal-day.other-month .cal-dn{color:var(--t4)}
 .cal-dn{font-size:13px;font-weight:500;color:var(--t2);line-height:1}
 .cal-dots{display:flex;gap:2px;margin-top:2px}
-.cal-dot{width:4px;height:4px;border-radius:50%}
-.ev-card{background:var(--glass2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--bamboo);cursor:pointer}
-.ev-time{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px;letter-spacing:.5px}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--bamboo)}
+.ev-card{background:rgba(20,34,24,.85);border:1px solid rgba(61,122,53,.18);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--bamboo);cursor:pointer}
+.ev-time{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px}
 .ev-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4}
 .ev-note{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
-.rec-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(200,148,30,.15);color:var(--amber);font-weight:600;margin-top:5px}
-.week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--border);min-height:52px;cursor:pointer}
+.week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid rgba(61,122,53,.1);min-height:52px;cursor:pointer}
 .week-dlabel{width:36px;flex-shrink:0}
 .week-dname{font-size:10px;color:var(--t3);font-weight:600}
 .week-dnum{font-size:18px;font-weight:700;color:var(--t2);line-height:1}
@@ -236,7 +234,6 @@ body::before {
   <div id="screen-sites" class="screen hidden"></div>
   <div id="screen-people" class="screen hidden"></div>
   <div id="screen-tao" class="screen hidden"></div>
-  <div id="screen-calendar" class="screen hidden"></div>
   <div id="screen-input" class="screen hidden"></div>
   <div id="screen-action" class="screen hidden"></div>
   <div id="screen-settings" class="screen hidden"></div>
@@ -266,9 +263,21 @@ body::before {
 </div>
 <div id="modal-container"></div>
 
-<script>var medInterval = null;
-var medSeconds = 0;
-var medTotal = 0;
+<script>
+function getTodayPlus(days) {
+  var d = new Date(); d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getToday() { return getTodayPlus(0); }
+function getEvents() { return state.events || []; }
+function buildSystemPrompt() {
+  return 'Field operations assistant for Uri (Regional Manager, IAI Philippines). Engineers: Gio, Kenneth. Contractors: ASC/Dave, 11-16.\n\nTODAY=' + getToday() + ' tomorrow=' + getTodayPlus(1) + ' in2days=' + getTodayPlus(2) + ' nextweek=' + getTodayPlus(7) + ' in2weeks=' + getTodayPlus(14) + ' in3weeks=' + getTodayPlus(21) + ' nextmonth=' + getTodayPlus(30) + '\n\nReturn ONLY JSON (no markdown):\n' +
+    '{"now":[{"id":"n1","text":"task under 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],' +
+    '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
+    '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
+    '"events":[{"title":"title","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","notify":"60"}],' +
+    '"focus":"one Hebrew sentence"}\n\nRULES: now=max 3 red tasks. Extract ALL dates/deadlines into events[]. Use the dates above for relative time refs. Every future-dated task in BOTH tasks AND events. notify defaults to 60.';
+}
 
 
 // ── STATE ─────────────────────────────────────────
@@ -305,7 +314,7 @@ function navigateTo(screen, ctx=null) {
   document.getElementById('screen-' + screen).classList.remove('hidden')
   
   // Update nav
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');})
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
   const activeBtn = document.querySelector(`.nav-btn[data-screen="${screen}"]`)
   if(activeBtn) activeBtn.classList.add('active')
   
@@ -440,7 +449,7 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var medHtml = MEDITATIONS.map(function(m, i) {
-    return '<div id="med-card-' + i + '" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+    return '<div onclick="startMeditation(' + i + ')" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
       '<div style="font-size:15px;font-weight:600;color:#e8f0e4">' + m.icon + ' ' + m.title + '</div>' +
       '<div style="font-size:12px;color:#6090a8;margin-top:3px">' + m.desc + '</div>' +
@@ -476,11 +485,6 @@ function renderTaoChapter(el, idx) {
 
   el.scrollTop = 0;
   playWater();
-  // Bind meditation card clicks after render
-  MEDITATIONS.forEach(function(m, i) {
-    var card = document.getElementById('med-card-' + i);
-    if(card) card.onclick = function() { startMeditationWithVoice(i); };
-  });
 }
 
 
@@ -564,8 +568,6 @@ function drawMedCircle(ratio) {
 
 function stopMeditation(completed) {
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
-  if("speechSynthesis" in window) window.speechSynthesis.cancel();
-  stopAmbientMusic();
   document.getElementById('modal-container').innerHTML = '';
   if(completed) { playTibetanBowl(); showRipple(); }
 }
@@ -590,6 +592,7 @@ function refreshBadges() {
   var sites = state.sites.filter(function(s){return s.status==='open'||s.status==='pending';}).length;
   var people = state.people.filter(function(p){return p.pending;}).length;
   var pairs = [['tasks',urgent],['sites',sites],['people',people]];
+  try { pairs.push(['calendar', getEventsForDate(getToday()).length]); } catch(e) {}
   pairs.forEach(function(pair) {
     var b = document.getElementById('badge-'+pair[0]);
     if(b) { b.textContent=pair[1]; b.classList.toggle('hidden', pair[1]===0); }
@@ -703,32 +706,32 @@ async function doAnalyze() {
       tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
       sites: mergeSites(state.sites, p.sites||[]),
       people: mergePeople(state.people, p.people||[]),
-      events: [...getEvents(), ...(function(){
-        var today = new Date().toISOString().slice(0,10);
-        var evs = (p.events||[]).map(function(e,i){ return {...e, id:'ev'+Date.now()+i, color:e.color||'var(--bamboo)'}; });
-        // Also add tasks without events as same-day calendar items
-        var taskEvs = [];
-        var allTasks = [...(p.now||[]),...(p.today||[]),...(p.later||[])];
-        allTasks.forEach(function(t,i){
-          var alreadyInEvs = evs.some(function(e){ return e.title && t.text && e.title.toLowerCase().includes(t.text.toLowerCase().slice(0,8)); });
-          if(!alreadyInEvs) {
-            taskEvs.push({id:'tev'+Date.now()+i,title:t.text,date:today,time:'',note:t.site||'',recurring:'',notify:'',color:'var(--bamboo)',assignee:t.assignee});
-          }
+      events: (function(){
+        var ts = Date.now(), td = getToday();
+        var aiEvs = (p.events||[]).map(function(e,i){
+          return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
+                  note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)'};
         });
-        return [...evs, ...taskEvs];
-      })()],
+        var allTasks = [...(p.now||[]),...(p.today||[]),...(p.later||[])];
+        var taskEvs = allTasks.map(function(t,i){
+          var covered = aiEvs.some(function(e){ return e.title&&t.text&&e.title.slice(0,10)===t.text.slice(0,10); });
+          if(covered) return null;
+          return {id:'tev'+ts+i,title:t.text,date:td,time:'',note:t.site||'',
+                  recurring:'',notify:'',color:{red:'#c85830',orange:'var(--gold)',green:'var(--bamboo)'}[t.color]||'var(--bamboo)'};
+        }).filter(Boolean);
+        return [...getEvents(),...aiEvs,...taskEvs];
+      })(),
       focus: p.focus || state.focus
     })
-    var newEvs = p.events || []
-    newEvs.forEach(function(ev){ if(ev.notify) scheduleNotification(ev) })
-    if(newEvs.length > 0) {
-      var toast = document.createElement('div')
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(61,122,53,0.95);color:#f0f5f0;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)'
-      toast.textContent = '📅 ' + newEvs.length + ' אירועים נוספו ללוח'
-      document.body.appendChild(toast)
-      setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){toast.remove()},300) }, 2500)
+    if((p.events||[]).length > 0) {
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(61,122,53,0.95);color:#f0f5f0;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.textContent = '📅 ' + (p.events||[]).length + ' אירועים נוספו ללוח';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
     }
     navigateTo('home')
+
   } catch(e) {
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
@@ -767,75 +770,25 @@ function renderTasks() {
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
   `
-
-  // Bind task buttons after render
-  state.tasks[taskBucket].forEach(function(t) {
-    var cb = document.getElementById('cb-'+t.id);
-    if(cb) cb.onclick = function(){ toggleTask(t.id); };
-    var actBtn = document.getElementById('act-'+t.id);
-    if(actBtn) actBtn.onclick = function(){ openAction({text:t.text,assignee:t.assignee||'',notes:t.notes||''}); };
-    var noteBtn = document.getElementById('note-'+t.id);
-    if(noteBtn) noteBtn.onclick = function(){ showTaskNotes(t.id); };
-  });
 }
 
 function taskCard(t) {
-  var cls = {red:'card-urgent',orange:'card-warn',green:'card-ok'}[t.color]||'card-warn';
-  var cbColor = {red:'#e07858',orange:'var(--amber)',green:'var(--sprout)'}[t.color]||'var(--amber)';
-  var hasNote = t.notes && t.notes.trim();
-  return '<div class="card ' + (t.done?'':cls) + '" style="opacity:'+(t.done?'0.38':'1')+';transition:opacity 0.2s;margin-bottom:8px">' +
-    '<div style="display:flex;align-items:flex-start;gap:12px">' +
-    '<div id="cb-'+t.id+'" style="width:26px;height:26px;border-radius:7px;flex-shrink:0;cursor:pointer;background:'+(t.done?cbColor:'transparent')+';border:1.5px solid '+cbColor+';display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;transition:all 0.15s">'+(t.done?'✓':'')+'</div>' +
-    '<div style="flex:1;min-width:0">' +
-    '<div style="font-size:15px;font-weight:'+(t.done?'400':'600')+';color:var(--t1);text-decoration:'+(t.done?'line-through':'none')+';line-height:1.4;opacity:'+(t.done?'0.5':'1')+'">'+t.text+'</div>' +
-    (hasNote ? '<div style="font-size:12px;color:var(--t2);margin-top:5px;line-height:1.6;background:rgba(6,11,7,0.5);border-radius:8px;padding:7px 10px;border-right:2px solid var(--bamboo)">'+t.notes+'</div>' : '') +
-    '<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">' +
-    (t.site?'<span class="tag">📍 '+t.site+'</span>':'') +
-    (t.assignee?'<span class="tag">👤 '+(ASSIGNEE[t.assignee]||t.assignee)+'</span>':'') +
-    '</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
-    (!t.done?'<button id="act-'+t.id+'" class="btn-icon" style="font-size:15px;padding:7px 10px">🖌️</button>':'') +
-    '<button id="note-'+t.id+'" class="btn-icon" style="font-size:14px;padding:7px 10px;color:'+(hasNote?'var(--gold)':'var(--t4)')+'">' + (hasNote?'📝':'＋') + '</button>' +
-    '</div></div></div>';
-}
-
-
-
-function showTaskNotes(id) {
-  var task = null;
-  ['now','today','later'].forEach(function(b){
-    state.tasks[b].forEach(function(t){ if(t.id===id) task=t; });
-  });
-  if(!task) return;
-
-  var modal = document.getElementById('modal-container');
-  modal.innerHTML =
-    '<div class="modal-overlay">' +
-    '<div class="modal">' +
-    '<div class="modal-handle"></div>' +
-    '<div style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px">'+task.text+'</div>' +
-    '<div style="font-size:11px;color:var(--t3);margin-bottom:14px;letter-spacing:0.3px">פירוט · הקשר</div>' +
-    '<textarea id="task-notes-input" style="width:100%;min-height:160px;background:rgba(6,11,7,0.8);border:1px solid var(--border2);border-radius:12px;padding:14px;color:var(--t1);font-size:14px;line-height:1.7;resize:none;outline:none;direction:rtl;font-family:inherit" placeholder="הוסף פירוט, הקשר, מידע לכתיבת מייל/וואטסאפ...&#10;&#10;לדוגמה:&#10;• מה הבעיה בדיוק&#10;• מה קרה עד עכשיו&#10;• מה אני מצפה מהצד השני">' + (task.notes||'') + '</textarea>' +
-    '<div style="display:flex;gap:8px;margin-top:12px">' +
-    '<button class="btn-primary" style="flex:1" id="save-notes-btn">שמור</button>' +
-    (task.notes ? '<button id="action-from-notes-btn" style="padding:14px 16px;border-radius:12px;background:rgba(61,122,53,0.2);border:1px solid rgba(61,122,53,0.4);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">✍️ כתוב</button>' : '') +
-    '<button class="btn-secondary" id="cancel-notes-btn">ביטול</button>' +
-    '</div></div></div>';
-
-  document.querySelector('.modal-overlay').onclick = function(e){ if(e.target===this) closeModal(); };
-  document.getElementById('cancel-notes-btn').onclick = closeModal;
-  document.getElementById('save-notes-btn').onclick = function() {
-    var notes = document.getElementById('task-notes-input').value;
-    var update = function(arr){ return arr.map(function(t){ return t.id===id ? {...t, notes:notes} : t; }); };
-    setState({tasks:{now:update(state.tasks.now),today:update(state.tasks.today),later:update(state.tasks.later)}});
-    closeModal();
-  };
-  var actBtn = document.getElementById('action-from-notes-btn');
-  if(actBtn) actBtn.onclick = function() {
-    var notes = document.getElementById('task-notes-input').value;
-    closeModal();
-    openAction({text:task.text, assignee:task.assignee||'', notes:notes});
-  };
+  const colors = {red:['#ef444418','#ef444460','#ef4444'],orange:['#f59e0b18','#f59e0b60','#f59e0b'],green:['#4ade8018','#4ade8060','#4ade80']}
+  const c = colors[t.color] || colors.orange
+  return `
+    <div style="background:${t.done?'#0f172a':c[0]};border:1.5px solid ${t.done?'#1e293b':c[1]};border-radius:14px;padding:14px;margin-bottom:8px;opacity:${t.done?'0.45':'1'};transition:opacity 0.2s">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div onclick="toggleTask('${t.id}')" style="width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;background:${t.done?c[2]:'transparent'};border:2px solid ${c[2]};display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">${t.done?'✓':''}</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:600;color:#f1f5f9;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+            ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+            ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+          </div>
+        </div>
+        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:16px;flex-shrink:0">🖌️</button>`:''}
+      </div>
+    </div>`
 }
 
 function setTaskBucket(b) { taskBucket=b; renderTasks() }
@@ -1080,13 +1033,10 @@ function renderAction() {
 async function doAction(type) {
   document.getElementById('action-buttons').style.display='none'
   document.getElementById('action-loading').style.display='block'
-  const ctx = actionCtx?.text || ''
-  const notes = actionCtx?.notes ? '\n\nBackground context:\n' + actionCtx.notes : ''
-  const assignee = actionCtx?.assignee || 'team member'
   const prompts = {
-    whatsapp:`Write a short WhatsApp message in English from Uri (Regional Manager, IAI Philippines) to ${assignee} about: ${ctx}.${notes} Keep it direct, max 4 sentences. Friendly but professional.`,
-    email:`Write a professional email in English from Uri (Regional Manager, Innovative Agro Industry) about: ${ctx}.${notes} Include subject line. Use the background context to make it specific and useful.`,
-    monday:`Write a Monday.com task update in English for: ${ctx}.${notes} Format: Status / Issue / Next Action / Owner. Be specific.`
+    whatsapp:`Write a short WhatsApp message in English from Uri (Regional Manager, IAI Philippines) to ${actionCtx?.assignee||'team member'} about: ${actionCtx?.text}. Max 3 sentences, direct.`,
+    email:`Write a professional email in English from Uri (Regional Manager, Innovative Agro Industry) about: ${actionCtx?.text}. Include subject line. Concise.`,
+    monday:`Write a Monday.com task update in English for: ${actionCtx?.text}. Format: Status / Issue / Next Action / Owner.`
   }
   try {
     const result = await callClaude([{role:'user',content:prompts[type]}])
@@ -1155,36 +1105,8 @@ function confirmClear() {
 function closeModal() { document.getElementById('modal-container').innerHTML='' }
 
 // ── CLAUDE API ────────────────────────────────────
-const SYSTEM_PROMPT = `You are a field operations assistant for Uri, a Regional Manager at Innovative Agro Industry Philippines (Region II). Uri has ADHD. Engineers: Gio and Kenneth. Contractors: ASC Construction (engineer: Dave) and 11-16 Construction.
+const SYSTEM_PROMPT = buildSystemPrompt()
 
-Uri sends notes in Hebrew/English/Tagalog mix. TODAY IS ${new Date().toISOString().slice(0,10)}.
-
-Return ONLY valid JSON, no markdown, no explanation:
-{"now":[{"id":"n1","text":"task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],"events":[{"title":"","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","notify":"60"}],"focus":"ONE Hebrew sentence"}
-
-IMPORTANT - HOW TO CALCULATE DATES (today = ${new Date().toISOString().slice(0,10)}):
-- "in 2 weeks" / "בעוד שבועיים" / "עוד שבועיים" = add 14 days to today
-- "in 3 weeks" / "בעוד 3 שבועות" = add 21 days
-- "in 2 days" / "עוד יומיים" / "בעוד יומיים" = add 2 days
-- "tomorrow" / "מחר" = add 1 day
-- "next week" / "שבוע הבא" = add 7 days
-- "next month" / "חודש הבא" = add 30 days
-- Specific date like "19.07" or "July 19" or "19/7" = ${new Date().getFullYear()}-07-19
-- "Monday" / "יום שני" = next Monday from today
-- "in a month" / "בעוד חודש" = add 30 days
-
-EVENTS RULES:
-1. Every task that has ANY time reference must ALSO appear in events with exact calculated date
-2. All meetings, visits, deadlines, follow-ups, reminders → events
-3. Always set notify to "60" (1 hour before) unless specified
-4. Put ALL tasks in events too if they have dates - even vague ones
-5. If no date given for a task, still add it to events with today's date + appropriate days based on urgency
-
-TASKS RULES:
-- now = urgent, do immediately (red)
-- today = do today (orange)  
-- later = future tasks (green)
-- color: red=critical, orange=important, green=routine`
 
 async function callClaude(messages, system=null) {
   const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
@@ -1206,7 +1128,6 @@ function mergeSites(ex, inc) {
 function mergePeople(ex, inc) {
   const m={}; ex.forEach(p=>m[p.name]=p); inc.forEach(p=>m[p.name]={...(m[p.name]||{}),...p}); return Object.values(m)
 }
-
 
 // ═══ CALENDAR ═══
 let calView='month',calDate=new Date(),calSelectedDate=new Date();
@@ -1761,8 +1682,7 @@ function stopVoice(){
 // ── INIT ─────────────────────────────────────────
 refreshBadges()
 renderHome()
-requestNotificationPermission()
-scheduleAllNotifications()
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission()
 if('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Fieldy/sw.js')
 }
