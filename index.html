@@ -565,6 +565,7 @@ function drawMedCircle(ratio) {
 function stopMeditation(completed) {
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
   if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  stopAmbientMusic();
   document.getElementById('modal-container').innerHTML = '';
   if(completed) { playTibetanBowl(); showRipple(); }
 }
@@ -1080,8 +1081,13 @@ function closeModal() { document.getElementById('modal-container').innerHTML='' 
 // ── CLAUDE API ────────────────────────────────────
 const SYSTEM_PROMPT = `You are a field operations assistant for Uri, a Regional Manager at Innovative Agro Industry Philippines (Region II). Uri has ADHD. Engineers: Gio and Kenneth. Contractors: ASC Construction (engineer: Dave) and 11-16 Construction.
 Uri sends notes in Hebrew/English/Tagalog mix. Return ONLY valid JSON (no markdown):
-{"now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"site","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],"focus":"ONE Hebrew sentence"}
-Rules: now MAX 3 tasks. color: red=critical, orange=important, green=routine.`
+{"now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"site","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],"events":[{"title":"event title","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","color":"var(--bamboo)"}],"focus":"ONE Hebrew sentence"}
+Rules:
+- now MAX 3 tasks. color: red=critical, orange=important, green=routine.
+- Parse ALL date/time references into events: meetings, deadlines, follow-ups, site visits.
+- Date parsing: "next week"=+7 days, "in 3 weeks"=+21 days, "tomorrow"=+1 day, "next month"=+30 days. Today is ${new Date().toISOString().slice(0,10)}.
+- If a task has a specific date/time, put it in events AND tasks.
+- recurring: use "weekly" for weekly meetings, "monthly" for monthly reports, etc.`
 
 async function callClaude(messages, system=null) {
   const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
@@ -1406,36 +1412,160 @@ function scheduleAllNotifications(){
 
 // ── MEDITATION VOICE ──────────────────────────────────────────
 var MED_SCRIPTS=[
-  ['ברוך הבא לנשימת הטאו. מצא תנוחה נוחה וסגור את עיניך.',
-   'שאף עמוק דרך האף. החזק רגע. ונשוף לאט דרך הפה.',
-   'עם כל נשיפה, שחרר את המתח מגופך.',
-   'דמיין את הטאו זורם דרכך כמו נהר שקט.',
-   'גופך הולך ורגוע. מחשבותיך נרגעות.',
-   'נשום. פשוט נשום. אתה כאן. ברגע הזה.'],
-  ['ישיבת זן. שב בנוח עם גב ישר.',
-   'הנח את ידיך על ברכיך והרגע את כתפיך.',
-   'שים לב לנשימה הטבעית שלך. אל תשנה אותה.',
-   'כאשר מחשבה עולה, הכר בה בעדינות ושחרר אותה.',
-   'אתה כמו הר. יציב. שקט. נוכח.'],
-  ['סריקת גוף. שכב או שב בנוח.',
-   'נשום עמוק ושחרר.',
-   'הפנה את תשומת לבך לקדקוד הראש שלך.',
-   'ירד לאט. הפנים. הצוואר. הכתפיים.',
-   'שחרר כל מקום של מתח עם הנשיפה.',
-   'גופך שלם. שלו. רגוע לחלוטין.'],
-  ['הליכת מושין. עמוד ישר.',
-   'הרגש את הרצפה תחת כפות רגליך.',
-   'כל צעד הוא מלא ושלם בפני עצמו.',
-   'המחשבות עוברות כמו עננים. אתה ממשיך ללכת.'],
-  ['דמיין נהר שקט לפניך.',
-   'המים זורמים בשקט, ללא מאמץ.',
-   'גם אתה יכול לזרום כך. ללא התנגדות.',
-   'אתה הנהר. גמיש. עמוק. שקט.'],
-  ['קירוב הריקות. עצום את עיניך.',
-   'דמיין חלל ריק ופתוח בחזה שלך.',
-   'עם כל נשיפה, הריקות מתרחבת.',
-   'בריקנות יש את כל האפשרויות.'],
+  ["Find a comfortable position. Close your eyes.",
+   "Take a slow breath in through your nose. Hold it gently. Now breathe out.",
+   "With each breath out, let your body soften.",
+   "Imagine the Tao flowing through you, like a quiet river.",
+   "You are here. This moment is enough.",
+   "In... and out. Let everything slow down.",
+   "Stay with the breath. Nothing else needed."],
+  ["Sit comfortably with your back straight.",
+   "Rest your hands on your knees. Let your shoulders drop.",
+   "Notice your breath, exactly as it is.",
+   "When a thought appears, gently let it go.",
+   "Return to the breath. Just this.",
+   "You are like a mountain. Still. Solid. Present.",
+   "Stay here, in the quiet."],
+  ["Lie down or sit comfortably.",
+   "Take a deep breath and release it fully.",
+   "Bring your attention to the top of your head.",
+   "Slowly move down. Your face. Your neck. Your shoulders.",
+   "With each breath out, release any tension you find.",
+   "Continue down. Your chest. Your back. Your belly.",
+   "Your whole body is at rest. Heavy and warm."],
+  ["Stand still. Feel the ground beneath your feet.",
+   "Take one slow step. Feel the full contact with the floor.",
+   "Each step is complete in itself.",
+   "Thoughts will come. Let them pass like clouds.",
+   "You are simply walking. Fully here.",
+   "Step by step. Breath by breath."],
+  ["Picture a calm river in front of you.",
+   "The water moves slowly, without effort.",
+   "You are that river. Flexible. Deep. Quiet.",
+   "Obstacles do not stop you. You simply flow around them.",
+   "Let yourself be carried by the current.",
+   "Soft like water. Strong like water."],
+  ["Close your eyes and settle in.",
+   "Imagine a quiet, open space inside your chest.",
+   "With each breath out, that space grows a little wider.",
+   "Emptiness is not nothing. It is possibility.",
+   "Rest in the stillness.",
+   "Nothing to do. Nowhere to go. Just this."],
 ];
+
+
+// ── AMBIENT MEDITATION MUSIC ──────────────────────────────────
+var ambientNodes = [];
+var ambientGain = null;
+var musicMuted = false;
+
+function startAmbientMusic() {
+  stopAmbientMusic();
+  try {
+    var ctx = getAudio();
+    ambientGain = ctx.createGain();
+    ambientGain.gain.setValueAtTime(0, ctx.currentTime);
+    ambientGain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 3);
+    ambientGain.connect(ctx.destination);
+
+    // Drone frequencies - calm and meditative
+    var freqs = [110, 164.8, 220, 329.6];
+    freqs.forEach(function(freq) {
+      var osc = ctx.createOscillator();
+      var oscGain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      // Very slow vibrato
+      var lfo = ctx.createOscillator();
+      var lfoGain = ctx.createGain();
+      lfo.frequency.value = 0.08 + Math.random() * 0.05;
+      lfoGain.gain.value = 0.3;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfo.start();
+
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      filter.Q.value = 0.5;
+
+      oscGain.gain.value = freq > 200 ? 0.4 : 0.7;
+      osc.connect(filter);
+      filter.connect(oscGain);
+      oscGain.connect(ambientGain);
+      osc.start();
+
+      ambientNodes.push(osc);
+      ambientNodes.push(lfo);
+    });
+
+    // Add gentle noise layer (like distant wind)
+    var bufSize = ctx.sampleRate * 2;
+    var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+    for(var i=0;i<bufSize;i++){
+      var w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520;b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;
+      data[i]=(b0+b1+b2+b3+b4+b5)*0.05;
+    }
+    var noise = ctx.createBufferSource();
+    var noiseGain = ctx.createGain();
+    var noiseFilter = ctx.createBiquadFilter();
+    noise.buffer = buf;
+    noise.loop = true;
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 400;
+    noiseFilter.Q.value = 0.3;
+    noiseGain.gain.value = 0.06;
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ambientGain);
+    noise.start();
+    ambientNodes.push(noise);
+
+  } catch(e) { console.log('Audio error:', e); }
+}
+
+function stopAmbientMusic() {
+  ambientNodes.forEach(function(n) { try { n.stop(); } catch(e) {} });
+  ambientNodes = [];
+  if(ambientGain) {
+    try { ambientGain.disconnect(); } catch(e) {}
+    ambientGain = null;
+  }
+}
+
+function toggleMusicMute() {
+  musicMuted = !musicMuted;
+  if(ambientGain) {
+    var ctx = getAudio();
+    ambientGain.gain.linearRampToValueAtTime(
+      musicMuted ? 0 : 0.12,
+      ctx.currentTime + 0.5
+    );
+  }
+  var btn = document.getElementById('music-toggle-btn');
+  if(btn) {
+    btn.textContent = musicMuted ? '🔇 מוסיקה' : '🎵 מוסיקה';
+    btn.style.color = musicMuted ? 'var(--t4)' : 'var(--sprout)';
+  }
+}
+
+function toggleVoiceMute() {
+  var btn = document.getElementById('voice-toggle-btn');
+  if(window.speechSynthesis.speaking || window._voiceEnabled !== false) {
+    window._voiceEnabled = false;
+    window.speechSynthesis.cancel();
+    if(btn) { btn.textContent = '🔇 הדרכה'; btn.style.color = 'var(--t4)'; }
+  } else {
+    window._voiceEnabled = true;
+    if(btn) { btn.textContent = '🎤 הדרכה'; btn.style.color = 'var(--sprout)'; }
+  }
+}
 
 function speakText(text){
   if(!('speechSynthesis' in window))return;
@@ -1453,64 +1583,70 @@ function speakText(text){
 function stopVoice(){if('speechSynthesis' in window)window.speechSynthesis.cancel();}
 
 function startMeditationWithVoice(idx){
+  window._voiceEnabled = true;
+  musicMuted = false;
   startMeditation(idx);
+  startAmbientMusic();
+
   var scripts = MED_SCRIPTS[idx] || MED_SCRIPTS[0];
   var si = 0;
 
-  // Preload voices
-  if('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    // iOS/Android need getVoices to be called after user gesture
-    var voices = window.speechSynthesis.getVoices();
-    if(!voices.length) {
-      window.speechSynthesis.onvoiceschanged = function() {
-        scheduleNextPhrase();
-      };
-    } else {
-      scheduleNextPhrase();
-    }
-  }
-
-  function scheduleNextPhrase() {
-    setTimeout(function() { speakPhrase(); }, 1500);
-  }
+  // Add music/voice toggle buttons to modal
+  setTimeout(function() {
+    var modal = document.querySelector('.modal');
+    if(!modal) return;
+    var controls = document.createElement('div');
+    controls.style.cssText = 'display:flex;gap:8px;margin-top:12px;margin-bottom:-4px';
+    controls.innerHTML =
+      '<button id="music-toggle-btn" onclick="toggleMusicMute()" style="flex:1;padding:10px;border-radius:10px;background:rgba(13,23,16,0.8);border:1px solid var(--border2);color:var(--sprout);font-size:13px;cursor:pointer">🎵 מוסיקה</button>' +
+      '<button id="voice-toggle-btn" onclick="toggleVoiceMute()" style="flex:1;padding:10px;border-radius:10px;background:rgba(13,23,16,0.8);border:1px solid var(--border2);color:var(--sprout);font-size:13px;cursor:pointer">🎤 הדרכה</button>';
+    modal.appendChild(controls);
+  }, 300);
 
   function speakPhrase() {
     if(si >= scripts.length || !medInterval) return;
-    var text = scripts[si];
-    si++;
+    if(window._voiceEnabled === false) {
+      setTimeout(function() { if(medInterval) speakPhrase(); }, 15000);
+      return;
+    }
+    var text = scripts[si]; si++;
 
     window.speechSynthesis.cancel();
     var utt = new SpeechSynthesisUtterance(text);
     var voices = window.speechSynthesis.getVoices();
 
-    // Try Hebrew first, then English female, then any
-    var voice = voices.find(function(v){ return v.lang && v.lang.startsWith('he'); }) ||
-                voices.find(function(v){ return v.lang && v.lang.startsWith('en') && /female|woman|samantha|karen|moira|tessa/i.test(v.name); }) ||
-                voices.find(function(v){ return v.lang && v.lang.startsWith('en'); }) ||
-                (voices.length ? voices[0] : null);
+    // Prefer calm English male voice
+    var voice =
+      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && /daniel|david|alex|oliver|mark|james|arthur|aaron/i.test(v.name); }) ||
+      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && !/female|woman|samantha|karen|moira|tessa|victoria|allison|zoe/i.test(v.name); }) ||
+      voices.find(function(v){ return v.lang && v.lang.startsWith('en'); }) ||
+      (voices.length ? voices[0] : null);
 
     if(voice) utt.voice = voice;
-    utt.rate = 0.72;
-    utt.pitch = 0.88;
+    utt.rate = 0.7;
+    utt.pitch = 0.85;
     utt.volume = 0.9;
 
     utt.onend = function() {
-      // Wait 12 seconds then speak next phrase
-      setTimeout(function() {
-        if(medInterval) speakPhrase();
-      }, 12000);
+      setTimeout(function() { if(medInterval) speakPhrase(); }, 13000);
     };
-
     utt.onerror = function() {
-      setTimeout(function() {
-        if(medInterval) speakPhrase();
-      }, 12000);
+      setTimeout(function() { if(medInterval) speakPhrase(); }, 13000);
     };
 
     window.speechSynthesis.speak(utt);
   }
+
+  var voices = window.speechSynthesis.getVoices();
+  if(!voices.length) {
+    window.speechSynthesis.onvoiceschanged = function() {
+      setTimeout(speakPhrase, 2000);
+    };
+  } else {
+    setTimeout(speakPhrase, 2000);
+  }
 }
+
 
 function stopVoice(){
   if('speechSynthesis' in window) window.speechSynthesis.cancel();
