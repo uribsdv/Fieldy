@@ -703,8 +703,18 @@ async function doAnalyze() {
       tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
       sites: mergeSites(state.sites, p.sites||[]),
       people: mergePeople(state.people, p.people||[]),
+      events: [...getEvents(), ...(p.events||[]).map(function(e,i){ return {...e, id:'ev'+Date.now()+i, color:e.color||'var(--bamboo)'}; })],
       focus: p.focus || state.focus
     })
+    var newEvs = p.events || []
+    newEvs.forEach(function(ev){ if(ev.notify) scheduleNotification(ev) })
+    if(newEvs.length > 0) {
+      var toast = document.createElement('div')
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(61,122,53,0.95);color:#f0f5f0;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)'
+      toast.textContent = '📅 ' + newEvs.length + ' אירועים נוספו ללוח'
+      document.body.appendChild(toast)
+      setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){toast.remove()},300) }, 2500)
+    }
     navigateTo('home')
   } catch(e) {
     err.textContent = 'שגיאה: ' + e.message
@@ -1080,14 +1090,34 @@ function closeModal() { document.getElementById('modal-container').innerHTML='' 
 
 // ── CLAUDE API ────────────────────────────────────
 const SYSTEM_PROMPT = `You are a field operations assistant for Uri, a Regional Manager at Innovative Agro Industry Philippines (Region II). Uri has ADHD. Engineers: Gio and Kenneth. Contractors: ASC Construction (engineer: Dave) and 11-16 Construction.
-Uri sends notes in Hebrew/English/Tagalog mix. Return ONLY valid JSON (no markdown):
-{"now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],"today":[...],"later":[...],"sites":[{"name":"site","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],"events":[{"title":"event title","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","color":"var(--bamboo)"}],"focus":"ONE Hebrew sentence"}
-Rules:
-- now MAX 3 tasks. color: red=critical, orange=important, green=routine.
-- Parse ALL date/time references into events: meetings, deadlines, follow-ups, site visits.
-- Date parsing: "next week"=+7 days, "in 3 weeks"=+21 days, "tomorrow"=+1 day, "next month"=+30 days. Today is ${new Date().toISOString().slice(0,10)}.
-- If a task has a specific date/time, put it in events AND tasks.
-- recurring: use "weekly" for weekly meetings, "monthly" for monthly reports, etc.`
+
+Uri sends notes in Hebrew/English/Tagalog mix. TODAY IS ${new Date().toISOString().slice(0,10)}.
+
+Return ONLY valid JSON (no markdown):
+{
+  "now":[{"id":"n1","text":"short task max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],
+  "today":[...],
+  "later":[...],
+  "sites":[{"name":"","province":"","issue":"","contractor":"asc/11-16 or null","status":"open/pending/resolved"}],
+  "people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],
+  "events":[{"title":"","date":"YYYY-MM-DD","time":"HH:MM or empty","note":"","recurring":"daily/weekly/monthly/yearly or empty","notify":"60"}],
+  "focus":"ONE Hebrew sentence"
+}
+
+CRITICAL RULES FOR EVENTS:
+- Extract ALL dates and timeframes into events array.
+- Calculate exact dates from today (${new Date().toISOString().slice(0,10)}):
+  * "in 2 weeks" / "בעוד שבועיים" = +14 days from today
+  * "in 3 weeks" / "בעוד 3 שבועות" = +21 days
+  * "tomorrow" / "מחר" = +1 day  
+  * "next week" / "שבוע הבא" = +7 days
+  * "next month" / "חודש הבא" = +30 days
+  * "in 2 days" / "עוד יומיים" = +2 days
+  * Specific dates like "19.07" or "July 19" = that exact date
+- Default notify to "60" (1 hour before) for all events.
+- If something is both a task AND has a date, put it in both tasks AND events.
+- recurring: "weekly" for weekly meetings, "monthly" for monthly reports.
+- Tasks: now=do immediately, today=do today, later=future without specific date.`
 
 async function callClaude(messages, system=null) {
   const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
@@ -1412,45 +1442,49 @@ function scheduleAllNotifications(){
 
 // ── MEDITATION VOICE ──────────────────────────────────────────
 var MED_SCRIPTS=[
-  ["Find a comfortable position. Close your eyes.",
-   "Take a slow breath in through your nose. Hold it gently. Now breathe out.",
-   "With each breath out, let your body soften.",
-   "Imagine the Tao flowing through you, like a quiet river.",
-   "You are here. This moment is enough.",
-   "In... and out. Let everything slow down.",
-   "Stay with the breath. Nothing else needed."],
-  ["Sit comfortably with your back straight.",
-   "Rest your hands on your knees. Let your shoulders drop.",
-   "Notice your breath, exactly as it is.",
-   "When a thought appears, gently let it go.",
-   "Return to the breath. Just this.",
-   "You are like a mountain. Still. Solid. Present.",
-   "Stay here, in the quiet."],
-  ["Lie down or sit comfortably.",
-   "Take a deep breath and release it fully.",
-   "Bring your attention to the top of your head.",
-   "Slowly move down. Your face. Your neck. Your shoulders.",
-   "With each breath out, release any tension you find.",
-   "Continue down. Your chest. Your back. Your belly.",
-   "Your whole body is at rest. Heavy and warm."],
-  ["Stand still. Feel the ground beneath your feet.",
-   "Take one slow step. Feel the full contact with the floor.",
-   "Each step is complete in itself.",
-   "Thoughts will come. Let them pass like clouds.",
-   "You are simply walking. Fully here.",
-   "Step by step. Breath by breath."],
-  ["Picture a calm river in front of you.",
-   "The water moves slowly, without effort.",
-   "You are that river. Flexible. Deep. Quiet.",
-   "Obstacles do not stop you. You simply flow around them.",
-   "Let yourself be carried by the current.",
-   "Soft like water. Strong like water."],
-  ["Close your eyes and settle in.",
-   "Imagine a quiet, open space inside your chest.",
-   "With each breath out, that space grows a little wider.",
-   "Emptiness is not nothing. It is possibility.",
-   "Rest in the stillness.",
-   "Nothing to do. Nowhere to go. Just this."],
+  ["Find a comfortable position... and gently close your eyes.",
+   "Take a slow breath in... and let it go.",
+   "There is nowhere to be right now. Just here.",
+   "Let your shoulders drop. Let your hands rest.",
+   "Breathe in through your nose... and out through your mouth.",
+   "With every breath out... something releases.",
+   "The Tao is like a river. You are part of that flow.",
+   "Nothing to fix. Nothing to figure out. Just breathe."],
+  ["Sit comfortably. Let your back straighten naturally.",
+   "Rest your hands on your knees.",
+   "Now... just notice your breath. Don't change it.",
+   "In... and out. That's all.",
+   "A thought comes up. That's fine. Let it pass.",
+   "Come back to the breath. Again and again.",
+   "You are like a mountain right now. Solid. Quiet. Unmoved."],
+  ["Lie down, or sit in a way that feels supported.",
+   "Take one long breath in... and release it completely.",
+   "Now bring your attention to the top of your head.",
+   "Slowly... move your awareness downward.",
+   "Your face... your jaw... your neck.",
+   "Let any tightness soften as you breathe out.",
+   "Your chest... your belly... rising and falling.",
+   "All the way down to your feet. Rest there."],
+  ["Come to a standing position. Feel the floor beneath you.",
+   "Take one deliberate step forward.",
+   "Feel every part of that step. The lift... the placement.",
+   "Walk slowly. There is no destination.",
+   "When your mind wanders... bring it back to your feet.",
+   "Each step is complete on its own.",
+   "This is the whole practice. Just walking. Just here."],
+  ["Picture a river. Wide and slow and clear.",
+   "Watch it moving. It doesn't struggle. It just flows.",
+   "That's what you can be right now.",
+   "When something gets in the way... go around it.",
+   "Soft on the outside. Deep underneath.",
+   "Let yourself be carried for a while."],
+  ["Settle in. Close your eyes.",
+   "Picture a space opening inside your chest.",
+   "Wide and quiet.",
+   "With each breath out... that space gets a little larger.",
+   "This stillness is not empty. It's full of potential.",
+   "You don't have to fill it. Just rest in it.",
+   "Nothing to do right now. This is enough."],
 ];
 
 
@@ -1616,16 +1650,20 @@ function startMeditationWithVoice(idx){
     var voices = window.speechSynthesis.getVoices();
 
     // Prefer calm English male voice
+    // Prefer natural male English voice
+    var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Fred','Alex','Bruce','Tom'];
     var voice =
-      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && /daniel|david|alex|oliver|mark|james|arthur|aaron/i.test(v.name); }) ||
-      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && !/female|woman|samantha|karen|moira|tessa|victoria|allison|zoe/i.test(v.name); }) ||
+      voices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }) && v.lang && v.lang.startsWith('en'); }) ||
+      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && v.localService && !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|susan|vicki/i.test(v.name); }) ||
+      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && !/samantha|karen|moira|tessa|victoria|allison|zoe/i.test(v.name); }) ||
       voices.find(function(v){ return v.lang && v.lang.startsWith('en'); }) ||
       (voices.length ? voices[0] : null);
 
     if(voice) utt.voice = voice;
-    utt.rate = 0.7;
-    utt.pitch = 0.85;
-    utt.volume = 0.9;
+    // Natural speaking pace - not too slow, with natural rhythm
+    utt.rate = 0.82;
+    utt.pitch = 0.92;
+    utt.volume = 0.88;
 
     utt.onend = function() {
       setTimeout(function() { if(medInterval) speakPhrase(); }, 13000);
