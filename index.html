@@ -17,7 +17,7 @@ textarea,select,input{font-family:inherit}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 24px;z-index:100}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns: repeat(6, 1fr);padding:8px 0 24px;z-index:100}
 .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;background:none;border:none;position:relative}
 .nav-icon{font-size:22px}
 .nav-label{font-size:10px;color:#475569;font-weight:400}
@@ -1589,6 +1589,12 @@ function toggleVoiceMute() {
   }
 }
 
+
+var selectedVoiceIdx = -1;
+function setMedVoice(idx) {
+  selectedVoiceIdx = parseInt(idx);
+}
+
 function speakText(text){
   if(!('speechSynthesis' in window))return;
   window.speechSynthesis.cancel();
@@ -1617,13 +1623,21 @@ function startMeditationWithVoice(idx){
   setTimeout(function() {
     var modal = document.querySelector('.modal');
     if(!modal) return;
+    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
+    var voiceOpts = enVoices.map(function(v,i){
+      return '<option value="' + i + '">' + v.name.replace('(en','').replace(')','').trim() + '</option>';
+    }).join('');
     var controls = document.createElement('div');
-    controls.style.cssText = 'display:flex;gap:8px;margin-top:12px;margin-bottom:-4px';
+    controls.style.cssText = 'margin-top:12px';
     controls.innerHTML =
-      '<button id="music-toggle-btn" onclick="toggleMusicMute()" style="flex:1;padding:10px;border-radius:10px;background:rgba(13,23,16,0.8);border:1px solid var(--border2);color:var(--sprout);font-size:13px;cursor:pointer">🎵 מוסיקה</button>' +
-      '<button id="voice-toggle-btn" onclick="toggleVoiceMute()" style="flex:1;padding:10px;border-radius:10px;background:rgba(13,23,16,0.8);border:1px solid var(--border2);color:var(--sprout);font-size:13px;cursor:pointer">🎤 הדרכה</button>';
+      '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+      '<button id="music-toggle-btn" onclick="toggleMusicMute()" style="flex:1;padding:9px;border-radius:10px;background:rgba(13,23,16,.8);border:1px solid var(--border2);color:var(--sprout);font-size:12px;cursor:pointer">🎵 מוסיקה</button>' +
+      '<button id="voice-toggle-btn" onclick="toggleVoiceMute()" style="flex:1;padding:9px;border-radius:10px;background:rgba(13,23,16,.8);border:1px solid var(--border2);color:var(--sprout);font-size:12px;cursor:pointer">🎤 הדרכה</button>' +
+      '</div>' +
+      (enVoices.length > 1 ? '<select id="voice-select" onchange="setMedVoice(this.value)" style="width:100%;background:rgba(6,11,7,.8);border:1px solid var(--border2);border-radius:10px;padding:8px 10px;color:var(--t2);font-size:12px;font-family:inherit">'+voiceOpts+'</select>' : '');
     modal.appendChild(controls);
-  }, 300);
+  }, 500);
 
   function speakPhrase() {
     if(si >= scripts.length || !medInterval) return;
@@ -1640,12 +1654,16 @@ function startMeditationWithVoice(idx){
     // Prefer calm English male voice
     // Prefer natural male English voice
     var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Fred','Alex','Bruce','Tom'];
-    var voice =
-      voices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }) && v.lang && v.lang.startsWith('en'); }) ||
-      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && v.localService && !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|susan|vicki/i.test(v.name); }) ||
-      voices.find(function(v){ return v.lang && v.lang.startsWith('en') && !/samantha|karen|moira|tessa|victoria|allison|zoe/i.test(v.name); }) ||
-      voices.find(function(v){ return v.lang && v.lang.startsWith('en'); }) ||
-      (voices.length ? voices[0] : null);
+    var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
+    var voice;
+    if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
+      voice = enVoices[selectedVoiceIdx];
+    } else {
+      var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex'];
+      voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }); }) ||
+              enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava/i.test(v.name); }) ||
+              (enVoices.length ? enVoices[0] : null);
+    }
 
     if(voice) utt.voice = voice;
     // Natural speaking pace - not too slow, with natural rhythm
@@ -1679,9 +1697,62 @@ function stopVoice(){
 }
 
 
+
+// Global ambient water sound
+var globalWaterNodes = [];
+var globalWaterGain = null;
+
+function startGlobalWater() {
+  if(globalWaterGain) return; // already running
+  try {
+    var ctx = getAudio();
+    globalWaterGain = ctx.createGain();
+    globalWaterGain.gain.setValueAtTime(0, ctx.currentTime);
+    globalWaterGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 3);
+    globalWaterGain.connect(ctx.destination);
+
+    var bufSize = ctx.sampleRate * 3;
+    var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+    for(var i=0;i<bufSize;i++){
+      var w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520;b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;
+      data[i]=(b0+b1+b2+b3+b4+b5)*0.06;
+    }
+    var noise = ctx.createBufferSource();
+    var filter = ctx.createBiquadFilter();
+    filter.type='bandpass'; filter.frequency.value=600; filter.Q.value=0.4;
+    noise.buffer=buf; noise.loop=true;
+    noise.connect(filter); filter.connect(globalWaterGain);
+    noise.start();
+    globalWaterNodes.push(noise);
+    
+    // Very gentle occasional drip tones
+    function drip() {
+      if(!globalWaterGain) return;
+      try {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type='sine'; osc.frequency.value = 300 + Math.random()*400;
+        g.gain.setValueAtTime(0.06, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc.connect(g); g.connect(globalWaterGain);
+        osc.start(); osc.stop(ctx.currentTime+0.8);
+      } catch(e){}
+      setTimeout(drip, 3000 + Math.random()*5000);
+    }
+    setTimeout(drip, 2000);
+  } catch(e){}
+}
+
 // ── INIT ─────────────────────────────────────────
 refreshBadges()
 renderHome()
+if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
+document.addEventListener("click", function startWater(){ startGlobalWater(); document.removeEventListener("click", startWater); }, {once:true})
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission()
 if('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Fieldy/sw.js')
