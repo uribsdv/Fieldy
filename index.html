@@ -236,6 +236,7 @@ body::before {
   <div id="screen-sites" class="screen hidden"></div>
   <div id="screen-people" class="screen hidden"></div>
   <div id="screen-tao" class="screen hidden"></div>
+  <div id="screen-calendar" class="screen hidden"></div>
   <div id="screen-input" class="screen hidden"></div>
   <div id="screen-action" class="screen hidden"></div>
   <div id="screen-settings" class="screen hidden"></div>
@@ -265,7 +266,11 @@ body::before {
 </div>
 <div id="modal-container"></div>
 
-<script>
+<script>var medInterval = null;
+var medSeconds = 0;
+var medTotal = 0;
+
+
 // ── STATE ─────────────────────────────────────────
 const KEY = 'fieldy_v2'
 let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],focus:'',updated:null}
@@ -435,7 +440,7 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var medHtml = MEDITATIONS.map(function(m, i) {
-    return '<div onclick="startMeditationWithVoice(' + i + ')" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+    return '<div id="med-card-' + i + '" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
       '<div style="font-size:15px;font-weight:600;color:#e8f0e4">' + m.icon + ' ' + m.title + '</div>' +
       '<div style="font-size:12px;color:#6090a8;margin-top:3px">' + m.desc + '</div>' +
@@ -471,6 +476,11 @@ function renderTaoChapter(el, idx) {
 
   el.scrollTop = 0;
   playWater();
+  // Bind meditation card clicks after render
+  MEDITATIONS.forEach(function(m, i) {
+    var card = document.getElementById('med-card-' + i);
+    if(card) card.onclick = function() { startMeditationWithVoice(i); };
+  });
 }
 
 
@@ -554,7 +564,7 @@ function drawMedCircle(ratio) {
 
 function stopMeditation(completed) {
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
-  stopVoice();
+  if("speechSynthesis" in window) window.speechSynthesis.cancel();
   document.getElementById('modal-container').innerHTML = '';
   if(completed) { playTibetanBowl(); showRipple(); }
 }
@@ -1444,16 +1454,68 @@ function stopVoice(){if('speechSynthesis' in window)window.speechSynthesis.cance
 
 function startMeditationWithVoice(idx){
   startMeditation(idx);
-  var scripts=MED_SCRIPTS[idx]||MED_SCRIPTS[0];
-  var si=0;
-  function speakNext(){
-    if(si<scripts.length&&medInterval){
-      speakText(scripts[si]);si++;
-      setTimeout(speakNext,15000);
+  var scripts = MED_SCRIPTS[idx] || MED_SCRIPTS[0];
+  var si = 0;
+
+  // Preload voices
+  if('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    // iOS/Android need getVoices to be called after user gesture
+    var voices = window.speechSynthesis.getVoices();
+    if(!voices.length) {
+      window.speechSynthesis.onvoiceschanged = function() {
+        scheduleNextPhrase();
+      };
+    } else {
+      scheduleNextPhrase();
     }
   }
-  setTimeout(speakNext,2000);
+
+  function scheduleNextPhrase() {
+    setTimeout(function() { speakPhrase(); }, 1500);
+  }
+
+  function speakPhrase() {
+    if(si >= scripts.length || !medInterval) return;
+    var text = scripts[si];
+    si++;
+
+    window.speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(text);
+    var voices = window.speechSynthesis.getVoices();
+
+    // Try Hebrew first, then English female, then any
+    var voice = voices.find(function(v){ return v.lang && v.lang.startsWith('he'); }) ||
+                voices.find(function(v){ return v.lang && v.lang.startsWith('en') && /female|woman|samantha|karen|moira|tessa/i.test(v.name); }) ||
+                voices.find(function(v){ return v.lang && v.lang.startsWith('en'); }) ||
+                (voices.length ? voices[0] : null);
+
+    if(voice) utt.voice = voice;
+    utt.rate = 0.72;
+    utt.pitch = 0.88;
+    utt.volume = 0.9;
+
+    utt.onend = function() {
+      // Wait 12 seconds then speak next phrase
+      setTimeout(function() {
+        if(medInterval) speakPhrase();
+      }, 12000);
+    };
+
+    utt.onerror = function() {
+      setTimeout(function() {
+        if(medInterval) speakPhrase();
+      }, 12000);
+    };
+
+    window.speechSynthesis.speak(utt);
+  }
 }
+
+function stopVoice(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
 
 // ── INIT ─────────────────────────────────────────
 refreshBadges()
