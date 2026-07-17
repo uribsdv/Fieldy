@@ -502,10 +502,12 @@ function renderTaoChapter(el, idx) {
   if (prevBtn) prevBtn.onclick = function() { renderTaoChapter(el, prevIdx); };
   if (nextBtn) nextBtn.onclick = function() { renderTaoChapter(el, nextIdx); };
 
-  // Bind meditation buttons
+  // Bind meditation buttons (IIFE to capture i correctly)
   MEDITATIONS.forEach(function(m, i) {
     var btn = document.getElementById('med-btn-' + i);
-    if (btn) btn.onclick = function() { startMeditationWithVoice(i); };
+    if (btn) btn.onclick = (function(idx) {
+      return function() { startMeditationWithVoice(idx); };
+    })(i);
   });
 
   el.scrollTop = 0;
@@ -1727,6 +1729,10 @@ function stopVoice(){
 
 // Global ambient water sound
 var globalWaterNodes = [];
+var medInterval = null;
+var medSeconds = 0;
+var medTotal = 0;
+var musicMuted = false;
 var globalWaterGain = null;
 
 function startGlobalWater() {
