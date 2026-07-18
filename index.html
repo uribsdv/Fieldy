@@ -263,7 +263,15 @@ body::before {
 </div>
 <div id="modal-container"></div>
 
-<script>
+<script>var medInterval = null;
+var medSeconds = 0;
+var medTotal = 0;
+var musicMuted = false;
+var selectedVoiceIdx = -1;
+var ambientNodes = [];
+var ambientGain = null;
+
+
 function getTodayPlus(days) {
   var d = new Date(); d.setDate(d.getDate() + days);
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -1225,6 +1233,13 @@ function renderCalendar(){
   el.querySelectorAll('.week-row').forEach(function(r){
     r.addEventListener('click',function(){showDayEvents(r.dataset.date);});
   });
+  // Bind delete buttons in month event list
+  getEvents().forEach(function(ev){
+    var btn = document.getElementById('del-ev-'+ev.id);
+    if(btn) btn.onclick = (function(eid){
+      return function(e){ e.stopPropagation(); deleteEvent(eid); };
+    })(ev.id);
+  });
 }
 
 function renderMonthCal(){
@@ -1661,103 +1676,71 @@ function stopVoice(){if('speechSynthesis' in window)window.speechSynthesis.cance
 function startMeditationWithVoice(idx){
   window._voiceEnabled = true;
   musicMuted = false;
+  try { startAmbientMusic(); } catch(e) { console.log('ambient err:', e); }
   startMeditation(idx);
-  startAmbientMusic();
-
+  
   var scripts = MED_SCRIPTS[idx] || MED_SCRIPTS[0];
   var si = 0;
 
-  // Add music/voice toggle buttons to modal
-    // Voice selector - load after small delay for voices to be ready
+  // Voice selector controls added to modal
   setTimeout(function() {
     var modal = document.querySelector('.modal');
     if(!modal) return;
-    
     var loadVoices = function() {
       var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
       var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
-      
-      var voiceOpts = '<option value="-1">קול אוטומטי (גבר)</option>';
+      var voiceOpts = '<option value="-1">אוטומטי (גבר)</option>';
       enVoices.forEach(function(v,i){
-        var gender = /female|woman|samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) ? '♀' : '♂';
-        voiceOpts += '<option value="'+i+'">'+gender+' '+v.name.split('(')[0].trim()+'</option>';
+        var g = /female|woman|samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) ? '♀' : '♂';
+        voiceOpts += '<option value="'+i+'">'+g+' '+v.name.split('(')[0].trim()+'</option>';
       });
-      
-      var controls = document.createElement('div');
-      controls.style.cssText = 'margin-top:12px';
-      controls.innerHTML =
-        '<select id="voice-select" style="width:100%;background:rgba(6,11,7,.9);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:13px;font-family:inherit;margin-bottom:8px">'+voiceOpts+'</select>'+
-        '<div style="display:flex;gap:8px">'+
-        '<button id="music-toggle-btn" style="flex:1;padding:9px;border-radius:10px;background:rgba(13,23,16,.8);border:1px solid var(--border2);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
-        '<button id="voice-toggle-btn" style="flex:1;padding:9px;border-radius:10px;background:rgba(13,23,16,.8);border:1px solid var(--border2);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
+      var ctrl = document.createElement('div');
+      ctrl.style.cssText = 'margin-top:10px';
+      ctrl.innerHTML =
+        '<select id="voice-select" style="width:100%;background:rgba(6,11,7,.9);border:1px solid rgba(61,122,53,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:12px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
+        '<div style="display:flex;gap:7px">'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
         '</div>';
-      modal.appendChild(controls);
-      
-      var vs = document.getElementById('voice-select');
-      if(vs) vs.onchange = function(){ selectedVoiceIdx = parseInt(this.value); };
-      var mb = document.getElementById('music-toggle-btn');
-      if(mb) mb.onclick = toggleMusicMute;
-      var vb = document.getElementById('voice-toggle-btn');
-      if(vb) vb.onclick = toggleVoiceMute;
+      modal.appendChild(ctrl);
+      var vs=document.getElementById('voice-select');
+      if(vs) vs.onchange=function(){ selectedVoiceIdx=parseInt(this.value); };
+      var mb=document.getElementById('music-mute-btn');
+      if(mb) mb.onclick=toggleMusicMute;
+      var vb=document.getElementById('voice-mute-btn');
+      if(vb) vb.onclick=toggleVoiceMute;
     };
-    
-    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    if(voices.length > 0) {
-      loadVoices();
-    } else {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-  }, 400);
-
+    var v=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+    if(v.length>0) loadVoices(); else window.speechSynthesis.onvoiceschanged=loadVoices;
+  }, 500);
 
   function speakPhrase() {
     if(si >= scripts.length || !medInterval) return;
-    if(window._voiceEnabled === false) {
-      setTimeout(function() { if(medInterval) speakPhrase(); }, 15000);
-      return;
-    }
+    if(window._voiceEnabled === false) { setTimeout(function(){if(medInterval)speakPhrase();},15000); return; }
     var text = scripts[si]; si++;
-
     window.speechSynthesis.cancel();
     var utt = new SpeechSynthesisUtterance(text);
     var voices = window.speechSynthesis.getVoices();
-
-    // Prefer calm English male voice
-    // Prefer natural male English voice
-    var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Fred','Alex','Bruce','Tom'];
     var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
     var voice;
     if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
       voice = enVoices[selectedVoiceIdx];
     } else {
-      // Default: prefer male voice
-      var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex','Mark','Tom','Bruce'];
+      var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex'];
       voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }); }) ||
-              enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki|susan/i.test(v.name); }) ||
+              enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name); }) ||
               (enVoices.length ? enVoices[0] : null);
     }
-    utt.rate = 0.82;
-    utt.pitch = 0.92;
-    utt.volume = 0.88;
-
-    utt.onend = function() {
-      setTimeout(function() { if(medInterval) speakPhrase(); }, 13000);
-    };
-    utt.onerror = function() {
-      setTimeout(function() { if(medInterval) speakPhrase(); }, 13000);
-    };
-
+    if(voice) utt.voice = voice;
+    utt.rate = 0.82; utt.pitch = 0.92; utt.volume = 0.88;
+    utt.onend = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
+    utt.onerror = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
     window.speechSynthesis.speak(utt);
   }
 
-  var voices = window.speechSynthesis.getVoices();
-  if(!voices.length) {
-    window.speechSynthesis.onvoiceschanged = function() {
-      setTimeout(speakPhrase, 2000);
-    };
-  } else {
-    setTimeout(speakPhrase, 2000);
-  }
+  var v = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  if(v.length > 0) { setTimeout(speakPhrase, 2000); }
+  else { window.speechSynthesis.onvoiceschanged = function(){ setTimeout(speakPhrase, 2000); }; }
 }
 
 
