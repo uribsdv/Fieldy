@@ -269,7 +269,7 @@ function getTodayPlus(days) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function getToday() { return getTodayPlus(0); }
-function getEvents() { return state.events || []; }
+function getEvents() { if(!state.events) state.events=[]; return state.events; }
 function buildSystemPrompt() {
   var td = getToday();
   return 'You are a field assistant for Uri (IAI Philippines Regional Manager). Today=' + td + '\n' +
@@ -301,7 +301,7 @@ function buildSystemPrompt() {
 
 // ── STATE ─────────────────────────────────────────
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],focus:'',updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 let currentScreen = 'home'
 let actionCtx = null
@@ -742,13 +742,14 @@ async function doAnalyze() {
                   note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)'};
         });
         var allTasks = [...(p.now||[]),...(p.today||[]),...(p.later||[])];
+        // Always add ALL tasks to calendar
         var taskEvs = allTasks.map(function(t,i){
-          var covered = aiEvs.some(function(e){ return e.title&&t.text&&e.title.slice(0,10)===t.text.slice(0,10); });
-          if(covered) return null;
           return {id:'tev'+ts+i,title:t.text,date:td,time:'',note:t.site||'',
+                  assignee:t.assignee||'',
                   recurring:'',notify:'',color:{red:'#c85830',orange:'var(--gold)',green:'var(--bamboo)'}[t.color]||'var(--bamboo)'};
-        }).filter(Boolean);
-        return [...getEvents(),...aiEvs,...taskEvs];
+        });
+        var existing = state.events || [];
+        return [...existing,...aiEvs,...taskEvs];
       })(),
       focus: p.focus || state.focus
     })
@@ -1126,7 +1127,7 @@ let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],focus:'',updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
