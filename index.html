@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#171008"/>
+<meta name="theme-color" content="#f6efdb"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Fieldy"/>
 <link rel="manifest" href="/Fieldy/manifest.json"/>
@@ -13,7 +13,7 @@
 <title>Fieldy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#14120f;color:#e9e2d3;direction:rtl;height:100vh;overflow:hidden;font-weight:400}
+body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#f6efdb;color:#211d17;direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:15px}
 .font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
@@ -21,29 +21,29 @@ textarea,select,input{font-family:inherit}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#171008;border-top:1px solid #241c10;display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#f0e7cf;border-top:1px solid var(--line);display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
 .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:6px 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
 .nav-icon{display:flex;align-items:center;justify-content:center;line-height:1}
-.nav-label{font-size:9px;color:#8a7550;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.nav-btn.active .nav-label{color:#cf9d2e;font-weight:700}
-.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#caa042;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
+.nav-label{font-size:10.5px;color:#948a7a;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-btn.active .nav-label{color:#b8790f;font-weight:700}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#e8940c;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
 /* Cards */
-.card{background:#241c10;border-radius:14px;padding:14px;margin-bottom:8px}
-.card-red{border:1.5px solid #ef444460;background:#ef444418}
+.card{background:#ffffff;border-radius:14px;padding:14px;margin-bottom:8px}
+.card-red{border:1.5px solid #ef444460;background:#fdeaea}
 .card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
 .card-green{border:1.5px solid #4ade8060;background:#4ade8018}
 /* Buttons */
-.btn-primary{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#8a6416,#b8860b);color:#fff;font-size:15px;font-weight:700;display:block;border:none;cursor:pointer}
-.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #4a3c22;background:transparent;color:#a08a5c;font-size:14px;cursor:pointer}
+.btn-primary{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#b8790f,#c9930f);color:#fff;font-size:16px;font-weight:700;display:block;border:none;cursor:pointer}
+.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #b0a68f;background:transparent;color:#6b6255;font-size:14px;cursor:pointer}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:#241c10;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
+.modal{background:#ffffff;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
 /* Form */
-.form-label{font-size:11px;color:#a08a5c;margin-bottom:4px;display:block}
-.form-input{width:100%;background:#171008;border:1px solid #4a3c22;border-radius:10px;padding:11px 12px;color:#f5ecd6;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
-.form-select{width:100%;background:#171008;border:1px solid #4a3c22;border-radius:8px;padding:10px 8px;color:#f5ecd6;font-size:13px;outline:none}
+.form-label{font-size:14px;color:#6b6255;margin-bottom:4px;display:block}
+.form-input{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:11px 12px;color:#211d17;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
+.form-select{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:8px;padding:10px 8px;color:#211d17;font-size:14px;outline:none}
 /* Tags */
-.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#171008;color:#a08a5c}
+.tag{font-size:14px;padding:3px 9px;border-radius:99px;background:#f0e7cf;color:#6b6255}
 .tag-red{background:#ef444422;color:#ef4444;font-weight:600}
 .tag-orange{background:#f59e0b22;color:#f59e0b;font-weight:600}
 .tag-green{background:#4ade8022;color:#4ade80;font-weight:600}
@@ -53,53 +53,53 @@ textarea,select,input{font-family:inherit}
 /* Checkbox */
 .cb{width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
-.progress-bar{background:#241c10;border-radius:99px;height:5px;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#cf9d2e,#e0b563)}
+.progress-bar{background:#eee3c9;border-radius:99px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#b8790f,#c9930f)}
 /* Screens header */
-.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#1c1508,#120d06);position:sticky;top:0;z-index:10}
+.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#fdf9ee,#f6efdb);position:sticky;top:0;z-index:10}
 /* Empty state */
-.empty{text-align:center;padding:60px 0;color:#4a3c22}
+.empty{text-align:center;padding:60px 0;color:#b0a68f}
 .empty-icon{font-size:40px;margin-bottom:10px}
 .empty-text{font-size:14px}
 /* Action result */
-.action-result{background:#171008;border-radius:14px;padding:16px;font-size:14px;color:#ece0c0;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
+.action-result{background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px;font-size:15px;color:#211d17;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
 
-/* Console Palette — graphite + single gold accent */
+/* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
-  --ink:#14120f;--ink2:#1b1814;--ink3:#221e18;
-  --washi:#e9e2d3;--warm:#d8cdb8;
-  --matcha:#8a6d1f;--matcha2:#a68a52;
-  --gold:#c9a227;--gold2:#dcb85a;
+  --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
+  --washi:#211d17;--warm:#3d362c;
+  --matcha:#946011;--matcha2:#8a7550;
+  --gold:#b8790f;--gold2:#c9930f;
   --terracotta:#8b4513;--rust:#a0522d;
-  --cherry:#c9a227;
-  --text1:#e9e2d3;--text2:#b8ae9c;--text3:#8a8172;
-  --t1:#e9e2d3;--t2:#b8ae9c;--t3:#8a8172;--t4:#5c5548;
-  --bamboo:#c9a227;--bamboo2:#a8841f;--sprout:#c9a227;
-  --border:rgba(201,162,39,.16);--glass2:rgba(27,24,20,.92);
-  --line:rgba(233,226,211,.08);
+  --cherry:#b8790f;
+  --text1:#211d17;--text2:#6b6255;--text3:#948a7a;
+  --t1:#211d17;--t2:#6b6255;--t3:#948a7a;--t4:#b0a68f;
+  --bamboo:#b8790f;--bamboo2:#946011;--sprout:#b8790f;
+  --border:rgba(43,38,32,.14);--glass2:rgba(255,255,255,.92);
+  --line:rgba(43,38,32,.09);
 }
-.tao-screen{background:linear-gradient(180deg,#0d0a05 0%,var(--ink) 100%);min-height:100%}
-.tao-card{background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;position:relative;overflow:hidden}
-.tao-verse{font-size:16px;line-height:2.4;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px}
-.tao-chapter-num{font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center}
-.tao-title{font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:16px;font-style:italic}
-.med-timer{font-size:48px;font-weight:200;color:#f5ecd6;text-align:center;letter-spacing:4px}
-.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #b8860b;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
+.tao-screen{background:linear-gradient(180deg,#f6efdb 0%,#f6efdb 100%);min-height:100%}
+.tao-card{background:linear-gradient(135deg,#fdf9ee,#fdf9ee);border:1px solid #a8711a;border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.tao-verse{font-size:16px;line-height:2.4;color:#211d17;text-align:center;font-weight:300;letter-spacing:0.5px}
+.tao-chapter-num{font-size:14px;color:#b8790f;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center}
+.tao-title{font-size:14px;color:#6b6255;text-align:center;margin-bottom:16px;font-style:italic}
+.med-timer{font-size:48px;font-weight:200;color:#211d17;text-align:center;letter-spacing:4px}
+.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #a8711a;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
 .breath-text{font-size:18px;color:#e8c15c;text-align:center;margin-top:16px;font-weight:300;letter-spacing:1px}
-.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#c9a227}
+.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#a8711a}
 @keyframes ripple{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
-.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #b8860b;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
+.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #a8711a;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
 
 
 /* === CONSOLE ATMOSPHERE === */
 
 body {
-  background: #14120f;
+  background: #f6efdb;
 }
 
 /* Flat header, no wash gradient */
 .screen-header {
-  background: #14120f !important;
+  background: #f6efdb !important;
   border-bottom: 1px solid var(--line) !important;
 }
 
@@ -112,7 +112,7 @@ body {
 
 /* Flat nav, no blur */
 #nav {
-  background: #14120f !important;
+  background: #fdf9ee !important;
   border-top: 1px solid var(--line) !important;
 }
 
@@ -131,7 +131,7 @@ body {
 
 /* Flat modal, thin top rule */
 .modal {
-  background: #1b1814 !important;
+  background: #fffdf6 !important;
   border-top: 1px solid var(--line) !important;
 }
 
@@ -139,13 +139,13 @@ body {
   transition: opacity 0.15s ease;
 }
 
-/* Tao screen keeps its own quiet, separate atmosphere */
+/* Tao screen keeps its own quiet, separate dark atmosphere on purpose */
 #screen-tao {
-  background: linear-gradient(180deg, #0d0a05 0%, #14120f 100%);
+  background: linear-gradient(180deg, #f6efdb 0%, #f6efdb 100%);
 }
 
 .form-input, .form-select {
-  background: #1b1814 !important;
+  background: #fffdf6 !important;
   border: 1px solid var(--line) !important;
   color: var(--text1) !important;
 }
@@ -186,33 +186,33 @@ body::before {
   z-index: 1;
 }
 
-.cal-header{padding:52px 18px 12px;background:#14120f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.cal-header{padding:52px 18px 12px;background:#f6efdb;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .cal-nav-btn{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
 .cal-month-title{font-size:18px;font-weight:700;color:var(--t1);text-align:center}
 .cal-view-tabs{display:flex;gap:4px}
-.cal-view-tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
+.cal-view-tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
 .cal-view-tab.active{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid rgba(201,162,39,.25)}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 8px 2px}
-.cal-weekday{font-size:10px;color:var(--t3);text-align:center;font-weight:600}
+.cal-weekday{font-size:14px;color:var(--t3);text-align:center;font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 8px;gap:2px}
 .cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;border:1px solid transparent}
 .cal-day.today{background:rgba(201,162,39,.14);border-color:var(--gold)}
 .cal-day.today .cal-dn{color:var(--gold);font-weight:800}
 .cal-day.other-month .cal-dn{color:var(--t4)}
-.cal-dn{font-size:13px;font-weight:500;color:var(--t2);line-height:1}
+.cal-dn{font-size:14px;font-weight:500;color:var(--t2);line-height:1}
 .cal-dots{display:flex;gap:2px;margin-top:2px}
 .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--gold)}
 .ev-card{background:var(--ink3);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--gold);cursor:pointer}
-.ev-time{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px}
+.ev-time{font-size:14px;color:var(--gold);font-weight:700;margin-bottom:3px}
 .ev-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4}
-.ev-note{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
+.ev-note{font-size:14px;color:var(--t2);margin-top:3px;line-height:1.5}
 .week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);min-height:52px;cursor:pointer}
 .week-dlabel{width:36px;flex-shrink:0}
-.week-dname{font-size:10px;color:var(--t3);font-weight:600}
+.week-dname{font-size:14px;color:var(--t3);font-weight:600}
 .week-dnum{font-size:18px;font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
-.week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:8px;padding:5px 10px;margin-bottom:4px;font-size:12px;color:var(--t1);font-weight:500}
+.week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:8px;padding:5px 10px;margin-bottom:4px;font-size:14px;color:var(--t1);font-weight:500}
 </style>
 </head>
 <body>
@@ -271,7 +271,7 @@ function buildSystemPrompt() {
     'Dates: tomorrow=' + getTodayPlus(1) + ', in2days=' + getTodayPlus(2) + ', nextweek=' + getTodayPlus(7) + ', in2weeks=' + getTodayPlus(14) + ', in3weeks=' + getTodayPlus(21) + ', nextmonth=' + getTodayPlus(30) + '\n\n' +
     'CRITICAL: Return ONLY this exact JSON structure, nothing else:\n' +
     '{' +
-    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":""}],' +
+    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":"","context":"phone/office/site or null"}],' +
     '"today":[],' +
     '"later":[],' +
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
@@ -290,7 +290,9 @@ function buildSystemPrompt() {
     '3. Put EVERY task in events[] with today as default date if no date given\n' +
     '4. notify always "60" (1 hour before)\n' +
     '5. events[] must never be empty - add all tasks there too\n' +
-    '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.';
+    '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.\n' +
+    '7. NEXT-ACTION WRITING: write each task.text as ONE concrete, physically-doable next step, not a vague label. Bad: "לטפל בבאר בקלוריה". Good: "להתקשר לדייב על באר קלוריה". If a message describes something with several steps, put ONLY the very next actionable step in text (the rest belongs in the site/event, not the task).\n' +
+    '8. CONTEXT: set "context" to the situation needed to actually do the task — "phone" (call/text/email from anywhere), "office" (needs computer/files/Monday.com), "site" (must be physically at the location), or null if unclear. Infer from verbs: "להתקשר/לשלוח הודעה"->phone, "לעדכן את מאנדיי/לכתוב דוח"->office, "לבדוק/לתקן/לבקר"->site.';
 }
 
 
@@ -671,54 +673,54 @@ function renderHome() {
   const pct = total ? Math.round((done/total)*100) : 0
 
   el.innerHTML = `
-    <div style="background:linear-gradient(180deg,#1c1508,#120d06);padding:48px 16px 16px;border-bottom:1px solid #241c10">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+    <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <div style="font-size:12px;color:#a08a5c;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
-          <div style="font-size:22px;font-weight:800;color:#f7f0dc">בוקר טוב, אורי ☀️</div>
-          <div style="font-size:11px;color:#8a7550;margin-top:2px">Region II · Cagayan Valley</div>
+          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
+          <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ☀️</div>
+          <div style="font-size:14px;color:#948a7a;margin-top:2px">Region II · Cagayan Valley</div>
         </div>
-        <button onclick="navigateTo('settings')" style="background:#241c10;border-radius:10px;padding:8px 10px;color:#a08a5c;font-size:16px">☯️</button>
+        <button onclick="navigateTo('settings')" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">☯️</button>
       </div>
-      ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#f59e0b18;border:1px solid #f59e0b44;border-radius:10px;cursor:pointer;margin-bottom:10px">
-        <div style="font-size:13px;color:#f59e0b;font-weight:600">⚠️ נדרש API Key</div>
-        <div style="font-size:12px;color:#8a7550;margin-top:2px">לחץ להגדרות</div>
+      ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
+        <div style="font-size:14px;color:#b8790f;font-weight:700">⚠️ נדרש API Key</div>
+        <div style="font-size:14px;color:#948a7a;margin-top:2px">לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#8a7550;margin-bottom:5px">
-          <span>התקדמות היום</span><span style="color:${done===total?'#4ade80':'#a08a5c'}">${done}/${total}</span>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#6b6255;margin-bottom:6px">
+          <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'#1a8f7a':'#211d17'}">${done}/${total}</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#4ade80':'linear-gradient(90deg,#cf9d2e,#e0b563)'}"></div></div>
+        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#1a8f7a':'linear-gradient(90deg,#b8790f,#c9930f)'}"></div></div>
       </div>` : ''}
     </div>
-    <div style="padding:14px 16px">
-      ${state.focus ? `<div style="background:linear-gradient(135deg,#2a2110,#241c10);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid #8a641633">
-        <div style="font-size:10px;color:#cf9d2e;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
-        <div style="font-size:14px;color:#f5ecd6;line-height:1.5;font-weight:600">${state.focus}</div>
+    <div style="padding:16px">
+      ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
+        <div style="font-size:14px;color:#b8790f;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
       </div>` : ''}
-      ${urgent.length > 0 ? `<div style="font-size:11px;color:#a08a5c;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
-      ${urgent.map(t=>`<div class="card card-red" onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:600;color:#f5ecd6">${t.text}</div>
-        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:5px">
+      ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
+      ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <div style="font-size:15px;font-weight:600;color:#211d17">${t.text}</div>
+        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:6px">
           ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
           ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
         </div>`:''}
       </div>`).join('')}` : ''}
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
-        <div class="card" onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border:1px solid ${urgent.length>0?'#ef444433':'transparent'}">
-          <div style="font-size:18px">🖌️</div>
-          <div style="font-size:22px;font-weight:800;color:${urgent.length>0?'#ef4444':'#8a7550'}">${urgent.length}</div>
-          <div style="font-size:10px;color:#8a7550;margin-top:2px">עכשיו</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#e8940c,#d67d0a)">
+          <div style="font-size:20px">🖌️</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${urgent.length}</div>
+          <div style="font-size:14px;color:#fde8c4;margin-top:2px;font-weight:600">עכשיו</div>
         </div>
-        <div class="card" onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border:1px solid ${openSites>0?'#f59e0b33':'transparent'}">
-          <div style="font-size:18px">🪷</div>
-          <div style="font-size:22px;font-weight:800;color:${openSites>0?'#f59e0b':'#8a7550'}">${openSites}</div>
-          <div style="font-size:10px;color:#8a7550;margin-top:2px">אתרים</div>
+        <div onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#1a8f7a,#147263)">
+          <div style="font-size:20px">🪷</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${openSites}</div>
+          <div style="font-size:14px;color:#c8ebe3;margin-top:2px;font-weight:600">אתרים</div>
         </div>
-        <div class="card" onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border:1px solid ${pendingPeople>0?'#e0b56333':'transparent'}">
-          <div style="font-size:18px">👥</div>
-          <div style="font-size:22px;font-weight:800;color:${pendingPeople>0?'#e0b563':'#8a7550'}">${pendingPeople}</div>
-          <div style="font-size:10px;color:#8a7550;margin-top:2px">ממתין</div>
+        <div onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#6b46c1,#5936a3)">
+          <div style="font-size:20px">👥</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${pendingPeople}</div>
+          <div style="font-size:14px;color:#dfd3f5;margin-top:2px;font-weight:600">ממתין</div>
         </div>
       </div>
       <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
@@ -736,13 +738,13 @@ function renderInput() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">הוסף הודעות</div>
       </div>
-      <div style="font-size:13px;color:#8a7550;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
-      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#241c10;border:1px solid #4a3c22;border-radius:12px;padding:14px;color:#f5ecd6;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
-      <div id="input-error" style="color:#ef4444;font-size:13px;margin-bottom:8px;display:none"></div>
-      ${!apiKey?`<div style="color:#f59e0b;font-size:13px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
+      <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
+      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
+      ${!apiKey?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
     </div>
   `
@@ -754,8 +756,8 @@ async function doAnalyze() {
   const err = document.getElementById('input-error')
   if(!text || !apiKey) return
   btn.textContent = '⚙️ מסדר...'
-  btn.style.background = '#241c10'
-  btn.style.color = '#8a7550'
+  btn.style.background = '#ffffff'
+  btn.style.color = '#7a6f5c'
   err.style.display = 'none'
   try {
     const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
@@ -788,7 +790,7 @@ async function doAnalyze() {
     })
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#f2ead2;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
       toast.textContent = '📅 ' + (p.events||[]).length + ' אירועים נוספו ללוח';
       document.body.appendChild(toast);
       setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
@@ -799,60 +801,70 @@ async function doAnalyze() {
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
     btn.textContent = '⚡ ארגן את היום'
-    btn.style.background = 'linear-gradient(135deg,#cf9d2e,#e0b563)'
+    btn.style.background = 'linear-gradient(135deg,#b8790f,#c9930f)'
     btn.style.color = '#fff'
   }
 }
 
 // ── TASKS ────────────────────────────────────────
 let taskBucket = 'now'
+let taskContextFilter = 'all'
+const CONTEXT_LABEL = {phone:'📞 טלפון',office:'💻 משרד',site:'📍 באתר'}
 
 function renderTasks() {
   const el = document.getElementById('screen-tasks')
   const counts = {now:state.tasks.now.filter(t=>!t.done).length,today:state.tasks.today.filter(t=>!t.done).length,later:state.tasks.later.filter(t=>!t.done).length}
-  const tasks = state.tasks[taskBucket] || []
-  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#a08a5c'}
+  const allTasks = state.tasks[taskBucket] || []
+  const tasks = taskContextFilter==='all' ? allTasks : allTasks.filter(t=>t.context===taskContextFilter)
+  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const CTX = [['all','הכל'],['phone','📞'],['office','💻'],['site','📍']]
 
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:18px;font-weight:700">משימות</div>
-        <button onclick="showAddTask()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        <button onclick="showAddTask()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#241c10'};color:${taskBucket===b?BCOLS[b]:'#a08a5c'};cursor:pointer">
+          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#ffffff'};color:${taskBucket===b?BCOLS[b]:'#6b6255'};cursor:pointer">
             <div style="font-size:16px">${['🎋','🌿','🕊️'][i]}</div>
-            <div style="font-size:11px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
-            ${counts[b]>0?`<div style="font-size:13px;font-weight:700">${counts[b]}</div>`:''}
+            <div style="font-size:14px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
+            ${counts[b]>0?`<div style="font-size:14px;font-weight:700">${counts[b]}</div>`:''}
           </button>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px">
+        ${CTX.map(([v,l])=>`<button onclick="setTaskContextFilter('${v}')" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid ${taskContextFilter===v?'var(--gold)':'var(--line)'};background:${taskContextFilter===v?'#fdf1da':'#ffffff'};color:${taskContextFilter===v?'var(--gold)':'#6b6255'};font-size:13px;font-weight:600">${l}</button>`).join('')}
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${tasks.length===0?`<div class="empty"><div class="empty-icon">🎋</div><div class="empty-text">ריק — כל הכבוד!</div></div>`:''}
+      ${tasks.length===0?`<div class="empty"><div class="empty-icon">🎋</div><div class="empty-text">${taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'}</div></div>`:''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
   `
 }
 
+function setTaskContextFilter(v) { taskContextFilter=v; renderTasks() }
+
 function taskCard(t) {
-  const colors = {red:'#ef4444',orange:'#f59e0b',green:'#4ade80'}
+  const colors = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
-    <div style="background:#1b1814;border:1px solid var(--line);border-right:3px solid ${t.done?'#3a3428':(overdue?'#ef4444':c)};border-radius:10px;padding:14px;margin-bottom:8px;opacity:${t.done?'0.5':'1'};transition:opacity 0.2s">
+    <div style="background:#ffffff;border:1px solid var(--line);border-right:3px solid ${t.done?'#e3d9bd':(overdue?'#ef4444':c)};border-radius:12px;padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask('${t.id}')" style="width:22px;height:22px;border-radius:6px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:1.5px solid ${c};display:flex;align-items:center;justify-content:center;font-size:12px;color:#14120f">${t.done?'✓':''}</div>
+        <div onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?'✓':''}</div>
         <div style="flex:1">
-          <div style="font-size:15px;font-weight:500;color:#e9e2d3;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
-          <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+          <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
             ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
-            ${t.time?`<span class="tag" style="${overdue?'background:#ef444422;color:#ef4444':''}">⏰ ${t.time}${overdue?' · עבר הזמן':''}</span>`:''}
+            ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag">${CONTEXT_LABEL[t.context]}</span>`:''}
+            ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">⏰ ${t.time}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
-        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#221e18;border-radius:8px;padding:7px 9px;color:#8a8172;font-size:15px;flex-shrink:0">✎</button>`:''}
-        ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#221e18;border-radius:8px;padding:7px 9px;color:#8a8172;font-size:15px;flex-shrink:0">🗑</button>`:''}
+        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px;flex-shrink:0">✎</button>`:''}
+        ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px;flex-shrink:0">🗑</button>`:''}
       </div>
     </div>`
 }
@@ -878,7 +890,7 @@ function showAddTask() {
       <div class="modal">
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ משימה חדשה</div>
         <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none"></textarea>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div><label class="form-label">אחראי</label>
             <select id="add-task-assignee" class="form-select">
               <option value="uri">אני</option><option value="gio">ג'יו</option>
@@ -893,6 +905,15 @@ function showAddTask() {
               <option value="red">דחוף</option><option value="orange">חשוב</option><option value="green">שוטף</option>
             </select></div>
         </div>
+        <div style="margin-bottom:14px">
+          <label class="form-label">הקשר — איפה אפשר לבצע?</label>
+          <select id="add-task-context" class="form-select">
+            <option value="">לא ידוע</option>
+            <option value="phone">📞 טלפון</option>
+            <option value="office">💻 משרד</option>
+            <option value="site">📍 באתר</option>
+          </select>
+        </div>
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddTask()">הוסף</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
@@ -904,7 +925,8 @@ function showAddTask() {
 function doAddTask() {
   const text = document.getElementById('add-task-text').value.trim()
   if(!text) return
-  const task = {id:`m${Date.now()}`,text,assignee:document.getElementById('add-task-assignee').value,color:document.getElementById('add-task-color').value,done:false,site:null}
+  const context = document.getElementById('add-task-context').value || null
+  const task = {id:`m${Date.now()}`,text,assignee:document.getElementById('add-task-assignee').value,color:document.getElementById('add-task-color').value,done:false,site:null,context}
   const bucket = document.getElementById('add-task-bucket').value
   setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
   playTaskAdd(); closeModal()
@@ -921,11 +943,11 @@ function renderSites() {
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:18px;font-weight:700">אתרים</div>
-        <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
       </div>
       <div style="display:flex;gap:6px">
         ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#8a6416':'#241c10'};color:${siteFilter===v?'#fff':'#a08a5c'};font-size:12px;font-weight:600">${l}</button>`
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#b8790f':'#ffffff'};color:${siteFilter===v?'#fff':'#6b6255'};font-size:14px;font-weight:600">${l}</button>`
         ).join('')}
       </div>
     </div>
@@ -936,21 +958,21 @@ function renderSites() {
 }
 
 function siteCard(s) {
-  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#a08a5c'
+  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#6b6255'
   return `
     <div class="card" style="border:1px solid ${col}33;margin-bottom:8px">
-      <div style="font-size:15px;font-weight:700;color:#f5ecd6">📍 ${s.name}</div>
-      ${s.province?`<div style="font-size:12px;color:#a08a5c;margin-top:2px">${s.province}</div>`:''}
-      ${s.issue?`<div style="font-size:13px;color:#c9b98a;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
+      <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${s.name}</div>
+      ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${s.province}</div>`:''}
+      ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
         <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#171008'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#8a7550'};font-size:11px;font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#171008;border-radius:8px;padding:7px 9px;color:#a08a5c;font-size:14px">🖌️</button>
+        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">🖌️</button>
       </div>
     </div>`
 }
@@ -1001,36 +1023,36 @@ function renderPeople() {
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:18px;font-weight:700">אנשים</div>
-        <button onclick="showAddPerson()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        <button onclick="showAddPerson()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
       </div>
     </div>
     <div style="padding:12px 16px">
       ${state.people.length===0?`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">אנשים יתווספו מהודעות</div></div>`:''}
-      ${withP.length>0?`<div style="font-size:11px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
-      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:11px;color:#8a7550;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
+      ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
+      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:14px;color:#7a6f5c;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
     </div>`
 }
 
 function personCard(p) {
-  const rc = {engineer:'#cf9d2e',contractor:'#f59e0b',nia:'#e0b563',other:'#a08a5c'}[p.role]||'#a08a5c'
+  const rc = {engineer:'#b8790f',contractor:'#f59e0b',nia:'#c9930f',other:'#6b6255'}[p.role]||'#6b6255'
   return `
     <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:8px;flex:1">
           <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:14px;color:${rc};font-weight:700;flex-shrink:0">${p.name[0]?.toUpperCase()||'?'}</div>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#f5ecd6">${p.name}</div>
-            ${p.company?`<div style="font-size:12px;color:#a08a5c">${p.company}</div>`:''}
+            <div style="font-size:15px;font-weight:700;color:#211d17">${p.name}</div>
+            ${p.company?`<div style="font-size:14px;color:#6b6255">${p.company}</div>`:''}
           </div>
         </div>
         <div style="display:flex;gap:6px">
-          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#171008;border-radius:8px;padding:7px 9px;color:#a08a5c;font-size:16px">🖌️</button>
+          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:16px">🖌️</button>
           ${p.pending?`<button onclick="clearPending('${p.name}')" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
         </div>
       </div>
       ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
-        <div style="font-size:10px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
-        <div style="font-size:13px;color:#c9b98a;line-height:1.5">${p.pending}</div>
+        <div style="font-size:14px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
+        <div style="font-size:14px;color:#7a6f5c;line-height:1.5">${p.pending}</div>
       </div>`:''}
     </div>`
 }
@@ -1076,21 +1098,21 @@ function renderAction() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">צור תוכן</div>
       </div>
-      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #cf9d2e;margin-bottom:20px">
-        <div style="font-size:14px;color:#f5ecd6;line-height:1.5">${actionCtx.text}</div>
-        ${actionCtx.assignee?`<div style="font-size:12px;color:#a08a5c;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
+      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #b8790f;margin-bottom:20px">
+        <div style="font-size:14px;color:#211d17;line-height:1.5">${actionCtx.text}</div>
+        ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
       </div>`:''}
       <div id="action-buttons">
         ${[['whatsapp','💬','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','📧','מייל','ASC / 11-16 / NIA'],['monday','📋','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
           <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
             <div style="font-size:16px;font-weight:600">${i} ${l}</div>
-            <div style="font-size:12px;color:#a08a5c;margin-top:3px">${s}</div>
+            <div style="font-size:14px;color:#6b6255;margin-top:3px">${s}</div>
           </div>`).join('')}
       </div>
-      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#a08a5c">
+      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#6b6255">
         <div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-size:14px">כותב...</div>
       </div>
       <div id="action-result-container" style="display:none">
@@ -1126,8 +1148,8 @@ function copyResult() {
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('action-copy-btn')
     btn.textContent='✓ הועתק!'
-    btn.style.background='#b8860b'
-    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#cf9d2e,#e0b563)'},2000)
+    btn.style.background='#a8711a'
+    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#b8790f,#c9930f)'},2000)
   })
 }
 
@@ -1137,25 +1159,25 @@ function renderSettings() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">הגדרות</div>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#cf9d2e;font-size:12px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
-        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#171008;border:1px solid #4a3c22;border-radius:10px;padding:12px;color:#f5ecd6;font-size:13px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#b8790f;font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
+        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
-        <div style="font-size:12px;color:#a08a5c;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
-        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:13px">נקה הכל</button>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
+        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:14px">נקה הכל</button>
       </div>
       <div class="card">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
-        <div style="font-size:12px;color:#a08a5c;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
-        <div style="font-size:12px;color:#a08a5c;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
-        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #cf9d2e44;background:transparent;color:#cf9d2e;font-size:13px">רענן עכשיו</button>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #b8790f44;background:transparent;color:#b8790f;font-size:14px">רענן עכשיו</button>
       </div>
     </div>`
 }
@@ -1182,8 +1204,8 @@ function saveApiKey() {
   localStorage.setItem('fieldy_key', val)
   const btn = document.getElementById('settings-save-btn')
   btn.textContent = '✓ נשמר!'
-  btn.style.background = '#b8860b'
-  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#cf9d2e,#e0b563)';navigateTo('home')},1500)
+  btn.style.background = '#a8711a'
+  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#b8790f,#c9930f)';navigateTo('home')},1500)
 }
 
 let clearConfirm = false
@@ -1340,7 +1362,7 @@ function renderMonthCal(){
     '<div class="cal-grid">'+days+'</div>'+
     '<div style="padding:10px 18px 0">'+
     (monthEvs.length?
-      '<div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">📅 אירועי החודש</div>'+
+      '<div style="font-size:14px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">📅 אירועי החודש</div>'+
       monthEvs.map(function(e){
         var dayNum = parseInt((e.date||'').split('-')[2]||'0');
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
@@ -1349,14 +1371,14 @@ function renderMonthCal(){
         return '<div style="background:rgba(36,28,16,.85);border:1px solid rgba(184,134,11,.18);border-radius:12px;padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+e.id+'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
-          '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+e.time:'')+'</div>'+
+          '<div style="font-size:14px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+e.time:'')+'</div>'+
           '<div style="font-size:14px;color:var(--t1);font-weight:600">'+e.title+'</div>'+
-          (e.note?'<div style="font-size:12px;color:var(--t2);margin-top:2px">'+e.note+'</div>':'')+
+          (e.note?'<div style="font-size:14px;color:var(--t2);margin-top:2px">'+e.note+'</div>':'')+
           '</div>'+
           '<button id="del-ev-'+e.id+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">✕</button>'+
           '</div></div>';
       }).join(''):
-      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">🌿</div><div style="font-size:13px;margin-top:6px">אין אירועים החודש</div></div>')+
+      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">🌿</div><div style="font-size:14px;margin-top:6px">אין אירועים החודש</div></div>')+
     '</div>';
 }
 
@@ -1374,7 +1396,7 @@ function renderWeekCal(){
       '<div class="week-dnum'+(isT?' today':'')+'">'+(d.getDate())+'</div></div>'+
       '<div style="flex:1">'+
       (evs.length?evs.map(function(e){return '<div class="week-epill">'+(e.time?e.time+' · ':'')+e.title+'</div>';}).join(''):
-       (isT?'<div style="font-size:12px;color:var(--t4);padding:4px 0">יום פנוי</div>':''))+
+       (isT?'<div style="font-size:14px;color:var(--t4);padding:4px 0">יום פנוי</div>':''))+
       '</div></div>';
   }
   return html;
@@ -1393,11 +1415,11 @@ function renderYearCal(){
       var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       var evs=getEventsForDate(dk);
       var isT=dk===tk;
-      mini+='<div style="font-size:9px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
+      mini+='<div style="font-size:14px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
     }
     var mm=m,yy=y;
     html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px" data-ym="'+y+'-'+m+'">'+
-      '<div style="font-size:10px;font-weight:700;color:var(--t2);margin-bottom:4px;text-align:center">'+MONTHS_HE[m]+'</div>'+
+      '<div style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:4px;text-align:center">'+MONTHS_HE[m]+'</div>'+
       '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">'+mini+'</div></div>';
   }
   html+='</div>';
@@ -1797,12 +1819,12 @@ function startMeditationWithVoice(idx){
       });
       var ctrl = document.createElement('div');
       ctrl.style.cssText = 'margin-top:10px';
-      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:11px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ← נגישות ← המרת טקסט לדיבור.</div>' : '';
+      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:14px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ← נגישות ← המרת טקסט לדיבור.</div>' : '';
       ctrl.innerHTML = lowVoiceNote +
-        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:12px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
+        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:14px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
         '<div style="display:flex;gap:7px">'+
-        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
-        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
         '</div>';
       modal.appendChild(ctrl);
       var vs=document.getElementById('voice-select');
