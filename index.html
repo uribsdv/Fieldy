@@ -17,10 +17,10 @@ textarea,select,input{font-family:inherit}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns: repeat(6, 1fr);padding:8px 0 24px;z-index:100}
-.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;background:none;border:none;position:relative}
-.nav-icon{font-size:22px}
-.nav-label{font-size:10px;color:#475569;font-weight:400}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:6px 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
+.nav-icon{font-size:19px;line-height:1}
+.nav-label{font-size:9px;color:#475569;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nav-btn.active .nav-label{color:#3b82f6;font-weight:700}
 .nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#c8a030;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
 /* Cards */
@@ -258,7 +258,7 @@ body::before {
       <span class="nav-label">אנשים</span>
       <span class="nav-badge hidden" id="badge-people">0</span>
     </button>
-      <button class="nav-btn" data-screen="calendar"><span class="nav-icon">📅</span><span class="nav-label" style="font-size:8px">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon">☯️</span><span class="nav-label">טאו</span></button>
+      <button class="nav-btn" data-screen="calendar"><span class="nav-icon">📅</span><span class="nav-label">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon">☯️</span><span class="nav-label">טאו</span></button>
   </nav>
 </div>
 <div id="modal-container"></div>
@@ -277,7 +277,6 @@ function getTodayPlus(days) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function getToday() { return getTodayPlus(0); }
-function getEvents() { if(!state.events) state.events=[]; return state.events; }
 function buildSystemPrompt() {
   var td = getToday();
   return 'You are a field assistant for Uri (IAI Philippines Regional Manager). Today=' + td + '\n' +
@@ -308,6 +307,7 @@ function buildSystemPrompt() {
 
 
 // ── STATE ─────────────────────────────────────────
+const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
 let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
@@ -745,19 +745,18 @@ async function doAnalyze() {
       people: mergePeople(state.people, p.people||[]),
       events: (function(){
         var ts = Date.now(), td = getToday();
+        // The AI already returns EVERY task (now/today/later) as a dated entry in
+        // p.events (see SYSTEM_PROMPT rules 2-5), so this is the single source of
+        // truth for the calendar. We used to ALSO synthesize a duplicate "today"
+        // event for every task here, which created a second, wrongly-dated ghost
+        // entry for anything that actually belonged on another day — that's why
+        // the calendar never looked in sync with what was uploaded from WhatsApp.
         var aiEvs = (p.events||[]).map(function(e,i){
           return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
                   note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)'};
         });
-        var allTasks = [...(p.now||[]),...(p.today||[]),...(p.later||[])];
-        // Always add ALL tasks to calendar
-        var taskEvs = allTasks.map(function(t,i){
-          return {id:'tev'+ts+i,title:t.text,date:td,time:'',note:t.site||'',
-                  assignee:t.assignee||'',
-                  recurring:'',notify:'',color:{red:'#c85830',orange:'var(--gold)',green:'var(--bamboo)'}[t.color]||'var(--bamboo)'};
-        });
         var existing = state.events || [];
-        return [...existing,...aiEvs,...taskEvs];
+        return [...existing,...aiEvs];
       })(),
       focus: p.focus || state.focus
     })
@@ -1113,12 +1112,34 @@ function renderSettings() {
         <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;color:#f1f5f9;font-size:13px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
-      <div class="card">
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
         <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:13px">נקה הכל</button>
       </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #3b82f644;background:transparent;color:#3b82f6;font-size:13px">רענן עכשיו</button>
+      </div>
     </div>`
+}
+
+async function forceRefreshApp() {
+  const btn = document.getElementById('refresh-app-btn')
+  if (btn) { btn.textContent = '⏳ מרענן...' }
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      for (const r of regs) await r.unregister()
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      for (const k of keys) await caches.delete(k)
+    }
+  } catch(e) { console.log('refresh cleanup error:', e) }
+  location.href = location.pathname + '?v=' + Date.now()
 }
 
 function saveApiKey() {
@@ -1612,6 +1633,52 @@ function startAmbientMusic() {
     noise.start();
     ambientNodes.push(noise);
 
+    // Continuous water trickle (bubbling stream) — a second, higher, brighter
+    // noise layer whose amplitude wobbles slowly and randomly so it reads as
+    // moving water rather than flat static.
+    var wBufSize = ctx.sampleRate * 2;
+    var wBuf = ctx.createBuffer(1, wBufSize, ctx.sampleRate);
+    var wData = wBuf.getChannelData(0);
+    var wb0=0,wb1=0,wb2=0;
+    for (var wi = 0; wi < wBufSize; wi++) {
+      var ww = Math.random() * 2 - 1;
+      wb0 = 0.95 * wb0 + ww * 0.15;
+      wb1 = 0.90 * wb1 + ww * 0.25;
+      wb2 = 0.80 * wb2 + ww * 0.40;
+      wData[wi] = (wb0 + wb1 + wb2) * 0.18;
+    }
+    var water = ctx.createBufferSource();
+    var waterFilter = ctx.createBiquadFilter();
+    var waterGain = ctx.createGain();
+    var waterWobble = ctx.createGain();
+    water.buffer = wBuf;
+    water.loop = true;
+    waterFilter.type = 'bandpass';
+    waterFilter.frequency.value = 1400;
+    waterFilter.Q.value = 0.7;
+    waterGain.gain.value = 0.05;
+    // Slow, irregular LFO on the gain so the trickle bubbles rather than hisses evenly
+    var waterLfo1 = ctx.createOscillator();
+    var waterLfo1Gain = ctx.createGain();
+    waterLfo1.type = 'sine';
+    waterLfo1.frequency.value = 0.35;
+    waterLfo1Gain.gain.value = 0.4;
+    var waterLfo2 = ctx.createOscillator();
+    var waterLfo2Gain = ctx.createGain();
+    waterLfo2.type = 'sine';
+    waterLfo2.frequency.value = 1.7;
+    waterLfo2Gain.gain.value = 0.25;
+    waterWobble.gain.value = 0.6;
+    waterLfo1.connect(waterLfo1Gain); waterLfo1Gain.connect(waterWobble.gain);
+    waterLfo2.connect(waterLfo2Gain); waterLfo2Gain.connect(waterWobble.gain);
+    waterLfo1.start(); waterLfo2.start();
+    water.connect(waterFilter);
+    waterFilter.connect(waterWobble);
+    waterWobble.connect(waterGain);
+    waterGain.connect(ambientGain);
+    water.start();
+    ambientNodes.push(water, waterLfo1, waterLfo2);
+
   } catch(e) { console.log('Audio error:', e); }
 }
 
@@ -1704,7 +1771,17 @@ function startMeditationWithVoice(idx){
         '</div>';
       modal.appendChild(ctrl);
       var vs=document.getElementById('voice-select');
-      if(vs) vs.onchange=function(){ selectedVoiceIdx=parseInt(this.value); };
+      var savedVoiceName = localStorage.getItem('fieldy_voice_name');
+      if (savedVoiceName) {
+        var savedIdx = enVoices.findIndex(function(v){ return v.name === savedVoiceName; });
+        if (savedIdx >= 0) { selectedVoiceIdx = savedIdx; vs.value = String(savedIdx); }
+      }
+      if(vs) vs.onchange=function(){
+        selectedVoiceIdx=parseInt(this.value);
+        var chosen = enVoices[selectedVoiceIdx];
+        if (chosen) localStorage.setItem('fieldy_voice_name', chosen.name);
+        else localStorage.removeItem('fieldy_voice_name');
+      };
       var mb=document.getElementById('music-mute-btn');
       if(mb) mb.onclick=toggleMusicMute;
       var vb=document.getElementById('voice-mute-btn');
@@ -1744,9 +1821,6 @@ function startMeditationWithVoice(idx){
 }
 
 
-function stopVoice(){
-  if('speechSynthesis' in window) window.speechSynthesis.cancel();
-}
 
 
 
