@@ -634,6 +634,7 @@ function startMeditation(idx) {
       breathIdx = (breathIdx + 1) % 4;
       var b = document.getElementById('breath-text');
       if (b) b.textContent = pattern[breathIdx];
+      if (breathIdx === 0 && typeof window._onBreathCycle === 'function') window._onBreathCycle();
     }
     if (medSeconds <= 0) stopMeditation(true);
   }, 1000);
@@ -656,6 +657,7 @@ function drawMedCircle(ratio) {
 
 function stopMeditation(completed) {
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
+  window._onBreathCycle = null;
   document.getElementById('modal-container').innerHTML = '';
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
   try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
@@ -1897,42 +1899,60 @@ function startMeditationWithVoice(idx){
   }, 500);
 
   function speakPhrase() {
-    if(si >= scripts.length || !medInterval) return;
-    if(window._voiceEnabled === false) { setTimeout(function(){if(medInterval)speakPhrase();},15000); return; }
-    var text = scripts[si]; si++;
-    window.speechSynthesis.cancel();
-    var utt = new SpeechSynthesisUtterance(text);
-    var voices = window.speechSynthesis.getVoices();
-    var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
-    var voice, vIdx;
-    if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
-      voice = enVoices[selectedVoiceIdx]; vIdx = selectedVoiceIdx;
-    } else {
-      var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex'];
-      voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }); }) ||
-              enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name); }) ||
-              (enVoices.length ? enVoices[0] : null);
-      vIdx = voice ? enVoices.indexOf(voice) : 0;
-    }
-    if(voice) { utt.voice = voice; utt.lang = voice.lang; }
-    // Many Android phones only expose 1-2 real TTS engine voices, so picking a
-    // different name in the dropdown can otherwise sound identical. Give each
-    // voice slot its own deterministic pitch/rate fingerprint so a change of
-    // selection is always audible, even on devices with a single underlying engine.
-    var vSeed = (vIdx || 0) + 1;
-    var pitchOffset = ((vSeed * 37) % 30) / 100 - 0.15; // -0.15..+0.15
-    var rateOffset = ((vSeed * 53) % 20) / 100 - 0.10;  // -0.10..+0.10
-    utt.rate = Math.max(0.6, Math.min(1.0, 0.82 + rateOffset));
-    utt.pitch = Math.max(0.6, Math.min(1.3, 0.92 + pitchOffset));
-    utt.volume = 0.88;
-    utt.onend = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
-    utt.onerror = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
-    window.speechSynthesis.speak(utt);
+    if(si >= scripts.length || !medInterval) return
+    if(window._voiceEnabled === false) return
+    var text = scripts[si]; si++
+    // A brief natural pause before speaking — real guidance doesn't snap in
+    // the instant the breath cycle turns over, it follows a beat behind it.
+    setTimeout(function() {
+      if(!medInterval) return
+      window.speechSynthesis.cancel()
+      var utt = new SpeechSynthesisUtterance(text)
+      var voices = window.speechSynthesis.getVoices()
+      var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en') })
+      var voice, vIdx
+      if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
+        voice = enVoices[selectedVoiceIdx]; vIdx = selectedVoiceIdx
+      } else {
+        var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex']
+        voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1 }) }) ||
+                enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) }) ||
+                (enVoices.length ? enVoices[0] : null)
+        vIdx = voice ? enVoices.indexOf(voice) : 0
+      }
+      if(voice) { utt.voice = voice; utt.lang = voice.lang }
+      // Slower, warmer baseline so it reads as a calm guide rather than a
+      // computer reading text — small per-voice variance kept so different
+      // voice picks still sound distinct, but centered lower/slower than before.
+      var vSeed = (vIdx || 0) + 1
+      var pitchOffset = ((vSeed * 37) % 16) / 100 - 0.08 // -0.08..+0.08
+      var rateOffset = ((vSeed * 53) % 12) / 100 - 0.06  // -0.06..+0.06
+      utt.rate = Math.max(0.62, Math.min(0.86, 0.74 + rateOffset))
+      utt.pitch = Math.max(0.7, Math.min(1.05, 0.87 + pitchOffset))
+      utt.volume = 0.88
+      window.speechSynthesis.speak(utt)
+    }, 700 + Math.random() * 500)
   }
 
-  var v = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  if(v.length > 0) { setTimeout(speakPhrase, 2000); }
-  else { window.speechSynthesis.onvoiceschanged = function(){ setTimeout(speakPhrase, 2000); }; }
+  // Speak roughly every 2nd or 3rd full breath cycle (~32-48s) instead of a
+  // fixed independent clock — this keeps the narration in step with the
+  // actual inhale/hold/exhale rhythm on screen, and the varying gap (rather
+  // than a perfectly even one) is what reads as a person guiding, not a timer.
+  var cyclesSinceSpoken = 0
+  var cyclesUntilNext = 1
+  window._onBreathCycle = function() {
+    if(window._voiceEnabled === false) return
+    cyclesSinceSpoken++
+    if(cyclesSinceSpoken >= cyclesUntilNext) {
+      cyclesSinceSpoken = 0
+      cyclesUntilNext = 2 + Math.round(Math.random())  // next gap: 2 or 3 cycles
+      speakPhrase()
+    }
+  }
+
+  var v = window.speechSynthesis ? window.speechSynthesis.getVoices() : []
+  if(v.length > 0) { setTimeout(speakPhrase, 5500) }
+  else { window.speechSynthesis.onvoiceschanged = function(){ setTimeout(speakPhrase, 5500) } }
 }
 
 
