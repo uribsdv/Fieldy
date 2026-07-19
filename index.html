@@ -25,7 +25,7 @@ textarea,select,input{font-family:inherit}
 .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:6px 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
 .nav-icon{display:flex;align-items:center;justify-content:center;line-height:1}
 .nav-label{font-size:10.5px;color:#948a7a;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.nav-btn.active .nav-label{color:#b8790f;font-weight:700}
+.nav-btn.active .nav-label{color:var(--gold);font-weight:700}
 .nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#e8940c;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
 /* Cards */
 .card{background:#ffffff;border-radius:14px;padding:14px;margin-bottom:8px}
@@ -33,7 +33,7 @@ textarea,select,input{font-family:inherit}
 .card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
 .card-green{border:1.5px solid #4ade8060;background:#4ade8018}
 /* Buttons */
-.btn-primary{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#b8790f,#c9930f);color:#fff;font-size:16px;font-weight:700;display:block;border:none;cursor:pointer}
+.btn-primary{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:16px;font-weight:700;display:block;border:none;cursor:pointer}
 .btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #b0a68f;background:transparent;color:#6b6255;font-size:14px;cursor:pointer}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
@@ -54,7 +54,7 @@ textarea,select,input{font-family:inherit}
 .cb{width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
 .progress-bar{background:#eee3c9;border-radius:99px;height:6px;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#b8790f,#c9930f)}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,var(--gold),var(--gold2))}
 /* Screens header */
 .screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#fdf9ee,#f6efdb);position:sticky;top:0;z-index:10}
 /* Empty state */
@@ -300,8 +300,33 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
+
+// ── THEME ─────────────────────────────────────────
+// Quick accent reskin for novelty (ADHD interest-based nervous system likes
+// occasional visual change). Only the accent — buttons, active nav, progress
+// bar, calendar highlights — switches; status colors (red/orange/green
+// priority) stay fixed everywhere since those carry functional meaning.
+const THEMES = {
+  amber: {label:'ענבר', gold:'#b8790f', gold2:'#c9930f', bamboo2:'#946011'},
+  teal:  {label:'טורקיז', gold:'#0f7d6c', gold2:'#139485', bamboo2:'#0b5c50'},
+  rose:  {label:'ורוד', gold:'#c2185b', gold2:'#d63384', bamboo2:'#9c1449'},
+}
+let currentTheme = localStorage.getItem('fieldy_theme') || 'amber'
+function applyTheme(name) {
+  const t = THEMES[name]; if(!t) return
+  currentTheme = name
+  localStorage.setItem('fieldy_theme', name)
+  const r = document.documentElement.style
+  r.setProperty('--gold', t.gold)
+  r.setProperty('--gold2', t.gold2)
+  r.setProperty('--cherry', t.gold)
+  r.setProperty('--bamboo', t.gold)
+  r.setProperty('--bamboo2', t.bamboo2)
+  r.setProperty('--sprout', t.gold)
+  renderCurrentScreen()
+}
 let currentScreen = 'home'
 let actionCtx = null
 
@@ -360,6 +385,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
 function navigateTo(screen, ctx=null) {
   if(ctx) actionCtx = ctx
+  if(medInterval && screen !== 'tao') { stopMeditation(false) }
 
   // Hide all screens
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'))
@@ -631,6 +657,8 @@ function drawMedCircle(ratio) {
 function stopMeditation(completed) {
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
   document.getElementById('modal-container').innerHTML = '';
+  try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
+  try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
   if(completed) { playTibetanBowl(); showRipple(); }
 }
 
@@ -676,26 +704,26 @@ function renderHome() {
     <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
+          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · 🔥 ${state.streak} ימים`:''}</div>
           <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ☀️</div>
           <div style="font-size:14px;color:#948a7a;margin-top:2px">Region II · Cagayan Valley</div>
         </div>
         <button onclick="navigateTo('settings')" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">☯️</button>
       </div>
       ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
-        <div style="font-size:14px;color:#b8790f;font-weight:700">⚠️ נדרש API Key</div>
+        <div style="font-size:14px;color:var(--gold);font-weight:700">⚠️ נדרש API Key</div>
         <div style="font-size:14px;color:#948a7a;margin-top:2px">לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
         <div style="display:flex;justify-content:space-between;font-size:14px;color:#6b6255;margin-bottom:6px">
           <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'#1a8f7a':'#211d17'}">${done}/${total}</span>
         </div>
-        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#1a8f7a':'linear-gradient(90deg,#b8790f,#c9930f)'}"></div></div>
+        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#1a8f7a':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
       </div>` : ''}
     </div>
     <div style="padding:16px">
       ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
-        <div style="font-size:14px;color:#b8790f;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
         <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
       </div>` : ''}
       ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
@@ -801,7 +829,7 @@ async function doAnalyze() {
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
     btn.textContent = '⚡ ארגן את היום'
-    btn.style.background = 'linear-gradient(135deg,#b8790f,#c9930f)'
+    btn.style.background = 'linear-gradient(135deg,var(--gold),var(--gold2))'
     btn.style.color = '#fff'
   }
 }
@@ -879,7 +907,16 @@ function deleteTask(id) {
 function toggleTask(id) {
   const wasUndone = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(t=>t.id===id&&!t.done)
   const toggle = arr => arr.map(t=>t.id===id?{...t,done:!t.done}:t)
-  setState({tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}})
+  const patch = {tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}}
+  if(wasUndone) {
+    const today = getToday()
+    if(state.lastStreakDate !== today) {
+      const y = getTodayPlus(-1)
+      patch.streak = (state.lastStreakDate === y) ? (state.streak||0) + 1 : 1
+      patch.lastStreakDate = today
+    }
+  }
+  setState(patch)
   if(wasUndone){playTaskComplete();showRipple();}
 }
 
@@ -947,7 +984,7 @@ function renderSites() {
       </div>
       <div style="display:flex;gap:6px">
         ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#b8790f':'#ffffff'};color:${siteFilter===v?'#fff':'#6b6255'};font-size:14px;font-weight:600">${l}</button>`
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'var(--gold)':'#ffffff'};color:${siteFilter===v?'#fff':'#6b6255'};font-size:14px;font-weight:600">${l}</button>`
         ).join('')}
       </div>
     </div>
@@ -1034,7 +1071,7 @@ function renderPeople() {
 }
 
 function personCard(p) {
-  const rc = {engineer:'#b8790f',contractor:'#f59e0b',nia:'#c9930f',other:'#6b6255'}[p.role]||'#6b6255'
+  const rc = {engineer:'var(--gold)',contractor:'#f59e0b',nia:'var(--gold2)',other:'#6b6255'}[p.role]||'#6b6255'
   return `
     <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -1101,7 +1138,7 @@ function renderAction() {
         <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">צור תוכן</div>
       </div>
-      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #b8790f;margin-bottom:20px">
+      ${actionCtx?.text?`<div class="card" style="border-right:3px solid var(--gold);margin-bottom:20px">
         <div style="font-size:14px;color:#211d17;line-height:1.5">${actionCtx.text}</div>
         ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
       </div>`:''}
@@ -1149,7 +1186,7 @@ function copyResult() {
     const btn = document.getElementById('action-copy-btn')
     btn.textContent='✓ הועתק!'
     btn.style.background='#a8711a'
-    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#b8790f,#c9930f)'},2000)
+    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
   })
 }
 
@@ -1163,8 +1200,19 @@ function renderSettings() {
         <div style="font-size:18px;font-weight:700">הגדרות</div>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🎨 ערכת צבע</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
+        <div style="display:flex;gap:8px">
+          ${Object.keys(THEMES).map(name=>`
+            <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'#ffffff'};cursor:pointer">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,${THEMES[name].gold},${THEMES[name].gold2});margin:0 auto 6px"></div>
+              <div style="font-size:12px;font-weight:600;color:${currentTheme===name?THEMES[name].gold:'#6b6255'}">${THEMES[name].label}</div>
+            </button>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#b8790f;font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
         <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
@@ -1177,7 +1225,7 @@ function renderSettings() {
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
-        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #b8790f44;background:transparent;color:#b8790f;font-size:14px">רענן עכשיו</button>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
       </div>
     </div>`
 }
@@ -1205,14 +1253,14 @@ function saveApiKey() {
   const btn = document.getElementById('settings-save-btn')
   btn.textContent = '✓ נשמר!'
   btn.style.background = '#a8711a'
-  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#b8790f,#c9930f)';navigateTo('home')},1500)
+  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
 }
 
 let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
@@ -1893,6 +1941,7 @@ function startMeditationWithVoice(idx){
 
 
 // ── INIT ─────────────────────────────────────────
+applyTheme(currentTheme)
 checkChronology()
 refreshBadges()
 renderHome()
