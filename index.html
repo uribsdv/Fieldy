@@ -3,43 +3,47 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#0f172a"/>
+<meta name="theme-color" content="#171008"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Fieldy"/>
 <link rel="manifest" href="/Fieldy/manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Fieldy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#080f0a;color:#e4efe0;direction:rtl;height:100vh;overflow:hidden}
+body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#14120f;color:#e9e2d3;direction:rtl;height:100vh;overflow:hidden;font-weight:400}
+.font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
 #app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f172a;border-top:1px solid #1e293b;display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#171008;border-top:1px solid #241c10;display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
 .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:6px 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
-.nav-icon{font-size:19px;line-height:1}
-.nav-label{font-size:9px;color:#475569;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.nav-btn.active .nav-label{color:#3b82f6;font-weight:700}
-.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#c8a030;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
+.nav-icon{display:flex;align-items:center;justify-content:center;line-height:1}
+.nav-label{font-size:9px;color:#8a7550;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-btn.active .nav-label{color:#cf9d2e;font-weight:700}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#caa042;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
 /* Cards */
-.card{background:#1e293b;border-radius:14px;padding:14px;margin-bottom:8px}
+.card{background:#241c10;border-radius:14px;padding:14px;margin-bottom:8px}
 .card-red{border:1.5px solid #ef444460;background:#ef444418}
 .card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
 .card-green{border:1.5px solid #4ade8060;background:#4ade8018}
 /* Buttons */
-.btn-primary{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#3d6e34,#4a7c3f);color:#fff;font-size:15px;font-weight:700;display:block;border:none;cursor:pointer}
-.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #334155;background:transparent;color:#64748b;font-size:14px;cursor:pointer}
+.btn-primary{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#8a6416,#b8860b);color:#fff;font-size:15px;font-weight:700;display:block;border:none;cursor:pointer}
+.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #4a3c22;background:transparent;color:#a08a5c;font-size:14px;cursor:pointer}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:#1e293b;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
+.modal{background:#241c10;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
 /* Form */
-.form-label{font-size:11px;color:#64748b;margin-bottom:4px;display:block}
-.form-input{width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:11px 12px;color:#f1f5f9;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
-.form-select{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px 8px;color:#f1f5f9;font-size:13px;outline:none}
+.form-label{font-size:11px;color:#a08a5c;margin-bottom:4px;display:block}
+.form-input{width:100%;background:#171008;border:1px solid #4a3c22;border-radius:10px;padding:11px 12px;color:#f5ecd6;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
+.form-select{width:100%;background:#171008;border:1px solid #4a3c22;border-radius:8px;padding:10px 8px;color:#f5ecd6;font-size:13px;outline:none}
 /* Tags */
-.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#0f172a;color:#64748b}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#171008;color:#a08a5c}
 .tag-red{background:#ef444422;color:#ef4444;font-weight:600}
 .tag-orange{background:#f59e0b22;color:#f59e0b;font-weight:600}
 .tag-green{background:#4ade8022;color:#4ade80;font-weight:600}
@@ -49,128 +53,113 @@ textarea,select,input{font-family:inherit}
 /* Checkbox */
 .cb{width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
-.progress-bar{background:#1e293b;border-radius:99px;height:5px;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+.progress-bar{background:#241c10;border-radius:99px;height:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,#cf9d2e,#e0b563)}
 /* Screens header */
-.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#111f13,#080f0a);position:sticky;top:0;z-index:10}
+.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#1c1508,#120d06);position:sticky;top:0;z-index:10}
 /* Empty state */
-.empty{text-align:center;padding:60px 0;color:#334155}
+.empty{text-align:center;padding:60px 0;color:#4a3c22}
 .empty-icon{font-size:40px;margin-bottom:10px}
 .empty-text{font-size:14px}
 /* Action result */
-.action-result{background:#0f172a;border-radius:14px;padding:16px;font-size:14px;color:#e2e8f0;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
+.action-result{background:#171008;border-radius:14px;padding:16px;font-size:14px;color:#ece0c0;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
 
-/* Japanese Earth Palette */
+/* Console Palette — graphite + single gold accent */
 :root{
-  --ink:#080f0a;--ink2:#111f13;--ink3:#1a2e1c;
-  --washi:#e8f0e4;--warm:#e8ddd0;
-  --matcha:#4a6741;--matcha2:#6b8c61;
-  --gold:#c4922a;--gold2:#d4a84b;
+  --ink:#14120f;--ink2:#1b1814;--ink3:#221e18;
+  --washi:#e9e2d3;--warm:#d8cdb8;
+  --matcha:#8a6d1f;--matcha2:#a68a52;
+  --gold:#c9a227;--gold2:#dcb85a;
   --terracotta:#8b4513;--rust:#a0522d;
-  --cherry:#c8a030;
-  --text2:#b0c8a8;--text3:#7a9a72;
+  --cherry:#c9a227;
+  --text1:#e9e2d3;--text2:#b8ae9c;--text3:#8a8172;
+  --t1:#e9e2d3;--t2:#b8ae9c;--t3:#8a8172;--t4:#5c5548;
+  --bamboo:#c9a227;--bamboo2:#a8841f;--sprout:#c9a227;
+  --border:rgba(201,162,39,.16);--glass2:rgba(27,24,20,.92);
+  --line:rgba(233,226,211,.08);
 }
-.tao-screen{background:linear-gradient(180deg,#060c08 0%,var(--ink) 100%);min-height:100%}
-.tao-card{background:linear-gradient(135deg,#111f13,#0d1f0f);border:1px solid #4a7c3f;border-radius:16px;padding:20px;position:relative;overflow:hidden}
-.tao-verse{font-size:16px;line-height:2.4;color:#e8f0e4;text-align:center;font-weight:300;letter-spacing:0.5px}
-.tao-chapter-num{font-size:11px;color:#c4922a;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center}
-.tao-title{font-size:13px;color:#b0c8a8;text-align:center;margin-bottom:16px;font-style:italic}
-.med-timer{font-size:48px;font-weight:200;color:#e8f0e4;text-align:center;letter-spacing:4px}
-.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #4a7c3f;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
-.breath-text{font-size:18px;color:#8fc87a;text-align:center;margin-top:16px;font-weight:300;letter-spacing:1px}
-.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#6a9e5a}
+.tao-screen{background:linear-gradient(180deg,#0d0a05 0%,var(--ink) 100%);min-height:100%}
+.tao-card{background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.tao-verse{font-size:16px;line-height:2.4;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px}
+.tao-chapter-num{font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center}
+.tao-title{font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:16px;font-style:italic}
+.med-timer{font-size:48px;font-weight:200;color:#f5ecd6;text-align:center;letter-spacing:4px}
+.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #b8860b;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
+.breath-text{font-size:18px;color:#e8c15c;text-align:center;margin-top:16px;font-weight:300;letter-spacing:1px}
+.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#c9a227}
 @keyframes ripple{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
-.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #4a7c3f;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
+.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #b8860b;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
 
 
-/* === ZEN SPA ATMOSPHERE === */
+/* === CONSOLE ATMOSPHERE === */
 
-/* Subtle bamboo texture via gradient */
 body {
-  background: #080f0a;
-  background-image: 
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 60px,
-      rgba(74,124,63,0.015) 60px,
-      rgba(74,124,63,0.015) 61px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 80px,
-      rgba(74,124,63,0.01) 80px,
-      rgba(74,124,63,0.01) 81px
-    );
+  background: #14120f;
 }
 
-/* Ink wash header effect */
+/* Flat header, no wash gradient */
 .screen-header {
-  background: linear-gradient(180deg, #111f13 0%, rgba(17,31,19,0.95) 100%) !important;
-  border-bottom: 1px solid rgba(74,124,63,0.2) !important;
+  background: #14120f !important;
+  border-bottom: 1px solid var(--line) !important;
 }
 
-/* Glassmorphism cards */
+/* Flat cards — thin hairline border, no blur, no glow */
 .card {
-  background: rgba(17,31,19,0.85) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(74,124,63,0.2) !important;
-  transition: border-color 0.2s;
+  background: var(--ink3) !important;
+  border: 1px solid var(--line) !important;
+  transition: border-color 0.15s;
 }
 
-/* Zen nav */
+/* Flat nav, no blur */
 #nav {
-  background: rgba(8,15,10,0.92) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(74,124,63,0.15) !important;
+  background: #14120f !important;
+  border-top: 1px solid var(--line) !important;
 }
 
-/* Soft glow on active nav */
-.nav-btn.active .nav-icon {
-  filter: drop-shadow(0 0 6px rgba(143,200,122,0.5));
+/* Active nav: flat accent color + underline, no glow */
+.nav-btn.active .nav-icon svg { stroke: var(--gold); }
+.nav-btn .nav-icon svg { stroke: var(--t3); transition: stroke .15s; }
+.nav-btn.active::after {
+  content:'';
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:20px; height:2px; background:var(--gold); border-radius:2px;
 }
 
-/* Ripple update */
 .success-ring {
-  border-color: var(--bamboo2) !important;
+  border-color: var(--gold) !important;
 }
 
-/* Zen modal */
+/* Flat modal, thin top rule */
 .modal {
-  background: rgba(8,15,10,0.97) !important;
-  border-top: 2px solid var(--bamboo) !important;
+  background: #1b1814 !important;
+  border-top: 1px solid var(--line) !important;
 }
 
-/* Screen transitions */
 .screen {
   transition: opacity 0.15s ease;
 }
 
-/* Tao screen special atmosphere */
+/* Tao screen keeps its own quiet, separate atmosphere */
 #screen-tao {
-  background: linear-gradient(180deg, #06100a 0%, #080f0a 100%);
+  background: linear-gradient(180deg, #0d0a05 0%, #14120f 100%);
 }
 
-/* Form inputs zen style */
 .form-input, .form-select {
-  background: rgba(8,15,10,0.9) !important;
-  border: 1px solid rgba(74,124,63,0.25) !important;
+  background: #1b1814 !important;
+  border: 1px solid var(--line) !important;
   color: var(--text1) !important;
 }
 
-/* Zen scrollbar */
 ::-webkit-scrollbar { width: 2px; }
-::-webkit-scrollbar-thumb { background: rgba(74,124,63,0.3); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius: 99px; }
 
-/* Zen background illustrations */
+/* Signature: a single quiet topographic contour, not a bamboo garden —
+   ties back to the actual subject (field survey / terrain), used once, faint. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20430%20800%27%20opacity%3D%270.07%27%3E%0A%20%20%3Cstyle%3Eline%2Crect%7Bstroke%3A%236a9e5a%3Bstroke-linecap%3Around%7D%3C/style%3E%0A%20%20%3C%21--%20Bamboo%20stalks%20--%3E%0A%20%20%3Cline%20x1%3D%2760%27%20y1%3D%27800%27%20x2%3D%2755%27%20y2%3D%270%27%20stroke-width%3D%2714%27/%3E%0A%20%20%3Cline%20x1%3D%2762%27%20y1%3D%27750%27%20x2%3D%2757%27%20y2%3D%27-50%27%20stroke-width%3D%271%27%20opacity%3D%270.3%27/%3E%0A%20%20%3Crect%20x%3D%2748%27%20y%3D%27120%27%20width%3D%2720%27%20height%3D%273%27%20rx%3D%271%27%20opacity%3D%270.6%27/%3E%0A%20%20%3Crect%20x%3D%2748%27%20y%3D%27280%27%20width%3D%2720%27%20height%3D%273%27%20rx%3D%271%27%20opacity%3D%270.6%27/%3E%0A%20%20%3Crect%20x%3D%2748%27%20y%3D%27450%27%20width%3D%2720%27%20height%3D%273%27%20rx%3D%271%27%20opacity%3D%270.6%27/%3E%0A%20%20%3Crect%20x%3D%2748%27%20y%3D%27620%27%20width%3D%2720%27%20height%3D%273%27%20rx%3D%271%27%20opacity%3D%270.6%27/%3E%0A%20%20%3C%21--%20Leaves%20left%20stalk%20--%3E%0A%20%20%3Cpath%20d%3D%27M55%20130%20Q20%20110%2010%2080%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%276%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M55%20130%20Q90%20115%20100%2090%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M55%20290%20Q15%20270%205%20240%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%276%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M55%20460%20Q90%20440%20105%20415%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M55%20460%20Q20%20445%208%20420%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%276%27%20fill%3D%27none%27/%3E%0A%20%20%3C%21--%20Second%20stalk%20--%3E%0A%20%20%3Cline%20x1%3D%27370%27%20y1%3D%27800%27%20x2%3D%27365%27%20y2%3D%27100%27%20stroke-width%3D%2711%27/%3E%0A%20%20%3Crect%20x%3D%27358%27%20y%3D%27200%27%20width%3D%2716%27%20height%3D%272.5%27%20rx%3D%271%27%20opacity%3D%270.5%27/%3E%0A%20%20%3Crect%20x%3D%27358%27%20y%3D%27380%27%20width%3D%2716%27%20height%3D%272.5%27%20rx%3D%271%27%20opacity%3D%270.5%27/%3E%0A%20%20%3Crect%20x%3D%27358%27%20y%3D%27560%27%20width%3D%2716%27%20height%3D%272.5%27%20rx%3D%271%27%20opacity%3D%270.5%27/%3E%0A%20%20%3Cpath%20d%3D%27M365%20210%20Q395%20195%20408%20170%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M365%20210%20Q335%20198%20322%20175%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M365%20390%20Q330%20372%20318%20348%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M365%20570%20Q400%20552%20415%20528%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%275%27%20fill%3D%27none%27/%3E%0A%20%20%3C%21--%20Third%20thin%20stalk%20--%3E%0A%20%20%3Cline%20x1%3D%27210%27%20y1%3D%27800%27%20x2%3D%27215%27%20y2%3D%27300%27%20stroke-width%3D%278%27%20opacity%3D%270.5%27/%3E%0A%20%20%3Crect%20x%3D%27207%27%20y%3D%27450%27%20width%3D%2712%27%20height%3D%272%27%20rx%3D%271%27%20opacity%3D%270.4%27/%3E%0A%20%20%3Crect%20x%3D%27207%27%20y%3D%27600%27%20width%3D%2712%27%20height%3D%272%27%20rx%3D%271%27%20opacity%3D%270.4%27/%3E%0A%20%20%3Cpath%20d%3D%27M212%20460%20Q235%20445%20242%20422%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%274%27%20fill%3D%27none%27%20opacity%3D%270.7%27/%3E%0A%20%20%3Cpath%20d%3D%27M212%20610%20Q190%20595%20182%20572%27%20stroke%3D%27%236a9e5a%27%20stroke-width%3D%274%27%20fill%3D%27none%27%20opacity%3D%270.7%27/%3E%0A%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20430%20800'%20opacity='0.05'%3E%3Cstyle%3Epath%7Bfill:none;stroke:%23c9a227;stroke-width:1%7D%3C/style%3E%3Cpath%20d='M-20%20120%20Q100%2080%20220%20130%20Q320%20170%20460%20110'/%3E%3Cpath%20d='M-20%20180%20Q110%20145%20230%20190%20Q330%20225%20460%20170'/%3E%3Cpath%20d='M-20%20560%20Q120%20520%20240%20565%20Q330%20600%20460%20545'/%3E%3Cpath%20d='M-20%20620%20Q130%20585%20250%20625%20Q340%20655%20460%20605'/%3E%3Cpath%20d='M-20%20680%20Q140%20648%20260%20685%20Q350%20712%20460%20665'/%3E%3C/svg%3E");
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -182,12 +171,11 @@ body::before {
   z-index: 1;
 }
 
-/* Tao screen gets water ripple instead */
 #screen-tao::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20430%20800%27%20opacity%3D%270.05%27%3E%0A%20%20%3Cstyle%3Eellipse%7Bfill%3Anone%3Bstroke%3A%236a9e5a%3Bstroke-width%3A1%7D%3C/style%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2720%27%20ry%3D%278%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2750%27%20ry%3D%2720%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2790%27%20ry%3D%2736%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27140%27%20ry%3D%2756%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27200%27%20ry%3D%2780%27/%3E%0A%20%20%3Cellipse%20cx%3D%2760%27%20cy%3D%27200%27%20rx%3D%2712%27%20ry%3D%275%27/%3E%0A%20%20%3Cellipse%20cx%3D%2760%27%20cy%3D%27200%27%20rx%3D%2730%27%20ry%3D%2712%27/%3E%0A%20%20%3Cellipse%20cx%3D%2760%27%20cy%3D%27200%27%20rx%3D%2755%27%20ry%3D%2722%27/%3E%0A%20%20%3Cellipse%20cx%3D%27360%27%20cy%3D%27350%27%20rx%3D%2715%27%20ry%3D%276%27/%3E%0A%20%20%3Cellipse%20cx%3D%27360%27%20cy%3D%27350%27%20rx%3D%2738%27%20ry%3D%2715%27/%3E%0A%20%20%3Cellipse%20cx%3D%27360%27%20cy%3D%27350%27%20rx%3D%2765%27%20ry%3D%2726%27/%3E%0A%20%20%3C%21--%20Misty%20mountain%20silhouette%20--%3E%0A%20%20%3Cpath%20d%3D%27M0%20500%20Q80%20380%20160%20420%20Q215%20360%20260%20400%20Q330%20320%20430%20400%20L430%20800%20L0%20800Z%27%20fill%3D%27rgba%2874%2C124%2C63%2C0.04%29%27%20stroke%3D%27none%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%20560%20Q100%20480%20200%20510%20Q280%20460%20430%20490%20L430%20800%20L0%20800Z%27%20fill%3D%27rgba%2874%2C124%2C63%2C0.03%29%27%20stroke%3D%27none%27/%3E%0A%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20430%20800%27%20opacity%3D%270.05%27%3E%0A%20%20%3Cstyle%3Eellipse%7Bfill%3Anone%3Bstroke%3A%23c9a227%3Bstroke-width%3A1%7D%3C/style%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2720%27%20ry%3D%278%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2750%27%20ry%3D%2720%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2790%27%20ry%3D%2736%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27140%27%20ry%3D%2756%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27200%27%20ry%3D%2780%27/%3E%0A%3C/svg%3E");
   background-size: cover;
   pointer-events: none;
   z-index: 0;
@@ -198,33 +186,33 @@ body::before {
   z-index: 1;
 }
 
-.cal-header{padding:52px 18px 12px;background:linear-gradient(180deg,rgba(13,23,16,.97),rgba(13,23,16,.85));backdrop-filter:blur(16px);border-bottom:1px solid rgba(61,122,53,.18);position:sticky;top:0;z-index:10}
+.cal-header{padding:52px 18px 12px;background:#14120f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.cal-nav-btn{background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.32);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
+.cal-nav-btn{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
 .cal-month-title{font-size:18px;font-weight:700;color:var(--t1);text-align:center}
 .cal-view-tabs{display:flex;gap:4px}
 .cal-view-tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
-.cal-view-tab.active{background:rgba(61,122,53,.15);color:var(--sprout);border:1px solid rgba(61,122,53,.3)}
+.cal-view-tab.active{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid rgba(201,162,39,.25)}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 8px 2px}
 .cal-weekday{font-size:10px;color:var(--t3);text-align:center;font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 8px;gap:2px}
 .cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;border:1px solid transparent}
-.cal-day.today{background:rgba(61,122,53,.2);border-color:var(--bamboo)}
-.cal-day.today .cal-dn{color:var(--sprout);font-weight:800}
+.cal-day.today{background:rgba(201,162,39,.14);border-color:var(--gold)}
+.cal-day.today .cal-dn{color:var(--gold);font-weight:800}
 .cal-day.other-month .cal-dn{color:var(--t4)}
 .cal-dn{font-size:13px;font-weight:500;color:var(--t2);line-height:1}
 .cal-dots{display:flex;gap:2px;margin-top:2px}
-.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--bamboo)}
-.ev-card{background:rgba(20,34,24,.85);border:1px solid rgba(61,122,53,.18);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--bamboo);cursor:pointer}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.ev-card{background:var(--ink3);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--gold);cursor:pointer}
 .ev-time{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:3px}
 .ev-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4}
 .ev-note{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
-.week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid rgba(61,122,53,.1);min-height:52px;cursor:pointer}
+.week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);min-height:52px;cursor:pointer}
 .week-dlabel{width:36px;flex-shrink:0}
 .week-dname{font-size:10px;color:var(--t3);font-weight:600}
 .week-dnum{font-size:18px;font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
-.week-epill{background:rgba(61,122,53,.15);border:1px solid rgba(61,122,53,.25);border-radius:8px;padding:5px 10px;margin-bottom:4px;font-size:12px;color:var(--t1);font-weight:500}
+.week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:8px;padding:5px 10px;margin-bottom:4px;font-size:12px;color:var(--t1);font-weight:500}
 </style>
 </head>
 <body>
@@ -240,25 +228,25 @@ body::before {
   <div id="screen-settings" class="screen hidden"></div>
   <nav id="nav">
     <button class="nav-btn active" data-screen="home">
-      <span class="nav-icon">⛩️</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
       <span class="nav-label">בית</span>
     </button>
     <button class="nav-btn" data-screen="tasks">
-      <span class="nav-icon">🖌️</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
       <span class="nav-label">משימות</span>
       <span class="nav-badge hidden" id="badge-tasks">0</span>
     </button>
     <button class="nav-btn" data-screen="sites">
-      <span class="nav-icon">🪷</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span>
       <span class="nav-label">אתרים</span>
       <span class="nav-badge hidden" id="badge-sites">0</span>
     </button>
     <button class="nav-btn" data-screen="people">
-      <span class="nav-icon">🌿</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8"/><circle cx="17" cy="7" r="2.6"/><path d="M15.5 14.3c2.6.4 4.4 2.3 4.9 5.2"/></svg></span>
       <span class="nav-label">אנשים</span>
       <span class="nav-badge hidden" id="badge-people">0</span>
     </button>
-      <button class="nav-btn" data-screen="calendar"><span class="nav-icon">📅</span><span class="nav-label">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon">☯️</span><span class="nav-label">טאו</span></button>
+      <button class="nav-btn" data-screen="calendar"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/></svg></span><span class="nav-label">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/></svg></span><span class="nav-label">טאו</span></button>
   </nav>
 </div>
 <div id="modal-container"></div>
@@ -283,7 +271,7 @@ function buildSystemPrompt() {
     'Dates: tomorrow=' + getTodayPlus(1) + ', in2days=' + getTodayPlus(2) + ', nextweek=' + getTodayPlus(7) + ', in2weeks=' + getTodayPlus(14) + ', in3weeks=' + getTodayPlus(21) + ', nextmonth=' + getTodayPlus(30) + '\n\n' +
     'CRITICAL: Return ONLY this exact JSON structure, nothing else:\n' +
     '{' +
-    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green"}],' +
+    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":""}],' +
     '"today":[],' +
     '"later":[],' +
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
@@ -301,7 +289,8 @@ function buildSystemPrompt() {
     '   - specific date "19.07" -> date=' + td.slice(0,4) + '-07-19\n' +
     '3. Put EVERY task in events[] with today as default date if no date given\n' +
     '4. notify always "60" (1 hour before)\n' +
-    '5. events[] must never be empty - add all tasks there too';
+    '5. events[] must never be empty - add all tasks there too\n' +
+    '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.';
 }
 
 
@@ -309,13 +298,49 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 let currentScreen = 'home'
 let actionCtx = null
 
 const save = () => { localStorage.setItem(KEY, JSON.stringify(state)) }
 const setState = (patch) => { Object.assign(state, patch, {updated: new Date().toISOString()}); save(); refreshBadges(); renderCurrentScreen() }
+
+// ── CHRONOLOGY ────────────────────────────────────
+// The app previously had no concept of "today" resetting: a task or focus
+// headline set at 10am would still show as if it were current the next day
+// or next week. This keeps the app connected to the actual clock:
+// - "now" tasks are, by definition, only relevant on the day they were added.
+//   Once the day rolls over, unfinished ones move to "today" instead of
+//   staying flagged as urgent-right-now forever.
+// - The "focus" headline (e.g. a specific meeting time) is scoped to the
+//   day it was generated and clears itself once that day has passed.
+// - Individual tasks/events that carry a real time are flagged overdue once
+//   that time has passed, instead of silently staying in an "upcoming" state.
+function isOverdue(t) {
+  if(!t || t.done || !t.time) return false
+  var d = t.date || getToday()
+  var dt = new Date(d + 'T' + t.time)
+  return !isNaN(dt) && dt.getTime() < Date.now()
+}
+function checkChronology() {
+  var today = getToday()
+  var changed = false
+  if(state.focus && state.focusDate && state.focusDate !== today) {
+    state.focus = ''; state.focusDate = null; changed = true
+  }
+  if(state.lastSeenDate && state.lastSeenDate !== today) {
+    var stale = (state.tasks.now || []).filter(t => !t.done)
+    if(stale.length) {
+      state.tasks.today = [...state.tasks.today, ...stale]
+      state.tasks.now = state.tasks.now.filter(t => t.done)
+      changed = true
+    }
+  }
+  if(state.lastSeenDate !== today) { state.lastSeenDate = today; changed = true }
+  if(changed) save()
+  return changed
+}
 
 const ASSIGNEE = {uri:'אני',gio:"ג'יו",kenneth:"קנת'",asc:'ASC','11-16':'11-16'}
 const STATUS_COLOR = {open:'red',pending:'orange',resolved:'green'}
@@ -476,31 +501,31 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var medHtml = MEDITATIONS.map(function(m, i) {
-    return '<div id="med-btn-' + i + '" style="background:#111f13;border:1px solid #1a2e1c;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+    return '<div id="med-btn-' + i + '" style="background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
-      '<div style="font-size:15px;font-weight:600;color:#e8f0e4">' + m.icon + ' ' + m.title + '</div>' +
-      '<div style="font-size:12px;color:#6090a8;margin-top:3px">' + m.desc + '</div>' +
+      '<div style="font-size:15px;font-weight:600;color:#f5ecd6">' + m.icon + ' ' + m.title + '</div>' +
+      '<div style="font-size:12px;color:#b3a077;margin-top:3px">' + m.desc + '</div>' +
       '</div>' +
-      '<div style="font-size:13px;color:#c4922a;flex-shrink:0">' + m.duration + ' דק</div>' +
+      '<div style="font-size:13px;color:#cf9d2e;flex-shrink:0">' + m.duration + ' דק</div>' +
       '</div>';
   }).join('');
 
   el.innerHTML =
-    '<div style="background:linear-gradient(180deg,#060c08,#080f0a);min-height:100%;padding:48px 16px 16px">' +
+    '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
     '<div style="text-align:center;margin-bottom:6px">' +
-    '<span style="font-size:11px;color:#8fc87a;letter-spacing:2px;font-weight:600">☯️ טאו טה צ׳ינג</span>' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו טה צ׳ינג</span>' +
     '</div>' +
-    '<div style="font-size:11px;color:#c4922a;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
-    '<div style="background:linear-gradient(135deg,#111f13,#0d1f0f);border:1px solid #4a7c3f;border-radius:16px;padding:20px;margin-bottom:16px">' +
-    '<div style="font-size:13px;color:#b0c8a8;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
-    '<div style="font-size:16px;line-height:2.2;color:#e8f0e4;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
+    '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;margin-bottom:16px">' +
+    '<div style="font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
+    '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
-    '<button id="tao-prev" style="background:#111f13;border:1px solid #1a2e1c;border-radius:10px;padding:10px 16px;color:#6090a8;font-size:14px;cursor:pointer">← הקודם</button>' +
-    '<span style="color:#6090a8;font-size:12px">' + (idx + 1) + ' / 80</span>' +
-    '<button id="tao-next" style="background:#111f13;border:1px solid #1a2e1c;border-radius:10px;padding:10px 16px;color:#6090a8;font-size:14px;cursor:pointer">הבא →</button>' +
+    '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">← הקודם</button>' +
+    '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
+    '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
     '</div>' +
-    '<div style="font-size:11px;color:#8fc87a;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
+    '<div style="font-size:11px;color:#e8c15c;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
     medHtml +
     '</div>';
 
@@ -534,8 +559,8 @@ function startMeditation(idx) {
   playTibetanBowl();
 
   const stepsHtml = med.steps.map(function(s, i) {
-    return '<div style="font-size:12px;color:#7a9a72;padding:4px 0;border-bottom:' +
-      (i < med.steps.length - 1 ? '1px solid #1a2e1c' : 'none') + '">' + s + '</div>';
+    return '<div style="font-size:12px;color:#b3a077;padding:4px 0;border-bottom:' +
+      (i < med.steps.length - 1 ? '1px solid #241b0d' : 'none') + '">' + s + '</div>';
   }).join('');
 
   const mins = med.duration.toString();
@@ -543,17 +568,17 @@ function startMeditation(idx) {
   modal.innerHTML =
     '<div class="modal-overlay">' +
     '<div class="modal" style="text-align:center">' +
-    '<div style="font-size:13px;color:#c4922a;font-weight:600;margin-bottom:4px">' + med.icon + ' ' + med.title + '</div>' +
-    '<div style="font-size:12px;color:#7a9a72;margin-bottom:20px">' + med.desc + '</div>' +
+    '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + med.icon + ' ' + med.title + '</div>' +
+    '<div style="font-size:12px;color:#b3a077;margin-bottom:20px">' + med.desc + '</div>' +
     '<div class="med-circle" id="med-circle">' +
     '<canvas id="med-canvas" width="180" height="180" style="position:absolute;inset:0;border-radius:50%"></canvas>' +
     '<div class="med-timer" id="med-timer">' + mins + ':00</div>' +
     '</div>' +
     '<div class="breath-text" id="breath-text">היכון...</div>' +
-    '<div style="margin:20px 0;padding:14px;background:#080f0a;border-radius:12px;text-align:right">' +
+    '<div style="margin:20px 0;padding:14px;background:#120d06;border-radius:12px;text-align:right">' +
     stepsHtml +
     '</div>' +
-    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #1a2e1c;background:transparent;color:#7a9a72;font-size:14px">סיים מוקדם</button>' +
+    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #241b0d;background:transparent;color:#b3a077;font-size:14px">סיים מוקדם</button>' +
     '</div></div>';
 
   drawMedCircle(1);
@@ -597,7 +622,7 @@ function drawMedCircle(ratio) {
   ctx.strokeStyle='rgba(196,146,42,0.15)'; ctx.lineWidth=3; ctx.stroke();
   if(ratio>0) {
     ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+(1-ratio)*Math.PI*2);
-    ctx.strokeStyle='#4a7c3f'; ctx.lineWidth=3; ctx.stroke();
+    ctx.strokeStyle='#b8860b'; ctx.lineWidth=3; ctx.stroke();
   }
 }
 
@@ -646,34 +671,34 @@ function renderHome() {
   const pct = total ? Math.round((done/total)*100) : 0
 
   el.innerHTML = `
-    <div style="background:linear-gradient(180deg,#111f13,#080f0a);padding:48px 16px 16px;border-bottom:1px solid #1e293b">
+    <div style="background:linear-gradient(180deg,#1c1508,#120d06);padding:48px 16px 16px;border-bottom:1px solid #241c10">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
         <div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
-          <div style="font-size:22px;font-weight:800;color:#f8fafc">בוקר טוב, אורי ☀️</div>
-          <div style="font-size:11px;color:#475569;margin-top:2px">Region II · Cagayan Valley</div>
+          <div style="font-size:12px;color:#a08a5c;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</div>
+          <div style="font-size:22px;font-weight:800;color:#f7f0dc">בוקר טוב, אורי ☀️</div>
+          <div style="font-size:11px;color:#8a7550;margin-top:2px">Region II · Cagayan Valley</div>
         </div>
-        <button onclick="navigateTo('settings')" style="background:#1e293b;border-radius:10px;padding:8px 10px;color:#64748b;font-size:16px">☯️</button>
+        <button onclick="navigateTo('settings')" style="background:#241c10;border-radius:10px;padding:8px 10px;color:#a08a5c;font-size:16px">☯️</button>
       </div>
       ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#f59e0b18;border:1px solid #f59e0b44;border-radius:10px;cursor:pointer;margin-bottom:10px">
         <div style="font-size:13px;color:#f59e0b;font-weight:600">⚠️ נדרש API Key</div>
-        <div style="font-size:12px;color:#78716c;margin-top:2px">לחץ להגדרות</div>
+        <div style="font-size:12px;color:#8a7550;margin-top:2px">לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:5px">
-          <span>התקדמות היום</span><span style="color:${done===total?'#4ade80':'#64748b'}">${done}/${total}</span>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#8a7550;margin-bottom:5px">
+          <span>התקדמות היום</span><span style="color:${done===total?'#4ade80':'#a08a5c'}">${done}/${total}</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#4ade80':'linear-gradient(90deg,#3b82f6,#06b6d4)'}"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#4ade80':'linear-gradient(90deg,#cf9d2e,#e0b563)'}"></div></div>
       </div>` : ''}
     </div>
     <div style="padding:14px 16px">
-      ${state.focus ? `<div style="background:linear-gradient(135deg,#1e3a5f,#1e293b);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid #1e40af33">
-        <div style="font-size:10px;color:#3b82f6;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
-        <div style="font-size:14px;color:#f1f5f9;line-height:1.5;font-weight:600">${state.focus}</div>
+      ${state.focus ? `<div style="background:linear-gradient(135deg,#2a2110,#241c10);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid #8a641633">
+        <div style="font-size:10px;color:#cf9d2e;font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:14px;color:#f5ecd6;line-height:1.5;font-weight:600">${state.focus}</div>
       </div>` : ''}
-      ${urgent.length > 0 ? `<div style="font-size:11px;color:#64748b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
+      ${urgent.length > 0 ? `<div style="font-size:11px;color:#a08a5c;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
       ${urgent.map(t=>`<div class="card card-red" onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:600;color:#f1f5f9">${t.text}</div>
+        <div style="font-size:14px;font-weight:600;color:#f5ecd6">${t.text}</div>
         ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:5px">
           ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
           ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
@@ -682,18 +707,18 @@ function renderHome() {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
         <div class="card" onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border:1px solid ${urgent.length>0?'#ef444433':'transparent'}">
           <div style="font-size:18px">🖌️</div>
-          <div style="font-size:22px;font-weight:800;color:${urgent.length>0?'#ef4444':'#475569'}">${urgent.length}</div>
-          <div style="font-size:10px;color:#475569;margin-top:2px">עכשיו</div>
+          <div style="font-size:22px;font-weight:800;color:${urgent.length>0?'#ef4444':'#8a7550'}">${urgent.length}</div>
+          <div style="font-size:10px;color:#8a7550;margin-top:2px">עכשיו</div>
         </div>
         <div class="card" onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border:1px solid ${openSites>0?'#f59e0b33':'transparent'}">
           <div style="font-size:18px">🪷</div>
-          <div style="font-size:22px;font-weight:800;color:${openSites>0?'#f59e0b':'#475569'}">${openSites}</div>
-          <div style="font-size:10px;color:#475569;margin-top:2px">אתרים</div>
+          <div style="font-size:22px;font-weight:800;color:${openSites>0?'#f59e0b':'#8a7550'}">${openSites}</div>
+          <div style="font-size:10px;color:#8a7550;margin-top:2px">אתרים</div>
         </div>
-        <div class="card" onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border:1px solid ${pendingPeople>0?'#06b6d433':'transparent'}">
+        <div class="card" onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border:1px solid ${pendingPeople>0?'#e0b56333':'transparent'}">
           <div style="font-size:18px">👥</div>
-          <div style="font-size:22px;font-weight:800;color:${pendingPeople>0?'#06b6d4':'#475569'}">${pendingPeople}</div>
-          <div style="font-size:10px;color:#475569;margin-top:2px">ממתין</div>
+          <div style="font-size:22px;font-weight:800;color:${pendingPeople>0?'#e0b563':'#8a7550'}">${pendingPeople}</div>
+          <div style="font-size:10px;color:#8a7550;margin-top:2px">ממתין</div>
         </div>
       </div>
       <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
@@ -711,11 +736,11 @@ function renderInput() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">הוסף הודעות</div>
       </div>
-      <div style="font-size:13px;color:#475569;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
-      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px;color:#f1f5f9;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <div style="font-size:13px;color:#8a7550;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
+      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#241c10;border:1px solid #4a3c22;border-radius:12px;padding:14px;color:#f5ecd6;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
       <div id="input-error" style="color:#ef4444;font-size:13px;margin-bottom:8px;display:none"></div>
       ${!apiKey?`<div style="color:#f59e0b;font-size:13px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
@@ -729,8 +754,8 @@ async function doAnalyze() {
   const err = document.getElementById('input-error')
   if(!text || !apiKey) return
   btn.textContent = '⚙️ מסדר...'
-  btn.style.background = '#1e293b'
-  btn.style.color = '#475569'
+  btn.style.background = '#241c10'
+  btn.style.color = '#8a7550'
   err.style.display = 'none'
   try {
     const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
@@ -758,11 +783,12 @@ async function doAnalyze() {
         var existing = state.events || [];
         return [...existing,...aiEvs];
       })(),
-      focus: p.focus || state.focus
+      focus: p.focus || state.focus,
+      focusDate: p.focus ? getToday() : state.focusDate
     })
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(61,122,53,0.95);color:#f0f5f0;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#f2ead2;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
       toast.textContent = '📅 ' + (p.events||[]).length + ' אירועים נוספו ללוח';
       document.body.appendChild(toast);
       setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
@@ -773,7 +799,7 @@ async function doAnalyze() {
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
     btn.textContent = '⚡ ארגן את היום'
-    btn.style.background = 'linear-gradient(135deg,#3b82f6,#06b6d4)'
+    btn.style.background = 'linear-gradient(135deg,#cf9d2e,#e0b563)'
     btn.style.color = '#fff'
   }
 }
@@ -785,7 +811,7 @@ function renderTasks() {
   const el = document.getElementById('screen-tasks')
   const counts = {now:state.tasks.now.filter(t=>!t.done).length,today:state.tasks.today.filter(t=>!t.done).length,later:state.tasks.later.filter(t=>!t.done).length}
   const tasks = state.tasks[taskBucket] || []
-  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#64748b'}
+  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#a08a5c'}
 
   el.innerHTML = `
     <div class="screen-header">
@@ -795,7 +821,7 @@ function renderTasks() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#1e293b'};color:${taskBucket===b?BCOLS[b]:'#64748b'};cursor:pointer">
+          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#241c10'};color:${taskBucket===b?BCOLS[b]:'#a08a5c'};cursor:pointer">
             <div style="font-size:16px">${['🎋','🌿','🕊️'][i]}</div>
             <div style="font-size:11px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
             ${counts[b]>0?`<div style="font-size:13px;font-weight:700">${counts[b]}</div>`:''}
@@ -810,25 +836,33 @@ function renderTasks() {
 }
 
 function taskCard(t) {
-  const colors = {red:['#ef444418','#ef444460','#ef4444'],orange:['#f59e0b18','#f59e0b60','#f59e0b'],green:['#4ade8018','#4ade8060','#4ade80']}
+  const colors = {red:'#ef4444',orange:'#f59e0b',green:'#4ade80'}
   const c = colors[t.color] || colors.orange
+  const overdue = isOverdue(t)
   return `
-    <div style="background:${t.done?'#0f172a':c[0]};border:1.5px solid ${t.done?'#1e293b':c[1]};border-radius:14px;padding:14px;margin-bottom:8px;opacity:${t.done?'0.45':'1'};transition:opacity 0.2s">
+    <div style="background:#1b1814;border:1px solid var(--line);border-right:3px solid ${t.done?'#3a3428':(overdue?'#ef4444':c)};border-radius:10px;padding:14px;margin-bottom:8px;opacity:${t.done?'0.5':'1'};transition:opacity 0.2s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask('${t.id}')" style="width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;background:${t.done?c[2]:'transparent'};border:2px solid ${c[2]};display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">${t.done?'✓':''}</div>
+        <div onclick="toggleTask('${t.id}')" style="width:22px;height:22px;border-radius:6px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:1.5px solid ${c};display:flex;align-items:center;justify-content:center;font-size:12px;color:#14120f">${t.done?'✓':''}</div>
         <div style="flex:1">
-          <div style="font-size:15px;font-weight:600;color:#f1f5f9;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          <div style="font-size:15px;font-weight:500;color:#e9e2d3;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
           <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
             ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
             ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+            ${t.time?`<span class="tag" style="${overdue?'background:#ef444422;color:#ef4444':''}">⏰ ${t.time}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
-        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:16px;flex-shrink:0">🖌️</button>`:''}
+        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#221e18;border-radius:8px;padding:7px 9px;color:#8a8172;font-size:15px;flex-shrink:0">✎</button>`:''}
+        ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#221e18;border-radius:8px;padding:7px 9px;color:#8a8172;font-size:15px;flex-shrink:0">🗑</button>`:''}
       </div>
     </div>`
 }
 
 function setTaskBucket(b) { taskBucket=b; renderTasks() }
+
+function deleteTask(id) {
+  const strip = arr => arr.filter(t=>t.id!==id)
+  setState({tasks:{now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}})
+}
 
 function toggleTask(id) {
   const wasUndone = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(t=>t.id===id&&!t.done)
@@ -891,7 +925,7 @@ function renderSites() {
       </div>
       <div style="display:flex;gap:6px">
         ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#1e40af':'#1e293b'};color:${siteFilter===v?'#fff':'#64748b'};font-size:12px;font-weight:600">${l}</button>`
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'#8a6416':'#241c10'};color:${siteFilter===v?'#fff':'#a08a5c'};font-size:12px;font-weight:600">${l}</button>`
         ).join('')}
       </div>
     </div>
@@ -902,21 +936,21 @@ function renderSites() {
 }
 
 function siteCard(s) {
-  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#64748b'
+  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#a08a5c'
   return `
     <div class="card" style="border:1px solid ${col}33;margin-bottom:8px">
-      <div style="font-size:15px;font-weight:700;color:#f1f5f9">📍 ${s.name}</div>
-      ${s.province?`<div style="font-size:12px;color:#64748b;margin-top:2px">${s.province}</div>`:''}
-      ${s.issue?`<div style="font-size:13px;color:#94a3b8;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
+      <div style="font-size:15px;font-weight:700;color:#f5ecd6">📍 ${s.name}</div>
+      ${s.province?`<div style="font-size:12px;color:#a08a5c;margin-top:2px">${s.province}</div>`:''}
+      ${s.issue?`<div style="font-size:13px;color:#c9b98a;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
         <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#0f172a'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#475569'};font-size:11px;font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#171008'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#8a7550'};font-size:11px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:14px">🖌️</button>
+        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#171008;border-radius:8px;padding:7px 9px;color:#a08a5c;font-size:14px">🖌️</button>
       </div>
     </div>`
 }
@@ -973,30 +1007,30 @@ function renderPeople() {
     <div style="padding:12px 16px">
       ${state.people.length===0?`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">אנשים יתווספו מהודעות</div></div>`:''}
       ${withP.length>0?`<div style="font-size:11px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
-      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:11px;color:#475569;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
+      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:11px;color:#8a7550;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
     </div>`
 }
 
 function personCard(p) {
-  const rc = {engineer:'#3b82f6',contractor:'#f59e0b',nia:'#06b6d4',other:'#64748b'}[p.role]||'#64748b'
+  const rc = {engineer:'#cf9d2e',contractor:'#f59e0b',nia:'#e0b563',other:'#a08a5c'}[p.role]||'#a08a5c'
   return `
     <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:8px;flex:1">
           <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:14px;color:${rc};font-weight:700;flex-shrink:0">${p.name[0]?.toUpperCase()||'?'}</div>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#f1f5f9">${p.name}</div>
-            ${p.company?`<div style="font-size:12px;color:#64748b">${p.company}</div>`:''}
+            <div style="font-size:15px;font-weight:700;color:#f5ecd6">${p.name}</div>
+            ${p.company?`<div style="font-size:12px;color:#a08a5c">${p.company}</div>`:''}
           </div>
         </div>
         <div style="display:flex;gap:6px">
-          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#0f172a;border-radius:8px;padding:7px 9px;color:#64748b;font-size:16px">🖌️</button>
+          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#171008;border-radius:8px;padding:7px 9px;color:#a08a5c;font-size:16px">🖌️</button>
           ${p.pending?`<button onclick="clearPending('${p.name}')" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
         </div>
       </div>
       ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
         <div style="font-size:10px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
-        <div style="font-size:13px;color:#94a3b8;line-height:1.5">${p.pending}</div>
+        <div style="font-size:13px;color:#c9b98a;line-height:1.5">${p.pending}</div>
       </div>`:''}
     </div>`
 }
@@ -1042,21 +1076,21 @@ function renderAction() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">צור תוכן</div>
       </div>
-      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #3b82f6;margin-bottom:20px">
-        <div style="font-size:14px;color:#f1f5f9;line-height:1.5">${actionCtx.text}</div>
-        ${actionCtx.assignee?`<div style="font-size:12px;color:#64748b;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
+      ${actionCtx?.text?`<div class="card" style="border-right:3px solid #cf9d2e;margin-bottom:20px">
+        <div style="font-size:14px;color:#f5ecd6;line-height:1.5">${actionCtx.text}</div>
+        ${actionCtx.assignee?`<div style="font-size:12px;color:#a08a5c;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
       </div>`:''}
       <div id="action-buttons">
         ${[['whatsapp','💬','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','📧','מייל','ASC / 11-16 / NIA'],['monday','📋','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
           <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
             <div style="font-size:16px;font-weight:600">${i} ${l}</div>
-            <div style="font-size:12px;color:#64748b;margin-top:3px">${s}</div>
+            <div style="font-size:12px;color:#a08a5c;margin-top:3px">${s}</div>
           </div>`).join('')}
       </div>
-      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#64748b">
+      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#a08a5c">
         <div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-size:14px">כותב...</div>
       </div>
       <div id="action-result-container" style="display:none">
@@ -1092,8 +1126,8 @@ function copyResult() {
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('action-copy-btn')
     btn.textContent='✓ הועתק!'
-    btn.style.background='#16a34a'
-    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)'},2000)
+    btn.style.background='#b8860b'
+    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,#cf9d2e,#e0b563)'},2000)
   })
 }
 
@@ -1103,25 +1137,25 @@ function renderSettings() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-        <button onclick="navigateTo('home')" style="background:#1e293b;border-radius:10px;padding:10px 14px;color:#94a3b8;font-size:18px">←</button>
+        <button onclick="navigateTo('home')" style="background:#241c10;border-radius:10px;padding:10px 14px;color:#c9b98a;font-size:18px">←</button>
         <div style="font-size:18px;font-weight:700">הגדרות</div>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#3b82f6;font-size:12px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
-        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;color:#f1f5f9;font-size:13px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#cf9d2e;font-size:12px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
+        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#171008;border:1px solid #4a3c22;border-radius:10px;padding:12px;color:#f5ecd6;font-size:13px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
+        <div style="font-size:12px;color:#a08a5c;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
         <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:13px">נקה הכל</button>
       </div>
       <div class="card">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
-        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #3b82f644;background:transparent;color:#3b82f6;font-size:13px">רענן עכשיו</button>
+        <div style="font-size:12px;color:#a08a5c;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
+        <div style="font-size:12px;color:#a08a5c;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid #cf9d2e44;background:transparent;color:#cf9d2e;font-size:13px">רענן עכשיו</button>
       </div>
     </div>`
 }
@@ -1148,8 +1182,8 @@ function saveApiKey() {
   localStorage.setItem('fieldy_key', val)
   const btn = document.getElementById('settings-save-btn')
   btn.textContent = '✓ נשמר!'
-  btn.style.background = '#16a34a'
-  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#3b82f6,#06b6d4)';navigateTo('home')},1500)
+  btn.style.background = '#b8860b'
+  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,#cf9d2e,#e0b563)';navigateTo('home')},1500)
 }
 
 let clearConfirm = false
@@ -1312,7 +1346,7 @@ function renderMonthCal(){
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
         var dateLabel = dayNum ? dayNum+'.'+monthNum : '';
         var col = e.color||'var(--bamboo)';
-        return '<div style="background:rgba(20,34,24,.85);border:1px solid rgba(61,122,53,.18);border-radius:12px;padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+e.id+'">'+
+        return '<div style="background:rgba(36,28,16,.85);border:1px solid rgba(184,134,11,.18);border-radius:12px;padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+e.id+'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
           '<div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+e.time:'')+'</div>'+
@@ -1359,7 +1393,7 @@ function renderYearCal(){
       var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       var evs=getEventsForDate(dk);
       var isT=dk===tk;
-      mini+='<div style="font-size:9px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(61,122,53,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
+      mini+='<div style="font-size:9px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
     }
     var mm=m,yy=y;
     html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px" data-ym="'+y+'-'+m+'">'+
@@ -1763,11 +1797,12 @@ function startMeditationWithVoice(idx){
       });
       var ctrl = document.createElement('div');
       ctrl.style.cssText = 'margin-top:10px';
-      ctrl.innerHTML =
-        '<select id="voice-select" style="width:100%;background:rgba(6,11,7,.9);border:1px solid rgba(61,122,53,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:12px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
+      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:11px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ← נגישות ← המרת טקסט לדיבור.</div>' : '';
+      ctrl.innerHTML = lowVoiceNote +
+        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:12px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
         '<div style="display:flex;gap:7px">'+
-        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
-        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(13,23,16,.8);border:1px solid rgba(61,122,53,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:12px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
         '</div>';
       modal.appendChild(ctrl);
       var vs=document.getElementById('voice-select');
@@ -1799,17 +1834,27 @@ function startMeditationWithVoice(idx){
     var utt = new SpeechSynthesisUtterance(text);
     var voices = window.speechSynthesis.getVoices();
     var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
-    var voice;
+    var voice, vIdx;
     if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
-      voice = enVoices[selectedVoiceIdx];
+      voice = enVoices[selectedVoiceIdx]; vIdx = selectedVoiceIdx;
     } else {
       var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex'];
       voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1; }); }) ||
               enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name); }) ||
               (enVoices.length ? enVoices[0] : null);
+      vIdx = voice ? enVoices.indexOf(voice) : 0;
     }
-    if(voice) utt.voice = voice;
-    utt.rate = 0.82; utt.pitch = 0.92; utt.volume = 0.88;
+    if(voice) { utt.voice = voice; utt.lang = voice.lang; }
+    // Many Android phones only expose 1-2 real TTS engine voices, so picking a
+    // different name in the dropdown can otherwise sound identical. Give each
+    // voice slot its own deterministic pitch/rate fingerprint so a change of
+    // selection is always audible, even on devices with a single underlying engine.
+    var vSeed = (vIdx || 0) + 1;
+    var pitchOffset = ((vSeed * 37) % 30) / 100 - 0.15; // -0.15..+0.15
+    var rateOffset = ((vSeed * 53) % 20) / 100 - 0.10;  // -0.10..+0.10
+    utt.rate = Math.max(0.6, Math.min(1.0, 0.82 + rateOffset));
+    utt.pitch = Math.max(0.6, Math.min(1.3, 0.92 + pitchOffset));
+    utt.volume = 0.88;
     utt.onend = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
     utt.onerror = function(){ setTimeout(function(){ if(medInterval) speakPhrase(); }, 13000); };
     window.speechSynthesis.speak(utt);
@@ -1826,8 +1871,10 @@ function startMeditationWithVoice(idx){
 
 
 // ── INIT ─────────────────────────────────────────
+checkChronology()
 refreshBadges()
 renderHome()
+setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
 if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission()
 if('serviceWorker' in navigator) {
