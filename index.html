@@ -276,7 +276,7 @@ function buildSystemPrompt() {
     '"later":[],' +
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
     '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
-    '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60"}],' +
+    '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60","site":"matching site name or null"}],' +
     '"focus":"Hebrew sentence"' +
     '}\n\n' +
     'RULES:\n' +
@@ -287,7 +287,7 @@ function buildSystemPrompt() {
     '   - "next week" or "שבוע הבא" -> date=' + getTodayPlus(7) + '\n' +
     '   - "in 3 weeks" or "בעוד 3 שבועות" -> date=' + getTodayPlus(21) + '\n' +
     '   - specific date "19.07" -> date=' + td.slice(0,4) + '-07-19\n' +
-    '3. Tasks and events[] are separate and NOT duplicates of each other — a task should appear in events[] only if it is ALSO a real calendar appointment/meeting/deadline, never just to "make sure it\'s visible somewhere".\n' +
+    '3. Tasks and events[] are separate and NOT duplicates of each other — a task should appear in events[] only if it is ALSO a real calendar appointment/meeting/deadline, never just to "make sure it\'s visible somewhere". If an event is clearly about one of the sites in sites[] (existing or new), set its "site" field to that exact site name so tapping the calendar item can jump to that site.\n' +
     '4. notify always "60" (1 hour before)\n' +
     '5. events[] can be empty — that\'s normal when a message has no actual appointments/deadlines\n' +
     '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.\n' +
@@ -819,7 +819,7 @@ async function doAnalyze() {
         // calendar forever, since the two had no link back to each other.
         var aiEvs = (p.events||[]).map(function(e,i){
           return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
-                  note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)'};
+                  note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)',site:e.site||null};
         });
         var existing = state.events || [];
         return [...existing,...aiEvs];
@@ -1506,12 +1506,14 @@ function renderCalendar(){
   el.querySelectorAll('.week-row').forEach(function(r){
     r.addEventListener('click',function(){showDayEvents(r.dataset.date);});
   });
-  // Bind delete buttons in month event list
+  // Bind delete buttons + card-tap navigation in month event list
   getEvents().forEach(function(ev){
     var btn = document.getElementById('del-ev-'+ev.id);
     if(btn) btn.onclick = (function(eid){
       return function(e){ e.stopPropagation(); deleteEvent(eid); };
     })(ev.id);
+    var card = document.getElementById('evc-'+ev.id);
+    if(card) card.onclick = (function(eid){ return function(){ openEventLink(eid); }; })(ev.id);
   });
 }
 
@@ -1568,7 +1570,7 @@ function renderMonthCal(){
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
           '<div style="font-size:14px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+e.time:'')+'</div>'+
-          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+e.title+'</div>'+
+          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+e.title+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+e.site+'</span>':'')+'</div>'+
           (e.note?'<div style="font-size:14px;color:var(--t2);margin-top:2px">'+e.note+'</div>':'')+
           '</div>'+
           '<button id="del-ev-'+e.id+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">✕</button>'+
@@ -1642,7 +1644,7 @@ function renderEvCard(e){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div style="flex:1">'+
     (e.time?'<div class="ev-time">⏰ '+e.time+'</div>':'')+
-    '<div class="ev-title">'+e.title+'</div>'+
+    '<div class="ev-title">'+e.title+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+e.site+'</span>':'')+'</div>'+
     (e.note?'<div class="ev-note">'+e.note+'</div>':'')+
     (e.recurring?'<div class="rec-badge">🔄 '+(RECUR_HE[e.recurring]||e.recurring)+'</div>':'')+
     '</div>'+
@@ -1669,10 +1671,12 @@ function showDayEvents(dk){
 
   document.getElementById('add-ev-day').onclick=function(){closeModal();showAddEvent(dk);};
   document.querySelector('.modal-overlay').onclick=function(e){if(e.target===this)closeModal();};
-  // Bind delete buttons
+  // Bind delete buttons + card-tap navigation
   evs.forEach(function(e){
     var btn=document.getElementById('del-'+e.id);
     if(btn)btn.onclick=function(ev){ev.stopPropagation();deleteEvent(e.id);};
+    var card=document.getElementById('evc-'+e.id);
+    if(card)card.onclick=function(){openEventLink(e.id);};
   });
 }
 
@@ -1685,6 +1689,11 @@ function showAddEvent(dateStr){
     '<label class="form-label">תאריך</label><input id="ev-date" type="date" class="form-input" value="'+td+'" style="direction:ltr"/>'+
     '<label class="form-label">שעה (אופציונלי)</label><input id="ev-time" type="time" class="form-input" style="direction:ltr"/>'+
     '<label class="form-label">הערה</label><input id="ev-note" class="form-input" placeholder="פרטים..."/>'+
+    '<label class="form-label">אתר מקושר (אופציונלי)</label>'+
+    '<select id="ev-site" class="form-select" style="margin-bottom:12px">'+
+    '<option value="">ללא</option>'+
+    getEvents.__sitesOptions()+
+    '</select>'+
     '<label class="form-label">חזרה</label>'+
     '<select id="ev-rec" class="form-select" style="margin-bottom:12px">'+
     '<option value="">ללא</option><option value="daily">יומי</option>'+
@@ -1704,6 +1713,11 @@ function showAddEvent(dateStr){
   document.getElementById('cancel-ev-btn').onclick=closeModal;
   document.getElementById('save-ev-btn').onclick=doAddEvent;
 }
+getEvents.__sitesOptions = function(){
+  return (state.sites||[]).map(function(s){
+    return '<option value="'+s.name.replace(/"/g,'&quot;')+'">'+s.name+'</option>';
+  }).join('');
+}
 
 
 function doAddEvent(){
@@ -1716,7 +1730,8 @@ function doAddEvent(){
     date:date,
     time:document.getElementById('ev-time').value,
     note:document.getElementById('ev-note').value,
-    recurring:document.getElementById('ev-recurring').value,
+    site:document.getElementById('ev-site').value||null,
+    recurring:document.getElementById('ev-rec').value,
     color:'var(--bamboo)',
     notify:document.getElementById('ev-notify').value
   };
@@ -1730,6 +1745,27 @@ function deleteEvent(id){
   setState({events:getEvents().filter(function(e){return e.id!==id;})});
   closeModal();
   renderCalendar();
+}
+
+// Clicking an event card jumps to whatever it's actually about: a linked
+// site if one was set, otherwise a best-effort match to an existing task
+// with the same text, otherwise nothing (there's no board to jump to).
+function openEventLink(id){
+  var ev = getEvents().find(function(e){return e.id===id;});
+  if(!ev) return;
+  if(ev.site && state.sites.some(function(s){return s.name===ev.site;})) {
+    siteFilter='all';
+    navigateTo('sites');
+    return;
+  }
+  var norm = function(s){return (s||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'').trim();};
+  var allTasks = [...state.tasks.now,...state.tasks.today,...state.tasks.later];
+  var match = allTasks.find(function(t){return norm(t.text)===norm(ev.title);});
+  if(match) {
+    taskBucket = state.tasks.now.some(function(t){return t.id===match.id;}) ? 'now' :
+                 state.tasks.today.some(function(t){return t.id===match.id;}) ? 'today' : 'later';
+    navigateTo('tasks');
+  }
 }
 
 // ── NOTIFICATIONS ──────────────────────────────────────────────
