@@ -281,15 +281,15 @@ function buildSystemPrompt() {
     '}\n\n' +
     'RULES:\n' +
     '1. now=urgent max 3 (red), today=do today (orange), later=future no date (green)\n' +
-    '2. EVENTS: Extract EVERY task/meeting/deadline into events[] with EXACT calculated date:\n' +
+    '2. EVENTS: put ONLY genuinely date/time-bound items in events[] — a meeting, a deadline, an appointment, something that belongs on a calendar. Do NOT create an events[] entry for every plain task; a task that\'s just "do X" with no specific date/meeting stays ONLY in now/today/later. Calculate exact dates:\n' +
     '   - "in 2 weeks" or "בעוד שבועיים" -> date=' + getTodayPlus(14) + '\n' +
     '   - "tomorrow" or "מחר" -> date=' + getTodayPlus(1) + '\n' +
     '   - "next week" or "שבוע הבא" -> date=' + getTodayPlus(7) + '\n' +
     '   - "in 3 weeks" or "בעוד 3 שבועות" -> date=' + getTodayPlus(21) + '\n' +
     '   - specific date "19.07" -> date=' + td.slice(0,4) + '-07-19\n' +
-    '3. Put EVERY task in events[] with today as default date if no date given\n' +
+    '3. Tasks and events[] are separate and NOT duplicates of each other — a task should appear in events[] only if it is ALSO a real calendar appointment/meeting/deadline, never just to "make sure it\'s visible somewhere".\n' +
     '4. notify always "60" (1 hour before)\n' +
-    '5. events[] must never be empty - add all tasks there too\n' +
+    '5. events[] can be empty — that\'s normal when a message has no actual appointments/deadlines\n' +
     '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.\n' +
     '7. NEXT-ACTION WRITING: write each task.text as ONE concrete, physically-doable next step, not a vague label. Bad: "לטפל בבאר בקלוריה". Good: "להתקשר לדייב על באר קלוריה". If a message describes something with several steps, put ONLY the very next actionable step in text (the rest belongs in the site/event, not the task).\n' +
     '8. CONTEXT: set "context" to the situation needed to actually do the task — "phone" (call/text/email from anywhere), "office" (needs computer/files/Monday.com), "site" (must be physically at the location), or null if unclear. Infer from verbs: "להתקשר/לשלוח הודעה"->phone, "לעדכן את מאנדיי/לכתוב דוח"->office, "לבדוק/לתקן/לבקר"->site.';
@@ -363,6 +363,15 @@ function checkChronology() {
       state.tasks.now = state.tasks.now.filter(t => t.done)
       changed = true
     }
+    // Completed tasks used to sit in their bucket forever until deleted one
+    // by one. Anything finished 3+ days ago is cleared out automatically.
+    var cutoff = Date.now() - 3*24*60*60*1000
+    var purge = arr => arr.filter(t => !(t.done && t.completedAt && t.completedAt < cutoff))
+    var before = state.tasks.now.length + state.tasks.today.length + state.tasks.later.length
+    state.tasks.now = purge(state.tasks.now)
+    state.tasks.today = purge(state.tasks.today)
+    state.tasks.later = purge(state.tasks.later)
+    if(state.tasks.now.length + state.tasks.today.length + state.tasks.later.length !== before) changed = true
   }
   if(state.lastSeenDate !== today) { state.lastSeenDate = today; changed = true }
   if(changed) save()
@@ -802,12 +811,11 @@ async function doAnalyze() {
       people: mergePeople(state.people, p.people||[]),
       events: (function(){
         var ts = Date.now(), td = getToday();
-        // The AI already returns EVERY task (now/today/later) as a dated entry in
-        // p.events (see SYSTEM_PROMPT rules 2-5), so this is the single source of
-        // truth for the calendar. We used to ALSO synthesize a duplicate "today"
-        // event for every task here, which created a second, wrongly-dated ghost
-        // entry for anything that actually belonged on another day — that's why
-        // the calendar never looked in sync with what was uploaded from WhatsApp.
+        // events[] is only for genuinely calendar-worthy items (meetings,
+        // deadlines, appointments) per SYSTEM_PROMPT rules 2-3. It used to
+        // mirror EVERY task too — that meant deleting or finishing a task in
+        // the Tasks screen left a duplicate "ghost" entry behind on the
+        // calendar forever, since the two had no link back to each other.
         var aiEvs = (p.events||[]).map(function(e,i){
           return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
                   note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)'};
@@ -886,6 +894,7 @@ function taskCard(t) {
         <div onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?'✓':''}</div>
         <div style="flex:1">
           <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          ${t.photo?`<img src="${t.photo}" onclick="viewPhoto('${t.photo}')" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
             ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
@@ -893,8 +902,11 @@ function taskCard(t) {
             ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">⏰ ${t.time}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
-        ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px;flex-shrink:0">✎</button>`:''}
-        ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px;flex-shrink:0">🗑</button>`:''}
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          ${!t.done?`<button onclick="showAddTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">✎</button>`:''}
+          ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">🖌️</button>`:''}
+          ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px">🗑</button>`:''}
+        </div>
       </div>
     </div>`
 }
@@ -908,7 +920,8 @@ function deleteTask(id) {
 
 function toggleTask(id) {
   const wasUndone = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(t=>t.id===id&&!t.done)
-  const toggle = arr => arr.map(t=>t.id===id?{...t,done:!t.done}:t)
+  const now = Date.now()
+  const toggle = arr => arr.map(t=>t.id===id?{...t,done:!t.done,completedAt:!t.done?now:null}:t)
   const patch = {tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}}
   if(wasUndone) {
     const today = getToday()
@@ -922,39 +935,100 @@ function toggleTask(id) {
   if(wasUndone){playTaskComplete();showRipple();}
 }
 
-function showAddTask() {
+// ── PHOTO ATTACHMENTS ────────────────────────────
+// Images are downsized client-side before being stored (localStorage has a
+// hard size ceiling per origin), so a phone photo becomes a small JPEG
+// thumbnail rather than a multi-MB original.
+let pendingPhoto = null
+function readImageAsThumbnail(file, cb) {
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    const img = new Image()
+    img.onload = function() {
+      const maxW = 720
+      const scale = Math.min(1, maxW / img.width)
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      cb(canvas.toDataURL('image/jpeg', 0.6))
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+function handlePhotoPick(input, previewId) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    pendingPhoto = dataUrl
+    renderPhotoPreview(previewId)
+  })
+}
+function removePendingPhoto(previewId) {
+  pendingPhoto = null
+  renderPhotoPreview(previewId)
+}
+function renderPhotoPreview(previewId) {
+  const prev = document.getElementById(previewId); if(!prev) return
+  prev.innerHTML = pendingPhoto
+    ? '<div style="position:relative"><img src="'+pendingPhoto+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>'+
+      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:14px">✕ הסר</button></div>'
+    : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>'
+}
+function photoInputHtml(inputId, previewId, existingPhoto) {
+  pendingPhoto = existingPhoto || null
+  return '<div style="margin-bottom:14px">'+
+    '<label class="form-label">תמונה (רשות)</label>'+
+    '<input type="file" accept="image/*" id="'+inputId+'" onchange="handlePhotoPick(this,\''+previewId+'\')" style="display:none"/>'+
+    '<div id="'+previewId+'" onclick="document.getElementById(\''+inputId+'\').click()" style="border:1.5px dashed var(--line);border-radius:10px;padding:14px;cursor:pointer;background:#ffffff">'+
+    (existingPhoto ? '<img src="'+existingPhoto+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>' : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>')+
+    '</div></div>'
+}
+function viewPhoto(src) {
+  document.getElementById('modal-container').innerHTML =
+    '<div class="modal-overlay" onclick="closeModal()" style="align-items:center;justify-content:center;padding:20px">'+
+    '<img src="'+src+'" style="max-width:100%;max-height:80vh;border-radius:14px"/>'+
+    '</div>'
+}
+
+let editingTaskId = null
+function showAddTask(id) {
+  editingTaskId = id || null
+  const t = id ? [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) : null
+  const bucketOf = id ? (state.tasks.now.some(x=>x.id===id)?'now':state.tasks.today.some(x=>x.id===id)?'today':'later') : 'now'
   const modal = document.getElementById('modal-container')
   modal.innerHTML = `
     <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
       <div class="modal">
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ משימה חדשה</div>
-        <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none"></textarea>
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?'✎ עריכת משימה':'+ משימה חדשה'}</div>
+        <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?t.text:''}</textarea>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div><label class="form-label">אחראי</label>
             <select id="add-task-assignee" class="form-select">
-              <option value="uri">אני</option><option value="gio">ג'יו</option>
-              <option value="kenneth">קנת'</option><option value="asc">ASC</option><option value="11-16">11-16</option>
+              <option value="uri" ${t&&t.assignee==='uri'?'selected':''}>אני</option><option value="gio" ${t&&t.assignee==='gio'?'selected':''}>ג'יו</option>
+              <option value="kenneth" ${t&&t.assignee==='kenneth'?'selected':''}>קנת'</option><option value="asc" ${t&&t.assignee==='asc'?'selected':''}>ASC</option><option value="11-16" ${t&&t.assignee==='11-16'?'selected':''}>11-16</option>
             </select></div>
           <div><label class="form-label">מתי</label>
             <select id="add-task-bucket" class="form-select">
-              <option value="now">עכשיו</option><option value="today">היום</option><option value="later">אחר כך</option>
+              <option value="now" ${bucketOf==='now'?'selected':''}>עכשיו</option><option value="today" ${bucketOf==='today'?'selected':''}>היום</option><option value="later" ${bucketOf==='later'?'selected':''}>אחר כך</option>
             </select></div>
           <div><label class="form-label">עדיפות</label>
             <select id="add-task-color" class="form-select">
-              <option value="red">דחוף</option><option value="orange">חשוב</option><option value="green">שוטף</option>
+              <option value="red" ${t&&t.color==='red'?'selected':''}>דחוף</option><option value="orange" ${!t||t.color==='orange'?'selected':''}>חשוב</option><option value="green" ${t&&t.color==='green'?'selected':''}>שוטף</option>
             </select></div>
         </div>
         <div style="margin-bottom:14px">
           <label class="form-label">הקשר — איפה אפשר לבצע?</label>
           <select id="add-task-context" class="form-select">
-            <option value="">לא ידוע</option>
-            <option value="phone">📞 טלפון</option>
-            <option value="office">💻 משרד</option>
-            <option value="site">📍 באתר</option>
+            <option value="" ${!t||!t.context?'selected':''}>לא ידוע</option>
+            <option value="phone" ${t&&t.context==='phone'?'selected':''}>📞 טלפון</option>
+            <option value="office" ${t&&t.context==='office'?'selected':''}>💻 משרד</option>
+            <option value="site" ${t&&t.context==='site'?'selected':''}>📍 באתר</option>
           </select>
         </div>
+        ${photoInputHtml('add-task-photo-input','add-task-photo-preview', t?t.photo:null)}
         <div style="display:flex;gap:8px">
-          <button class="btn-primary" style="flex:1" onclick="doAddTask()">הוסף</button>
+          <button class="btn-primary" style="flex:1" onclick="doAddTask()">${t?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
       </div>
@@ -965,10 +1039,26 @@ function doAddTask() {
   const text = document.getElementById('add-task-text').value.trim()
   if(!text) return
   const context = document.getElementById('add-task-context').value || null
-  const task = {id:`m${Date.now()}`,text,assignee:document.getElementById('add-task-assignee').value,color:document.getElementById('add-task-color').value,done:false,site:null,context}
+  const assignee = document.getElementById('add-task-assignee').value
+  const color = document.getElementById('add-task-color').value
   const bucket = document.getElementById('add-task-bucket').value
-  setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
-  playTaskAdd(); closeModal()
+  const photo = pendingPhoto
+
+  if(editingTaskId) {
+    const id = editingTaskId
+    const strip = arr => arr.filter(x=>x.id!==id)
+    const original = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) || {}
+    const updated = {...original, text, assignee, color, context, photo}
+    const next = {now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}
+    next[bucket] = [...next[bucket], updated]
+    setState({tasks:next})
+    editingTaskId = null
+  } else {
+    const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,photo}
+    setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
+    playTaskAdd()
+  }
+  closeModal()
 }
 
 // ── SITES ────────────────────────────────────────
@@ -996,6 +1086,14 @@ function renderSites() {
     </div>`
 }
 
+function mapsLinkFor(loc) {
+  if(!loc) return ''
+  const coordMatch = loc.trim().match(/^-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+$/)
+  return coordMatch
+    ? 'https://www.google.com/maps?q=' + encodeURIComponent(loc.trim())
+    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc.trim())
+}
+
 function siteCard(s) {
   const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#6b6255'
   return `
@@ -1003,14 +1101,18 @@ function siteCard(s) {
       <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${s.name}</div>
       ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${s.province}</div>`:''}
       ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
+      ${s.photo?`<img src="${s.photo}" onclick="viewPhoto('${s.photo}')" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
         <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
+        ${s.location?`<a href="${mapsLinkFor(s.location)}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🗺️ Maps</a>`:''}
+        ${s.mondayLink?`<a href="${s.mondayLink}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🔗 Monday.com</a>`:''}
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
           <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
+        <button onclick="showAddSite('${s.name.replace(/'/g,"\\'")}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">✎</button>
         <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">🖌️</button>
       </div>
     </div>`
@@ -1019,26 +1121,35 @@ function siteCard(s) {
 function setSiteFilter(f) { siteFilter=f; renderSites() }
 function updateSiteStatus(name, status) { setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)}) }
 
-function showAddSite() {
+let editingSiteName = null
+function showAddSite(name) {
+  editingSiteName = name || null
+  const s = name ? state.sites.find(x=>x.name===name) : null
   document.getElementById('modal-container').innerHTML = `
     <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
       <div class="modal">
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ אתר חדש</div>
-        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well"/>
-        <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya"/>
-        <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08"/>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?'✎ עריכת אתר':'+ אתר חדש'}</div>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?s.name:''}"/>
+        <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?s.province||'':''}"/>
+        <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?s.issue||'':''}"/>
+        <label class="form-label">מיקום / קואורדינטות</label>
+        <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?s.location||'':''}"/>
+        <div style="font-size:12px;color:#948a7a;margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
+        <label class="form-label">קישור Monday.com (רשות)</label>
+        <input id="add-site-monday" class="form-input" placeholder="הדבק קישור לפריט ב-Monday" value="${s?s.mondayLink||'':''}" style="direction:ltr"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;margin-top:12px">
           <div><label class="form-label">קבלן</label>
             <select id="add-site-contractor" class="form-select">
-              <option value="">—</option><option value="asc">ASC</option><option value="11-16">11-16</option>
+              <option value="" ${!s||!s.contractor?'selected':''}>—</option><option value="asc" ${s&&s.contractor==='asc'?'selected':''}>ASC</option><option value="11-16" ${s&&s.contractor==='11-16'?'selected':''}>11-16</option>
             </select></div>
           <div><label class="form-label">סטטוס</label>
             <select id="add-site-status" class="form-select">
-              <option value="open">פתוח</option><option value="pending">ממתין</option><option value="resolved">נפתר</option>
+              <option value="open" ${!s||s.status==='open'?'selected':''}>פתוח</option><option value="pending" ${s&&s.status==='pending'?'selected':''}>ממתין</option><option value="resolved" ${s&&s.status==='resolved'?'selected':''}>נפתר</option>
             </select></div>
         </div>
+        ${photoInputHtml('add-site-photo-input','add-site-photo-preview', s?s.photo:null)}
         <div style="display:flex;gap:8px">
-          <button class="btn-primary" style="flex:1" onclick="doAddSite()">הוסף</button>
+          <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
       </div>
@@ -1048,7 +1159,24 @@ function showAddSite() {
 function doAddSite() {
   const name = document.getElementById('add-site-name').value.trim()
   if(!name) return
-  setState({sites:[...state.sites,{name,province:document.getElementById('add-site-province').value,issue:document.getElementById('add-site-issue').value,contractor:document.getElementById('add-site-contractor').value,status:document.getElementById('add-site-status').value,id:Date.now()}]})
+  const site = {
+    name,
+    province:document.getElementById('add-site-province').value,
+    issue:document.getElementById('add-site-issue').value,
+    location:document.getElementById('add-site-location').value.trim(),
+    mondayLink:document.getElementById('add-site-monday').value.trim(),
+    contractor:document.getElementById('add-site-contractor').value,
+    status:document.getElementById('add-site-status').value,
+    photo:pendingPhoto
+  }
+  if(editingSiteName) {
+    site.id = (state.sites.find(x=>x.name===editingSiteName)||{}).id || Date.now()
+    setState({sites:state.sites.map(x=>x.name===editingSiteName?site:x)})
+    editingSiteName = null
+  } else {
+    site.id = Date.now()
+    setState({sites:[...state.sites, site]})
+  }
   closeModal()
 }
 
@@ -1219,6 +1347,11 @@ function renderSettings() {
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧹 ניקוי כפילויות בלוח</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
+        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">נקה כפילויות</button>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
         <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:14px">נקה הכל</button>
@@ -1230,6 +1363,18 @@ function renderSettings() {
         <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
       </div>
     </div>`
+}
+
+function dedupeEvents() {
+  const btn = document.getElementById('dedupe-btn')
+  const allTasks = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const norm = s => (s||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'').trim()
+  const taskTexts = new Set(allTasks.map(t=>norm(t.text)).filter(Boolean))
+  const before = state.events.length
+  const kept = state.events.filter(e => !taskTexts.has(norm(e.title)))
+  const removed = before - kept.length
+  setState({events:kept})
+  if(btn) { btn.textContent = removed>0 ? `נוקו ${removed} כפילויות ✓` : 'לא נמצאו כפילויות'; setTimeout(()=>{if(btn)btn.textContent='נקה כפילויות'},2500) }
 }
 
 async function forceRefreshApp() {
@@ -1267,7 +1412,7 @@ function confirmClear() {
 }
 
 // ── MODAL ─────────────────────────────────────────
-function closeModal() { document.getElementById('modal-container').innerHTML='' }
+function closeModal() { document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
 
 // ── CLAUDE API ────────────────────────────────────
 const SYSTEM_PROMPT = buildSystemPrompt()
