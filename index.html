@@ -274,7 +274,7 @@ function buildSystemPrompt() {
     '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":"","context":"phone/office/site or null"}],' +
     '"today":[],' +
     '"later":[],' +
-    '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved"}],' +
+    '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved","location":"coordinates or address if mentioned, else null","mondayLink":"a literal monday.com URL if one appears in the text, else null","remo":"REMO number if mentioned, else null","year":"2024/2025/2026 contract year if mentioned or inferable, else null"}],' +
     '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
     '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60","site":"matching site name or null"}],' +
     '"focus":"Hebrew sentence"' +
@@ -293,7 +293,8 @@ function buildSystemPrompt() {
     '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.\n' +
     '7. NEXT-ACTION WRITING: write each task.text as ONE concrete, physically-doable next step, not a vague label. Bad: "לטפל בבאר בקלוריה". Good: "להתקשר לדייב על באר קלוריה". This applies WITHIN a single task that has several sequential steps — put only the very next step in text (the rest belongs in the site/event, not the task). It does NOT mean collapsing several separate tasks into one — see rule 9.\n' +
     '8. CONTEXT: set "context" to the situation needed to actually do the task — "phone" (call/text/email from anywhere), "office" (needs computer/files/Monday.com), "site" (must be physically at the location), or null if unclear. Infer from verbs: "להתקשר/לשלוח הודעה"->phone, "לעדכן את מאנדיי/לכתוב דוח"->office, "לבדוק/לתקן/לבקר"->site.\n' +
-    '9. SPLITTING: one pasted message can contain several genuinely separate, independent action items — different people, different sites, or clearly unrelated asks, even in a single paragraph or sentence (e.g. "תתקשר לדייב על הבאר בקלוריה ותעדכן את נובי שהגנרטור בסטה קרוז מוכן" is TWO tasks, not one). Create a separate now/today/later entry for EACH distinct item — never merge unrelated asks into one, and never silently drop one because you only kept "the next" one. Likewise if a message mentions more than one site or contractor issue, create a separate entry in sites[] for each one. When in doubt about whether something is one task or two, prefer splitting.';
+    '9. SPLITTING: one pasted message can contain several genuinely separate, independent action items — different people, different sites, or clearly unrelated asks, even in a single paragraph or sentence (e.g. "תתקשר לדייב על הבאר בקלוריה ותעדכן את נובי שהגנרטור בסטה קרוז מוכן" is TWO tasks, not one). Create a separate now/today/later entry for EACH distinct item — never merge unrelated asks into one, and never silently drop one because you only kept "the next" one. Likewise if a message mentions more than one site or contractor issue, create a separate entry in sites[] for each one. A numbered list (1. 2. 3...) in the message is a strong signal that each number is its own separate item — do not collapse a numbered list into one task. When in doubt about whether something is one task or two, prefer splitting.\n' +
+    '10. SITE DETAILS: when a message gives coordinates (any format: decimal "16.9754, 121.8107" or DMS like 18°17\'50.89"N 121°24\'1.57"E) or a written address for a site, put that exact text in that site\'s "location". If the raw message text contains a literal monday.com URL, put that exact URL in that site\'s "mondayLink". If the message mentions a contract/project year (e.g. "2026 project", "פרויקט 2025") or a REMO number for a site, fill "year"/"remo" accordingly — these often distinguish otherwise-identical site names across different contract years.';
 }
 
 
@@ -1106,6 +1107,8 @@ function siteCard(s) {
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
         <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
+        ${s.year?`<span class="tag">📅 ${s.year}</span>`:''}
+        ${s.remo?`<span class="tag">REMO ${s.remo}</span>`:''}
         ${s.location?`<a href="${mapsLinkFor(s.location)}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🗺️ Maps</a>`:''}
         ${s.mondayLink?`<a href="${s.mondayLink}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🔗 Monday.com</a>`:''}
       </div>
@@ -1148,6 +1151,17 @@ function showAddSite(name) {
               <option value="open" ${!s||s.status==='open'?'selected':''}>פתוח</option><option value="pending" ${s&&s.status==='pending'?'selected':''}>ממתין</option><option value="resolved" ${s&&s.status==='resolved'?'selected':''}>נפתר</option>
             </select></div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div><label class="form-label">מספר REMO</label>
+            <input id="add-site-remo" class="form-input" placeholder="REMO-1234" value="${s?s.remo||'':''}" style="direction:ltr"/></div>
+          <div><label class="form-label">שנת חוזה</label>
+            <select id="add-site-year" class="form-select">
+              <option value="" ${!s||!s.year?'selected':''}>—</option>
+              <option value="2024" ${s&&s.year==='2024'?'selected':''}>2024</option>
+              <option value="2025" ${s&&s.year==='2025'?'selected':''}>2025</option>
+              <option value="2026" ${s&&s.year==='2026'?'selected':''}>2026</option>
+            </select></div>
+        </div>
         ${photoInputHtml('add-site-photo-input','add-site-photo-preview', s?s.photo:null)}
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
@@ -1166,6 +1180,8 @@ function doAddSite() {
     issue:document.getElementById('add-site-issue').value,
     location:document.getElementById('add-site-location').value.trim(),
     mondayLink:document.getElementById('add-site-monday').value.trim(),
+    remo:document.getElementById('add-site-remo').value.trim(),
+    year:document.getElementById('add-site-year').value,
     contractor:document.getElementById('add-site-contractor').value,
     status:document.getElementById('add-site-status').value,
     photo:pendingPhoto
@@ -1434,7 +1450,14 @@ async function callClaude(messages, system=null) {
 
 // ── MERGE HELPERS ────────────────────────────────
 function mergeSites(ex, inc) {
-  const m={}; ex.forEach(s=>m[s.name]=s); inc.forEach(s=>m[s.name]={...(m[s.name]||{}),...s}); return Object.values(m)
+  const m={}; ex.forEach(s=>m[s.name]=s);
+  inc.forEach(s=>{
+    const prev = m[s.name]||{}
+    const clean = {}
+    Object.keys(s).forEach(k=>{ if(s[k]!==null && s[k]!=='' && s[k]!==undefined) clean[k]=s[k] })
+    m[s.name] = {...prev, ...clean}
+  });
+  return Object.values(m)
 }
 function mergePeople(ex, inc) {
   const m={}; ex.forEach(p=>m[p.name]=p); inc.forEach(p=>m[p.name]={...(m[p.name]||{}),...p}); return Object.values(m)
