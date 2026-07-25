@@ -336,21 +336,17 @@ function syncStateToServer() {
 }
 async function loadStateFromServer() {
   if(!serverConfigured()) return
-  try {
-    const r = await fetch(serverUrl + '/api/state', {headers:{'Authorization':'Bearer '+serverPasscode}})
-    if(!r.ok) throw new Error('status '+r.status)
-    const d = await r.json()
-    if(d.data) {
-      // Server already has real data — it becomes the source of truth.
-      state = d.data
-      save()
-    } else {
-      // First connection: nothing on the server yet. This device's existing
-      // local data becomes the seed (the one-time migration).
-      syncStateToServer()
-    }
-  } catch(e) {
-    console.log('could not reach server, continuing with local data:', e)
+  const r = await fetch(serverUrl + '/api/state', {headers:{'Authorization':'Bearer '+serverPasscode}})
+  if(!r.ok) throw new Error('status '+r.status)
+  const d = await r.json()
+  if(d.data) {
+    // Server already has real data — it becomes the source of truth.
+    state = d.data
+    save()
+  } else {
+    // First connection: nothing on the server yet. This device's existing
+    // local data becomes the seed (the one-time migration).
+    syncStateToServer()
   }
 }
 
@@ -1420,7 +1416,7 @@ function renderSettings() {
         <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
         <input id="settings-server-passcode" type="password" value="${serverPasscode}" placeholder="הסיסמה שהגדרת ב-Cloudflare" class="form-input" style="direction:ltr;margin-bottom:12px"/>
         <div style="display:flex;gap:8px">
-          <button class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
+          <button id="server-save-btn" class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
           <button id="server-test-btn" onclick="testServerConfig()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px">בדוק חיבור</button>
         </div>
       </div>
@@ -1488,15 +1484,26 @@ function saveApiKey() {
   setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
 }
 
-function saveServerConfig() {
+async function saveServerConfig() {
   serverUrl = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
   serverPasscode = document.getElementById('settings-server-passcode').value.trim()
   localStorage.setItem('fieldy_server_url', serverUrl)
   localStorage.setItem('fieldy_passcode', serverPasscode)
-  if(!serverConfigured()) { renderSettings(); return }
-  loadStateFromServer().then(function(){
-    checkChronology(); refreshBadges(); renderSettings()
-  })
+  const btn = document.getElementById('server-save-btn')
+  if(!serverConfigured()) {
+    if(btn) { btn.textContent = 'נשמר (בלי חיבור)'; setTimeout(()=>renderSettings(), 1400) }
+    else renderSettings()
+    return
+  }
+  if(btn) { btn.textContent = 'מתחבר...'; btn.disabled = true }
+  try {
+    await loadStateFromServer()
+    checkChronology(); refreshBadges()
+    if(btn) { btn.textContent = '✓ מחובר וסונכרן!'; btn.style.background = '#1a8f7a' }
+  } catch(e) {
+    if(btn) { btn.textContent = '✕ נכשל, נשמר מקומית'; btn.style.background = '#c0392b' }
+  }
+  setTimeout(()=>renderSettings(), 1800)
 }
 
 async function testServerConfig() {
@@ -2279,7 +2286,7 @@ if(serverConfigured()) {
     checkChronology()
     refreshBadges()
     renderCurrentScreen()
-  })
+  }).catch(function(e){ console.log('boot: server unreachable, continuing with local data:', e) })
 }
 setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
 if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
