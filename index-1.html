@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#f6efdb"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Fieldy"/>
+<link rel="manifest" href="/Fieldy/manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Fieldy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#f6efdb;color:#211d17;direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:15px}
+.font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+textarea,select,input{font-family:inherit}
+#app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.hidden{display:none!important}
+/* Nav */
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#f0e7cf;border-top:1px solid var(--line);display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:6px 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
+.nav-icon{display:flex;align-items:center;justify-content:center;line-height:1}
+.nav-label{font-size:10.5px;color:#948a7a;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-btn.active .nav-label{color:var(--gold);font-weight:700}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#e8940c;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
+/* Cards */
+.card{background:#ffffff;border-radius:14px;padding:14px;margin-bottom:8px}
+.card-red{border:1.5px solid #ef444460;background:#fdeaea}
+.card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
+.card-green{border:1.5px solid #4ade8060;background:#4ade8018}
+/* Buttons */
+.btn-primary{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:16px;font-weight:700;display:block;border:none;cursor:pointer}
+.btn-secondary{padding:14px 18px;border-radius:12px;border:1px solid #b0a68f;background:transparent;color:#6b6255;font-size:14px;cursor:pointer}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#ffffff;width:100%;max-width:430px;border-radius:18px 18px 0 0;padding:22px 16px 40px;max-height:85vh;overflow-y:auto}
+/* Form */
+.form-label{font-size:14px;color:#6b6255;margin-bottom:4px;display:block}
+.form-input{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:11px 12px;color:#211d17;font-size:14px;outline:none;display:block;margin-bottom:10px;direction:rtl}
+.form-select{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:8px;padding:10px 8px;color:#211d17;font-size:14px;outline:none}
+/* Tags */
+.tag{font-size:14px;padding:3px 9px;border-radius:99px;background:#f0e7cf;color:#6b6255}
+.tag-red{background:#ef444422;color:#ef4444;font-weight:600}
+.tag-orange{background:#f59e0b22;color:#f59e0b;font-weight:600}
+.tag-green{background:#4ade8022;color:#4ade80;font-weight:600}
+.tag-status-open{background:#ef444422;color:#ef4444;font-weight:600}
+.tag-status-pending{background:#f59e0b22;color:#f59e0b;font-weight:600}
+.tag-status-resolved{background:#4ade8022;color:#4ade80;font-weight:600}
+/* Checkbox */
+.cb{width:26px;height:26px;border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;transition:all 0.15s;border:2px solid}
+/* Progress */
+.progress-bar{background:#eee3c9;border-radius:99px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.4s;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+/* Screens header */
+.screen-header{padding:48px 16px 12px;background:linear-gradient(180deg,#fdf9ee,#f6efdb);position:sticky;top:0;z-index:10}
+/* Empty state */
+.empty{text-align:center;padding:60px 0;color:#b0a68f}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-text{font-size:14px}
+/* Action result */
+.action-result{background:#ffffff;border:1px solid var(--line);border-radius:14px;padding:16px;font-size:15px;color:#211d17;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
+
+/* Console Palette — warm cream + amber accent (light, reading-app inspired) */
+:root{
+  --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
+  --washi:#211d17;--warm:#3d362c;
+  --matcha:#946011;--matcha2:#8a7550;
+  --gold:#b8790f;--gold2:#c9930f;
+  --terracotta:#8b4513;--rust:#a0522d;
+  --cherry:#b8790f;
+  --text1:#211d17;--text2:#6b6255;--text3:#948a7a;
+  --t1:#211d17;--t2:#6b6255;--t3:#948a7a;--t4:#b0a68f;
+  --bamboo:#b8790f;--bamboo2:#946011;--sprout:#b8790f;
+  --border:rgba(43,38,32,.14);--glass2:rgba(255,255,255,.92);
+  --line:rgba(43,38,32,.09);
+}
+.tao-screen{background:linear-gradient(180deg,#f6efdb 0%,#f6efdb 100%);min-height:100%}
+.tao-card{background:linear-gradient(135deg,#fdf9ee,#fdf9ee);border:1px solid #a8711a;border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.tao-verse{font-size:16px;line-height:2.4;color:#211d17;text-align:center;font-weight:300;letter-spacing:0.5px}
+.tao-chapter-num{font-size:14px;color:#b8790f;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center}
+.tao-title{font-size:14px;color:#6b6255;text-align:center;margin-bottom:16px;font-style:italic}
+.med-timer{font-size:48px;font-weight:200;color:#211d17;text-align:center;letter-spacing:4px}
+.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #a8711a;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
+.breath-text{font-size:18px;color:#e8c15c;text-align:center;margin-top:16px;font-weight:300;letter-spacing:1px}
+.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#a8711a}
+@keyframes ripple{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
+.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #a8711a;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
+
+
+/* === CONSOLE ATMOSPHERE === */
+
+body {
+  background: #f6efdb;
+}
+
+/* Flat header, no wash gradient */
+.screen-header {
+  background: #f6efdb !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+/* Flat cards — thin hairline border, no blur, no glow */
+.card {
+  background: var(--ink3) !important;
+  border: 1px solid var(--line) !important;
+  transition: border-color 0.15s;
+}
+
+/* Flat nav, no blur */
+#nav {
+  background: #fdf9ee !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+/* Active nav: flat accent color + underline, no glow */
+.nav-btn.active .nav-icon svg { stroke: var(--gold); }
+.nav-btn .nav-icon svg { stroke: var(--t3); transition: stroke .15s; }
+.nav-btn.active::after {
+  content:'';
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:20px; height:2px; background:var(--gold); border-radius:2px;
+}
+
+.success-ring {
+  border-color: var(--gold) !important;
+}
+
+/* Flat modal, thin top rule */
+.modal {
+  background: #fffdf6 !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+.screen {
+  transition: opacity 0.15s ease;
+}
+
+/* Tao screen keeps its own quiet, separate dark atmosphere on purpose */
+#screen-tao {
+  background: linear-gradient(180deg, #f6efdb 0%, #f6efdb 100%);
+}
+
+.form-input, .form-select {
+  background: #fffdf6 !important;
+  border: 1px solid var(--line) !important;
+  color: var(--text1) !important;
+}
+
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius: 99px; }
+
+/* Signature: a single quiet topographic contour, not a bamboo garden —
+   ties back to the actual subject (field survey / terrain), used once, faint. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20430%20800'%20opacity='0.05'%3E%3Cstyle%3Epath%7Bfill:none;stroke:%23c9a227;stroke-width:1%7D%3C/style%3E%3Cpath%20d='M-20%20120%20Q100%2080%20220%20130%20Q320%20170%20460%20110'/%3E%3Cpath%20d='M-20%20180%20Q110%20145%20230%20190%20Q330%20225%20460%20170'/%3E%3Cpath%20d='M-20%20560%20Q120%20520%20240%20565%20Q330%20600%20460%20545'/%3E%3Cpath%20d='M-20%20620%20Q130%20585%20250%20625%20Q340%20655%20460%20605'/%3E%3Cpath%20d='M-20%20680%20Q140%20648%20260%20685%20Q350%20712%20460%20665'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+}
+
+#screen-tao::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20430%20800%27%20opacity%3D%270.05%27%3E%0A%20%20%3Cstyle%3Eellipse%7Bfill%3Anone%3Bstroke%3A%23c9a227%3Bstroke-width%3A1%7D%3C/style%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2720%27%20ry%3D%278%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2750%27%20ry%3D%2720%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%2790%27%20ry%3D%2736%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27140%27%20ry%3D%2756%27/%3E%0A%20%20%3Cellipse%20cx%3D%27215%27%20cy%3D%27680%27%20rx%3D%27200%27%20ry%3D%2780%27/%3E%0A%3C/svg%3E");
+  background-size: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#screen-tao > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cal-header{padding:52px 18px 12px;background:#f6efdb;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav-btn{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:8px 14px;color:var(--t2);font-size:18px;cursor:pointer}
+.cal-month-title{font-size:18px;font-weight:700;color:var(--t1);text-align:center}
+.cal-view-tabs{display:flex;gap:4px}
+.cal-view-tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
+.cal-view-tab.active{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid rgba(201,162,39,.25)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 8px 2px}
+.cal-weekday{font-size:14px;color:var(--t3);text-align:center;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 8px;gap:2px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;border:1px solid transparent}
+.cal-day.today{background:rgba(201,162,39,.14);border-color:var(--gold)}
+.cal-day.today .cal-dn{color:var(--gold);font-weight:800}
+.cal-day.other-month .cal-dn{color:var(--t4)}
+.cal-dn{font-size:14px;font-weight:500;color:var(--t2);line-height:1}
+.cal-dots{display:flex;gap:2px;margin-top:2px}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.ev-card{background:var(--ink3);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:3px solid var(--gold);cursor:pointer}
+.ev-time{font-size:14px;color:var(--gold);font-weight:700;margin-bottom:3px}
+.ev-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4}
+.ev-note{font-size:14px;color:var(--t2);margin-top:3px;line-height:1.5}
+.week-row{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);min-height:52px;cursor:pointer}
+.week-dlabel{width:36px;flex-shrink:0}
+.week-dname{font-size:14px;color:var(--t3);font-weight:600}
+.week-dnum{font-size:18px;font-weight:700;color:var(--t2);line-height:1}
+.week-dnum.today{color:var(--sprout)}
+.week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:8px;padding:5px 10px;margin-bottom:4px;font-size:14px;color:var(--t1);font-weight:500}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="screen-home" class="screen"></div>
+  <div id="screen-tasks" class="screen hidden"></div>
+  <div id="screen-sites" class="screen hidden"></div>
+  <div id="screen-people" class="screen hidden"></div>
+  <div id="screen-tao" class="screen hidden"></div>
+  <div id="screen-calendar" class="screen hidden"></div>
+  <div id="screen-input" class="screen hidden"></div>
+  <div id="screen-action" class="screen hidden"></div>
+  <div id="screen-settings" class="screen hidden"></div>
+  <nav id="nav">
+    <button class="nav-btn active" data-screen="home">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
+      <span class="nav-label">בית</span>
+    </button>
+    <button class="nav-btn" data-screen="tasks">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
+      <span class="nav-label">משימות</span>
+      <span class="nav-badge hidden" id="badge-tasks">0</span>
+    </button>
+    <button class="nav-btn" data-screen="sites">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span>
+      <span class="nav-label">אתרים</span>
+      <span class="nav-badge hidden" id="badge-sites">0</span>
+    </button>
+    <button class="nav-btn" data-screen="people">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8"/><circle cx="17" cy="7" r="2.6"/><path d="M15.5 14.3c2.6.4 4.4 2.3 4.9 5.2"/></svg></span>
+      <span class="nav-label">אנשים</span>
+      <span class="nav-badge hidden" id="badge-people">0</span>
+    </button>
+      <button class="nav-btn" data-screen="calendar"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/></svg></span><span class="nav-label">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/></svg></span><span class="nav-label">טאו</span></button>
+  </nav>
+</div>
+<div id="modal-container"></div>
+
+<script>var medInterval = null;
+var medSeconds = 0;
+var medTotal = 0;
+var musicMuted = false;
+var selectedVoiceIdx = -1;
+var ambientNodes = [];
+var ambientGain = null;
+
+
+function getTodayPlus(days) {
+  var d = new Date(); d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getToday() { return getTodayPlus(0); }
+function buildSystemPrompt() {
+  var td = getToday();
+  return 'You are a field assistant for Uri (IAI Philippines Regional Manager). Today=' + td + '\n' +
+    'Dates: tomorrow=' + getTodayPlus(1) + ', in2days=' + getTodayPlus(2) + ', nextweek=' + getTodayPlus(7) + ', in2weeks=' + getTodayPlus(14) + ', in3weeks=' + getTodayPlus(21) + ', nextmonth=' + getTodayPlus(30) + '\n\n' +
+    'CRITICAL: Return ONLY this exact JSON structure, nothing else:\n' +
+    '{' +
+    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":"","context":"phone/office/site or null","note":"short side-remark attached to this task, or null"}],' +
+    '"today":[],' +
+    '"later":[],' +
+    '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved","location":"coordinates or address if mentioned, else null","mondayLink":"a literal monday.com URL if one appears in the text, else null","remo":"REMO number if mentioned, else null","year":"2024/2025/2026 contract year if mentioned or inferable, else null"}],' +
+    '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
+    '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60","site":"matching site name or null"}],' +
+    '"focus":"Hebrew sentence"' +
+    '}\n\n' +
+    'RULES:\n' +
+    '1. now=urgent max 3 (red), today=do today (orange), later=future no date (green)\n' +
+    '2. EVENTS: put ONLY genuinely date/time-bound items in events[] — a meeting, a deadline, an appointment, something that belongs on a calendar. Do NOT create an events[] entry for every plain task; a task that\'s just "do X" with no specific date/meeting stays ONLY in now/today/later. Calculate exact dates:\n' +
+    '   - "in 2 weeks" or "בעוד שבועיים" -> date=' + getTodayPlus(14) + '\n' +
+    '   - "tomorrow" or "מחר" -> date=' + getTodayPlus(1) + '\n' +
+    '   - "next week" or "שבוע הבא" -> date=' + getTodayPlus(7) + '\n' +
+    '   - "in 3 weeks" or "בעוד 3 שבועות" -> date=' + getTodayPlus(21) + '\n' +
+    '   - specific date "19.07" -> date=' + td.slice(0,4) + '-07-19\n' +
+    '3. Tasks and events[] are separate and NOT duplicates of each other — a task should appear in events[] only if it is ALSO a real calendar appointment/meeting/deadline, never just to "make sure it\'s visible somewhere". If an event is clearly about one of the sites in sites[] (existing or new), set its "site" field to that exact site name so tapping the calendar item can jump to that site.\n' +
+    '4. notify always "60" (1 hour before)\n' +
+    '5. events[] can be empty — that\'s normal when a message has no actual appointments/deadlines\n' +
+    '6. If a now/today/later item names a specific clock time (e.g. "בעוד דקות ב-10:03", "פגישה ב-14:00"), also fill that item\'s "time" (HH:MM 24h) and "date" (default ' + td + ' if unstated) — this lets the app auto-detect once that time has passed.\n' +
+    '7. NEXT-ACTION WRITING: write each task.text as ONE concrete, physically-doable next step, not a vague label. Bad: "לטפל בבאר בקלוריה". Good: "להתקשר לדייב על באר קלוריה". This applies WITHIN a single task that has several sequential steps — put only the very next step in text (the rest belongs in the site/event, not the task). It does NOT mean collapsing several separate tasks into one — see rule 9.\n' +
+    '8. CONTEXT: set "context" to the situation needed to actually do the task — "phone" (call/text/email from anywhere), "office" (needs computer/files/Monday.com), "site" (must be physically at the location), or null if unclear. Infer from verbs: "להתקשר/לשלוח הודעה"->phone, "לעדכן את מאנדיי/לכתוב דוח"->office, "לבדוק/לתקן/לבקר"->site.\n' +
+    '9. SPLITTING: one pasted message can contain several genuinely separate, independent action items — different people, different sites, or clearly unrelated asks, even in a single paragraph or sentence (e.g. "תתקשר לדייב על הבאר בקלוריה ותעדכן את נובי שהגנרטור בסטה קרוז מוכן" is TWO tasks, not one). Create a separate now/today/later entry for EACH distinct item — never merge unrelated asks into one, and never silently drop one because you only kept "the next" one. Likewise if a message mentions more than one site or contractor issue, create a separate entry in sites[] for each one. A numbered list (1. 2. 3...) in the message is a strong signal that each number is its own separate item — do not collapse a numbered list into one task. When in doubt about whether something is one task or two, prefer splitting.\n' +
+    '10. SITE DETAILS: when a message gives coordinates (any format: decimal "16.9754, 121.8107" or DMS like 18°17\'50.89"N 121°24\'1.57"E) or a written address for a site, put that exact text in that site\'s "location". If the raw message text contains a literal monday.com URL, put that exact URL in that site\'s "mondayLink". If the message mentions a contract/project year (e.g. "2026 project", "פרויקט 2025") or a REMO number for a site, fill "year"/"remo" accordingly — these often distinguish otherwise-identical site names across different contract years.\n' +
+    '11. TASK ≠ SUBSTITUTE FOR SITE: a task that talks about a site is NOT a substitute for a sites[] entry — if a specific site name, coordinates, or "site name -" label appears anywhere in the message, ALWAYS ALSO create or update a sites[] entry for it (with whatever of name/location/year/remo/issue was given), even though the same message also produced a task in now/today/later. Emitting only the task and skipping the site is wrong.\n\n' +
+    'WORKED EXAMPLE — input:\n' +
+    '"For tomorrow\n1. Need to check and get panelli pump and motor at cauayan wh. (Warehouse)\n2. check 2026 project (still waiting for engr junell to send the well report)\n- 18°17\'50.89"N 121°24\'1.57"E\n- site name - San Francisco, Luna, Apayao\n3. We will go to the NIA in charge to this 2026 project to ask them if this is really 2026 project."\n' +
+    'Expected shape of the output (values illustrative, keep your own concise Hebrew task text):\n' +
+    '- today: THREE separate entries, one per numbered item — a pump/motor pickup task, a "waiting on engr junell\'s well report" task, and a "visit NIA to confirm 2026 project" task. Not two, not one merged item.\n' +
+    '- sites: ONE entry — {"name":"San Francisco, Luna, Apayao","location":"18°17\'50.89"N 121°24\'1.57"E","year":"2026","issue":"waiting for engr junell well report","status":"pending"} — created even though item 2 also produced a task above.\n' +
+    '- events: empty, unless a real deadline/meeting time was given (there isn\'t one here).\n\n' +
+    '12. NOTES vs SEPARATE TASKS: a short aside that only makes sense attached to one specific task (a reminder, a payment to make about it, a detail to not forget) goes in that task\'s "note" field — small print under the main task, not a task of its own. Example: main task "פגישה עם איגור בשישי ב-20:30" with note "לשלם על מפגש רביעי". This is different from rule 9 splitting: rule 9 is for independent action items that stand on their own; "note" is for a remark that is meaningless without its parent task.';
+}
+
+
+
+// ── STATE ─────────────────────────────────────────
+const APP_VERSION = '2026.07.19-1'
+const KEY = 'fieldy_v2'
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
+let apiKey = localStorage.getItem('fieldy_key') || ''
+
+// ── SERVER SYNC ───────────────────────────────────
+// Optional: if a server URL + passcode are set (Settings screen), the app
+// syncs `state` to a Cloudflare Worker + D1 instead of staying purely local.
+// localStorage remains a fast local cache either way, so the app still opens
+// instantly and still works if the network/server is briefly unavailable —
+// the server is an addition, not a replacement for offline function.
+let serverUrl = (localStorage.getItem('fieldy_server_url') || '').replace(/\/+$/, '')
+let serverPasscode = localStorage.getItem('fieldy_passcode') || ''
+function serverConfigured() { return !!(serverUrl && serverPasscode) }
+let _syncTimer = null
+function syncStateToServer() {
+  if(!serverConfigured()) return
+  clearTimeout(_syncTimer)
+  _syncTimer = setTimeout(function() {
+    fetch(serverUrl + '/api/state', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+      body: JSON.stringify(state)
+    }).catch(function(e){ console.log('server sync failed (kept locally):', e) })
+  }, 1200)
+}
+async function loadStateFromServer() {
+  if(!serverConfigured()) return
+  try {
+    const r = await fetch(serverUrl + '/api/state', {headers:{'Authorization':'Bearer '+serverPasscode}})
+    if(!r.ok) throw new Error('status '+r.status)
+    const d = await r.json()
+    if(d.data) {
+      // Server already has real data — it becomes the source of truth.
+      state = d.data
+      save()
+    } else {
+      // First connection: nothing on the server yet. This device's existing
+      // local data becomes the seed (the one-time migration).
+      syncStateToServer()
+    }
+  } catch(e) {
+    console.log('could not reach server, continuing with local data:', e)
+  }
+}
+
+// ── THEME ─────────────────────────────────────────
+// Quick accent reskin for novelty (ADHD interest-based nervous system likes
+// occasional visual change). Only the accent — buttons, active nav, progress
+// bar, calendar highlights — switches; status colors (red/orange/green
+// priority) stay fixed everywhere since those carry functional meaning.
+const THEMES = {
+  amber: {label:'ענבר', gold:'#b8790f', gold2:'#c9930f', bamboo2:'#946011'},
+  teal:  {label:'טורקיז', gold:'#0f7d6c', gold2:'#139485', bamboo2:'#0b5c50'},
+  rose:  {label:'ורוד', gold:'#c2185b', gold2:'#d63384', bamboo2:'#9c1449'},
+}
+let currentTheme = localStorage.getItem('fieldy_theme') || 'amber'
+function applyTheme(name) {
+  const t = THEMES[name]; if(!t) return
+  currentTheme = name
+  localStorage.setItem('fieldy_theme', name)
+  const r = document.documentElement.style
+  r.setProperty('--gold', t.gold)
+  r.setProperty('--gold2', t.gold2)
+  r.setProperty('--cherry', t.gold)
+  r.setProperty('--bamboo', t.gold)
+  r.setProperty('--bamboo2', t.bamboo2)
+  r.setProperty('--sprout', t.gold)
+  renderCurrentScreen()
+}
+let currentScreen = 'home'
+let actionCtx = null
+
+const save = () => { localStorage.setItem(KEY, JSON.stringify(state)); syncStateToServer() }
+const setState = (patch) => { Object.assign(state, patch, {updated: new Date().toISOString()}); save(); refreshBadges(); renderCurrentScreen() }
+
+// ── CHRONOLOGY ────────────────────────────────────
+// The app previously had no concept of "today" resetting: a task or focus
+// headline set at 10am would still show as if it were current the next day
+// or next week. This keeps the app connected to the actual clock:
+// - "now" tasks are, by definition, only relevant on the day they were added.
+//   Once the day rolls over, unfinished ones move to "today" instead of
+//   staying flagged as urgent-right-now forever.
+// - The "focus" headline (e.g. a specific meeting time) is scoped to the
+//   day it was generated and clears itself once that day has passed.
+// - Individual tasks/events that carry a real time are flagged overdue once
+//   that time has passed, instead of silently staying in an "upcoming" state.
+function isOverdue(t) {
+  if(!t || t.done || !t.time) return false
+  var d = t.date || getToday()
+  var dt = new Date(d + 'T' + t.time)
+  return !isNaN(dt) && dt.getTime() < Date.now()
+}
+function checkChronology() {
+  var today = getToday()
+  var changed = false
+  if(state.focus && state.focusDate && state.focusDate !== today) {
+    state.focus = ''; state.focusDate = null; changed = true
+  }
+  if(state.lastSeenDate && state.lastSeenDate !== today) {
+    var stale = (state.tasks.now || []).filter(t => !t.done)
+    if(stale.length) {
+      state.tasks.today = [...state.tasks.today, ...stale]
+      state.tasks.now = state.tasks.now.filter(t => t.done)
+      changed = true
+    }
+    // Completed tasks used to sit in their bucket forever until deleted one
+    // by one. Anything finished 3+ days ago is cleared out automatically.
+    var cutoff = Date.now() - 3*24*60*60*1000
+    var purge = arr => arr.filter(t => !(t.done && t.completedAt && t.completedAt < cutoff))
+    var before = state.tasks.now.length + state.tasks.today.length + state.tasks.later.length
+    state.tasks.now = purge(state.tasks.now)
+    state.tasks.today = purge(state.tasks.today)
+    state.tasks.later = purge(state.tasks.later)
+    if(state.tasks.now.length + state.tasks.today.length + state.tasks.later.length !== before) changed = true
+  }
+  if(state.lastSeenDate !== today) { state.lastSeenDate = today; changed = true }
+  if(changed) save()
+  return changed
+}
+
+const ASSIGNEE = {uri:'אני',gio:"ג'יו",kenneth:"קנת'",asc:'ASC','11-16':'11-16'}
+const STATUS_COLOR = {open:'red',pending:'orange',resolved:'green'}
+const STATUS_LABEL = {open:'פתוח',pending:'ממתין',resolved:'נפתר'}
+
+// ── NAVIGATION ────────────────────────────────────
+const NAV_SCREENS = ['home','tasks','sites','people','calendar','tao']
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const s = btn.dataset.screen
+    navigateTo(s)
+  })
+})
+
+function navigateTo(screen, ctx=null) {
+  if(ctx) actionCtx = ctx
+  if(medInterval && screen !== 'tao') { stopMeditation(false) }
+
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'))
+  
+  // Show target
+  document.getElementById('screen-' + screen).classList.remove('hidden')
+  
+  // Update nav
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+  const activeBtn = document.querySelector(`.nav-btn[data-screen="${screen}"]`)
+  if(activeBtn) activeBtn.classList.add('active')
+  
+  // Show/hide nav
+  document.getElementById('nav').style.display = NAV_SCREENS.includes(screen) ? 'grid' : 'none'
+  
+  currentScreen = screen
+  renderCurrentScreen()
+  
+  // Scroll to top
+  const el = document.getElementById('screen-' + screen)
+  if(el) el.scrollTop = 0
+}
+
+function goBack() {
+  navigateTo('home')
+}
+
+
+// ── TAO DATA ─────────────────────────────────────────────────────
+const TAO_CHAPTERS = ["הדרך\nאת הטאו הנצחי\nלא ניתן לתאר במילים\nכל שם אשר אנסה לתת לו\nרחוק יהיה משמו האמיתי\nנטול שם הוא\nמקור ראשיתם\nשל שמים וארץ\nנטולת תואר\nהיא אמם\nשל רבוא הדברים\nבעל התאוות\nרואה את הנגלה בלבד\nאם רק נטול תאווה תהיה\nתוכל לראות גם נסתרות\nיש דברים רבים בעולם\nושמות שונים לכולם\nאך יש תעלומה אחת גדולה\nגם מלפנים\nוגם מאחור\nהסוד הגדול ועולם התופעות\nשמותיהם שונים\nאך מקורם אחד\nלחיות ללא פחד\nלחוש את העולם\nלחוות את המכשולים\nלדעת את העולם\n\n· · ·\n\nמעבר\nלשער\nהתופעות\nזורם\nנהר\nהטאו\nהכל חלקי מלבד אחד\nאת הכיעור מודדים לפי היופי\nאת הטוב על פי הרע\nאת הקל על פי הקושי\nאבל את הטאו\nאין למדוד מול מה\nעל כן\nיש ואין\nמולידים זה את זה\nכבד וקל\nמשלימים זה את זה\nארוך וקצר\nמתארים זה את זה\nגבוה ונמוך\nנוטים זה אל זה\nלפנים ואחור\nנשענים זה על זה\nלפיכך שרוי החכם באפס מאמץ\nומטיף ללא מילים\nרגוע ונינוח\nשלו ופתוח\nאלף דברים\nללא הפסקה\nעולים ונופלים\nולו יש סבלנות לכולם", "יוצר\nאך לא\nמחזיק\nכיוון שאינו\nתובע\nזכות\nלעצמו\nלא ניתן\nלקחת\nממנו\nאותה\nפשטות ומנוחה\nאל תכתיר חכמים\nולא יריב העם\nאל תתגאה במעורר קנאה\nולא יחמדו האנשים\nאל תאסוף רכוש בעל ערך\nולא יהיו שודדים\nזו דרכו של החכם\nהוא מרוקן את תשוקותיהם\nוממלא את לבם\nהוא ממעט את שאיפותיהם\nומחזק את עצמותיהם\nעשה\nבאפס\nמעשה\nוהכול\nמעצמו\nייעשה", "מחוץ לזמן\nהטאו כלי ריק הוא\nלכן אינו מתמלא\nוגם אינו מתיישן\nבא מעומק אין חקר\nעתיק יומין ומסתורין\nגדלותו בריקותו\nהוא מקהה חודו\nפותח קשריו\nמרכך זוהרו\nומנצנץ באוויר\nבגרגרי האבק\nנחבא בעומק\nתמיד קיים\nהוא הקיסר הקדמון\nשהוליד את הדברים כולם\nאינני יודע\nבנו\nשל מי הוא\nאך אדע\nכי קודם הוא\nלעולם\nומחוץ\nלזמן הוויתו", "חוק אחד\nשמים וארץ אינם רחמנים\nעבורם הכל\nהוא אותו הדבר\nגם החכמים אינם רחמנים\nחוק הטאו הוא אחד\nאפילו אם יש מאה שבטים\nהחלל שבין שמים וארץ\nהוא ריק במהותו\nכמו מפוח\nהמוציא רוח\nכך גם זה\nאשר מרבה במילים\nיתעייף לשוא\nוטוב יעשה אם ינוח\nהרבה מילים\nמעט\nמשקל\nמוטב\nלשמור\nחלק\nמהמילים\nבתוך\nהלב", "רוח העמק\nרוח עמק\nבת אלמוות\nנשיות\nמסתורית\nשורש\nשמים\nוארץ\nלעד\nמתקיים\nשער\nפתוח\nלא ייסגר\nשאב\nמים\nאין\nתחתית\nאין\nעייפות", "שאיפות אישיות\nהטבע הוא שלם\nהשמיים נצחיים\nוהארץ לעולם עומדת\nהם חיים לנצח\nמכיוון שאין להם רצון\nגם החכם\nכמו שמים\nוכמו הארץ\nאינו עסוק בעצמו\nולכן\nשלם הוא\nעם הבריאה\nמפני\nשאין בו\nשאיפות\nיכול הוא\nלממש\nאהבה במלואה\nלא להחזיק את השאיפות יותר מדי זמן,\nצריך גם לנשוף ,בשביל להמשיך לנשום.", "אופי של מים\nהטוב העליון הוא כמו מים\nהטובים ומועילים\nלאינסוף דברים\nושרויים ללא טענות\nבכל המקומות\nהייתי אומר שלטאו\nיש אופי כמו של מים\nשניהם מקבלים כל צורה\nונמצאים\nבלי לדרוש לעצמם דבר\nגם במקומות\nשאין בהם הרבה כבוד", "במקומות בהם יש שפע של מים ,שם ממעיטים בערכם.\nעצות ליוצאים לחופש\nבית כדאי שיהיה קרוב לאדמה\nלב חשוב לשמור פתוח\nמגע בין אנשים חייב עדינות וחסד\nשותפות מתבססת על נאמנות\nכשיש סדר לא צריך חוקים\nכדי להצליח צריך להשתמש במחשבה בחוכמה\nכל תנועה דורשת את זמנה הנכון\nכשלא\nמתלוננים\nמתגלה\nהמהות\nולא הפגמים\nהוסיפו חכמים:\nהפסיכולוגיה המערבית המודרנית גילתה רק בסוף המאה העשרים שלא בריא להדחיק\nסבלנות\nכשהכד מלא עד סופו\nעם כל תזוזה קטנה\nישפכו מים\nהשחז חרב עד\nשיא חדותה\nוהיא תישבר בקלות\nכשהאולם מלא\nבזהב ואבני חן\nבעל הבית\nיהיה עסוק\nבשמירה\nבמקום לנוח\nעושר כבוד ותארים\nמעלים גאווה\nגאווה\nהיא זרע\nלאסון ומצוקה\nכשהושלמה\nהמלאכה\nוהושגה הצלחה\nדרך הטאו\nהיא\nלפרוש\nלמנוחה", "כשמשחיזים סכין,\nלא בודקים את החדות בכל רגע.\nכשממלאים כד מים מברז,\nכדאי להניח אותו על הרצפה.\nמעלותיו של הגיבור המסתורי\nכשהנפש מלאה\nדבר לא יסיחנה מהטאו\nאם תוכל לעדן את נשימתך\nתהיה רך ורגוע כמו תינוק\nאם תזכך את נפשך מאישיותך\nתוכל לשמור עליה ללא פגם\nאם תאהב אנשים\nתוכל ללא מאמץ לשלוט על ממלכה\nאם גלויים בפניך שערי טבע ושמים\nותבורך ברוב מזל\nתוכל אז להיות\nגדול בסבלנות\nכמעט\nכמו תרנגולת\nאם גלויים לפניך סודות\nארבעת כיווני השמים\nלא צריך עוד ידע\nואפשר לחיות ללא דעות\nהגיבור המסתורי\nאם הוא מוליד\nהוא יפרנס\nאבל את שהוליד\nלא יקרא שלו", "אם\nעשה\nלא\nיתגאה\nאם\nינהל\nלא ישתלט\nהריק\nשלושים חישורים מתאחדים\nבטבורו של גלגל\nמלבד החישורים\nהריק\nהוא רובו של הגלגל\nכד החרס\nעיקר שימושו הוא בחללו\nעל כן\nהאין יש לו תפקיד\nהריק בעל צורה\nבית\nהוא ריבועים של אוויר\nדלת בין שני חדרים\nרק מחברת את האוויר\nחלון מחבר חלל מרובע\nעם הריק הגדול\nשבחוץ\nלעיתים\nהיש\nהוא רק תירוץ\nואריזה\nוהאין\nהוא\nהאוצר האמיתי", "מעט מול הרבה\nיותר מדי צבעים\nמעוורים את העיניים\nיותר מדי צלילים\nמחרישים את האוזניים\nיותר מדי טעמים\nמקהים את חוש הטעם\nיותר מדי רצונות\nמבלבלים את הדעת\nהימורים וצייד\nמעוררים חמדנות\nחפצים יקרים\nמנוולים\nאת יפי הפשטות\nעל כן החכם\nאוכל לפי מידת קיבתו\nולא לפי מידת העין\nהוא\nדוחה\nאת המיותר\nותמיד\nידבק\nבמהות", "תהילה ובושה\nרדיפת תהילה\nובריחה מבושה\nגורמים לחרדה\nלרצות כבוד\nכמוהו לרצות לפרנס\nגוף נוסף\nמה פירוש תהילה ובושה גורמים לחרדה\nמה פירוש כבוד כמוהו כגוף נוסף\nאם אין לך גוף\nמאיזה אסון נותר כבר לפחד\nלפיכך יש להתייחס אל כל הדברים\nכמו היו הגוף שלך\nזה אשר\nאוהב את העולם\nכפי שהוא אוהב\nאת גופו\nניתן להפקיד בידיו\nבבטחה\nאת העולם כולו", "הנסתר\nהפשטות\nגם כשמביטים בה\nאינה נראית\nהנדיר\nגם כשמאזינים לו\nהוא נסתר\nהעדינות\nגם אם אחזת בה\nאינה נתפסת\nשלושת אלה\nמתחמקים מהגדרה\nלא ניתן לרדת לפשרם\nבכוח המחשבה\nהם שייכים אל הטאו\nומתמזגים עם האחד\nאחד זה גם אם יזרח מול עיניך\nלא יסנוור\nגם אם תחביאו מתחת לאדמה\nלא יאפל\nחוט ארוך\nצורה ללא צורה\nדמותו בכל דבר\nשמו שקט\nמטבעו\nבלתי ניתן להגדרה\nקיים לפני המילים\nולנצח לא יוגדר\nפגוש בו ואין לו פנים\nלך אחריו ולא תראה את אחוריו", "אתן לכם רמז על הטאו\nאם\nתדע\nאת\nהעתיק מכל\nאדון\nתהיה\nעל\nההווה\nלנקות את האור\nחכמי הטאו של ימי קדם\nהיו עדינים יודעי נסתרות\nובעלי חדות מחשבה\nכיוון שכה העמיקו\nבחכמת העולם\nקשה מאד לרדת\nלסוף דעתם\nכיוון שכך\nאנסה בדוחק\nלשרטט מספר קווים\nלדמותו של החכם\nהוא זהיר\nכאדם החוצה נהר קפוא בחורף\nהוא מהסס\nכילד החושש להפריע לשכנים\nהוא סבלן\nכמו קרח נמס\nהוא צנוע\nכמו אורח אצל אחרים\nמקורי\nכמו גזע עץ\nריק\nכעמק מוקף הרים\nעמום\nכמי-מעמקים\nמי מסוגל לנקות את החושך מהאור\nמי מסוגל לזכך מים עכורים עד צלולים יהיו\nמי מסוגל להפשיר את הקפוא עד ינוע\nמי מסוגל להוליד דברים בנחת\nכל דבר\nבזמנו", "זה אשר הולך בעקבות העיקרים\nואינו מחפש אחר המושלם\nזה אשר שומר על הטאו\nולא רוצה להיגמל\nמה\nשאינו\nמלא\nלא\nיקרה לו\nכלום\nגם\nאם\nייפול\nהתחדשות\nהקדש עצמך להשגת שלווה\nרוקן עצמך משאיפות אחרות\nמי שהרבה להתרוקן\nיישאר בסוף עם שלווה גדולה\nכזה הוא העולם\nמיליון דברים מופיעים יחד\nומיליון דברים נסוגים\nהביטו בצמחי הבר\nשהנצו לזמן קצר ופרחו בהדר\nואחר כך שבים\nלנוח באדמה\nאני רואה את הדברים עולים\nורואה אותם נעלמים\nמחזוריות של לידה ושיבה\nיש בה יופי ושלווה\nההתחדשות\nהיא בשלום עם עצמה\nלכל הדברים יש גורל\nמחזור הגורל קרוי נצח\nידיעת הנצח קרויה בינה\nאם תכעס על הנצח\nתפר את השלווה\nאם תאהב את הנצח\nתוכל לחבוק כל\nבהיותך חובק כל\nתשיג את הגדלות\nבאוחזך בטבעיות\nאחד תהיה עם השלמות", "גם אם הגוף\nזמני הוא\nויום אחד נגמר\nהטאו\nעד כלות הזמן\nלא יאונה לו כל רע\nלכן\nלהכיל את הטאו\nמשמעו לגעת בנצחי\nבקיים לעד\nמקיף כל\nישר במשפט\nחסר פניות\nשלם\nעליון\nונשגב\nהוא\nהטאו\nפרחי הבר פורחים לזמן קצר.\nמרבית זמנם הם רדומים בתוך הזרע.\nהפרח והזרע הם שני מצבים של אותו הדבר.\nראש ודוגמא\nהנעלה במושלים\nהעם בקושי מרגיש\nבקיומו\nהמושלים הפחותים מהם\nהם אלה\nאותם מכבדים\nומשבחים ומהללים\nנופלים מאלה השליטים\nמהם פוחדים האנשים\nבפחותים עוד יותר\nכבר מזלזלים\nכאשר לא מאמינים למושל\nאין מאמינים לממשלתו\nכבוד פחד זלזול ואמונה\nהכל מתחיל ונגמר בקיסר\nלכן עליו ללמוד\nאת החשיבות הרבה\nשיש להקדיש\nלמילים", "במקום\nבו\nפועל\nהטאו\nאנשים\nאומרים\nהדבר\nקרה\nמעצמו\nצביעות\nרק משנעזבה הדרך הגדולה\nהופיעו חוקים\nלאנושיות ולשוויון\nהרי גם במדינות רחוקות\nבהן לא שמעו\nעל החוקים החדשים\nיש טוב-לב חסד וצדק\nרק כאשר האהבה\nנחבלת\nכבוד ומסירות\nהופכים להיות ערכים\nכשצצים מלומדים\nסימן שהערמומיות פורחת\nכשהערמומיות פורחת\nאחותה הצביעות\nמרימה את הראש\nכאשר אומה\nנמצאת במצב של מבוכה וחוסר סדר\nלאומנות ודגלים נולדים\nגם כשקשרי המשפחה\nמתערערים\nעדיין יש בלב אהבה להורים\nודאגה לילדים\nגם באומה מפוצלת\nעדיין יש שרים נאמנים", "באשר\nהטאו קיים\nהאיזון\nנשמר\nבאשר\nאובד\nהטאו\nמופיעים\nההבדלים\nשבין\nהדברים\nהמלצות לשר החינוך\nעקור את הספרים מעט בלימודים\nוייטב לעם מאה מונים\nזנח את החוקים הקל במשמעת ובצווים\nויוסרו מהעם יגון וייסורים\nעקור את ההתחסדות והשלך את הצדקנות\nוישוב העם באופן טבעי אל אהבה וכבוד\nבטל את רדיפת הבצע ויוקרת העושר\nויעברו מעל האדמה הגניבה והשוד\nאך ארבעה עיקרים אלה אין בהם די\nהם רק אומרים מה לא לעשות\nחשובים יותר הם ארבעת העיקרים\nשל מה שחשוב לעשות\nהיה תם לב\nדבק בפשטות\nהמעט עצמך\nצמצם בתאוות", "זנח\nהרגלים\nישנים\nגלה\nאת\nעצמך\nהעירום\nוחבק\nאת\nהאופי\nהראשון\nאני\nקל להסתבך\nבין הגדרות של טוב ורע\nקשה להגדיר באופן מוחלט\nמה חיובי ומה שלילי\nנכון ושגוי\nמה מעט נבדלים השניים\nואולי לא ניגודים הם\nאלא אבני רחיים\nבין כן ובין לא\nמה המרחק\nבין טוב ובין רע\nמי ישער את ההבדל\nאבל האנשים\nמקפצים בחיים\nצוהלים\nכאילו היו במסיבה נהדרת\nכמו ילדים\nשהעפילו ביום אביב\nאל ראש מגדל\nאני לבדי אדיש ושקט\nלא מראה סימנים\nלפעמים אני מרגיש כמו תינוק\nשעדיין אינו מסוגל לחייך\nעצוב אני כמו אחד שאין לו בית\nנראה כמו דחליל זרוק\nלכל האחרים יש יותר מאשר די\nורק אני לבד ואין לאן לחזור\nלבי מבולבל\nמחשבותיי כמו של שוטה", "לעיתים נראה כי סתום לי המוח\nאני לא באמת יודע הרבה\nיש אנשים מבריקים ומלאי בטחון\nואני כה עמום\nעם בטחון של חלזון\nיש אנשים צלולים\nואני\nגם לעצמי חסר שקיפות\nזנוח ללא עוגן\nמיטלטל\nכמו הרוח\nשאינה חדלה לנשוב\nהאנשים\nנדמה כי יש להם מה לעשות\nואני כה חסר תכלית\nלפעמים מגושם\nובשאר הזמן לא מעשי\nכזה אני\nשונה אולי מכל האחרים\nאבל מעריך יותר מכל\nאת החיפוש\nאחר הפלא הקיומי\nכמו בן המחפש\nאת אימא\nטוב ורע נכון ושגוי\nאינם זהים בעיני\nאך אני מפחד משניהם\nמכיוון שהם אינסופיים\nואין לדעת את אחריתם\nואולי כך הוא הדבר\nואיש הטאו שונה יהיה\nמשאר בני האדם\nלא\nמחכה\nבאף\nשולחן\nיונק\nישירות\nמהחזה\nשל\nהטבע\nאכן קל להסתבך\nבין הגדרות של טוב ורע,\nוקשה להגדיר באופן מוחלט\nמה חיובי ומה שלילי.\nלהמר על הטאו\nמידה נעלה היא\nללכת בדרך הטאו\nצריך אומץ רב\nכדי להמר עם הכל\nעל דבר שאין לו דמות\nלא שם ולא צורה\nמימי קדם\nועד עתה\nמבחינת הטאו\nדבר\nלא השתנה\nמהיכן אני יודע כל זאת?\nכך גילה לי הטאו\nמעורפל\nמסתורי\nבלתי מושג\nהאמת\nשם נמצאת\nבתוכה המהות\nועמה\nהנאמנות\nוהאמונה", "כפוף\nהיה צנוע ותישאר גדול\nהיה כפוף ותישאר ישר\nהיה ריק ותישאר מלא\nהיה בלוי ותישאר חדש\nזה אשר מעט לו\nיקבל\nזה אשר הרבה לו\nישועבד\nאין הוא מתרברב\nלמרות שיש לו הישגים\nאין הוא מתנשא\nלכן כבודו מאריך ימים\nאין הוא נאבק\nלכן לא נאבקים בו\nאין הוא מתחרה\nלכן איש לא יוכל לו\nלפיכך\nהחכם\nשומר\nעל\nהטאו\nונותן\nדוגמא\nלעולם", "חכמי הטאו הדגישו באופן מיוחד את ההמלצה להתכופף כשצריך ובכך להגדיל את\nההסתברות לחזור הביתה בשלום.\nהנח לדברים להיות\nכמו הרוח שאינה סוערת ברציפות\nכמו הגשם שיורד בהפסקות\nכך יש לדבר מעט ולא כל הזמן\nאם שמיים וארץ לא מאריכים\nכל שכן על האדם\nאיש הצדק\nיהיה לאחד עם הצדק\nאיש ההפסד\nיהיה אחד עם התבוסה\nהדימוי העצמי\nהופך להיות\nהגורל של החיים\nזה אשר הולך בדרך הטאו\nהתכונה הטובה תקדם את פניו\nהטאו יאיר לו פנים\nזה אשר דבק בתכונה הרעה\nהיא תפתח לו בשמחה את דלתה\nותאמצו בחום\nאל חיקה\nמי\nשלא מאמין\nבעצמו\nקשה יהיה\nלאחרים\nלהאמין בו", "צניעות\nעמידה על הבהונות\nאינה עמידה איתנה\nהליכה בפישוק רגליים\nאינה הליכה יציבה\nאדם המציג עצמו לראווה\nמשבח מאדיר\nומהלל את עצמו\nרק עומד על בהונותיו\nאו מהלך כברווז\nהמתנשא\nלא\nיאריך ימים\nהמגזים\nבדיבור\nאו\nפעולה\nמעשיו\nנמאסים", "ארבעה עליונים\nיש דבר מעורפל ומושלם\nהקיים מלפני שמיים וארץ\nחסר צורה נטול תנועה\nגלוי ונסתר\nעומד איתן ואינו משתנה\nמקיף כל ואינו מסכן דבר\nאפשר לראותו כאם העולם\nאינני יודע את שמו\nאכנהו טאו\nבמאמץ לתארו\nאומר כי הוא חובק כל\nחובק כל וקיים לעד\nחובק כל ונמצא בכל\nמרחיק עד סוף היקום\nומפיח בעולם חיים\nארבעה עליונים יש בעולם\nוהאדם אחד מהם\nהאדם\nשומר על חוקי הארץ\nהארץ\nמתנהלת על פי השמים\nהשמים\nמתנהלים על פי הטאו\nהטאו\nשומר על האמת", "השמים\nפתוחים\nהארץ\nגדולה\nוהדרך\nאינסופית\nאדנות\nבעומק הקלות\nיש גם כובד\nבבסיס התנועה\nיש מנוחה\nלכן החכם\nגם כשצועד יום ארוך\nוסוחב על גבו\nקרון של משא\nשרוי הוא באדישות\nשיש בה אדנות\nושלווה\nאם\nקל\nיהיה\nבסיסו\nיישמט\nאם\nנחפז\nיהיה\nאת עצמו\nיאבד", "בהערה שהוסיף החכם הסיני וואנג-פי ,אומר הוא כך:\nאהבת החומר\nהמיטיב ללכת\nאינו משאיר אחריו עקבות\nהדובר הטוב\nאינו מותיר ספיקות\nהחשבונאי הטוב\nלא צריך מקלות חישוב\nהבנאי הטוב\nלא נדרש למסמרים\nהמיטיב לקשור\nלא נזקק להרבה חבלים\nאבל יש גם אנשים רעים בעולם\nולאנשים הרעים\nהיו מורים טובים\nעיקר העיקרים של הסוד\nהוא אהבת החומר אשר בידיך\nלא לכבד את המורה\nאפילו לחכמים זו טעות גדולה\nאנשים\nטובים\nמדריכים\nגם\nאנשים\nרעים", "גזע עץ\nהחזק בגבריות אך שמור גם על הנשיות\nויפתחו בפניך אפיקי עולם\nאם תהיה גיא לעולם\nתשרה עליך סגולה נצחית\nגבורת אמת ותום ילדות\nמה הקשר בין גבורה ותום?\nהלבן והשחור\nאינם סותרים האחד את השני\nלחכם יש מקום לכל הצבעים\nהחכם הוא רק מראה שקופה\nשל העולם\nטוב תעשה אם תזכור\nשהטאו אינו מוגבל\nתהילה\nחרפה\nגזע עץ\nאפיק העולם\nפשטות\nמלכת השרים\nטאו", "החכם הסיני ייאן פו בחר להכניס כאן הסבר:\nלהיות אורח\nמי שמבקש להחזיק בעולם ולשנותו\nרואה אני כי לא יצליח\nהעולם הוא כלי של אנרגיה וצ'י\nלא ניתן לכלאו\nהכולא מהרס אותו\nהמחזיק בו מאבדו\nאיש הטאו אינו מנסה\nלעצב את העולם\nלכן אינו פוגע בו", "שלושת הדברות\nהאנשים חלקם מתעכבים\nאחרים רצים מהר מדי\nחלקם מתקדמים קדימה\nאחרים משתרכים מאחור\nחלקם נשימתם ארוכה\nאחרים נשימתם קצרה\nחלקם שומרים על לשונם\nאחרים מרבים להג\nחלקם חזקים\nואחרים חלשים\nלכן החכם\nנמנע\nמהקיצוניות\nנמנע\nמהמותרות\nונמנע\nמהיהירות\nעצות לשר הצבא\nבמקום שחונה צבא\nיעלה קוץ ודרדר\nאחרי ניצחונות מפוארים של צבא\nתבואנה שנות מצוקה\nאם אתה חייב לנצח\nעשה זאת אך אל תתגאה\nהמצביא הטוב\nמשיג את מטרתו ותו לא\nאינו מתפאר\nאינו מתייהר\nאינו מריע\nואינו מתנשא\nהוא משיג את מטרתו\nכי אין ברירה\nהחסון\nבדרך הטבע\nמזדקן\nאך\nנטול\nהטאו\nכלה\nבמהרה", "קללת הלוחם\nהיפים בכלי הנשק\nנועדו להשחית\nהם שער לפורענות\nואינם כליו של אציל\nמי ששמח\nלהלחם בבני אדם\nאת שלוותו\nלא ישיג לעולם\nניצחון\nבמלחמה\nאינו\nיותר\nממסע\nלוויה", "כמו טל\nאם נותנים לטאו\nשם\nזה די והותר\nמכאן והלאה\nעדיף לעצור\nאבל\nמסכים אני\nלהוסיף עוד זאת\nבממלכה\nבה\nהמלך\nשומר\nעל\nהטאו\nיורד\nבלילה\nטל\nמתוק", "חיים ארוכים\nהיודע אחרים\nפיקח\nהיודע עצמו\nנאור\nהיודע מתי די\nעשיר\nהמתמיד בדרכו\nבעל רצון\nהכובש אחרים\nבעל-כוח\nהכובש עצמו\nגיבור\nשמור\nעל נתיב\nהשתמש\nבכוח הפנימי\nאל תפחד\nמהמוות\nותחייה\nהרבה שנים", "החכם הסיני פאי-צה ,הוסיף:\nבתרגום אחר מופיע:\nמשפחת הטאו\nהטאו הגדול\nנמצא בכל\nגם אם תפנו ימינה\nגם אם תרחיקו\nלנדוד לשמאל\nהוא\nמלביש\nומפרנס\nאת ריבוא\nהדברים\nהתלויים בו\nכל רגע\nבמחיר\nחייהם\nגם האור נדמה כנטול צבע,\nאך למעשה הוא מחייה את הצבעים כולם.", "מסע\nעובר\nמסע\nלהחזיק\nבדמות הגדולה\nעולם ומלואו\nבא\nאליך\nתחת\nשמים\nשלום\nשלווה\nתעצם", "לדבר\nאסור\nמביט\nלא רואה\nלהקשיב\nרק\nשקט גדול\nשימושיות\nלעולם\nלא נגמר\nבפרק זה התרגום הוא נקי כמעט לגמרי מעריכה לשונית.\nעקרונות הרפואה הסינית\nאם רוצים לצמצם\nלפעמים צריך להרחיב\nאם רוצים להחליש\nלפעמים צריך לחזק\nעל מנת להפיל דבר\nיש לרוממו תחילה\nכדי לקבל\nצריך קודם לתת", "בעזרת חכמת האור\nהרך על הקשה\nיכול לגבור\nאבל הכי טוב\nבשביל\nהדג\nזה לא\nלהתרחק\nמהמים\nרסן הפשטות\nאיש הטאו\nרגוע\nוללא מאמץ\nמספיק לעשות הכל\nהפשטות\nהיא נטולת תאווה\nואם לא תפריע להם הסביבה\nבני האדם\nמבפנים\nכבר יש להם אותה", "באפס תאווה\nבאה שלווה גדולה\nוהעולם כולו\nשרוי אז במישרין\nלך\nבעקבות הטבע\nוהכל\nכבר יקרה\nלבד\nעצות לשר המשפט\nכמו אהבה\nשלא צריכה סיבה\nכך גם\nצדק אמיתי\nהוא מעבר\nלכל החוקים\nאל תחשוב על חוק\nחשוב על חסד\nאל תהיה פילוסוף\nפשוט תהיה אדיב\nוזכור כי הצדק\nבא מאהבה\nתרבות מתנשאת\nהיא תחילתו של התוהו\nלמדנות ופולחן\nהם ראשיתה של כסילות\nכשהחסד אובד\nמגיע תורה של אהבת אנוש\nכשאהבת אנוש אובדת\nבא תור הצדיקות\nבהעדר צדיקות מופיע הפולחן", "הפולחן\nהוא סבלנות\nשנתערערה\nאמונה\nשנחלשה\nוראשית\nמבוכה\nאת הקוראים המערביים לא צריך לשכנע שחשוב שהצדק יהיה טהור ונקי מהסיבה\nעל פוליטיקאים\nמקדם היה האחד\nללא האחד\nהשמים עלולים להיקרע\nוהאדמה להבקע\nהשמים קיבלו את האחד\nוהפכו צלולים\nהאדמה עם האחד\nהפכה יציבה\nהעמק עם האחד\nבכל טוב התמלא\nבזמן קדם\nהמלכים ידעו את האחד\nושלטו בעולם בבטחה\nנפש האדם\nחייתה בשלום עם האחד\nוהייתה מאושרת ורגועה\nבזמן האחרון\nהשליטים עושים שיבושים\nהם קוראים לעצמם\nחדלי ערך ומשרתי העם\nאבל איני משוכנע\nשהענווה\nהיא באמת שורש מהותם\nהיש דבר השנוא יותר\nעל אנשים\nמאשר להיות\nמשרתים של אחרים", "לא\nרצוי\nלהתבלט\nכמו\nיהלום\nתוספת מאוחרת:\nמרכבה מפורקת אינה מרכבה\nומי שחושב את עצמו לאבן חן\nשלא יתפלא אם בנהר יטבע\nפתגם זן אומר:\nהחכם משאיר אחריו עקבות\nכמו שמשאיר הנשר בשמיים\nפיזיקה\nהיש\nמורכב ברובו\nמהאין\nהאין\nוהיש\nאין ניגוד\nבין השניים\nכל הדברים בתבל\nבאים מהקיים\nוהקיים\nמהלא קיים\nכשהולכים בשביל\nהאדם\nוהדרך\nנדמים\nכמתקדמים\nבכיוונים\nהפוכים", "עידוד לתלמידים\nאם ישמע אדם מעולה על הטאו\nישקוד לנהל את חייו על פיו\nאם ישמע אדם בינוני על הטאו\nלשעה ישמרהו ולשעה יאבדהו\nאם ישמע שוטה על הטאו\nיפרוץ בצחוק גדול\nאם לא היה צוחק\nלא היה זה טאו\nעל כן יש האומרים\nהנאור בטאו\nנראה חשוך\nהמתקדם בטאו\nנראה נסוג\nהמישיר בטאו\nנראה אובד דרך", "הטאו\nכמו נהר\nחזק\nרחב\nועמוק\nכמו עיגול\nאבל\nלבן\nיותר\nמהירח\nכמו\nריבוע גדול\nאבל\nבלי זוויות\nכמו תינוק\nהרך מכל\nחווה את הקשה מכל\nיוצא מתוך חום בלי חלל\nאל חלל נטול חום\nמתוך כך למדתי\nאת יתרונה של\nהזרימה הטבעית\nאת כל הנחוץ\nכוח החיים כבר יעשה\nיש הרבה חכמה וכוח\nבמקומות\nשאין בהם מילים\nאבל\nמי יצליח\nלטפל\nבדאגות\nכמו\nתינוק", "יין ויאנג\nטאו הוא אחד\nאחד הוליד\nוהנה שניים\nשניים הם ניגוד\nניגוד שווה שלושה\nכשיש שלושה\nעולים מיד\nעוד רבבה\nאבל היין והיאנג\nכמו הצל והאור\nאחד מלפנים\nשני מאחור\nההרמוניה בין הניגודים\nהיא נשמת החיים\nהמחבל\nבסדר הטוב\nגם\nיחיה\nוימות\nאבל לא\nבסדר\nהנכון", "שלוש שאלות\nשמך או עצמך\nמה קרוב אליך יותר\nעצמך או רכושך\nמה יקר לך יותר\nרכושך או בריאותך\nהיכן כואב לך יותר\nשים לב\nמרבה התלהבות\nמרבה הוצאות\nמרבה אגירה\nמרבה הפסדים\nלכן\nדע לשמוח בחלקך\nולא תדע בושה\nדע מתי די\nולא תדע סכנה\nכך ללא דאגות\nנעים\nלהאריך ימים\nהחכם יו פו הוסיף כאן הערה:", "המליאות הריקה\nהנמרץ אל האושר\nנראה כעצל\nצח הלשון\nנשמע מגמגם\nהשלימות נראית\nכהעדר שלמות\nהישרות העילאית\nרק נראית עקומה\nאם יש בעולם דבר\nשתשתמש בו\nולא יחסר\nהרי זו\nהמלאות\nהריקה\nטוהר\nושלוות רוח\nקובעים\nאת\nסדר\nהעולם", "המכשולים\nכאשר יש טאו בממלכה\nסוסי המרוץ\nנשלחים לזיבול השדות\nכאשר אין הטאו מושל\nלוקחים את הסוסים\nלרעות בגבולות\nאין אסון גדול\nמחוסר שקט פנימי", "אין טפשות גדולה יותר\nמהליכה עיוורת אחר התשוקות\nאין אומללות גדולה\nמהעדרה של מידת ההסתפקות\nאין מכשול גדול יותר\nמאשר החמדנות\nהיודע\nמתי די\nתמיד\nיש לו די\nדעת עולם\nמבלי לצאת מפתח ביתו\nיודע החכם עולם ומלואו", "הממעיט\nהעוסק בלימוד\nמוסיף ידיעה מיום ליום\nהעוסק בטאו\nממעיט עשייה מיום ליום\nממעיט וחוזר וממעיט\nעד שהוא מגיע אל אי-העשיה\nוהעשיה אז זורמת דרכו\nכך\nבאי-עשיה\nאין דבר שאינו נעשה\nבלא מאמץ\nאפשר לכבוש עולם\nמי\nשמתאמץ\nלא יוכל\nלאורך\nזמן\nלהחזיק", "לב ישר\nאני\nאין לי לב שהוא מיוחד ורק שלי\nלב העם הוא לבי\nעם טובים איטיב\nוגם עם רעים איטיב\nעם ישרים אישיר\nואף עם לא ישרים אישיר\nבמאמינים אאמין\nבלא מאמינים\nגם להם אני מאמין\nכי כך עושים\nאנשים ישרים\nהחכם\nחי\nבעולם פשוט\nהוא עוזר\nאינו חושד\nרואה את עצמו\nכתינוק\nואת כולם\nכילדיו", "המוות\nכל הבאים בשער העולם\nמתחילים את דרכם אל המוות\nשליש מתים ממחלות\nואין ברירה\nשליש נוסף מתים\nבגלל שהתאמצו להיות בריאים\nיתר על המידה\nאלה שלא עושים מאמץ מיוחד\nיאריכו יותר ימים\nמאלה החפצים\nבחיים נצחיים\nאם רק רגוע תהיה\nלא יפגע בך הנמר\nלא יתקוף הקרנף\nאפשר להבקיע מחנה צבא\nללא שריון או מלחמה\nהיה שלם\nואין מקום\nלקרן הקרנף\nולא לנמר\nלנעוץ ציפורניו\nמי שלא מתעסק\nעם המוות\nהמוות\nלא מתעסק איתו", "ילדים\nהטאו הוא זה שמוליד אותם\nהוא גם יפרנס ויזין אותם\nמהותו\nמעצבת אותם\nכוחו\nמשלים את שלהם\nכל אחד וצורתו\nכל אחד ושלמותו\nהטאו מקיים אותם\nהטאו מגדל אותם\nהטאו משלים אותם\nהטאו מטפח אותם\nהטאו מגונן עליהם\nהטאו לעולם לא ינטוש אותם\nהטאו ינהל אותם\nאבל לעולם לא ישלוט עליהם\nזו היא הסגולה\nמוליד ולא רוכש\nעושה ולא מתגאה\nמנהל ולא משתלט\nהטאו\nמעולם\nלא שכח\nדבר", "אם העולם\nהעולם יש לו אימא\nאקרא לה\nאם כל חי\nהשג את האם\nובאמצעותה תדע את הבנים\nדע את בניה\nאך חזור ושמור על האם\nאם כזאת תעשה\nלעולם לא תאבד\nהכבר מעשים\nולא תנצל\nסגור שערים\nולא תדע אכזבה\nהכנס\nאל\nהטאו\nהעם\nזוהרך\nולך\nעם\nהאור", "שניים מעקרונות היסוד של הפילוסופיה הסינית אומרים:\nישר\nלו הייתה לי בינה\nולו גם מועטה\nכל חיי הייתי הולך\nבדרך הראשית\nהיא גדולה\nישרה\nרחבה\nומישורית\nהחכם חושש משבילים עקיפים\nאבל דרכים צדדיות\nושבילים צרים ונפתלים\nעדיפים משום מה על ההמונים\nכשהארמון מפואר\nאבל שדות העם יבשים\nכשהעשירים לובשים יקר\nוזוללים מטעמים\nבזמן שהעם רעב\nוחי בין קוצים\nשלא יתפלאו העשירים\nאם יש גנבים ושודדים\nגם זה\nבמסגרת הטאו\nנכסים\nמיותרים\nמשכיחים\nאת החיוני", "לדורי דורות\nהמושרש היטב לא יחמוק\nהשתול עמוק לא יעקר\nהילדים נושאים בחובם\nאת אשר קיבלו מההורים\nמזג ההורים עובר הלאה\nקארמה לדורי דורות\nלכן\nהמטפח טאו בתוך עצמו\nחסדו אמת\nהמכניס טאו למשפחתו\nגבורתו שופעת\nהמלמד טאו בכפרו\nגבורתו מתרבה\nהמטפח טאו בתוך מדינתו\nגבורתו משגשגת\nהמפיץ טאו בתבל\nגבורתו חסד עולם\nחקור את גופך\nולמד מה זה גוף\nחקור עצמך\nודע זולתך\nחקור משפחתך\nולמד מה זו משפחה\nלמד כפר\nותדע מה זו מדינה\nאם תרצה להבין עם שלם\nלמד להכיר את היחיד\nלמד ארץ אחת\nותדע את כל העולם", "שב\nבשקט\nותדע\nמהו\nטאו\nכתב עמוס עוז:\nהסירו דאגה\nתינוק הוא מבורך\nבהשגחה העליונה\nולא יקרה לו כל רע\nלא יעקוץ אותו עקרב\nלא צרעה ולא אפעה\nלא יפחד מחיות פרא\nולא מעופות טרף דורסים\nהתינוק\nעצמותיו חלשות וגידיו רכים\nאך אחיזתו בחיים איתנה\nונטולת חרדה\nשרביטו הקטון ניעור\nעוד בטרם ידע בין נקבה וזכר\nהוא מסוגל כל היום לצרוח\nגרונו חזק ואינו נצרד\nיש בו און\nהוא יודע להתמיד\nוהוא מתואם עם העולם", "דע\nאת הקבוע\nואל\nתדאג\nיתר\nעל\nהמידה\nחלק מטכניקות המדיטציה של מנזרי הזן מלמדות סוג מסויים של התמקדות בנשימות\nובמקביל ,הקשבה אל הנעשה בסביבה.\nבדידות החכמים\nזה שמדבר לא יודע\nזה שיודע לא מדבר\nהוא חוסם פתחיו\nסוגר דלתותיו\nמקהה חודו\nמרכך זוהרו\nשומר על מסתורין\nמתאחד עם אבקו\nבלתי ניתן לקרבה\nאבל לא ניתן לריחוק\nאף אחד\nלא יאמר לו מה לעשות\nאבל גם אין ממנו נזק\nאין הוא מבקש כבוד\nוללא מאמץ\nהוא מוקף בו\nבעיני\nכזה הוא\nאיש טאו", "המלצות למעצבי אומה\nביושר משול במדינה\nבערמה עשה לך מלחמה\nבישוב דעת זכה במנוחה\nככל שירבו האיסורים וההגבלות\nכן ירבה עוניו של העם\nככל שירבו חוקים ותקנות\nכן ירבו שודדי המשפט\nומומחי החוק\nככל שירבו כלי הנשק\nכן תרבה האלימות\nככל שירבו המפעלים\nכך יהיו יותר דברים\nשלא צריכים\nלכן אמר החכם\nנוקט אני באפס מעשה\nוהדברים מסתדרים על הדרך\nלא מתערב\nוהשינוי נעשה מעצמו\nכאשר אני ישר עם עצמי\nגם האחרים\nשומרים איתי על יושר\nגם אם אני בטלן\nולא עושה הרבה\nהברכה תמיד איתי\nועם אלה שסביבי", "בריא\nממחלת\nהקינאה\nהייתי\nרוצה\nשוב\nלהגיד\nשאין\nברכה\nכמו\nהפשטות\nאושר ועצב\nהאושר\nעל גבי העצב נישא\nהצער\nתחת כנפי האושר שוכן\nהמזל הטוב סמוך אל הרע\nבמזל הרע אורב הטוב\nמי ידע גבולם\nלכן החכם תמיד זהיר\nאנשים טועים כל הזמן\nחיים שלמים\nימים ארוכים\nשל טעויות\nישר\nולא פוגע\nצודק\nולא מעליב\nמאיר\nאבל לא\nמסנוור בעין\nגדולה של ממש היא להיות צודק ולא לצעוק.", "מתינות\nעם בני אדם\nכמו בעבודת האדמה\nאין טוב\nממתינות\nבמתינות\nהכל קורה במהירות\nהמתון מקדם בגבורה\nגם את הצרה\nוממתין הוא\nשגם היא תעבור\nאיש\nטאו\nשורש\nעמוק\nגזע\nאיתן", "רוחות רפאים\nלשלוט\nבארץ הגדולה\nמצריך\nמידת אומנות\nכמו לטגן דג קטן\nכאשר יש טאו בממלכה\nלא מהלכים בה רוחות רפאים\nכאשר אין טאו בממלכה\nמכתירים את המתים\nלהיות אלים\nלא שאני מזלזל\nברוחות הרפאים\nאבל יותר טוב\nשהם לא יתערבבו\nעם האנשים\nלא\nהם\nולא\nהחכמים", "מדיניות האגן\nמדינה גדולה\nצריכה להיות\nמקום מפגש\nכמו אגן ניקוז\nאליו זורמים\nכל הנהרות\nכדי שיזרמו אליה\nחייבת היא\nלהיות למטה\nנשית יותר\nשלווה יותר\nועמוקה\nהנקבה בדממתה\nשמה עצמה למטה\nובכך תמיד גוברת\nעל הזכר\nהתאחדות\nהיא\nחוק\nהטבע\nיחד\nיותר טוב\nלכולם", "מטמון ומקלט\nמקלט הטאו\nהוא מטמונו\nשל האדם הטוב\nתכשיטים\nאבירים", "סוסים\nגם הקיסר\nושלושת ילדיו\nהם כאין וכאפס\nלעומת\nתפארתו\nשל\nהטאו\nכלכלה נכונה\nעסוק באפס מעשה\nעשה באפס עיסוק\nטעם את החסר טעם\nלמד את הבלתי ניתן ללמידה\nמדוד את הבלתי ניתן למדידה\nהשג את הבלתי ניתן להשגה\nהגה במה שאנשים זנחו\nזכור את מה שאנשים שכחו\nואל תמהר\nהגדל את הקטן\nהרבה את המועט\nטפל בקשה בעודו קל\nטפל בגדול בעודו קטן\nכל הדברים המורכבים בעולם\nהיו בתחילתם רק עניין קטן\nגמול על איבה בחסד\nמי שלא מפחד להיות למטה\nתמיד יהיה למעלה\nמי שמרבה להבטיח\nודאי לא ירבה לקיים\nהרגיל להקל ראש בדברים רבים\nודאי שיתקל בקשיים\nטפל בקטן ותשיג גדולות\nהחכם יטפל בקשה בעודו קל\nאצלו הקשיים\nלא מספיקים להתקשות", "להצליח בהתחלה\nאת הנייח קל לאחוז\nאת חסר הסימן ניתן לחזות\nהגדול לבסוף נשבר\nאבל הזעיר רק מתפזר\nעשה תיקון עוד לפני שהתחלת\nמשול בדברים לפני שיתבלבלו\nכשאין סדר\nיש חוסר סדר\nוהשאנן סופו להכשל\nעל סף ההצלחה\nדאג לסוף\nכמו שאתה דואג להתחלה\nולא תראה כשלון בדרכך\nלפיכך החכם\nרואה דברים קשים\nולבסוף אין לו קשיים\nמגדל של תשע קומות\nמתחיל מדלי של עפר\nעץ גדול\nמתחיל כשתיל דק אחד", "מסע\nשל\nאלף לי\nמתחיל\nבצעד\nאחד\nצפוף בראש\nבימי קדם\nהטובים שבאנשים למדו\nכדי להיות נכונים\nלא כדי להיות משכילים\nהיום האנשים מתווכחים\nכי צפוף להם\nיותר מדי בראש\nלפיכך\nהשליטה רק מדעת היא אסון\nאבל אם אפשר בהיסח הדעת\nיבואו ברכה וביטחון\nהזוכר תמיד את שני אלה\nידע את סגולת המופת\nשמה האחר של סגולת המופת\nהיא חכמת הנסתר\nחכמת הנסתר עמוקה היא\nולעיתים נמצאת\nבסתירה גמורה\nלאמונה הרגילה\nאך בעומק העניין\nמביאה היא את הדברים\nלהרמוניה שלמה\nכך מגיעים\nאל\nהאחד\nהגדול", "כמו הים\nכל הנהרות יורדים אל הימים\nהנהרות והימים\nאינם מתחרים\nאם תרצה להיות ים\nעליך להנמיך\nולרדת למטה\nאיש הטאו\nנמוך כמו הים\nאם החכם צריך להוביל\nאין לו בעיה\nלעשות זאת גם מאחור\nאף\nאחד\nלא\nמתווכח\nעם\nהים", "שלושת האוצרות\nכולם אומרים לי\nכי הטאו שלי גדול\nלי הוא נראה יותר\nכמו אפס\nרק משום שהוא גדול\nהוא דומה לאפס\nמול החסר צורה\nכל צורה אחרת\nנראת קטנה\nשלושה אוצרות לי\nשאני מחזיק ושומר עליהם\nהראשון קרוי אהבה\nהשני קרוי הסתפקות\nהשלישי קרוי בלא גאווה ללכת בעולם\nאהבה\nעל כן יכול אני להיות אמיץ\nהסתפקות\nעל כן יכול אני להיות נדיב\nבלא גאווה ללכת בעולם\nעל כן יכול אני\nלהיות אדון השרים\nמי שמוכן להיות אמיץ\nאבל אין בו אהבה\nמי שנדיב\nאבל אין בו הסתפקות\nמי שאוהב להיות חשוב\nואין בו צנעה\nכל מה שהשיג\nימות בלעדיו", "זה\nאשר\nשומר\nעל רחמים\nגם\nבמלחמה\nשמיים\nיושיעו\nויגנו\nעליו\nשיא החכמה\nהטוב שבחיילים\nאינו מהיר חימה\nהטוב שבמצביאים\nאינו שוחר מלחמה\nהטוב שבמעסיקים\nחושב על טובת האנשים\nכח\nרצון\nהסתייעות\nבאחרים\nחוסר\nמאבק\nזיווג\nעם השמיים\nלתכונות אלה\nאקרא\nשיא\nהחכמה", "לא לזלזל\nאמר מצביא קדום\nבמלחמה\nאיני מעז להתנהג\nכבעל הבית\nחכם יותר להתנהג כאורח\nאין שטות גדולה יותר\nמאשר זלזול באויב\nזלזול באויב\nכמעט וגרם לי\nאת אובדן אוצרי\nכששני צבאות גדולים\nמתנגשים\nהרגוע יותר\nבסופו של דבר\nינצח\nאל\nתקפל\nאת\nהשרוול\nאם\nאין לך\nזרוע", "לעשות\nאת דברי\nקל מאוד להבין\nוקל מאוד לעשות\nאך בודדים הם אלה\nשבאמת מבינים\nונדיר האדם\nהיכול לקבלם\nומסוגל לעשותם\nלפיכך\nהחכם\nעדיף שילבש\nבגדי צמר\nפשוטים\nויסתיר\nאת תכשיטי\nאבן הירקן\nבזן בודהיזם אומרים:\n”“It is too simple to understand", "המחלה\nלדעת את אפס הידיעה\nזו היא החכמה הנעלה\nאבל המחלה הגדולה\nהיא לחיות בעיוורון\nולחשוב שרואים\nלא לדעת\nולחשוב שיש ידיעה\nמי\nשיודע\nשהוא עיוור\nאולי\nהוא לא רואה\nאבל\nלפחות\nאין לו\nאת\nהמחלה", "סוקרטס אמר:\nהמורה הרוחני גורדג'ייף (המכון להתפתחות הרמונית של האדם) אמר פעם שהתלמיד\nהשפלה\nאל תצופף\nאת מגורי העם\nאל תצר\nאת מעונותיהם\nאל תמרר\nחייהם\nאל תדכא\nעצמותם\nאם תזלזל\nמי לא ירגיש מושפל\nהמנע\nמעשות רע\nולבטח\nימנע\nאסון\nנורא", "הרשת הגדולה\nבעל ההעזה\nעושה\nולעיתים גם ממית\nמי שיש לו את האומץ\nלא לעשות\nמניח לטבעי להיות\nלעשות ולא לעשות\nשני אלה לפעמים מועילים\nלפעמים מזיקים\nטאו של השמיים\nלא נלחם\nותמיד מנצח\nלא מדבר\nאבל תמיד עונה\nלא קורא\nוכולם באים\nנראה רגוע\nובכל זאת\nיש לו תוכניות", "רשת\nהשמים\nגדולה\nורחבה\nולמרות\nשעיני הרשת\nגדולות\nאין דבר\nבעולם\nשיחמוק\nשר המוות\nכשיש הוצאה להורג\nמלבד ההורג והנהרג\nנחוץ גם השופט\nאבל מדוע לנו\nלעשות את העבודה\nשל שר המוות\nצריכה להיות הפרדה\nבין חוטב העצים\nובין הנפח\nכל אחד\nיעשה\nאת תפקידו\nאחרת\nודאי\nיפצע\nאת ידו", "צדק\nאם ראשי הממשל\nמבקשים לעצמם\nאוכל משובח\nוהעם רעב\nאם\nראשי העם\nעוסקים רק\nבמותרות\nומעבירים זמנם\nבעינוגים\nשלא יתפלאו\nאם העם\nמזלזל במוות\nולא מעריך חיים\nדבק\nבחיים\nשל עצמו\nומקל ראש\nבמוות\nשל אחרים\nאין בכך\nכבוד\nלחיים", "טאי צ'י\nהאדם\nבכניסתו לחיים\nגמיש ורפוי\nבמותו\nצפוד ונוקשה\nכל העשבים והצמחים\nבכניסתם לחיים\nגמישים וענוגים\nבמותם\nיבשים וכמושים\nעל כן\nהצפידות והנוקשות מתלוות למוות\nהגמישות והרפיון  -לחיים\nצבא נוקשה\nאינו מנצח\nעץ נוקשה\nמזומן לגרזן\nהנוקשה\nוהכבד\nתמיד למטה\nהגמיש\nוהרפוי\nזקוף\nיהיה", "אומנות הקשת\nהטאו העליון מזכיר את הקשת\nכשהיא מתוחה\nהחלק התחתון עולה למעלה\nהחלק העליון מתכופף\nוהחסר מתמלא\nזו היא דרך השמיים\nהארוך מתקצר\nהעקום מתיישר\nהגדול מפחית\nוממלא את החסר\nרק הנוכל\nגורע מהחסר\nומוסיף ליותר\nהמחזיק\nבקשת\nהטאו\nמשתמש\nבכוח\nשל\nהחסר", "כמו מים\nאין בעולם דבר\nרך\nגמיש\nורפוי מהמים\nגם במתקפה\nעל היציב והנוקשה\nאין יעיל מהמים\nכולם יודעים זאת\nאך מי אכן ינהג כך\nמה\nאני\nאשם\nשדברי\nאמת\nנשמעים\nהפוכים", "שלום\nאחר פיוס במריבה גדולה\nעדיין נשארת בלב טינה\nמלחמות לא מסתיימות\nבתום הקרב\nלכן לא כדאית המלחמה\nהחכם\nדואג להתחייבויותיו\nלפני שהוא מביע תלונה\nטאו\nשל השמים\nאינו\nמגוון\nבמשפט\nתמיד\nהוא\nלצד\nהטוב", "אחרית הימים\nארץ קטנה ואנשים בה מעט\nכלי מלחמה רבים\nאך איש אינו משתמש\nיש אוניות ויש מרכבות\nאבל אין המרבים לנדוד\nלומדים לקשור בחבל\nבמקום לחבר אותיות\nאף כי הארצות השכנות\nנראות לעין\nונשמעים משם\nקולות הכלבים והתרנגולים\nעד זקנה ומוות\nלא יעלה הצורך\nלגור במקומות אחרים\nמזונם\nערב\nלבושם\nנקי\nמעונם\nשמח\nומנהגם\nבשלווה", "סיכום\nדברי אמת אינם יפים\nדברים יפים אינם אמת\nהאיש הטוב אינו מתווכח\nהמתווכח אינו טוב\nהיודע\nאינו למדן מופלג\nהלמדן המופלג\nאינו יודע\nהחכם אינו צובר\nומרבה לעזור לאחרים\nככל שירבה לתת\nכן ירבה עושרו\nטאו\nשל השמים\nלהיטיב\nלא להכאיב\nטאו\nשל החכם\nלעשות\nבמקום\nלהתלונן\n81\nנספח א:\nכשסין הייתה העולם\nנספח ב:\nהאגדה על חייו של לאו-צה\nאלפיים וחמש מאות שנה עברו מאז אותם ימי מעבר ותהפוכות בחצרו של קיסר צ'ואו\nמי שהבין את הטאו,\nהוא נאמן לטבעיות.\nמי שלא הבין את הטאו ,יפר אותו\".\nבפועל קונפוציוס סידר את מערכת המשפט והכניס ארבעה סוגים של חובת ציות:\nולסיום שני המשפטים המסכמים:\nנספח ג:\nגרסתו של צ'ואנג-צה למפגש הענקים\nבתרגום אחר מסופר כך על המפגש בין לאו-צה וקונפוציוס לפי מסורת תלמידיו של\nהמורה צ'ואנג-צה:\nבטבע\nאין כל בלבול.\nאבל כשהנחלים יבשים\nוהדגים מוטלים בחרבה,\nהם מרטיבים זה את זה\nומלחלחים עצמם\nברוקם.\nמוטב שישכחו אחד את השני\nויפנו חזרה אל הים!\"\nהספרים של לאו-צה וצ'ואנג-צה (קולות האדמה) תורגמו פעמים רבות ובכל תרגום הם\nנספח ד:\nהגיגים\nנספח ה:\nתורת הבודהא\nwww.nissimamon.com"];
+
+const TAO_TITLES = ['הדרך','הכל חלקי','מחוץ לזמן','חוק אחד','הרוח העמק',
+  'המרחב הריק','המקדש הפנימי','מים','ריקות והשלמה','ריסון הקצוות',
+  'יתרונות האין','הצבעים','מעדנות','גאווה ומפלה','מספיק',
+  'השורש הגדול','שלושה אוצרות','שובי אל הגדול','שלומות ואחדות','ריבוי ופחות',
+  'ריכוך הנוקשה','האמת הפשוטה','ההתנהגות','ואל תתנשא','הצנוע',
+  'הנסתר','מה שנשמר','חזק ורך','חוזק ועדינות','הצנוע המנצח',
+  'עידוד לתלמידים','בסיס הלימוד','ללא מאמץ','כוח הגדול','הדרך הטובה',
+  'הפנימה','הדאגה','הבסיס','הנהגה טובה','בין שמים לארץ',
+  'ידיעה עצמית','הרצון הגדול','מסע הנשמה','אהבת הטאו','אמהות',
+  'פעולה ואי-פעולה','ידיעה ולמידה','לב ישר','הקיסר הטוב','ההתנהלות',
+  'הבסיס הנכון','פשטות','ספירת ברכות','ממלכת הטאו','המגבלות',
+  'עמקות הנסתר','השורש','האמת האחת','מים ואבן','הדרך הפשוטה',
+  'ההוויה הטהורה','שלושת האוצרות','הנכון','ניצחון','עדינות',
+  'ידיעת הסוד','הידיעה','הוו-וויי','המלכות הקטנה','האמת',
+  'ספר הטאו א','ספר הטאו ב','ספר הטאו ג','ספר הטאו ד','ספר הטאו ה',
+  'ספר הטאו ו','ספר הטאו ז','ספר הטאו ח','ספר הטאו ט','סיכום'];
+
+const MEDITATIONS = [
+  {title:'נשימת הטאו',duration:5,icon:'🌊',desc:'נשום עם זרם הטאו',steps:['שאיפה עמוקה 4 שניות','עצירה 4 שניות','נשיפה איטית 6 שניות','השהייה 2 שניות']},
+  {title:'ישיבת זן',duration:7,icon:'🪷',desc:'שב בשקט — כמו הר',steps:['גב ישר, עיניים חצי עצומות','שים לב לנשימה הטבעית','כשמחשבה עולה — חזור לנשימה','אין מטרה — רק להיות']},
+  {title:'סריקת גוף',duration:8,icon:'🌿',desc:'שחרר את המתח',steps:['התחל מהקדקוד','רד לאט מטה','שים לב לכל אזור מתח','שחרר בנשיפה']},
+  {title:'הליכת מוּשין',duration:10,icon:'🏔️',desc:'צעד בנוכחות מלאה',steps:['עמוד ישר, רגליים יציבות','כל צעד — מלא ושלם','שים לב לתחושה בכפות הרגליים','המחשבות — כעננים עוברים']},
+  {title:'ויזואליזציית מים',duration:6,icon:'💧',desc:'היה כמים — גמיש וזורם',steps:['דמיין נהר שקט','אתה הנהר — זורם סביב אבנים','אין התנגדות — רק זרימה','כל מכשול הופך לחלק מהדרך']},
+  {title:'קירוב הריקות',duration:5,icon:'⭕',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
+];
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+const getAudio = () => { if(!audioCtx) audioCtx = new AudioCtx(); return audioCtx; };
+
+const playTone = (freq, dur, type='sine', vol=0.3) => {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq; osc.type = type;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+};
+
+const playZenBell = () => { playTone(528,2.5); setTimeout(()=>playTone(396,1.5),400); };
+const playTibetanBowl = () => { playTone(256,3); setTimeout(()=>playTone(384,2),250); setTimeout(()=>playTone(512,1.5),600); };
+const playTaskComplete = () => { playTone(440,0.3); setTimeout(()=>playTone(554,0.3),150); setTimeout(()=>playTone(659,1),300); };
+const playTaskAdd = () => playTone(396,0.5,'triangle',0.2);
+
+const showRipple = () => {
+  const el = document.createElement('div');
+  el.className = 'success-ring';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+};
+
+const getTaoChapter = () => {
+  const start = new Date('2025-01-01');
+  const today = new Date();
+  return Math.floor((today - start) / 86400000) % 80;
+};
+
+
+// Water sound (gentle stream)
+const playWater = () => {
+  try {
+    const ctx = getAudio();
+    const bufferSize = ctx.sampleRate * 0.8;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    // Pink noise filtered to sound like water
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for(let i=0; i<bufferSize; i++) {
+      const w = Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      data[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.08;
+      b6=w*0.115926;
+    }
+    const src = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type='bandpass'; filter.frequency.value=800; filter.Q.value=0.5;
+    src.buffer=buffer;
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0,ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.3,ctx.currentTime+0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+    src.start(); src.stop(ctx.currentTime+0.8);
+  } catch(e) {}
+};
+
+function renderTao() {
+  const el = document.getElementById('screen-tao');
+  const idx = getTaoChapter();
+  renderTaoChapter(el, idx);
+}
+
+function renderTaoChapter(el, idx) {
+  idx = Math.max(0, Math.min(79, idx));
+  var chapter = TAO_CHAPTERS[idx] || '';
+  var title = TAO_TITLES[idx] || ('פרק ' + (idx + 1));
+  var lines = chapter.split('\n').filter(function(l) { return l.trim(); });
+  var prevIdx = (idx - 1 + 80) % 80;
+  var nextIdx = (idx + 1) % 80;
+
+  var verseHtml = lines.map(function(l) {
+    return '<div style="padding:4px 0">' + l + '</div>';
+  }).join('');
+
+  var medHtml = MEDITATIONS.map(function(m, i) {
+    return '<div id="med-btn-' + i + '" style="background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+      '<div>' +
+      '<div style="font-size:15px;font-weight:600;color:#f5ecd6">' + m.icon + ' ' + m.title + '</div>' +
+      '<div style="font-size:12px;color:#b3a077;margin-top:3px">' + m.desc + '</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#cf9d2e;flex-shrink:0">' + m.duration + ' דק</div>' +
+      '</div>';
+  }).join('');
+
+  el.innerHTML =
+    '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
+    '<div style="text-align:center;margin-bottom:6px">' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו טה צ׳ינג</span>' +
+    '</div>' +
+    '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;margin-bottom:16px">' +
+    '<div style="font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
+    '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+    '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">← הקודם</button>' +
+    '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
+    '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
+    '</div>' +
+    '<div style="font-size:11px;color:#e8c15c;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
+    medHtml +
+    '</div>';
+
+  // Add click handlers AFTER innerHTML is set
+  var prevBtn = document.getElementById('tao-prev');
+  var nextBtn = document.getElementById('tao-next');
+  if (prevBtn) prevBtn.onclick = function() { renderTaoChapter(el, prevIdx); };
+  if (nextBtn) nextBtn.onclick = function() { renderTaoChapter(el, nextIdx); };
+
+  // Bind meditation buttons (IIFE to capture i correctly)
+  MEDITATIONS.forEach(function(m, i) {
+    var btn = document.getElementById('med-btn-' + i);
+    if (btn) btn.onclick = (function(idx) {
+      return function() { startMeditationWithVoice(idx); };
+    })(i);
+  });
+
+  el.scrollTop = 0;
+  playWater();
+}
+
+
+function startMeditation(idx) {
+  const med = MEDITATIONS[idx];
+  medTotal = med.duration * 60;
+  medSeconds = medTotal;
+
+  // Stop any existing timer first
+  if(medInterval) { clearInterval(medInterval); medInterval = null; }
+
+  playTibetanBowl();
+
+  const stepsHtml = med.steps.map(function(s, i) {
+    return '<div style="font-size:12px;color:#b3a077;padding:4px 0;border-bottom:' +
+      (i < med.steps.length - 1 ? '1px solid #241b0d' : 'none') + '">' + s + '</div>';
+  }).join('');
+
+  const mins = med.duration.toString();
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML =
+    '<div class="modal-overlay">' +
+    '<div class="modal" style="text-align:center">' +
+    '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + med.icon + ' ' + med.title + '</div>' +
+    '<div style="font-size:12px;color:#b3a077;margin-bottom:20px">' + med.desc + '</div>' +
+    '<div class="med-circle" id="med-circle">' +
+    '<canvas id="med-canvas" width="180" height="180" style="position:absolute;inset:0;border-radius:50%"></canvas>' +
+    '<div class="med-timer" id="med-timer">' + mins + ':00</div>' +
+    '</div>' +
+    '<div class="breath-text" id="breath-text">היכון...</div>' +
+    '<div style="margin:20px 0;padding:14px;background:#120d06;border-radius:12px;text-align:right">' +
+    stepsHtml +
+    '</div>' +
+    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #241b0d;background:transparent;color:#b3a077;font-size:14px">סיים מוקדם</button>' +
+    '</div></div>';
+
+  drawMedCircle(1);
+
+  var pattern = ['שאיפה...', 'עצירה...', 'נשיפה...', 'השהייה...'];
+  var breathTimes = [4, 4, 6, 2];
+  var breathIdx = 0;
+  var breathTimer = 0;
+
+  setTimeout(function() {
+    var b = document.getElementById('breath-text');
+    if (b) b.textContent = pattern[0];
+  }, 1500);
+
+  medInterval = setInterval(function() {
+    medSeconds--;
+    var m = Math.floor(medSeconds / 60);
+    var s = medSeconds % 60;
+    var timer = document.getElementById('med-timer');
+    if (timer) timer.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    drawMedCircle(medSeconds / medTotal);
+    breathTimer++;
+    if (breathTimer >= breathTimes[breathIdx]) {
+      breathTimer = 0;
+      breathIdx = (breathIdx + 1) % 4;
+      var b = document.getElementById('breath-text');
+      if (b) b.textContent = pattern[breathIdx];
+      if (breathIdx === 0 && typeof window._onBreathCycle === 'function') window._onBreathCycle();
+    }
+    if (medSeconds <= 0) stopMeditation(true);
+  }, 1000);
+}
+
+
+function drawMedCircle(ratio) {
+  const canvas = document.getElementById('med-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=180, cx=W/2, cy=W/2, r=W/2-4;
+  ctx.clearRect(0,0,W,W);
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(196,146,42,0.15)'; ctx.lineWidth=3; ctx.stroke();
+  if(ratio>0) {
+    ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+(1-ratio)*Math.PI*2);
+    ctx.strokeStyle='#b8860b'; ctx.lineWidth=3; ctx.stroke();
+  }
+}
+
+function stopMeditation(completed) {
+  if(medInterval) { clearInterval(medInterval); medInterval = null; }
+  window._onBreathCycle = null;
+  document.getElementById('modal-container').innerHTML = '';
+  try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
+  try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
+  if(completed) { playTibetanBowl(); showRipple(); }
+}
+
+function renderCurrentScreen() {
+  switch(currentScreen) {
+    case 'home': renderHome(); break
+    case 'tasks': renderTasks(); break
+    case 'sites': renderSites(); break
+    case 'people': renderPeople(); break
+    case 'calendar': renderCalendar(); break
+    case 'tao': renderTao(); break
+    case 'input': renderInput(); break
+    case 'action': renderAction(); break
+    case 'settings': renderSettings(); break
+  }
+}
+
+// ── BADGES ───────────────────────────────────────
+function refreshBadges() {
+  var urgent = state.tasks.now.filter(function(t){return !t.done;}).length;
+  var sites = state.sites.filter(function(s){return s.status==='open'||s.status==='pending';}).length;
+  var people = state.people.filter(function(p){return p.pending;}).length;
+  var pairs = [['tasks',urgent],['sites',sites],['people',people]];
+  try { pairs.push(['calendar', getEventsForDate(getToday()).length]); } catch(e) {}
+  pairs.forEach(function(pair) {
+    var b = document.getElementById('badge-'+pair[0]);
+    if(b) { b.textContent=pair[1]; b.classList.toggle('hidden', pair[1]===0); }
+  });
+}
+
+// ── HOME ─────────────────────────────────────────
+function renderHome() {
+  const el = document.getElementById('screen-home')
+  const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const done = all.filter(t=>t.done).length
+  const total = all.length
+  const urgent = state.tasks.now.filter(t=>!t.done).slice(0,3)
+  const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
+  const pendingPeople = state.people.filter(p=>p.pending).length
+  const pct = total ? Math.round((done/total)*100) : 0
+
+  el.innerHTML = `
+    <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · 🔥 ${state.streak} ימים`:''}</div>
+          <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ☀️</div>
+          <div style="font-size:14px;color:#948a7a;margin-top:2px">Region II · Cagayan Valley</div>
+        </div>
+        <button onclick="navigateTo('settings')" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">☯️</button>
+      </div>
+      ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
+        <div style="font-size:14px;color:var(--gold);font-weight:700">⚠️ נדרש API Key</div>
+        <div style="font-size:14px;color:#948a7a;margin-top:2px">לחץ להגדרות</div>
+      </div>` : ''}
+      ${total > 0 ? `<div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#6b6255;margin-bottom:6px">
+          <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'#1a8f7a':'#211d17'}">${done}/${total}</span>
+        </div>
+        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#1a8f7a':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
+      </div>` : ''}
+    </div>
+    <div style="padding:16px">
+      ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
+        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
+      </div>` : ''}
+      ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
+      ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <div style="font-size:15px;font-weight:600;color:#211d17">${t.text}</div>
+        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:6px">
+          ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+          ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+        </div>`:''}
+      </div>`).join('')}` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#e8940c,#d67d0a)">
+          <div style="font-size:20px">🖌️</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${urgent.length}</div>
+          <div style="font-size:14px;color:#fde8c4;margin-top:2px;font-weight:600">עכשיו</div>
+        </div>
+        <div onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#1a8f7a,#147263)">
+          <div style="font-size:20px">🪷</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${openSites}</div>
+          <div style="font-size:14px;color:#c8ebe3;margin-top:2px;font-weight:600">אתרים</div>
+        </div>
+        <div onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#6b46c1,#5936a3)">
+          <div style="font-size:20px">👥</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${pendingPeople}</div>
+          <div style="font-size:14px;color:#dfd3f5;margin-top:2px;font-weight:600">ממתין</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
+      ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
+      </div>`:''}
+    </div>
+  `
+}
+
+// ── INPUT ────────────────────────────────────────
+function renderInput() {
+  const el = document.getElementById('screen-input')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">הוסף הודעות</div>
+      </div>
+      <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
+      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
+      ${!apiKey?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
+      <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
+    </div>
+  `
+}
+
+async function doAnalyze() {
+  const text = document.getElementById('input-text')?.value?.trim()
+  const btn = document.getElementById('input-btn')
+  const err = document.getElementById('input-error')
+  if(!text || !apiKey) return
+  btn.textContent = '⚙️ מסדר...'
+  btn.style.background = '#ffffff'
+  btn.style.color = '#7a6f5c'
+  err.style.display = 'none'
+  try {
+    const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
+    console.log('AI raw:', parsed.slice(0,500))
+    const p = JSON.parse(parsed.replace(/```json|```/g,'').trim())
+    console.log('Events from AI:', JSON.stringify(p.events))
+    const s = Date.now()
+    const tag = (arr,pfx) => (arr||[]).map((t,i)=>({...t,id:`${pfx}${s}${i}`,done:false}))
+    setState({
+      tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
+      sites: mergeSites(state.sites, p.sites||[]),
+      people: mergePeople(state.people, p.people||[]),
+      events: (function(){
+        var ts = Date.now(), td = getToday();
+        // events[] is only for genuinely calendar-worthy items (meetings,
+        // deadlines, appointments) per SYSTEM_PROMPT rules 2-3. It used to
+        // mirror EVERY task too — that meant deleting or finishing a task in
+        // the Tasks screen left a duplicate "ghost" entry behind on the
+        // calendar forever, since the two had no link back to each other.
+        var aiEvs = (p.events||[]).map(function(e,i){
+          return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
+                  note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)',site:e.site||null};
+        });
+        var existing = state.events || [];
+        return [...existing,...aiEvs];
+      })(),
+      focus: p.focus || state.focus,
+      focusDate: p.focus ? getToday() : state.focusDate
+    })
+    if((p.events||[]).length > 0) {
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.textContent = '📅 ' + (p.events||[]).length + ' אירועים נוספו ללוח';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
+    }
+    navigateTo('home')
+
+  } catch(e) {
+    err.textContent = 'שגיאה: ' + e.message
+    err.style.display = 'block'
+    btn.textContent = '⚡ ארגן את היום'
+    btn.style.background = 'linear-gradient(135deg,var(--gold),var(--gold2))'
+    btn.style.color = '#fff'
+  }
+}
+
+// ── TASKS ────────────────────────────────────────
+let taskBucket = 'now'
+let taskContextFilter = 'all'
+const CONTEXT_LABEL = {phone:'📞 טלפון',office:'💻 משרד',site:'📍 באתר'}
+
+function renderTasks() {
+  const el = document.getElementById('screen-tasks')
+  const counts = {now:state.tasks.now.filter(t=>!t.done).length,today:state.tasks.today.filter(t=>!t.done).length,later:state.tasks.later.filter(t=>!t.done).length}
+  const allTasks = state.tasks[taskBucket] || []
+  const tasks = taskContextFilter==='all' ? allTasks : allTasks.filter(t=>t.context===taskContextFilter)
+  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const CTX = [['all','הכל'],['phone','📞'],['office','💻'],['site','📍']]
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:18px;font-weight:700">משימות</div>
+        <button onclick="showAddTask()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        ${['now','today','later'].map((b,i)=>`
+          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#ffffff'};color:${taskBucket===b?BCOLS[b]:'#6b6255'};cursor:pointer">
+            <div style="font-size:16px">${['🎋','🌿','🕊️'][i]}</div>
+            <div style="font-size:14px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
+            ${counts[b]>0?`<div style="font-size:14px;font-weight:700">${counts[b]}</div>`:''}
+          </button>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px">
+        ${CTX.map(([v,l])=>`<button onclick="setTaskContextFilter('${v}')" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid ${taskContextFilter===v?'var(--gold)':'var(--line)'};background:${taskContextFilter===v?'#fdf1da':'#ffffff'};color:${taskContextFilter===v?'var(--gold)':'#6b6255'};font-size:13px;font-weight:600">${l}</button>`).join('')}
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${tasks.length===0?`<div class="empty"><div class="empty-icon">🎋</div><div class="empty-text">${taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'}</div></div>`:''}
+      ${tasks.map(t=>taskCard(t)).join('')}
+    </div>
+  `
+}
+
+function setTaskContextFilter(v) { taskContextFilter=v; renderTasks() }
+
+function taskCard(t) {
+  const colors = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
+  const c = colors[t.color] || colors.orange
+  const overdue = isOverdue(t)
+  return `
+    <div style="background:#ffffff;border:1px solid var(--line);border-right:3px solid ${t.done?'#e3d9bd':(overdue?'#ef4444':c)};border-radius:12px;padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?'✓':''}</div>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          ${t.note?`<div style="font-size:12px;color:#948a7a;margin-top:3px;line-height:1.4">${t.note}</div>`:''}
+          ${t.photo?`<img src="${t.photo}" onclick="viewPhoto('${t.photo}')" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+            ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+            ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag">${CONTEXT_LABEL[t.context]}</span>`:''}
+            ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">⏰ ${t.time}${overdue?' · עבר הזמן':''}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          ${!t.done?`<button onclick="showAddTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">✎</button>`:''}
+          ${!t.done?`<button onclick="openAction({text:'${t.text.replace(/'/g,"\\'")}',assignee:'${t.assignee||''}'})" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">🖌️</button>`:''}
+          ${t.done?`<button onclick="deleteTask('${t.id}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px">🗑</button>`:''}
+        </div>
+      </div>
+    </div>`
+}
+
+function setTaskBucket(b) { taskBucket=b; renderTasks() }
+
+function deleteTask(id) {
+  const strip = arr => arr.filter(t=>t.id!==id)
+  setState({tasks:{now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}})
+}
+
+function toggleTask(id) {
+  const wasUndone = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(t=>t.id===id&&!t.done)
+  const now = Date.now()
+  const toggle = arr => arr.map(t=>t.id===id?{...t,done:!t.done,completedAt:!t.done?now:null}:t)
+  const patch = {tasks:{now:toggle(state.tasks.now),today:toggle(state.tasks.today),later:toggle(state.tasks.later)}}
+  if(wasUndone) {
+    const today = getToday()
+    if(state.lastStreakDate !== today) {
+      const y = getTodayPlus(-1)
+      patch.streak = (state.lastStreakDate === y) ? (state.streak||0) + 1 : 1
+      patch.lastStreakDate = today
+    }
+  }
+  setState(patch)
+  if(wasUndone){playTaskComplete();showRipple();}
+}
+
+// ── PHOTO ATTACHMENTS ────────────────────────────
+// Images are downsized client-side before being stored (localStorage has a
+// hard size ceiling per origin), so a phone photo becomes a small JPEG
+// thumbnail rather than a multi-MB original.
+let pendingPhoto = null
+function readImageAsThumbnail(file, cb) {
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    const img = new Image()
+    img.onload = function() {
+      const maxW = 720
+      const scale = Math.min(1, maxW / img.width)
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      cb(canvas.toDataURL('image/jpeg', 0.6))
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+function handlePhotoPick(input, previewId) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    pendingPhoto = dataUrl
+    renderPhotoPreview(previewId)
+  })
+}
+function removePendingPhoto(previewId) {
+  pendingPhoto = null
+  renderPhotoPreview(previewId)
+}
+function renderPhotoPreview(previewId) {
+  const prev = document.getElementById(previewId); if(!prev) return
+  prev.innerHTML = pendingPhoto
+    ? '<div style="position:relative"><img src="'+pendingPhoto+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>'+
+      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:14px">✕ הסר</button></div>'
+    : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>'
+}
+function photoInputHtml(inputId, previewId, existingPhoto) {
+  pendingPhoto = existingPhoto || null
+  return '<div style="margin-bottom:14px">'+
+    '<label class="form-label">תמונה (רשות)</label>'+
+    '<input type="file" accept="image/*" id="'+inputId+'" onchange="handlePhotoPick(this,\''+previewId+'\')" style="display:none"/>'+
+    '<div id="'+previewId+'" onclick="document.getElementById(\''+inputId+'\').click()" style="border:1.5px dashed var(--line);border-radius:10px;padding:14px;cursor:pointer;background:#ffffff">'+
+    (existingPhoto ? '<img src="'+existingPhoto+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>' : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>')+
+    '</div></div>'
+}
+function viewPhoto(src) {
+  document.getElementById('modal-container').innerHTML =
+    '<div class="modal-overlay" onclick="closeModal()" style="align-items:center;justify-content:center;padding:20px">'+
+    '<img src="'+src+'" style="max-width:100%;max-height:80vh;border-radius:14px"/>'+
+    '</div>'
+}
+
+let editingTaskId = null
+function showAddTask(id) {
+  editingTaskId = id || null
+  const t = id ? [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) : null
+  const bucketOf = id ? (state.tasks.now.some(x=>x.id===id)?'now':state.tasks.today.some(x=>x.id===id)?'today':'later') : 'now'
+  const modal = document.getElementById('modal-container')
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?'✎ עריכת משימה':'+ משימה חדשה'}</div>
+        <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?t.text:''}</textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="form-label">אחראי</label>
+            <select id="add-task-assignee" class="form-select">
+              <option value="uri" ${t&&t.assignee==='uri'?'selected':''}>אני</option><option value="gio" ${t&&t.assignee==='gio'?'selected':''}>ג'יו</option>
+              <option value="kenneth" ${t&&t.assignee==='kenneth'?'selected':''}>קנת'</option><option value="asc" ${t&&t.assignee==='asc'?'selected':''}>ASC</option><option value="11-16" ${t&&t.assignee==='11-16'?'selected':''}>11-16</option>
+            </select></div>
+          <div><label class="form-label">מתי</label>
+            <select id="add-task-bucket" class="form-select">
+              <option value="now" ${bucketOf==='now'?'selected':''}>עכשיו</option><option value="today" ${bucketOf==='today'?'selected':''}>היום</option><option value="later" ${bucketOf==='later'?'selected':''}>אחר כך</option>
+            </select></div>
+          <div><label class="form-label">עדיפות</label>
+            <select id="add-task-color" class="form-select">
+              <option value="red" ${t&&t.color==='red'?'selected':''}>דחוף</option><option value="orange" ${!t||t.color==='orange'?'selected':''}>חשוב</option><option value="green" ${t&&t.color==='green'?'selected':''}>שוטף</option>
+            </select></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="form-label">הקשר — איפה אפשר לבצע?</label>
+          <select id="add-task-context" class="form-select">
+            <option value="" ${!t||!t.context?'selected':''}>לא ידוע</option>
+            <option value="phone" ${t&&t.context==='phone'?'selected':''}>📞 טלפון</option>
+            <option value="office" ${t&&t.context==='office'?'selected':''}>💻 משרד</option>
+            <option value="site" ${t&&t.context==='site'?'selected':''}>📍 באתר</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="form-label">הערת שוליים (רשות)</label>
+          <input id="add-task-note" class="form-input" placeholder="פרט קטן שקשור למשימה הזו..." value="${t&&t.note?t.note:''}"/>
+        </div>
+        ${photoInputHtml('add-task-photo-input','add-task-photo-preview', t?t.photo:null)}
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddTask()">${t?'שמור':'הוסף'}</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddTask() {
+  const text = document.getElementById('add-task-text').value.trim()
+  if(!text) return
+  const context = document.getElementById('add-task-context').value || null
+  const assignee = document.getElementById('add-task-assignee').value
+  const color = document.getElementById('add-task-color').value
+  const bucket = document.getElementById('add-task-bucket').value
+  const note = document.getElementById('add-task-note').value.trim() || null
+  const photo = pendingPhoto
+
+  if(editingTaskId) {
+    const id = editingTaskId
+    const strip = arr => arr.filter(x=>x.id!==id)
+    const original = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) || {}
+    const updated = {...original, text, assignee, color, context, note, photo}
+    const next = {now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}
+    next[bucket] = [...next[bucket], updated]
+    setState({tasks:next})
+    editingTaskId = null
+  } else {
+    const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,note,photo}
+    setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
+    playTaskAdd()
+  }
+  closeModal()
+}
+
+// ── SITES ────────────────────────────────────────
+let siteFilter = 'open'
+
+function renderSites() {
+  const el = document.getElementById('screen-sites')
+  const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:18px;font-weight:700">אתרים</div>
+        <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'var(--gold)':'#ffffff'};color:${siteFilter===v?'#fff':'#6b6255'};font-size:14px;font-weight:600">${l}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${sites.length===0?`<div class="empty"><div class="empty-icon">🪷</div><div class="empty-text">אין אתרים</div></div>`:''}
+      ${sites.map(s=>siteCard(s)).join('')}
+    </div>`
+}
+
+function mapsLinkFor(loc) {
+  if(!loc) return ''
+  const coordMatch = loc.trim().match(/^-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+$/)
+  return coordMatch
+    ? 'https://www.google.com/maps?q=' + encodeURIComponent(loc.trim())
+    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc.trim())
+}
+
+function siteCard(s) {
+  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#6b6255'
+  return `
+    <div class="card" style="border:1px solid ${col}33;margin-bottom:8px">
+      <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${s.name}</div>
+      ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${s.province}</div>`:''}
+      ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
+      ${s.photo?`<img src="${s.photo}" onclick="viewPhoto('${s.photo}')" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
+        <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
+        ${s.year?`<span class="tag">📅 ${s.year}</span>`:''}
+        ${s.remo?`<span class="tag">REMO ${s.remo}</span>`:''}
+        ${s.location?`<a href="${mapsLinkFor(s.location)}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🗺️ Maps</a>`:''}
+        ${s.mondayLink?`<a href="${s.mondayLink}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🔗 Monday.com</a>`:''}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        ${['open','pending','resolved'].map(st=>`
+          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
+        ).join('')}
+        <button onclick="showAddSite('${s.name.replace(/'/g,"\\'")}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">✎</button>
+        <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">🖌️</button>
+      </div>
+    </div>`
+}
+
+function setSiteFilter(f) { siteFilter=f; renderSites() }
+function updateSiteStatus(name, status) { setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)}) }
+
+let editingSiteName = null
+function showAddSite(name) {
+  editingSiteName = name || null
+  const s = name ? state.sites.find(x=>x.name===name) : null
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?'✎ עריכת אתר':'+ אתר חדש'}</div>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?s.name:''}"/>
+        <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?s.province||'':''}"/>
+        <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?s.issue||'':''}"/>
+        <label class="form-label">מיקום / קואורדינטות</label>
+        <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?s.location||'':''}"/>
+        <div style="font-size:12px;color:#948a7a;margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
+        <label class="form-label">קישור Monday.com (רשות)</label>
+        <input id="add-site-monday" class="form-input" placeholder="הדבק קישור לפריט ב-Monday" value="${s?s.mondayLink||'':''}" style="direction:ltr"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;margin-top:12px">
+          <div><label class="form-label">קבלן</label>
+            <select id="add-site-contractor" class="form-select">
+              <option value="" ${!s||!s.contractor?'selected':''}>—</option><option value="asc" ${s&&s.contractor==='asc'?'selected':''}>ASC</option><option value="11-16" ${s&&s.contractor==='11-16'?'selected':''}>11-16</option>
+            </select></div>
+          <div><label class="form-label">סטטוס</label>
+            <select id="add-site-status" class="form-select">
+              <option value="open" ${!s||s.status==='open'?'selected':''}>פתוח</option><option value="pending" ${s&&s.status==='pending'?'selected':''}>ממתין</option><option value="resolved" ${s&&s.status==='resolved'?'selected':''}>נפתר</option>
+            </select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div><label class="form-label">מספר REMO</label>
+            <input id="add-site-remo" class="form-input" placeholder="REMO-1234" value="${s?s.remo||'':''}" style="direction:ltr"/></div>
+          <div><label class="form-label">שנת חוזה</label>
+            <select id="add-site-year" class="form-select">
+              <option value="" ${!s||!s.year?'selected':''}>—</option>
+              <option value="2024" ${s&&s.year==='2024'?'selected':''}>2024</option>
+              <option value="2025" ${s&&s.year==='2025'?'selected':''}>2025</option>
+              <option value="2026" ${s&&s.year==='2026'?'selected':''}>2026</option>
+            </select></div>
+        </div>
+        ${photoInputHtml('add-site-photo-input','add-site-photo-preview', s?s.photo:null)}
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddSite() {
+  const name = document.getElementById('add-site-name').value.trim()
+  if(!name) return
+  const site = {
+    name,
+    province:document.getElementById('add-site-province').value,
+    issue:document.getElementById('add-site-issue').value,
+    location:document.getElementById('add-site-location').value.trim(),
+    mondayLink:document.getElementById('add-site-monday').value.trim(),
+    remo:document.getElementById('add-site-remo').value.trim(),
+    year:document.getElementById('add-site-year').value,
+    contractor:document.getElementById('add-site-contractor').value,
+    status:document.getElementById('add-site-status').value,
+    photo:pendingPhoto
+  }
+  if(editingSiteName) {
+    site.id = (state.sites.find(x=>x.name===editingSiteName)||{}).id || Date.now()
+    setState({sites:state.sites.map(x=>x.name===editingSiteName?site:x)})
+    editingSiteName = null
+  } else {
+    site.id = Date.now()
+    setState({sites:[...state.sites, site]})
+  }
+  closeModal()
+}
+
+// ── PEOPLE ───────────────────────────────────────
+function renderPeople() {
+  const el = document.getElementById('screen-people')
+  const withP = state.people.filter(p=>p.pending)
+  const withoutP = state.people.filter(p=>!p.pending)
+
+  el.innerHTML = `
+    <div class="screen-header">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:18px;font-weight:700">אנשים</div>
+        <button onclick="showAddPerson()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+      </div>
+    </div>
+    <div style="padding:12px 16px">
+      ${state.people.length===0?`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">אנשים יתווספו מהודעות</div></div>`:''}
+      ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
+      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:14px;color:#7a6f5c;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
+    </div>`
+}
+
+function personCard(p) {
+  const rc = {engineer:'var(--gold)',contractor:'#f59e0b',nia:'var(--gold2)',other:'#6b6255'}[p.role]||'#6b6255'
+  return `
+    <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:8px;flex:1">
+          <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:14px;color:${rc};font-weight:700;flex-shrink:0">${p.name[0]?.toUpperCase()||'?'}</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#211d17">${p.name}</div>
+            ${p.company?`<div style="font-size:14px;color:#6b6255">${p.company}</div>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="openAction({text:'${(p.pending||p.name).replace(/'/g,"\\'")}',assignee:'${p.name}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:16px">🖌️</button>
+          ${p.pending?`<button onclick="clearPending('${p.name}')" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
+        </div>
+      </div>
+      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
+        <div style="font-size:14px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
+        <div style="font-size:14px;color:#7a6f5c;line-height:1.5">${p.pending}</div>
+      </div>`:''}
+    </div>`
+}
+
+function clearPending(name) { setState({people:state.people.map(p=>p.name===name?{...p,pending:''}:p)}) }
+
+function showAddPerson() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ איש קשר</div>
+        <label class="form-label">שם</label><input id="add-person-name" class="form-input" placeholder="Dave"/>
+        <label class="form-label">חברה</label><input id="add-person-company" class="form-input" placeholder="ASC Construction"/>
+        <label class="form-label">ממתין ל...</label><input id="add-person-pending" class="form-input" placeholder="חתימה על waiver"/>
+        <label class="form-label">תפקיד</label>
+        <select id="add-person-role" class="form-select" style="margin-bottom:14px">
+          <option value="contractor">קבלן</option><option value="engineer">מהנדס</option>
+          <option value="nia">NIA</option><option value="other">אחר</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="doAddPerson()">הוסף</button>
+          <button class="btn-secondary" onclick="closeModal()">ביטול</button>
+        </div>
+      </div>
+    </div>`
+}
+
+function doAddPerson() {
+  const name = document.getElementById('add-person-name').value.trim()
+  if(!name) return
+  setState({people:[...state.people,{name,company:document.getElementById('add-person-company').value,pending:document.getElementById('add-person-pending').value,role:document.getElementById('add-person-role').value,id:Date.now()}]})
+  closeModal()
+}
+
+// ── ACTION ───────────────────────────────────────
+function openAction(ctx) {
+  actionCtx = ctx
+  navigateTo('action')
+}
+
+function renderAction() {
+  const el = document.getElementById('screen-action')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">צור תוכן</div>
+      </div>
+      ${actionCtx?.text?`<div class="card" style="border-right:3px solid var(--gold);margin-bottom:20px">
+        <div style="font-size:14px;color:#211d17;line-height:1.5">${actionCtx.text}</div>
+        ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">👤 ${actionCtx.assignee}</div>`:''}
+      </div>`:''}
+      <div id="action-buttons">
+        ${[['whatsapp','💬','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','📧','מייל','ASC / 11-16 / NIA'],['monday','📋','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
+          <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
+            <div style="font-size:16px;font-weight:600">${i} ${l}</div>
+            <div style="font-size:14px;color:#6b6255;margin-top:3px">${s}</div>
+          </div>`).join('')}
+      </div>
+      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#6b6255">
+        <div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-size:14px">כותב...</div>
+      </div>
+      <div id="action-result-container" style="display:none">
+        <div id="action-result" class="action-result"></div>
+        <button id="action-copy-btn" class="btn-primary" onclick="copyResult()" style="margin-bottom:10px">📜 העתק</button>
+        <button class="btn-secondary" style="width:100%" onclick="renderAction()">← צור משהו אחר</button>
+      </div>
+    </div>`
+}
+
+async function doAction(type) {
+  document.getElementById('action-buttons').style.display='none'
+  document.getElementById('action-loading').style.display='block'
+  const prompts = {
+    whatsapp:`Write a short WhatsApp message in English from Uri (Regional Manager, IAI Philippines) to ${actionCtx?.assignee||'team member'} about: ${actionCtx?.text}. Max 3 sentences, direct.`,
+    email:`Write a professional email in English from Uri (Regional Manager, Innovative Agro Industry) about: ${actionCtx?.text}. Include subject line. Concise.`,
+    monday:`Write a Monday.com task update in English for: ${actionCtx?.text}. Format: Status / Issue / Next Action / Owner.`
+  }
+  try {
+    const result = await callClaude([{role:'user',content:prompts[type]}])
+    document.getElementById('action-loading').style.display='none'
+    document.getElementById('action-result').textContent=result
+    document.getElementById('action-result-container').style.display='block'
+  } catch(e) {
+    document.getElementById('action-loading').style.display='none'
+    document.getElementById('action-buttons').style.display='block'
+    alert('שגיאה: ' + e.message)
+  }
+}
+
+function copyResult() {
+  const text = document.getElementById('action-result').textContent
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('action-copy-btn')
+    btn.textContent='✓ הועתק!'
+    btn.style.background='#a8711a'
+    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
+  })
+}
+
+// ── SETTINGS ─────────────────────────────────────
+function renderSettings() {
+  const el = document.getElementById('screen-settings')
+  el.innerHTML = `
+    <div style="padding:48px 16px 24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
+        <div style="font-size:18px;font-weight:700">הגדרות</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🎨 ערכת צבע</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
+        <div style="display:flex;gap:8px">
+          ${Object.keys(THEMES).map(name=>`
+            <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'#ffffff'};cursor:pointer">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,${THEMES[name].gold},${THEMES[name].gold2});margin:0 auto 6px"></div>
+              <div style="font-size:12px;font-weight:600;color:${currentTheme===name?THEMES[name].gold:'#6b6255'}">${THEMES[name].label}</div>
+            </button>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">☁️ שרת (Cloudflare)</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת.':'לא מחובר — הנתונים נשארים רק במכשיר הזה.'}</div>
+        <label class="form-label">כתובת השרת</label>
+        <input id="settings-server-url" value="${serverUrl}" placeholder="https://fieldy-proxy.xxx.workers.dev" class="form-input" style="direction:ltr"/>
+        <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
+        <input id="settings-server-passcode" type="password" value="${serverPasscode}" placeholder="הסיסמה שהגדרת ב-Cloudflare" class="form-input" style="direction:ltr;margin-bottom:12px"/>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
+          <button id="server-test-btn" onclick="testServerConfig()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px">בדוק חיבור</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
+        <div style="font-size:12px;color:#948a7a;margin-bottom:8px">${serverConfigured()?'לא בשימוש כרגע — השרת מטפל בזה. אפשר להשאיר ריק.':'משמש רק כל עוד אין חיבור לשרת למעלה.'}</div>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
+        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
+        <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧹 ניקוי כפילויות בלוח</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
+        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">נקה כפילויות</button>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
+        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:14px">נקה הכל</button>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
+      </div>
+    </div>`
+}
+
+function dedupeEvents() {
+  const btn = document.getElementById('dedupe-btn')
+  const allTasks = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const norm = s => (s||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'').trim()
+  const taskTexts = new Set(allTasks.map(t=>norm(t.text)).filter(Boolean))
+  const before = state.events.length
+  const kept = state.events.filter(e => !taskTexts.has(norm(e.title)))
+  const removed = before - kept.length
+  setState({events:kept})
+  if(btn) { btn.textContent = removed>0 ? `נוקו ${removed} כפילויות ✓` : 'לא נמצאו כפילויות'; setTimeout(()=>{if(btn)btn.textContent='נקה כפילויות'},2500) }
+}
+
+async function forceRefreshApp() {
+  const btn = document.getElementById('refresh-app-btn')
+  if (btn) { btn.textContent = '⏳ מרענן...' }
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      for (const r of regs) await r.unregister()
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      for (const k of keys) await caches.delete(k)
+    }
+  } catch(e) { console.log('refresh cleanup error:', e) }
+  location.href = location.pathname + '?v=' + Date.now()
+}
+
+function saveApiKey() {
+  const val = document.getElementById('settings-key').value.trim()
+  apiKey = val
+  localStorage.setItem('fieldy_key', val)
+  const btn = document.getElementById('settings-save-btn')
+  btn.textContent = '✓ נשמר!'
+  btn.style.background = '#a8711a'
+  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
+}
+
+function saveServerConfig() {
+  serverUrl = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
+  serverPasscode = document.getElementById('settings-server-passcode').value.trim()
+  localStorage.setItem('fieldy_server_url', serverUrl)
+  localStorage.setItem('fieldy_passcode', serverPasscode)
+  if(!serverConfigured()) { renderSettings(); return }
+  loadStateFromServer().then(function(){
+    checkChronology(); refreshBadges(); renderSettings()
+  })
+}
+
+async function testServerConfig() {
+  const btn = document.getElementById('server-test-btn')
+  const url = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
+  const pass = document.getElementById('settings-server-passcode').value.trim()
+  if(!url || !pass) { btn.textContent = 'מלא קודם'; setTimeout(()=>btn.textContent='בדוק חיבור', 1800); return }
+  btn.textContent = 'בודק...'
+  try {
+    const r = await fetch(url + '/api/state', {headers:{'Authorization':'Bearer '+pass}})
+    btn.textContent = r.ok ? '✓ מחובר!' : '✕ נכשל ('+r.status+')'
+  } catch(e) {
+    btn.textContent = '✕ אין תגובה'
+  }
+  setTimeout(()=>{ btn.textContent = 'בדוק חיבור' }, 2200)
+}
+
+let clearConfirm = false
+function confirmClear() {
+  const btn = document.getElementById('clear-btn')
+  if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
+  save(); clearConfirm=false; navigateTo('home')
+}
+
+// ── MODAL ─────────────────────────────────────────
+function closeModal() { document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
+
+// ── CLAUDE API ────────────────────────────────────
+const SYSTEM_PROMPT = buildSystemPrompt()
+
+
+async function callClaude(messages, system=null) {
+  if(serverConfigured()) {
+    const r = await fetch(serverUrl + '/api/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+      body:JSON.stringify({messages, system})
+    })
+    const d = await r.json()
+    if(d.error) throw new Error(typeof d.error === 'string' ? d.error : (d.error.message || 'server error'))
+    return d.content?.find(b=>b.type==='text')?.text || ''
+  }
+  const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
+  if(system) body.system = system
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  })
+  const d = await r.json()
+  if(d.error) throw new Error(d.error.message)
+  return d.content?.find(b=>b.type==='text')?.text || ''
+}
+
+// ── MERGE HELPERS ────────────────────────────────
+function mergeSites(ex, inc) {
+  const m={}; ex.forEach(s=>m[s.name]=s);
+  inc.forEach(s=>{
+    const prev = m[s.name]||{}
+    const clean = {}
+    Object.keys(s).forEach(k=>{ if(s[k]!==null && s[k]!=='' && s[k]!==undefined) clean[k]=s[k] })
+    m[s.name] = {...prev, ...clean}
+  });
+  return Object.values(m)
+}
+function mergePeople(ex, inc) {
+  const m={}; ex.forEach(p=>m[p.name]=p); inc.forEach(p=>m[p.name]={...(m[p.name]||{}),...p}); return Object.values(m)
+}
+
+// ═══ CALENDAR ═══
+let calView='month',calDate=new Date(),calSelectedDate=new Date();
+const DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
+const DAYS_FULL=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const RECUR_HE={daily:'יומי',weekly:'שבועי',monthly:'חודשי',yearly:'שנתי'};
+
+function getEvents(){return state.events||[];}
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayKey(){return dateKey(new Date());}
+
+function getEventsForDate(dk){
+  const [y,m,day]=dk.split('-').map(Number);
+  const dow=new Date(y,m-1,day).getDay();
+  return getEvents().filter(e=>{
+    if(e.date===dk)return true;
+    if(!e.recurring)return false;
+    const ed=new Date(e.date);
+    if(e.recurring==='daily')return true;
+    if(e.recurring==='weekly')return ed.getDay()===dow;
+    if(e.recurring==='monthly')return ed.getDate()===day;
+    if(e.recurring==='yearly')return ed.getMonth()===m-1&&ed.getDate()===day;
+    return false;
+  });
+}
+
+function renderCalendar(){
+  const el=document.getElementById('screen-calendar');
+  const monthLabel=MONTHS_HE[calDate.getMonth()]+' '+calDate.getFullYear();
+  let body='';
+  if(calView==='month')body=renderMonthCal();
+  else if(calView==='week')body=renderWeekCal();
+  else body=renderYearCal();
+
+  el.innerHTML=
+    '<div class="cal-header">'+
+    '<div class="cal-nav-row">'+
+    '<button class="cal-nav-btn" id="cal-prev">‹</button>'+
+    '<div class="cal-month-title">'+monthLabel+'</div>'+
+    '<button class="cal-nav-btn" id="cal-next">›</button>'+
+    '</div>'+
+    '<div class="cal-view-tabs">'+
+    '<button class="cal-view-tab '+(calView==='week'?'active':'')+'" id="cvw">שבוע</button>'+
+    '<button class="cal-view-tab '+(calView==='month'?'active':'')+'" id="cvm">חודש</button>'+
+    '<button class="cal-view-tab '+(calView==='year'?'active':'')+'" id="cvy">שנה</button>'+
+    '</div></div>'+
+    '<div>'+body+'</div>'+
+    '<div style="padding:14px 18px">'+
+    '<button class="btn-primary" id="cal-add-btn">+ אירוע חדש</button>'+
+    '</div>';
+
+  // Bind buttons
+  document.getElementById('cal-prev').onclick=calNavPrev;
+  document.getElementById('cal-next').onclick=calNavNext;
+  document.getElementById('cvw').onclick=function(){setCalView('week');};
+  document.getElementById('cvm').onclick=function(){setCalView('month');};
+  document.getElementById('cvy').onclick=function(){setCalView('year');};
+  document.getElementById('cal-add-btn').onclick=function(){showAddEvent();};
+
+  // Bind day cells
+  el.querySelectorAll('.cal-day').forEach(function(d){
+    d.addEventListener('click',function(){showDayEvents(d.dataset.date);});
+  });
+  el.querySelectorAll('.week-row').forEach(function(r){
+    r.addEventListener('click',function(){showDayEvents(r.dataset.date);});
+  });
+  // Bind delete buttons + card-tap navigation in month event list
+  getEvents().forEach(function(ev){
+    var btn = document.getElementById('del-ev-'+ev.id);
+    if(btn) btn.onclick = (function(eid){
+      return function(e){ e.stopPropagation(); deleteEvent(eid); };
+    })(ev.id);
+    var card = document.getElementById('evc-'+ev.id);
+    if(card) card.onclick = (function(eid){ return function(){ openEventLink(eid); }; })(ev.id);
+  });
+}
+
+function renderMonthCal(){
+  var y=calDate.getFullYear(),m=calDate.getMonth();
+  var first=new Date(y,m,1).getDay();
+  var dim=new Date(y,m+1,0).getDate();
+  var prev=new Date(y,m,0).getDate();
+  var tk=todayKey();
+  var days='';
+  // prev month
+  for(var i=first-1;i>=0;i--){
+    var d=prev-i,dk=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    days+='<div class="cal-day other-month" data-date="'+dk+'"><span class="cal-dn">'+d+'</span></div>';
+  }
+  // current month
+  for(var d=1;d<=dim;d++){
+    var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var evs=getEventsForDate(dk);
+    var cls=dk===tk?' today':'';
+    days+='<div class="cal-day'+cls+'" data-date="'+dk+'">'+
+      '<span class="cal-dn">'+d+'</span>'+
+      (evs.length?'<div class="cal-dots">'+evs.slice(0,3).map(function(e){return '<div class="cal-dot" style="background:'+(e.color||'var(--bamboo)')+'"></div>';}).join('')+'</div>':'')+
+      '</div>';
+  }
+  // next month fill
+  var total=first+dim,next=total%7===0?0:7-(total%7);
+  for(var d=1;d<=next;d++){
+    var dk=y+'-'+(m+2)+'-'+d;
+    days+='<div class="cal-day other-month" data-date="'+dk+'"><span class="cal-dn">'+d+'</span></div>';
+  }
+  var tk=todayKey();
+  // Show all events this month
+  var monthEvs = [];
+  for(var d=1;d<=dim;d++){
+    var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    getEventsForDate(dk).forEach(function(e){ 
+      if(!monthEvs.find(function(x){return x.id===e.id;})) monthEvs.push(e);
+    });
+  }
+  monthEvs.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+  
+  return '<div class="cal-weekdays">'+DAYS_HE.map(function(d){return '<div class="cal-weekday">'+d+'</div>';}).join('')+'</div>'+
+    '<div class="cal-grid">'+days+'</div>'+
+    '<div style="padding:10px 18px 0">'+
+    (monthEvs.length?
+      '<div style="font-size:14px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">📅 אירועי החודש</div>'+
+      monthEvs.map(function(e){
+        var dayNum = parseInt((e.date||'').split('-')[2]||'0');
+        var monthNum = parseInt((e.date||'').split('-')[1]||'0');
+        var dateLabel = dayNum ? dayNum+'.'+monthNum : '';
+        var col = e.color||'var(--bamboo)';
+        return '<div style="background:#ffffff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+e.id+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+          '<div style="flex:1">'+
+          '<div style="font-size:14px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+e.time:'')+'</div>'+
+          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+e.title+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+e.site+'</span>':'')+'</div>'+
+          (e.note?'<div style="font-size:14px;color:var(--t2);margin-top:2px">'+e.note+'</div>':'')+
+          '</div>'+
+          '<button id="del-ev-'+e.id+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">✕</button>'+
+          '</div></div>';
+      }).join(''):
+      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">🌿</div><div style="font-size:14px;margin-top:6px">אין אירועים החודש</div></div>')+
+    '</div>';
+}
+
+
+function renderWeekCal(){
+  var sw=new Date(calDate);sw.setDate(calDate.getDate()-calDate.getDay());
+  var tk=todayKey();var html='';
+  for(var i=0;i<7;i++){
+    var d=new Date(sw);d.setDate(sw.getDate()+i);
+    var dk=dateKey(d);
+    var evs=getEventsForDate(dk);
+    var isT=dk===tk;
+    html+='<div class="week-row" data-date="'+dk+'">'+
+      '<div class="week-dlabel"><div class="week-dname">'+DAYS_FULL[d.getDay()].slice(0,2)+'\'</div>'+
+      '<div class="week-dnum'+(isT?' today':'')+'">'+(d.getDate())+'</div></div>'+
+      '<div style="flex:1">'+
+      (evs.length?evs.map(function(e){return '<div class="week-epill">'+(e.time?e.time+' · ':'')+e.title+'</div>';}).join(''):
+       (isT?'<div style="font-size:14px;color:var(--t4);padding:4px 0">יום פנוי</div>':''))+
+      '</div></div>';
+  }
+  return html;
+}
+
+function renderYearCal(){
+  var y=calDate.getFullYear();
+  var html='<div style="padding:10px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  for(var m=0;m<12;m++){
+    var first=new Date(y,m,1).getDay();
+    var dim=new Date(y,m+1,0).getDate();
+    var tk=todayKey();
+    var mini='';
+    for(var i=0;i<first;i++)mini+='<div></div>';
+    for(var d=1;d<=dim;d++){
+      var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      var evs=getEventsForDate(dk);
+      var isT=dk===tk;
+      mini+='<div style="font-size:14px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
+    }
+    var mm=m,yy=y;
+    html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px" data-ym="'+y+'-'+m+'">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:4px;text-align:center">'+MONTHS_HE[m]+'</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">'+mini+'</div></div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function setCalView(v){calView=v;renderCalendar();}
+function calNavPrev(){
+  if(calView==='month')calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);
+  else if(calView==='week'){calDate=new Date(calDate);calDate.setDate(calDate.getDate()-7);}
+  else calDate=new Date(calDate.getFullYear()-1,0,1);
+  renderCalendar();
+}
+function calNavNext(){
+  if(calView==='month')calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);
+  else if(calView==='week'){calDate=new Date(calDate);calDate.setDate(calDate.getDate()+7);}
+  else calDate=new Date(calDate.getFullYear()+1,0,1);
+  renderCalendar();
+}
+
+function renderEvCard(e){
+  var col=e.color||'var(--bamboo)';
+  return '<div class="ev-card" style="border-right-color:'+col+'" id="evc-'+e.id+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
+    '<div style="flex:1">'+
+    (e.time?'<div class="ev-time">⏰ '+e.time+'</div>':'')+
+    '<div class="ev-title">'+e.title+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+e.site+'</span>':'')+'</div>'+
+    (e.note?'<div class="ev-note">'+e.note+'</div>':'')+
+    (e.recurring?'<div class="rec-badge">🔄 '+(RECUR_HE[e.recurring]||e.recurring)+'</div>':'')+
+    '</div>'+
+    '<button id="del-'+e.id+'" style="background:none;border:none;color:var(--t4);font-size:16px;padding:4px;cursor:pointer">✕</button>'+
+    '</div></div>';
+}
+
+function showDayEvents(dk){
+  var parts=dk.split('-');
+  var label=parts[2]+' '+MONTHS_HE[parseInt(parts[1])-1]+' '+parts[0];
+  var evs=getEventsForDate(dk);
+  var modal=document.getElementById('modal-container');
+  modal.innerHTML=
+    '<div class="modal-overlay">'+
+    '<div class="modal">'+
+    '<div class="modal-handle"></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
+    '<div style="font-size:16px;font-weight:700;color:var(--t1)">📅 '+label+'</div>'+
+    '<button class="btn-add" id="add-ev-day">+ הוסף</button>'+
+    '</div>'+
+    (evs.length?evs.map(renderEvCard).join(''):
+     '<div class="empty" style="padding:20px 0"><div class="empty-icon">🌿</div><div class="empty-text">אין אירועים</div></div>')+
+    '</div></div>';
+
+  document.getElementById('add-ev-day').onclick=function(){closeModal();showAddEvent(dk);};
+  document.querySelector('.modal-overlay').onclick=function(e){if(e.target===this)closeModal();};
+  // Bind delete buttons + card-tap navigation
+  evs.forEach(function(e){
+    var btn=document.getElementById('del-'+e.id);
+    if(btn)btn.onclick=function(ev){ev.stopPropagation();deleteEvent(e.id);};
+    var card=document.getElementById('evc-'+e.id);
+    if(card)card.onclick=function(){openEventLink(e.id);};
+  });
+}
+
+function showAddEvent(dateStr){
+  var td=dateStr||getToday();
+  var modal=document.getElementById('modal-container');
+  modal.innerHTML='<div class="modal-overlay"><div class="modal"><div class="modal-handle"></div>'+
+    '<div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--t1)">+ אירוע חדש</div>'+
+    '<label class="form-label">כותרת</label><input id="ev-title" class="form-input" placeholder="פגישה / הגשה..."/>'+
+    '<label class="form-label">תאריך</label><input id="ev-date" type="date" class="form-input" value="'+td+'" style="direction:ltr"/>'+
+    '<label class="form-label">שעה (אופציונלי)</label><input id="ev-time" type="time" class="form-input" style="direction:ltr"/>'+
+    '<label class="form-label">הערה</label><input id="ev-note" class="form-input" placeholder="פרטים..."/>'+
+    '<label class="form-label">אתר מקושר (אופציונלי)</label>'+
+    '<select id="ev-site" class="form-select" style="margin-bottom:12px">'+
+    '<option value="">ללא</option>'+
+    getEvents.__sitesOptions()+
+    '</select>'+
+    '<label class="form-label">חזרה</label>'+
+    '<select id="ev-rec" class="form-select" style="margin-bottom:12px">'+
+    '<option value="">ללא</option><option value="daily">יומי</option>'+
+    '<option value="weekly">שבועי</option><option value="monthly">חודשי</option><option value="yearly">שנתי</option>'+
+    '</select>'+
+    '<label class="form-label">התראה</label>'+
+    '<select id="ev-notify" class="form-select" style="margin-bottom:16px">'+
+    '<option value="">ללא</option><option value="0">בזמן</option>'+
+    '<option value="10">10 דק לפני</option><option value="30">30 דק לפני</option>'+
+    '<option value="60" selected>שעה לפני</option><option value="1440">יום לפני</option>'+
+    '</select>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="btn-primary" style="flex:1" id="save-ev-btn">שמור</button>'+
+    '<button class="btn-secondary" id="cancel-ev-btn">ביטול</button>'+
+    '</div></div></div>';
+  document.querySelector('.modal-overlay').onclick=function(e){if(e.target===this)closeModal();};
+  document.getElementById('cancel-ev-btn').onclick=closeModal;
+  document.getElementById('save-ev-btn').onclick=doAddEvent;
+}
+getEvents.__sitesOptions = function(){
+  return (state.sites||[]).map(function(s){
+    return '<option value="'+s.name.replace(/"/g,'&quot;')+'">'+s.name+'</option>';
+  }).join('');
+}
+
+
+function doAddEvent(){
+  var title=document.getElementById('ev-title').value.trim();
+  var date=document.getElementById('ev-date').value;
+  if(!title||!date)return;
+  var ev={
+    id:'ev'+Date.now(),
+    title:title,
+    date:date,
+    time:document.getElementById('ev-time').value,
+    note:document.getElementById('ev-note').value,
+    site:document.getElementById('ev-site').value||null,
+    recurring:document.getElementById('ev-rec').value,
+    color:'var(--bamboo)',
+    notify:document.getElementById('ev-notify').value
+  };
+  setState({events:[...getEvents(),ev]});
+  if(ev.notify!=='')scheduleNotification(ev);
+  closeModal();
+  renderCalendar();
+}
+
+function deleteEvent(id){
+  setState({events:getEvents().filter(function(e){return e.id!==id;})});
+  closeModal();
+  renderCalendar();
+}
+
+// Clicking an event card jumps to whatever it's actually about: a linked
+// site if one was set, otherwise a best-effort match to an existing task
+// with the same text, otherwise nothing (there's no board to jump to).
+function openEventLink(id){
+  var ev = getEvents().find(function(e){return e.id===id;});
+  if(!ev) return;
+  if(ev.site && state.sites.some(function(s){return s.name===ev.site;})) {
+    siteFilter='all';
+    navigateTo('sites');
+    return;
+  }
+  var norm = function(s){return (s||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'').trim();};
+  var allTasks = [...state.tasks.now,...state.tasks.today,...state.tasks.later];
+  var match = allTasks.find(function(t){return norm(t.text)===norm(ev.title);});
+  if(match) {
+    taskBucket = state.tasks.now.some(function(t){return t.id===match.id;}) ? 'now' :
+                 state.tasks.today.some(function(t){return t.id===match.id;}) ? 'today' : 'later';
+    navigateTo('tasks');
+  }
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────────────
+function requestNotificationPermission(){
+  if('Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+function scheduleNotification(ev){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  if(!ev.notify&&ev.notify!==0)return;
+  var parts=ev.date.split('-').map(Number);
+  var tp=ev.time?ev.time.split(':').map(Number):[9,0];
+  var evTime=new Date(parts[0],parts[1]-1,parts[2],tp[0],tp[1]);
+  var notTime=new Date(evTime.getTime()-parseInt(ev.notify)*60*1000);
+  var delay=notTime.getTime()-Date.now();
+  if(delay>0&&delay<7*24*60*60*1000){
+    setTimeout(function(){
+      if(Notification.permission==='granted'){
+        new Notification('Fieldy 📅 '+ev.title,{
+          body:ev.notify==='0'?'עכשיו':'בעוד '+ev.notify+' דקות',
+          icon:'/Fieldy/icon-192-1.png',tag:ev.id
+        });
+        playZenBell();
+      }
+    },delay);
+  }
+}
+
+function scheduleAllNotifications(){
+  getEvents().forEach(function(ev){if(ev.notify)scheduleNotification(ev);});
+}
+
+// ── MEDITATION VOICE ──────────────────────────────────────────
+var MED_SCRIPTS=[
+  ["Find a comfortable position... and gently close your eyes.",
+   "Take a slow breath in... and let it go.",
+   "There is nowhere to be right now. Just here.",
+   "Let your shoulders drop. Let your hands rest.",
+   "Breathe in through your nose... and out through your mouth.",
+   "With every breath out... something releases.",
+   "The Tao is like a river. You are part of that flow.",
+   "Nothing to fix. Nothing to figure out. Just breathe."],
+  ["Sit comfortably. Let your back straighten naturally.",
+   "Rest your hands on your knees.",
+   "Now... just notice your breath. Don't change it.",
+   "In... and out. That's all.",
+   "A thought comes up. That's fine. Let it pass.",
+   "Come back to the breath. Again and again.",
+   "You are like a mountain right now. Solid. Quiet. Unmoved."],
+  ["Lie down, or sit in a way that feels supported.",
+   "Take one long breath in... and release it completely.",
+   "Now bring your attention to the top of your head.",
+   "Slowly... move your awareness downward.",
+   "Your face... your jaw... your neck.",
+   "Let any tightness soften as you breathe out.",
+   "Your chest... your belly... rising and falling.",
+   "All the way down to your feet. Rest there."],
+  ["Come to a standing position. Feel the floor beneath you.",
+   "Take one deliberate step forward.",
+   "Feel every part of that step. The lift... the placement.",
+   "Walk slowly. There is no destination.",
+   "When your mind wanders... bring it back to your feet.",
+   "Each step is complete on its own.",
+   "This is the whole practice. Just walking. Just here."],
+  ["Picture a river. Wide and slow and clear.",
+   "Watch it moving. It doesn't struggle. It just flows.",
+   "That's what you can be right now.",
+   "When something gets in the way... go around it.",
+   "Soft on the outside. Deep underneath.",
+   "Let yourself be carried for a while."],
+  ["Settle in. Close your eyes.",
+   "Picture a space opening inside your chest.",
+   "Wide and quiet.",
+   "With each breath out... that space gets a little larger.",
+   "This stillness is not empty. It's full of potential.",
+   "You don't have to fill it. Just rest in it.",
+   "Nothing to do right now. This is enough."],
+];
+
+
+// ── AMBIENT MEDITATION MUSIC ──────────────────────────────────
+var ambientNodes = [];
+var ambientGain = null;
+var musicMuted = false;
+
+function startAmbientMusic() {
+  stopAmbientMusic();
+  try {
+    var ctx = getAudio();
+    ambientGain = ctx.createGain();
+    ambientGain.gain.setValueAtTime(0, ctx.currentTime);
+    ambientGain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 3);
+    ambientGain.connect(ctx.destination);
+
+    // Drone frequencies - calm and meditative
+    var freqs = [110, 164.8, 220, 329.6];
+    freqs.forEach(function(freq) {
+      var osc = ctx.createOscillator();
+      var oscGain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      // Very slow vibrato
+      var lfo = ctx.createOscillator();
+      var lfoGain = ctx.createGain();
+      lfo.frequency.value = 0.08 + Math.random() * 0.05;
+      lfoGain.gain.value = 0.3;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      lfo.start();
+
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      filter.Q.value = 0.5;
+
+      oscGain.gain.value = freq > 200 ? 0.4 : 0.7;
+      osc.connect(filter);
+      filter.connect(oscGain);
+      oscGain.connect(ambientGain);
+      osc.start();
+
+      ambientNodes.push(osc);
+      ambientNodes.push(lfo);
+    });
+
+    // Add gentle noise layer (like distant wind)
+    var bufSize = ctx.sampleRate * 2;
+    var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+    for(var i=0;i<bufSize;i++){
+      var w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520;b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;
+      data[i]=(b0+b1+b2+b3+b4+b5)*0.05;
+    }
+    var noise = ctx.createBufferSource();
+    var noiseGain = ctx.createGain();
+    var noiseFilter = ctx.createBiquadFilter();
+    noise.buffer = buf;
+    noise.loop = true;
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 400;
+    noiseFilter.Q.value = 0.3;
+    noiseGain.gain.value = 0.06;
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ambientGain);
+    noise.start();
+    ambientNodes.push(noise);
+
+    // Continuous water trickle (bubbling stream) — a second, higher, brighter
+    // noise layer whose amplitude wobbles slowly and randomly so it reads as
+    // moving water rather than flat static.
+    var wBufSize = ctx.sampleRate * 2;
+    var wBuf = ctx.createBuffer(1, wBufSize, ctx.sampleRate);
+    var wData = wBuf.getChannelData(0);
+    var wb0=0,wb1=0,wb2=0;
+    for (var wi = 0; wi < wBufSize; wi++) {
+      var ww = Math.random() * 2 - 1;
+      wb0 = 0.95 * wb0 + ww * 0.15;
+      wb1 = 0.90 * wb1 + ww * 0.25;
+      wb2 = 0.80 * wb2 + ww * 0.40;
+      wData[wi] = (wb0 + wb1 + wb2) * 0.18;
+    }
+    var water = ctx.createBufferSource();
+    var waterFilter = ctx.createBiquadFilter();
+    var waterGain = ctx.createGain();
+    var waterWobble = ctx.createGain();
+    water.buffer = wBuf;
+    water.loop = true;
+    waterFilter.type = 'bandpass';
+    waterFilter.frequency.value = 1400;
+    waterFilter.Q.value = 0.7;
+    waterGain.gain.value = 0.05;
+    // Slow, irregular LFO on the gain so the trickle bubbles rather than hisses evenly
+    var waterLfo1 = ctx.createOscillator();
+    var waterLfo1Gain = ctx.createGain();
+    waterLfo1.type = 'sine';
+    waterLfo1.frequency.value = 0.35;
+    waterLfo1Gain.gain.value = 0.4;
+    var waterLfo2 = ctx.createOscillator();
+    var waterLfo2Gain = ctx.createGain();
+    waterLfo2.type = 'sine';
+    waterLfo2.frequency.value = 1.7;
+    waterLfo2Gain.gain.value = 0.25;
+    waterWobble.gain.value = 0.6;
+    waterLfo1.connect(waterLfo1Gain); waterLfo1Gain.connect(waterWobble.gain);
+    waterLfo2.connect(waterLfo2Gain); waterLfo2Gain.connect(waterWobble.gain);
+    waterLfo1.start(); waterLfo2.start();
+    water.connect(waterFilter);
+    waterFilter.connect(waterWobble);
+    waterWobble.connect(waterGain);
+    waterGain.connect(ambientGain);
+    water.start();
+    ambientNodes.push(water, waterLfo1, waterLfo2);
+
+  } catch(e) { console.log('Audio error:', e); }
+}
+
+function stopAmbientMusic() {
+  ambientNodes.forEach(function(n) { try { n.stop(); } catch(e) {} });
+  ambientNodes = [];
+  if(ambientGain) {
+    try { ambientGain.disconnect(); } catch(e) {}
+    ambientGain = null;
+  }
+}
+
+function toggleMusicMute() {
+  musicMuted = !musicMuted;
+  if(ambientGain) {
+    var ctx = getAudio();
+    ambientGain.gain.linearRampToValueAtTime(
+      musicMuted ? 0 : 0.12,
+      ctx.currentTime + 0.5
+    );
+  }
+  var btn = document.getElementById('music-toggle-btn');
+  if(btn) {
+    btn.textContent = musicMuted ? '🔇 מוסיקה' : '🎵 מוסיקה';
+    btn.style.color = musicMuted ? 'var(--t4)' : 'var(--sprout)';
+  }
+}
+
+function toggleVoiceMute() {
+  var btn = document.getElementById('voice-toggle-btn');
+  if(window.speechSynthesis.speaking || window._voiceEnabled !== false) {
+    window._voiceEnabled = false;
+    window.speechSynthesis.cancel();
+    if(btn) { btn.textContent = '🔇 הדרכה'; btn.style.color = 'var(--t4)'; }
+  } else {
+    window._voiceEnabled = true;
+    if(btn) { btn.textContent = '🎤 הדרכה'; btn.style.color = 'var(--sprout)'; }
+  }
+}
+
+
+var selectedVoiceIdx = -1;
+function setMedVoice(idx) {
+  selectedVoiceIdx = parseInt(idx);
+}
+
+function speakText(text){
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  var utt=new SpeechSynthesisUtterance(text);
+  var voices=window.speechSynthesis.getVoices();
+  var v=voices.find(function(v){return v.lang.startsWith('he');})||
+        voices.find(function(v){return v.lang.startsWith('en')&&v.name.toLowerCase().includes('female');})||
+        voices[0];
+  if(v)utt.voice=v;
+  utt.rate=0.75;utt.pitch=0.9;utt.volume=0.85;
+  window.speechSynthesis.speak(utt);
+}
+
+function stopVoice(){if('speechSynthesis' in window)window.speechSynthesis.cancel();}
+
+function startMeditationWithVoice(idx){
+  window._voiceEnabled = true;
+  musicMuted = false;
+  try { startAmbientMusic(); } catch(e) { console.log('ambient err:', e); }
+  startMeditation(idx);
+  
+  var scripts = MED_SCRIPTS[idx] || MED_SCRIPTS[0];
+  var si = 0;
+
+  // Voice selector controls added to modal
+  setTimeout(function() {
+    var modal = document.querySelector('.modal');
+    if(!modal) return;
+    var loadVoices = function() {
+      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en'); });
+      var voiceOpts = '<option value="-1">אוטומטי (גבר)</option>';
+      enVoices.forEach(function(v,i){
+        var g = /female|woman|samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) ? '♀' : '♂';
+        voiceOpts += '<option value="'+i+'">'+g+' '+v.name.split('(')[0].trim()+'</option>';
+      });
+      var ctrl = document.createElement('div');
+      ctrl.style.cssText = 'margin-top:10px';
+      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:14px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ← נגישות ← המרת טקסט לדיבור.</div>' : '';
+      ctrl.innerHTML = lowVoiceNote +
+        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:14px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
+        '<div style="display:flex;gap:7px">'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
+        '</div>';
+      modal.appendChild(ctrl);
+      var vs=document.getElementById('voice-select');
+      var savedVoiceName = localStorage.getItem('fieldy_voice_name');
+      if (savedVoiceName) {
+        var savedIdx = enVoices.findIndex(function(v){ return v.name === savedVoiceName; });
+        if (savedIdx >= 0) { selectedVoiceIdx = savedIdx; vs.value = String(savedIdx); }
+      }
+      if(vs) vs.onchange=function(){
+        selectedVoiceIdx=parseInt(this.value);
+        var chosen = enVoices[selectedVoiceIdx];
+        if (chosen) localStorage.setItem('fieldy_voice_name', chosen.name);
+        else localStorage.removeItem('fieldy_voice_name');
+      };
+      var mb=document.getElementById('music-mute-btn');
+      if(mb) mb.onclick=toggleMusicMute;
+      var vb=document.getElementById('voice-mute-btn');
+      if(vb) vb.onclick=toggleVoiceMute;
+    };
+    var v=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+    if(v.length>0) loadVoices(); else window.speechSynthesis.onvoiceschanged=loadVoices;
+  }, 500);
+
+  function speakPhrase() {
+    if(si >= scripts.length || !medInterval) return
+    if(window._voiceEnabled === false) return
+    var text = scripts[si]; si++
+    // A brief natural pause before speaking — real guidance doesn't snap in
+    // the instant the breath cycle turns over, it follows a beat behind it.
+    setTimeout(function() {
+      if(!medInterval) return
+      window.speechSynthesis.cancel()
+      var utt = new SpeechSynthesisUtterance(text)
+      var voices = window.speechSynthesis.getVoices()
+      var enVoices = voices.filter(function(v){ return v.lang && v.lang.startsWith('en') })
+      var voice, vIdx
+      if(selectedVoiceIdx >= 0 && selectedVoiceIdx < enVoices.length) {
+        voice = enVoices[selectedVoiceIdx]; vIdx = selectedVoiceIdx
+      } else {
+        var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex']
+        voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1 }) }) ||
+                enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) }) ||
+                (enVoices.length ? enVoices[0] : null)
+        vIdx = voice ? enVoices.indexOf(voice) : 0
+      }
+      if(voice) { utt.voice = voice; utt.lang = voice.lang }
+      // Slower, warmer baseline so it reads as a calm guide rather than a
+      // computer reading text — small per-voice variance kept so different
+      // voice picks still sound distinct, but centered lower/slower than before.
+      var vSeed = (vIdx || 0) + 1
+      var pitchOffset = ((vSeed * 37) % 16) / 100 - 0.08 // -0.08..+0.08
+      var rateOffset = ((vSeed * 53) % 12) / 100 - 0.06  // -0.06..+0.06
+      utt.rate = Math.max(0.62, Math.min(0.86, 0.74 + rateOffset))
+      utt.pitch = Math.max(0.7, Math.min(1.05, 0.87 + pitchOffset))
+      utt.volume = 0.88
+      window.speechSynthesis.speak(utt)
+    }, 700 + Math.random() * 500)
+  }
+
+  // Speak roughly every 2nd or 3rd full breath cycle (~32-48s) instead of a
+  // fixed independent clock — this keeps the narration in step with the
+  // actual inhale/hold/exhale rhythm on screen, and the varying gap (rather
+  // than a perfectly even one) is what reads as a person guiding, not a timer.
+  var cyclesSinceSpoken = 0
+  var cyclesUntilNext = 1
+  window._onBreathCycle = function() {
+    if(window._voiceEnabled === false) return
+    cyclesSinceSpoken++
+    if(cyclesSinceSpoken >= cyclesUntilNext) {
+      cyclesSinceSpoken = 0
+      cyclesUntilNext = 2 + Math.round(Math.random())  // next gap: 2 or 3 cycles
+      speakPhrase()
+    }
+  }
+
+  var v = window.speechSynthesis ? window.speechSynthesis.getVoices() : []
+  if(v.length > 0) { setTimeout(speakPhrase, 5500) }
+  else { window.speechSynthesis.onvoiceschanged = function(){ setTimeout(speakPhrase, 5500) } }
+}
+
+
+
+
+
+
+// ── INIT ─────────────────────────────────────────
+applyTheme(currentTheme)
+checkChronology()
+refreshBadges()
+renderHome()
+if(serverConfigured()) {
+  loadStateFromServer().then(function(){
+    checkChronology()
+    refreshBadges()
+    renderCurrentScreen()
+  })
+}
+setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
+if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission()
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Fieldy/sw.js')
+}
+</script>
+</body>
+</html>
