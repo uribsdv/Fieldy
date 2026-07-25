@@ -310,7 +310,9 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},updated:null}
+if(!state.personal) state.personal = {gymLog:{}, meditationLog:{}, vacationGoal:''}
+if(!state.personal.meditationLog) state.personal.meditationLog = {}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 
 // ── SERVER SYNC ───────────────────────────────────
@@ -334,6 +336,48 @@ function syncStateToServer() {
     }).catch(function(e){ console.log('server sync failed (kept locally):', e) })
   }, 1200)
 }
+// Appends a permanent event to the server's history log — separate from the
+// state snapshot above, this is what survives being overwritten and is what
+// later analysis ("how long does a site usually stay open") is built from.
+function logEvent(type, payload) {
+  if(!serverConfigured()) return
+  fetch(serverUrl + '/api/log', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+    body: JSON.stringify({type, payload, ts: new Date().toISOString()})
+  }).catch(function(e){ console.log('history log failed (non-critical):', e) })
+}
+
+// ── PERSONAL (outside work) ───────────────────────
+function toggleGymToday() {
+  const today = getToday()
+  const log = {...(state.personal.gymLog||{})}
+  const wasSet = !!log[today]
+  if(wasSet) delete log[today]; else log[today] = true
+  setState({personal:{...state.personal, gymLog:log}})
+  if(!wasSet) logEvent('gym_completed', {date: today})
+}
+function toggleMeditationToday() {
+  const today = getToday()
+  const log = {...(state.personal.meditationLog||{})}
+  const wasSet = !!log[today]
+  if(wasSet) delete log[today]; else log[today] = true
+  setState({personal:{...state.personal, meditationLog:log}})
+  if(!wasSet) logEvent('meditation_completed', {source:'manual'})
+}
+function saveVacationGoal() {
+  const val = document.getElementById('vacation-goal-input').value.trim()
+  setState({personal:{...state.personal, vacationGoal: val}})
+}
+let latestInsights = {items: []}
+async function fetchInsights() {
+  if(!serverConfigured()) return
+  try {
+    const r = await fetch(serverUrl + '/api/insights', {headers:{'Authorization':'Bearer '+serverPasscode}})
+    if(r.ok) { latestInsights = await r.json(); if(currentScreen==='home') renderHome() }
+  } catch(e) { console.log('insights fetch failed (non-critical):', e) }
+}
+
 async function loadStateFromServer() {
   if(!serverConfigured()) return
   const r = await fetch(serverUrl + '/api/state', {headers:{'Authorization':'Bearer '+serverPasscode}})
@@ -717,7 +761,7 @@ function stopMeditation(completed) {
   document.getElementById('modal-container').innerHTML = '';
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
   try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
-  if(completed) { playTibetanBowl(); showRipple(); }
+  if(completed) { playTibetanBowl(); showRipple(); logEvent('meditation_completed', {}); }
 }
 
 function renderCurrentScreen() {
@@ -780,6 +824,10 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
+      ${latestInsights.items && latestInsights.items.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
+        ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${it.icon} ${it.text}</div>`).join('')}
+      </div>` : ''}
       ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
         <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
         <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
@@ -814,6 +862,29 @@ function renderHome() {
         <div class="empty-icon">📋</div>
         <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
       </div>`:''}
+
+      <div class="card" style="margin-top:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">🌱 מחוץ לעבודה</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button onclick="toggleGymToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${state.personal.gymLog[getToday()]?'#1a8f7a':'var(--line)'};background:${state.personal.gymLog[getToday()]?'#1a8f7a18':'#ffffff'};color:${state.personal.gymLog[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🏋️ ${state.personal.gymLog[getToday()]?'התאמנתי היום ✓':'סמן אימון'}</button>
+          <button onclick="toggleMeditationToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${state.personal.meditationLog[getToday()]?'#1a8f7a':'var(--line)'};background:${state.personal.meditationLog[getToday()]?'#1a8f7a18':'#ffffff'};color:${state.personal.meditationLog[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🧘 ${state.personal.meditationLog[getToday()]?'עשיתי היום ✓':'סמן מדיטציה'}</button>
+        </div>
+        <label class="form-label">יעד לחופשה הבאה</label>
+        <div style="display:flex;gap:8px">
+          <input id="vacation-goal-input" class="form-input" style="margin-bottom:0" placeholder="לדוגמה: בורקאי, דצמבר" value="${state.personal.vacationGoal||''}"/>
+          <button onclick="saveVacationGoal()" style="background:#f0e7cf;border-radius:10px;padding:0 16px;color:#6b6255;font-size:14px">שמור</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧠 שאל את Fieldy</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'שאלה חופשית על ההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
+        ${serverConfigured()?`
+        <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: כמה ימים עברו בלי מדיטציה?" style="margin-bottom:10px"/>
+        <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">שאל</button>
+        <div id="ask-fieldy-answer" style="margin-top:12px;font-size:15px;color:#211d17;line-height:1.6;display:none"></div>
+        `:''}
+      </div>
     </div>
   `
 }
@@ -852,9 +923,12 @@ async function doAnalyze() {
     console.log('Events from AI:', JSON.stringify(p.events))
     const s = Date.now()
     const tag = (arr,pfx) => (arr||[]).map((t,i)=>({...t,id:`${pfx}${s}${i}`,done:false}))
+    const existingSiteNames = new Set(state.sites.map(x=>x.name))
+    const newAiSites = (p.sites||[]).filter(x=>x.name && !existingSiteNames.has(x.name))
+    const taggedSites = (p.sites||[]).map(x => existingSiteNames.has(x.name) ? x : {...x, createdAt: new Date().toISOString()})
     setState({
       tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
-      sites: mergeSites(state.sites, p.sites||[]),
+      sites: mergeSites(state.sites, taggedSites),
       people: mergePeople(state.people, p.people||[]),
       events: (function(){
         var ts = Date.now(), td = getToday();
@@ -873,6 +947,7 @@ async function doAnalyze() {
       focus: p.focus || state.focus,
       focusDate: p.focus ? getToday() : state.focusDate
     })
+    newAiSites.forEach(x => logEvent('site_created', {name: x.name, contractor: x.contractor||null, status: x.status||'open'}))
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
       toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
@@ -980,7 +1055,10 @@ function toggleTask(id) {
     }
   }
   setState(patch)
-  if(wasUndone){playTaskComplete();showRipple();}
+  if(wasUndone){
+    playTaskComplete();showRipple();
+    logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
+  }
 }
 
 // ── PHOTO ATTACHMENTS ────────────────────────────
@@ -1174,7 +1252,11 @@ function siteCard(s) {
 }
 
 function setSiteFilter(f) { siteFilter=f; renderSites() }
-function updateSiteStatus(name, status) { setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)}) }
+function updateSiteStatus(name, status) {
+  const site = state.sites.find(s=>s.name===name)
+  setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)})
+  logEvent('site_status_changed', {name, status, contractor: site?site.contractor:null})
+}
 
 let editingSiteName = null
 function showAddSite(name) {
@@ -1243,7 +1325,9 @@ function doAddSite() {
     editingSiteName = null
   } else {
     site.id = Date.now()
+    site.createdAt = new Date().toISOString()
     setState({sites:[...state.sites, site]})
+    logEvent('site_created', {name: site.name, contractor: site.contractor||null, status: site.status})
   }
   closeModal()
 }
@@ -1398,6 +1482,7 @@ function renderSettings() {
         <div style="font-size:18px;font-weight:700">הגדרות</div>
       </div>
       <div class="card" style="margin-bottom:14px">
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🎨 ערכת צבע</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
         <div style="display:flex;gap:8px">
@@ -1519,6 +1604,35 @@ async function testServerConfig() {
     btn.textContent = '✕ אין תגובה'
   }
   setTimeout(()=>{ btn.textContent = 'בדוק חיבור' }, 2200)
+}
+
+async function askFieldy() {
+  const input = document.getElementById('ask-fieldy-input')
+  const btn = document.getElementById('ask-fieldy-btn')
+  const answerEl = document.getElementById('ask-fieldy-answer')
+  const question = input.value.trim()
+  if(!question) return
+  btn.textContent = 'חושב...'
+  btn.disabled = true
+  answerEl.style.display = 'none'
+  try {
+    const r = await fetch(serverUrl + '/api/ask', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+      body: JSON.stringify({question})
+    })
+    const d = await r.json()
+    if(d.error) throw new Error(d.error)
+    answerEl.style.color = '#211d17'
+    answerEl.textContent = d.answer || 'לא התקבלה תשובה.'
+    answerEl.style.display = 'block'
+  } catch(e) {
+    answerEl.style.color = '#c0392b'
+    answerEl.textContent = '✕ שגיאה: ' + e.message
+    answerEl.style.display = 'block'
+  }
+  btn.textContent = 'שאל'
+  btn.disabled = false
 }
 
 let clearConfirm = false
@@ -2287,6 +2401,7 @@ if(serverConfigured()) {
     refreshBadges()
     renderCurrentScreen()
   }).catch(function(e){ console.log('boot: server unreachable, continuing with local data:', e) })
+  fetchInsights()
 }
 setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
 if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
