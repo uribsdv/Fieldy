@@ -271,7 +271,7 @@ function buildSystemPrompt() {
     'Dates: tomorrow=' + getTodayPlus(1) + ', in2days=' + getTodayPlus(2) + ', nextweek=' + getTodayPlus(7) + ', in2weeks=' + getTodayPlus(14) + ', in3weeks=' + getTodayPlus(21) + ', nextmonth=' + getTodayPlus(30) + '\n\n' +
     'CRITICAL: Return ONLY this exact JSON structure, nothing else:\n' +
     '{' +
-    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":"","context":"phone/office/site or null"}],' +
+    '"now":[{"id":"n1","text":"max 8 words","site":null,"assignee":"uri/gio/kenneth/asc/11-16 or null","color":"red/orange/green","time":"","date":"","context":"phone/office/site or null","note":"short side-remark attached to this task, or null"}],' +
     '"today":[],' +
     '"later":[],' +
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved","location":"coordinates or address if mentioned, else null","mondayLink":"a literal monday.com URL if one appears in the text, else null","remo":"REMO number if mentioned, else null","year":"2024/2025/2026 contract year if mentioned or inferable, else null"}],' +
@@ -301,7 +301,8 @@ function buildSystemPrompt() {
     'Expected shape of the output (values illustrative, keep your own concise Hebrew task text):\n' +
     '- today: THREE separate entries, one per numbered item — a pump/motor pickup task, a "waiting on engr junell\'s well report" task, and a "visit NIA to confirm 2026 project" task. Not two, not one merged item.\n' +
     '- sites: ONE entry — {"name":"San Francisco, Luna, Apayao","location":"18°17\'50.89"N 121°24\'1.57"E","year":"2026","issue":"waiting for engr junell well report","status":"pending"} — created even though item 2 also produced a task above.\n' +
-    '- events: empty, unless a real deadline/meeting time was given (there isn\'t one here).';
+    '- events: empty, unless a real deadline/meeting time was given (there isn\'t one here).\n\n' +
+    '12. NOTES vs SEPARATE TASKS: a short aside that only makes sense attached to one specific task (a reminder, a payment to make about it, a detail to not forget) goes in that task\'s "note" field — small print under the main task, not a task of its own. Example: main task "פגישה עם איגור בשישי ב-20:30" with note "לשלם על מפגש רביעי". This is different from rule 9 splitting: rule 9 is for independent action items that stand on their own; "note" is for a remark that is meaningless without its parent task.';
 }
 
 
@@ -311,6 +312,47 @@ const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
 let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
 let apiKey = localStorage.getItem('fieldy_key') || ''
+
+// ── SERVER SYNC ───────────────────────────────────
+// Optional: if a server URL + passcode are set (Settings screen), the app
+// syncs `state` to a Cloudflare Worker + D1 instead of staying purely local.
+// localStorage remains a fast local cache either way, so the app still opens
+// instantly and still works if the network/server is briefly unavailable —
+// the server is an addition, not a replacement for offline function.
+let serverUrl = (localStorage.getItem('fieldy_server_url') || '').replace(/\/+$/, '')
+let serverPasscode = localStorage.getItem('fieldy_passcode') || ''
+function serverConfigured() { return !!(serverUrl && serverPasscode) }
+let _syncTimer = null
+function syncStateToServer() {
+  if(!serverConfigured()) return
+  clearTimeout(_syncTimer)
+  _syncTimer = setTimeout(function() {
+    fetch(serverUrl + '/api/state', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+      body: JSON.stringify(state)
+    }).catch(function(e){ console.log('server sync failed (kept locally):', e) })
+  }, 1200)
+}
+async function loadStateFromServer() {
+  if(!serverConfigured()) return
+  try {
+    const r = await fetch(serverUrl + '/api/state', {headers:{'Authorization':'Bearer '+serverPasscode}})
+    if(!r.ok) throw new Error('status '+r.status)
+    const d = await r.json()
+    if(d.data) {
+      // Server already has real data — it becomes the source of truth.
+      state = d.data
+      save()
+    } else {
+      // First connection: nothing on the server yet. This device's existing
+      // local data becomes the seed (the one-time migration).
+      syncStateToServer()
+    }
+  } catch(e) {
+    console.log('could not reach server, continuing with local data:', e)
+  }
+}
 
 // ── THEME ─────────────────────────────────────────
 // Quick accent reskin for novelty (ADHD interest-based nervous system likes
@@ -339,7 +381,7 @@ function applyTheme(name) {
 let currentScreen = 'home'
 let actionCtx = null
 
-const save = () => { localStorage.setItem(KEY, JSON.stringify(state)) }
+const save = () => { localStorage.setItem(KEY, JSON.stringify(state)); syncStateToServer() }
 const setState = (patch) => { Object.assign(state, patch, {updated: new Date().toISOString()}); save(); refreshBadges(); renderCurrentScreen() }
 
 // ── CHRONOLOGY ────────────────────────────────────
@@ -903,6 +945,7 @@ function taskCard(t) {
         <div onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?'✓':''}</div>
         <div style="flex:1">
           <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${t.text}</div>
+          ${t.note?`<div style="font-size:12px;color:#948a7a;margin-top:3px;line-height:1.4">${t.note}</div>`:''}
           ${t.photo?`<img src="${t.photo}" onclick="viewPhoto('${t.photo}')" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
@@ -1035,6 +1078,10 @@ function showAddTask(id) {
             <option value="site" ${t&&t.context==='site'?'selected':''}>📍 באתר</option>
           </select>
         </div>
+        <div style="margin-bottom:14px">
+          <label class="form-label">הערת שוליים (רשות)</label>
+          <input id="add-task-note" class="form-input" placeholder="פרט קטן שקשור למשימה הזו..." value="${t&&t.note?t.note:''}"/>
+        </div>
         ${photoInputHtml('add-task-photo-input','add-task-photo-preview', t?t.photo:null)}
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddTask()">${t?'שמור':'הוסף'}</button>
@@ -1051,19 +1098,20 @@ function doAddTask() {
   const assignee = document.getElementById('add-task-assignee').value
   const color = document.getElementById('add-task-color').value
   const bucket = document.getElementById('add-task-bucket').value
+  const note = document.getElementById('add-task-note').value.trim() || null
   const photo = pendingPhoto
 
   if(editingTaskId) {
     const id = editingTaskId
     const strip = arr => arr.filter(x=>x.id!==id)
     const original = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) || {}
-    const updated = {...original, text, assignee, color, context, photo}
+    const updated = {...original, text, assignee, color, context, note, photo}
     const next = {now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}
     next[bucket] = [...next[bucket], updated]
     setState({tasks:next})
     editingTaskId = null
   } else {
-    const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,photo}
+    const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,note,photo}
     setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
     playTaskAdd()
   }
@@ -1365,7 +1413,20 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">☁️ שרת (Cloudflare)</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת.':'לא מחובר — הנתונים נשארים רק במכשיר הזה.'}</div>
+        <label class="form-label">כתובת השרת</label>
+        <input id="settings-server-url" value="${serverUrl}" placeholder="https://fieldy-proxy.xxx.workers.dev" class="form-input" style="direction:ltr"/>
+        <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
+        <input id="settings-server-passcode" type="password" value="${serverPasscode}" placeholder="הסיסמה שהגדרת ב-Cloudflare" class="form-input" style="direction:ltr;margin-bottom:12px"/>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
+          <button id="server-test-btn" onclick="testServerConfig()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px">בדוק חיבור</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
+        <div style="font-size:12px;color:#948a7a;margin-bottom:8px">${serverConfigured()?'לא בשימוש כרגע — השרת מטפל בזה. אפשר להשאיר ריק.':'משמש רק כל עוד אין חיבור לשרת למעלה.'}</div>
         <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
         <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
@@ -1427,6 +1488,32 @@ function saveApiKey() {
   setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
 }
 
+function saveServerConfig() {
+  serverUrl = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
+  serverPasscode = document.getElementById('settings-server-passcode').value.trim()
+  localStorage.setItem('fieldy_server_url', serverUrl)
+  localStorage.setItem('fieldy_passcode', serverPasscode)
+  if(!serverConfigured()) { renderSettings(); return }
+  loadStateFromServer().then(function(){
+    checkChronology(); refreshBadges(); renderSettings()
+  })
+}
+
+async function testServerConfig() {
+  const btn = document.getElementById('server-test-btn')
+  const url = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
+  const pass = document.getElementById('settings-server-passcode').value.trim()
+  if(!url || !pass) { btn.textContent = 'מלא קודם'; setTimeout(()=>btn.textContent='בדוק חיבור', 1800); return }
+  btn.textContent = 'בודק...'
+  try {
+    const r = await fetch(url + '/api/state', {headers:{'Authorization':'Bearer '+pass}})
+    btn.textContent = r.ok ? '✓ מחובר!' : '✕ נכשל ('+r.status+')'
+  } catch(e) {
+    btn.textContent = '✕ אין תגובה'
+  }
+  setTimeout(()=>{ btn.textContent = 'בדוק חיבור' }, 2200)
+}
+
 let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
@@ -1443,6 +1530,16 @@ const SYSTEM_PROMPT = buildSystemPrompt()
 
 
 async function callClaude(messages, system=null) {
+  if(serverConfigured()) {
+    const r = await fetch(serverUrl + '/api/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+      body:JSON.stringify({messages, system})
+    })
+    const d = await r.json()
+    if(d.error) throw new Error(typeof d.error === 'string' ? d.error : (d.error.message || 'server error'))
+    return d.content?.find(b=>b.type==='text')?.text || ''
+  }
   const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
   if(system) body.system = system
   const r = await fetch('https://api.anthropic.com/v1/messages',{
@@ -2177,6 +2274,13 @@ applyTheme(currentTheme)
 checkChronology()
 refreshBadges()
 renderHome()
+if(serverConfigured()) {
+  loadStateFromServer().then(function(){
+    checkChronology()
+    refreshBadges()
+    renderCurrentScreen()
+  })
+}
 setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
 if(typeof scheduleAllNotifications === "function") scheduleAllNotifications();
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission()
