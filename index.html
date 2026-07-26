@@ -312,11 +312,13 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},updated:null}
 if(!state.personal) state.personal = {gymLog:{}, meditationLog:{}, vacationGoal:''}
 if(!state.personal.gymLog) state.personal.gymLog = {}
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 if(!state.moods) state.moods = []
+if(!state.brainDumps) state.brainDumps = []
+if(!state.personalInsights) state.personalInsights = {text:'', updatedAt:null, basedOnCount:0}
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 
@@ -378,29 +380,112 @@ function saveVacationGoal() {
 const MOOD_LIB = {
   overwhelmed: {label:'מוצף', icon:'🌊', color:'#ef4444', taskLimit:1,
     actions:[
-      'תכתוב (כאן או על דף) את כל מה שרץ לך בראש — לא לפתור, רק לפרוק את זה החוצה.',
+      'תכתוב (כאן למטה או על דף) את כל מה שרץ לך בראש — לא לפתור, רק לפרוק את זה החוצה.',
       'נשימה אחת: 4 שניות פנימה · 7 עצירה · 8 החוצה. שוב אם צריך.',
-      'תסתכל רק על המשימה האחת שמוצגת למטה. השאר לא קיים כרגע.'
+      'תסתכל רק על המשימה האחת שמוצגת למטה. השאר לא קיים כרגע.',
+      'תגיד בקול (או תכתוב) משפט אחד: "כרגע אני עושה רק את X". זהו.',
+      'קום לדקה, תזיז את הגוף, תשתה מים. הראש נרגע כשהגוף זז.',
+      'תשאל את עצמך: מה הדבר האחד שאם ייעשה היום, ישנה הכי הרבה? רק זה.'
     ]},
   scattered: {label:'מפוזר', icon:'🌀', color:'#f59e0b', taskLimit:2,
     actions:[
       'בחר משימה אחת קטנה ותשים טיימר ל-10 דקות — רק עליה.',
       'סגור טאבים/אפליקציות מיותרות לרגע. פחות גירויים, יותר פוקוס.',
-      'תגיד למישהו במה אתה מתחיל עכשיו — אחריות חיצונית עוזרת להתמקד.'
+      'תגיד למישהו במה אתה מתחיל עכשיו — אחריות חיצונית עוזרת להתמקד.',
+      'תכתוב 3 מילים שמתארות מה מסיח אותך כרגע — לפעמים זה מספיק כדי לשחרר את זה.',
+      'תעבור פיזית למקום אחר (חדר/כיסא) לפני שמתחילים משהו חדש.',
+      'תבחר את המשימה הכי קטנה ברשימה, לא הכי חשובה — רק כדי להתחיל לזוז.'
     ]},
   tired: {label:'עייף', icon:'🔋', color:'#6b46c1', taskLimit:2,
     actions:[
       'שתה מים ותאכל משהו קטן — לפעמים זה פשוט דלק חסר.',
       '5 דקות הליכה או מתיחה לפני שממשיכים.',
-      'תדחה כל מה שלא חייב היום. תשאיר רק את החיוני.'
+      'תדחה כל מה שלא חייב היום. תשאיר רק את החיוני.',
+      'אם אפשר, תעצום עיניים ל-5 דקות — לא לישון, רק לנוח.',
+      'תעביר את המשימה הכי קשה למחר בבוקר, ותעשה עכשיו רק דברים קלים.',
+      'תבדוק מתי אכלת/שתית לאחרונה — לפעמים העייפות היא פשוט זה.'
     ]},
   focused: {label:'פוקוס', icon:'🎯', color:'#1a8f7a', taskLimit:null,
     actions:[
       'זה הזמן למשימה הכי קשה או החשובה — תנצל את זה עכשיו.',
-      'תדחה הפרעות ב-30-45 דקות אם אפשר, ותאריך את הבלוק הזה.'
+      'תדחה הפרעות ב-30-45 דקות אם אפשר, ותאריך את הבלוק הזה.',
+      'תכבה התראות לא דחופות לחצי שעה, ותשאר בזרימה.',
+      'תסיים קודם דבר אחד עד הסוף לפני שקופצים למשהו אחר.'
     ]}
 }
 const MOOD_ORDER = ['overwhelmed','scattered','tired','focused']
+
+function pickRandom(arr, n) {
+  var copy = arr.slice()
+  var out = []
+  while(out.length < n && copy.length) {
+    var i = Math.floor(Math.random()*copy.length)
+    out.push(copy.splice(i,1)[0])
+  }
+  return out
+}
+
+function saveBrainDump() {
+  const ta = document.getElementById('brain-dump-input')
+  const text = ta && ta.value.trim()
+  if(!text) return
+  const dumps = [...(state.brainDumps||[]), {ts: Date.now(), date: getToday(), text: text}]
+  setState({brainDumps: dumps.length > 200 ? dumps.slice(dumps.length-200) : dumps})
+  if(ta) ta.value = ''
+  const saved = document.getElementById('brain-dump-saved')
+  if(saved) { saved.style.display='inline'; setTimeout(()=>{ saved.style.display='none' }, 1800) }
+  if(shouldAnalyzePatterns()) analyzePersonalPatterns()
+}
+
+// True once there's enough fresh material (5+ new dumps/moods since the
+// last analysis) and it hasn't run in the last 24h — keeps this from firing
+// on every keystroke or burning API calls needlessly.
+function shouldAnalyzePatterns() {
+  if(!apiKey && !serverConfigured()) return false
+  const pi = state.personalInsights || {basedOnCount:0, updatedAt:null}
+  const newCount = (state.brainDumps||[]).length + (state.moods||[]).length
+  const enoughNew = (newCount - (pi.basedOnCount||0)) >= 5
+  const notTooRecent = !pi.updatedAt || (Date.now() - pi.updatedAt) > 24*60*60*1000
+  return enoughNew && notTooRecent
+}
+
+async function analyzePersonalPatterns(manual) {
+  const dumps = (state.brainDumps||[]).slice(-40)
+  const moods = (state.moods||[]).slice(-80)
+  if(dumps.length < 3 && moods.length < 5) {
+    if(manual) { const b=document.getElementById('insight-refresh-btn'); if(b){b.textContent='עדיין מעט נתונים'; setTimeout(()=>{b.textContent='🔍 נתח עכשיו'},2000)} }
+    return
+  }
+  const btn = document.getElementById('insight-refresh-btn')
+  if(btn) { btn.textContent='⚙️ מנתח...'; btn.disabled = true }
+  try {
+    const dumpLines = dumps.map(d=>`[${d.date}] ${d.text}`).join('\n')
+    const moodLines = moods.map(m=>`${m.date} שעה ${m.hour}: ${MOOD_LIB[m.mood]?MOOD_LIB[m.mood].label:m.mood} (${m.source})`).join('\n')
+    const prompt = 'להלן רשומות "פריקת מחשבות" ורישומי מצב-רוח שאורי (מנהל אזורי, ADHD) תיעד בעצמו באפליקציה שלו לאורך זמן.\n\n' +
+      'פריקות מחשבות:\n' + (dumpLines||'(אין)') + '\n\n' +
+      'יומן מצבי-רוח:\n' + (moodLines||'(אין)') + '\n\n' +
+      'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, ומה שנשמע כמו דברים שעוזרים לו או מכבידים עליו. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), 3-5 משפטים קצרים בלבד, קונקרטי ולא כללי. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
+    const result = await callClaude([{role:'user', content: prompt}])
+    setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length}})
+    if(currentScreen==='home') renderHome()
+  } catch(e) {
+    if(btn) { btn.textContent='✕ שגיאה'; setTimeout(()=>{btn.textContent='🔍 נתח עכשיו'; btn.disabled=false},2000) }
+    return
+  }
+  if(btn) { btn.textContent='🔍 נתח עכשיו'; btn.disabled = false }
+}
+
+function rerollMoodTip() {
+  if(!state.moods || !state.moods.length) return
+  var moods = state.moods.slice()
+  var last = {...moods[moods.length-1]}
+  var lib = MOOD_LIB[last.mood]
+  if(!lib) return
+  last.actions = pickRandom(lib.actions, Math.min(3, lib.actions.length))
+  moods[moods.length-1] = last
+  setState({moods: moods})
+  if(currentScreen === 'home') renderHome()
+}
 
 function getCurrentMood() {
   if(!state.moods || !state.moods.length) return null
@@ -413,12 +498,14 @@ function getCurrentMood() {
 function logMood(mood, source) {
   if(!MOOD_LIB[mood]) return
   var now = new Date()
-  var entry = {ts: now.getTime(), date: getToday(), hour: now.getHours(), weekday: now.getDay(), mood: mood, source: source || 'manual'}
+  var lib = MOOD_LIB[mood]
+  var entry = {ts: now.getTime(), date: getToday(), hour: now.getHours(), weekday: now.getDay(), mood: mood, source: source || 'manual', actions: pickRandom(lib.actions, Math.min(3, lib.actions.length))}
   var moods = [...(state.moods||[]), entry]
   if(moods.length > 500) moods = moods.slice(moods.length - 500)
   setState({moods: moods})
   logEvent('mood_logged', {mood: mood, source: source || 'manual'})
   if(currentScreen === 'home') renderHome()
+  if(shouldAnalyzePatterns()) analyzePersonalPatterns()
 }
 
 // Looks for a mood that keeps recurring in the same weekday + time-of-day
@@ -920,12 +1007,29 @@ function renderHome() {
         </div>
       </div>
       ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:14px;padding:14px 16px;margin-bottom:16px">
-        <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px;margin-bottom:8px">${moodDef.icon} ${moodDef.label} · המלצות עכשיו</div>
-        ${moodDef.actions.map(a=>`<div style="font-size:14px;color:#211d17;margin-bottom:6px;line-height:1.5">• ${a}</div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px">${moodDef.icon} ${moodDef.label} · המלצות עכשיו</div>
+          <button onclick="rerollMoodTip()" style="background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:8px;padding:4px 10px;color:${moodDef.color};font-size:12px;font-weight:600">🔄 טיפ אחר</button>
+        </div>
+        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:14px;color:#211d17;margin-bottom:6px;line-height:1.5">• ${a}</div>`).join('')}
+        <textarea id="brain-dump-input" placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..." style="width:100%;min-height:70px;background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:8px;padding:8px 16px;color:#ffffff;font-size:13px;font-weight:600">שמור ופנה מקום</button>
+          <span id="brain-dump-saved" style="display:none;font-size:13px;color:${moodDef.color};font-weight:600">✓ נשמר</span>
+        </div>
       </div>` : ''}
       ${moodPatterns.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">📊 דפוס שחוזר</div>
         ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${MOOD_LIB[p.mood].icon} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
+      </div>` : ''}
+      ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:#eef2f7;border:1px solid #cdd9e8;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">🧠 מה שאני לומד עליך</div>
+          ${(apiKey||serverConfigured())?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">🔍 נתח עכשיו</button>`:''}
+        </div>
+        ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:14px;color:#211d17;line-height:1.6;white-space:pre-line">${state.personalInsights.text}</div>
+        <div style="font-size:12px;color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
+        `<div style="font-size:14px;color:#6b6255;line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
       </div>` : ''}
       ${latestInsights.items && latestInsights.items.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
@@ -1743,7 +1847,7 @@ let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
