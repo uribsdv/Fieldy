@@ -312,6 +312,8 @@ const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
 let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},updated:null}
 if(!state.personal) state.personal = {gymLog:{}, meditationLog:{}, vacationGoal:''}
+if(!state.personal.gymLog) state.personal.gymLog = {}
+if(!state.personal.meditationLog) state.personal.meditationLog = {}
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 
@@ -866,8 +868,8 @@ function renderHome() {
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">🌱 מחוץ לעבודה</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
-          <button onclick="toggleGymToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${state.personal.gymLog[getToday()]?'#1a8f7a':'var(--line)'};background:${state.personal.gymLog[getToday()]?'#1a8f7a18':'#ffffff'};color:${state.personal.gymLog[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🏋️ ${state.personal.gymLog[getToday()]?'התאמנתי היום ✓':'סמן אימון'}</button>
-          <button onclick="toggleMeditationToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${state.personal.meditationLog[getToday()]?'#1a8f7a':'var(--line)'};background:${state.personal.meditationLog[getToday()]?'#1a8f7a18':'#ffffff'};color:${state.personal.meditationLog[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🧘 ${state.personal.meditationLog[getToday()]?'עשיתי היום ✓':'סמן מדיטציה'}</button>
+          <button onclick="toggleGymToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${(state.personal.gymLog||{})[getToday()]?'#1a8f7a':'var(--line)'};background:${(state.personal.gymLog||{})[getToday()]?'#1a8f7a18':'#ffffff'};color:${(state.personal.gymLog||{})[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🏋️ ${(state.personal.gymLog||{})[getToday()]?'התאמנתי היום ✓':'סמן אימון'}</button>
+          <button onclick="toggleMeditationToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a':'var(--line)'};background:${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a18':'#ffffff'};color:${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🧘 ${(state.personal.meditationLog||{})[getToday()]?'עשיתי היום ✓':'סמן מדיטציה'}</button>
         </div>
         <label class="form-label">יעד לחופשה הבאה</label>
         <div style="display:flex;gap:8px">
