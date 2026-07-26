@@ -277,9 +277,11 @@ function buildSystemPrompt() {
     '"sites":[{"name":"","province":"","issue":"","contractor":"asc or 11-16 or null","status":"open/pending/resolved","location":"coordinates or address if mentioned, else null","mondayLink":"a literal monday.com URL if one appears in the text, else null","remo":"REMO number if mentioned, else null","year":"2024/2025/2026 contract year if mentioned or inferable, else null"}],' +
     '"people":[{"name":"","role":"contractor/engineer/nia/other","company":"","pending":""}],' +
     '"events":[{"title":"ENGLISH title","date":"' + td + '","time":"","note":"","recurring":"","notify":"60","site":"matching site name or null"}],' +
-    '"focus":"Hebrew sentence"' +
+    '"focus":"Hebrew sentence",' +
+    '"moodGuess":"overwhelmed/scattered/tired/focused/neutral"' +
     '}\n\n' +
     'RULES:\n' +
+    '0. MOOD: infer "moodGuess" from the tone/phrasing/pace of the pasted text itself (not from task content) — rushed, dense, anxious phrasing with many urgent items and little structure -> "overwhelmed"; jumping between unrelated topics with no clear thread -> "scattered"; short, low-energy, or mentions of tiredness/no sleep -> "tired"; calm, clear, organized phrasing -> "focused"; anything else or unclear -> "neutral". Default to "neutral" unless the tone clearly signals one of the others — do not over-diagnose from a short or neutral message.\n' +
     '1. now=urgent max 3 (red), today=do today (orange), later=future no date (green)\n' +
     '2. EVENTS: put ONLY genuinely date/time-bound items in events[] — a meeting, a deadline, an appointment, something that belongs on a calendar. Do NOT create an events[] entry for every plain task; a task that\'s just "do X" with no specific date/meeting stays ONLY in now/today/later. Calculate exact dates:\n' +
     '   - "in 2 weeks" or "בעוד שבועיים" -> date=' + getTodayPlus(14) + '\n' +
@@ -310,10 +312,11 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],updated:null}
 if(!state.personal) state.personal = {gymLog:{}, meditationLog:{}, vacationGoal:''}
 if(!state.personal.gymLog) state.personal.gymLog = {}
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
+if(!state.moods) state.moods = []
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 
@@ -371,6 +374,79 @@ function saveVacationGoal() {
   const val = document.getElementById('vacation-goal-input').value.trim()
   setState({personal:{...state.personal, vacationGoal: val}})
 }
+// ── MOOD / ADHD ASSIST ────────────────────────────
+const MOOD_LIB = {
+  overwhelmed: {label:'מוצף', icon:'🌊', color:'#ef4444', taskLimit:1,
+    actions:[
+      'תכתוב (כאן או על דף) את כל מה שרץ לך בראש — לא לפתור, רק לפרוק את זה החוצה.',
+      'נשימה אחת: 4 שניות פנימה · 7 עצירה · 8 החוצה. שוב אם צריך.',
+      'תסתכל רק על המשימה האחת שמוצגת למטה. השאר לא קיים כרגע.'
+    ]},
+  scattered: {label:'מפוזר', icon:'🌀', color:'#f59e0b', taskLimit:2,
+    actions:[
+      'בחר משימה אחת קטנה ותשים טיימר ל-10 דקות — רק עליה.',
+      'סגור טאבים/אפליקציות מיותרות לרגע. פחות גירויים, יותר פוקוס.',
+      'תגיד למישהו במה אתה מתחיל עכשיו — אחריות חיצונית עוזרת להתמקד.'
+    ]},
+  tired: {label:'עייף', icon:'🔋', color:'#6b46c1', taskLimit:2,
+    actions:[
+      'שתה מים ותאכל משהו קטן — לפעמים זה פשוט דלק חסר.',
+      '5 דקות הליכה או מתיחה לפני שממשיכים.',
+      'תדחה כל מה שלא חייב היום. תשאיר רק את החיוני.'
+    ]},
+  focused: {label:'פוקוס', icon:'🎯', color:'#1a8f7a', taskLimit:null,
+    actions:[
+      'זה הזמן למשימה הכי קשה או החשובה — תנצל את זה עכשיו.',
+      'תדחה הפרעות ב-30-45 דקות אם אפשר, ותאריך את הבלוק הזה.'
+    ]}
+}
+const MOOD_ORDER = ['overwhelmed','scattered','tired','focused']
+
+function getCurrentMood() {
+  if(!state.moods || !state.moods.length) return null
+  var recent = state.moods[state.moods.length-1]
+  var cutoff = Date.now() - 4*60*60*1000 // active for 4h after logging
+  if(!recent || recent.ts < cutoff) return null
+  return recent
+}
+
+function logMood(mood, source) {
+  if(!MOOD_LIB[mood]) return
+  var now = new Date()
+  var entry = {ts: now.getTime(), date: getToday(), hour: now.getHours(), weekday: now.getDay(), mood: mood, source: source || 'manual'}
+  var moods = [...(state.moods||[]), entry]
+  if(moods.length > 500) moods = moods.slice(moods.length - 500)
+  setState({moods: moods})
+  logEvent('mood_logged', {mood: mood, source: source || 'manual'})
+  if(currentScreen === 'home') renderHome()
+}
+
+// Looks for a mood that keeps recurring in the same weekday + time-of-day
+// slot (morning/afternoon/evening), so patterns like "Sunday afternoons
+// tend to be overwhelming" surface on their own instead of staying invisible.
+function getMoodPatterns() {
+  if(!state.moods || state.moods.length < 5) return []
+  var blocks = {}
+  state.moods.forEach(function(m) {
+    var wd = (m.weekday != null) ? m.weekday : new Date(m.ts).getDay()
+    var hr = (m.hour != null) ? m.hour : new Date(m.ts).getHours()
+    var block = hr < 12 ? 'בבוקר' : (hr < 17 ? 'אחה"צ' : 'בערב')
+    var key = wd + '|' + block
+    if(!blocks[key]) blocks[key] = {}
+    blocks[key][m.mood] = (blocks[key][m.mood] || 0) + 1
+  })
+  var insights = []
+  Object.keys(blocks).forEach(function(key) {
+    var parts = key.split('|'), wd = parseInt(parts[0]), block = parts[1]
+    var counts = blocks[key]
+    var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a] })[0]
+    if(top && top !== 'focused' && counts[top] >= 3) {
+      insights.push({wd: wd, block: block, mood: top, count: counts[top]})
+    }
+  })
+  return insights.sort(function(a,b){ return b.count - a.count }).slice(0,2)
+}
+
 let latestInsights = {items: []}
 async function fetchInsights() {
   if(!serverConfigured()) return
@@ -799,10 +875,14 @@ function renderHome() {
   const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
   const done = all.filter(t=>t.done).length
   const total = all.length
-  const urgent = state.tasks.now.filter(t=>!t.done).slice(0,3)
+  const curMood = getCurrentMood()
+  const moodDef = curMood ? MOOD_LIB[curMood.mood] : null
+  const urgentLimit = (moodDef && moodDef.taskLimit) ? moodDef.taskLimit : 3
+  const urgent = state.tasks.now.filter(t=>!t.done).slice(0,urgentLimit)
   const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
   const pendingPeople = state.people.filter(p=>p.pending).length
   const pct = total ? Math.round((done/total)*100) : 0
+  const moodPatterns = getMoodPatterns()
 
   el.innerHTML = `
     <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
@@ -826,6 +906,27 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+          ${MOOD_ORDER.map(m=>{
+            const d = MOOD_LIB[m]
+            const active = curMood && curMood.mood===m
+            return `<button onclick="logMood('${m}','manual')" style="padding:10px 2px;border-radius:12px;border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'#ffffff'};text-align:center">
+              <div style="font-size:18px">${d.icon}</div>
+              <div style="font-size:11px;font-weight:600;color:${active?d.color:'#6b6255'};margin-top:2px">${d.label}</div>
+            </button>`
+          }).join('')}
+        </div>
+      </div>
+      ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px;margin-bottom:8px">${moodDef.icon} ${moodDef.label} · המלצות עכשיו</div>
+        ${moodDef.actions.map(a=>`<div style="font-size:14px;color:#211d17;margin-bottom:6px;line-height:1.5">• ${a}</div>`).join('')}
+      </div>` : ''}
+      ${moodPatterns.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">📊 דפוס שחוזר</div>
+        ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${MOOD_LIB[p.mood].icon} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
+      </div>` : ''}
       ${latestInsights.items && latestInsights.items.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
         ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${it.icon} ${it.text}</div>`).join('')}
@@ -950,6 +1051,7 @@ async function doAnalyze() {
       focusDate: p.focus ? getToday() : state.focusDate
     })
     newAiSites.forEach(x => logEvent('site_created', {name: x.name, contractor: x.contractor||null, status: x.status||'open'}))
+    if(p.moodGuess && MOOD_LIB[p.moodGuess]) logMood(p.moodGuess, 'auto')
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
       toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
@@ -1641,7 +1743,7 @@ let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
