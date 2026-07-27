@@ -2553,8 +2553,12 @@ function startMeditationWithVoice(idx){
         voice = enVoices[selectedVoiceIdx]; vIdx = selectedVoiceIdx
       } else {
         var malePref = ['Daniel','David','Oliver','James','Arthur','Aaron','Alex']
+        var femaleNames = /samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i
         voice = enVoices.find(function(v){ return malePref.some(function(n){ return v.name.indexOf(n)!==-1 }) }) ||
-                enVoices.find(function(v){ return !/samantha|karen|moira|tessa|victoria|allison|zoe|fiona|ava|vicki/i.test(v.name) }) ||
+                // Android/Chrome: prefer a Google network voice (much better than the local "Compact" one)
+                enVoices.find(function(v){ return /google/i.test(v.name) && !v.localService && !femaleNames.test(v.name) }) ||
+                enVoices.find(function(v){ return /google/i.test(v.name) && !v.localService }) ||
+                enVoices.find(function(v){ return !femaleNames.test(v.name) }) ||
                 (enVoices.length ? enVoices[0] : null)
         vIdx = voice ? enVoices.indexOf(voice) : 0
       }
