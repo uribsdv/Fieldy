@@ -479,11 +479,11 @@ function saveLeadershipEntry() {
 // ── QUOTES ────────────────────────────────────────
 let quoteRerollSeed = 0
 function getQuoteOfTheDay() {
-  if(!state.quotes || !state.quotes.length) return null
+  if(!state.quotes || !state.quotes.length) return {text:"Who's living your life?", addedAt: Date.now()}
   var d = new Date(getToday())
   var dayNum = Math.floor(d.getTime()/86400000)
   var idx = (dayNum + quoteRerollSeed) % state.quotes.length
-  return state.quotes[idx]
+  return state.quotes[idx] || {text:"Who's living your life?", addedAt: Date.now()}
 }
 function rerollQuote() {
   quoteRerollSeed++
@@ -797,6 +797,21 @@ const MEDITATIONS = [
   {title:'קירוב הריקות',duration:5,icon:'⭕',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
 ];
 
+// ── PERSONAL DEVELOPMENT: SINEK LEADERSHIP TOOLKIT ─
+// Practical, paraphrased exercises drawn from Start With Why, Find Your Why,
+// The Infinite Game and Leaders Eat Last (Simon Sinek).
+// Own wording throughout — not quotes from the books.
+const SINEK_TOOLKIT = [
+  {icon:'🎯',title:'מצא את ה-WHY שלך',tip:'כתוב את סיפור המקור שלך - מתי בפעם הראשונה הרגשת שאתה עושה משהו שמשנה מציאות. תחפש דוגמה חוזרת, לא רק את הרגע הדרמטי.'},
+  {icon:'🔵',title:'המעגל הזהב',tip:'בפעם הבאה שאתה מציג משימה או רעיון לצוות - התחל מה"למה" (המטרה), אחר כך "איך" (הדרך), ולבסוף "מה" (הפעולה). לא בכיוון ההפוך.'},
+  {icon:'📜',title:'משפט הלמה',tip:'ניסוח בפורמט: "כדי ש-___ , אני ___". תבנה משפט קצר אחד שמסביר את המטרה שלך כמנהל אזורי - ותחזור אליו כשמשהו מרגיש חסר משמעות.'},
+  {icon:'♾️',title:'הסיבה הצודקת',tip:'הגדר מטרה שהצוות שלך רוצה להשיג גם בעוד 10 שנים - לא רק "לסגור את הפרויקט הזה". זו העוגן שמונע איבוד כיוון.'},
+  {icon:'🥊',title:'יריב ראוי',tip:'קח את המתחרה או המכשול שהכי מציק לך (קבלן איטי, לחץ מלמעלה) ותשאל - מה הוא חושף לי על החוליה החלשה שלי, במקום איך לנצח אותו.'},
+  {icon:'🛡️',title:'מעגל הביטחון',tip:'זהה רגע השבוע שבו מישהו בצוות שלך יכל לבוא אליך עם טעות בלי פחד. אם לא קרה - שאל את עצמך למה.'},
+  {icon:'🍽️',title:'לאכול אחרון',tip:'לפני שאתה דואג לעצמך (זמן, קרדיט, נוחות) - תבדוק שהצוות שלך מסודר. שים לב במיוחד למתי שאתה עושה את זה הפוך.'},
+  {icon:'🔄',title:'גמישות קיומית',tip:'אם דרך הפעולה הנוכחית לא מקדמת את המטרה האמיתית - היה מוכן לשנות אותה, גם אם השקעת בה זמן. השינוי לא כישלון.'}
+];
+
 // ── PERSONAL DEVELOPMENT: ADHD TOOLKIT ────────────
 // Practical, paraphrased techniques drawn from "ADHD is Awesome" (Holderness),
 // "Fast Minds" (Surman/Bilkey/Weintraub) and "Self-Regulation & Mindfulness" (Gibbs).
@@ -966,6 +981,18 @@ function renderTaoChapter(el, idx) {
     '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">✓ נשמר</span>' +
     '</div></div>';
 
+  var sinekCardsHtml = SINEK_TOOLKIT.map(function(c,i){
+    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
+      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
+      '</div>'
+  }).join('');
+  var sinekHtml =
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">📖 כלים מעשיים מהספרים</div>' +
+    sinekCardsHtml +
+    '</div>';
+
   var adhdCardsHtml = ADHD_TOOLKIT.map(function(c,i){
     return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
       '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
@@ -988,7 +1015,7 @@ function renderTaoChapter(el, idx) {
 
   var modeContentHtml = '';
   if(taoMode==='lead') {
-    modeContentHtml = quoteHtml + weekHtml + leadHtml;
+    modeContentHtml = quoteHtml + weekHtml + leadHtml + sinekHtml;
   } else if(taoMode==='adhd') {
     modeContentHtml = adhdHtml;
   } else {
