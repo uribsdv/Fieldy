@@ -312,13 +312,46 @@ function buildSystemPrompt() {
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.07.19-1'
 const KEY = 'fieldy_v2'
-let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},updated:null}
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],updated:null}
 if(!state.personal) state.personal = {gymLog:{}, meditationLog:{}, vacationGoal:''}
 if(!state.personal.gymLog) state.personal.gymLog = {}
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 if(!state.moods) state.moods = []
 if(!state.brainDumps) state.brainDumps = []
 if(!state.personalInsights) state.personalInsights = {text:'', updatedAt:null, basedOnCount:0}
+if(!state.quotes || !state.quotes.length) state.quotes = [{text:"Who's living your life?", addedAt: Date.now()}]
+if(!state.leadershipLog) state.leadershipLog = []
+const QUOTE_SEEDS_V2 = [
+  "תזכור את ה'למה' שמנחה אותך - זה מה שצריך להוביל כל החלטה, לא הלוח זמנים.",
+  "מנהיג טוב משחק כדי להמשיך לשחק נכון, לא רק כדי לנצח היום.",
+  "התפקיד שלך הוא להגן על האנשים שלך - התוצאות מגיעות אחרי זה, לא לפני.",
+  "שינוי אמיתי מתחיל מזהות: מי אני רוצה להיות, לא רק מה אני רוצה להשיג.",
+  "1% שיפור כל יום נראה כאין וכאפס בטווח הקצר, ועצום בטווח הארוך."
+]
+QUOTE_SEEDS_V2.forEach(function(t){
+  if(!state.quotes.some(function(q){ return q.text===t })) state.quotes.push({text:t, addedAt: Date.now()})
+})
+// Paraphrased ideas (own wording) from Start With Why, The Infinite Game,
+// Leaders Eat Last, Atomic Habits, ADHD is Awesome, Fast Minds, and
+// Self-Regulation & Mindfulness — not quotes copied from the books.
+const QUOTE_SEEDS_V3 = [
+  "התחל מהמטרה - האנשים סביבך יזהו אותה עוד לפני שתסביר להם מה בדיוק אתה עושה.",
+  "לפעמים השינוי הגדול ביותר הוא לשנות כיוון בלי לוותר על הסיבה שבגללה התחלת.",
+  "המתחרה שהכי מציק לך הוא לרוב זה שמלמד אותך הכי הרבה על עצמך.",
+  "צוות שמרגיש מוגן כלפי פנים, ילחם בשבילך כלפי חוץ.",
+  "התפקיד של המנהיג הוא לספוג את הלחץ מלמעלה כדי שהצוות למטה יוכל לעבוד בשקט.",
+  "כל פעולה קטנה היא הצבעה עבור מי שאתה רוצה להיות.",
+  "המערכת שבנית תמשיך לעבוד גם ביום שאין לך מוטיבציה.",
+  "לא צריך קפיצה גדולה - שיפור זעיר שחוזר על עצמו כל יום מנצח כל פעם.",
+  "המצב רוח שלך היום הוא לרוב מדד לכמה שינה, תזונה וחיבור קיבלת אתמול - לא שיפוט על מי שאתה.",
+  "אם אתה יכול לכתוב את זה - תכתוב את זה. הזיכרון לא צריך לשאת הכל לבד.",
+  "מבנה חיצוני הוא לא סימן לחולשה - הוא הכלי שמאפשר למוח שלך לזרוח.",
+  "אי אפשר לתפקד היטב לפני שהגוף מרגיש בטוח ורגוע - קודם תסדיר, אחר כך תבצע."
+]
+QUOTE_SEEDS_V3.forEach(function(t){
+  if(!state.quotes.some(function(q){ return q.text===t })) state.quotes.push({text:t, addedAt: Date.now()})
+})
+localStorage.setItem(KEY, JSON.stringify(state))
 if(!state.personal.meditationLog) state.personal.meditationLog = {}
 let apiKey = localStorage.getItem('fieldy_key') || ''
 
@@ -415,6 +448,57 @@ const MOOD_LIB = {
 }
 const MOOD_ORDER = ['overwhelmed','scattered','tired','focused']
 
+// ── LEADERSHIP DEVELOPMENT ────────────────────────
+function leadField(id, label, value) {
+  return '<div style="margin-bottom:10px">' +
+    '<div style="font-size:12px;color:#b3a077;margin-bottom:4px">' + label + '</div>' +
+    '<textarea id="' + id + '" style="width:100%;min-height:44px;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;resize:none;outline:none;line-height:1.5;direction:rtl;font-family:inherit">' + (value||'') + '</textarea>' +
+    '</div>'
+}
+function getTodayLeadershipEntry() {
+  return (state.leadershipLog||[]).find(function(e){ return e.date===getToday() }) || null
+}
+function saveLeadershipEntry() {
+  const get = id => { const el=document.getElementById(id); return el?el.value.trim():'' }
+  const entry = {
+    date: getToday(),
+    why: get('lead-why'),
+    safetyWin: get('lead-safety'),
+    habitWin: get('lead-habit'),
+    improve: get('lead-improve'),
+    updatedAt: Date.now()
+  }
+  const log = (state.leadershipLog||[]).filter(e=>e.date!==getToday())
+  log.push(entry)
+  setState({leadershipLog: log.length>365?log.slice(log.length-365):log})
+  const saved = document.getElementById('lead-saved')
+  if(saved) { saved.style.display='inline'; setTimeout(()=>{saved.style.display='none'},1800) }
+  if(shouldAnalyzePatterns()) analyzePersonalPatterns()
+}
+
+// ── QUOTES ────────────────────────────────────────
+let quoteRerollSeed = 0
+function getQuoteOfTheDay() {
+  if(!state.quotes || !state.quotes.length) return null
+  var d = new Date(getToday())
+  var dayNum = Math.floor(d.getTime()/86400000)
+  var idx = (dayNum + quoteRerollSeed) % state.quotes.length
+  return state.quotes[idx]
+}
+function rerollQuote() {
+  quoteRerollSeed++
+  if(currentScreen==='tao') renderTao()
+}
+function addQuote() {
+  const input = document.getElementById('quote-add-input')
+  const text = input && input.value.trim()
+  if(!text) return
+  const quotes = [...(state.quotes||[]), {text: text, addedAt: Date.now()}]
+  setState({quotes: quotes})
+  if(input) input.value = ''
+  if(currentScreen==='tao') renderTao()
+}
+
 function pickRandom(arr, n) {
   var copy = arr.slice()
   var out = []
@@ -443,7 +527,7 @@ function saveBrainDump() {
 function shouldAnalyzePatterns() {
   if(!apiKey && !serverConfigured()) return false
   const pi = state.personalInsights || {basedOnCount:0, updatedAt:null}
-  const newCount = (state.brainDumps||[]).length + (state.moods||[]).length
+  const newCount = (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length
   const enoughNew = (newCount - (pi.basedOnCount||0)) >= 5
   const notTooRecent = !pi.updatedAt || (Date.now() - pi.updatedAt) > 24*60*60*1000
   return enoughNew && notTooRecent
@@ -452,7 +536,8 @@ function shouldAnalyzePatterns() {
 async function analyzePersonalPatterns(manual) {
   const dumps = (state.brainDumps||[]).slice(-40)
   const moods = (state.moods||[]).slice(-80)
-  if(dumps.length < 3 && moods.length < 5) {
+  const leadEntries = (state.leadershipLog||[]).slice(-30)
+  if(dumps.length < 3 && moods.length < 5 && leadEntries.length < 3) {
     if(manual) { const b=document.getElementById('insight-refresh-btn'); if(b){b.textContent='עדיין מעט נתונים'; setTimeout(()=>{b.textContent='🔍 נתח עכשיו'},2000)} }
     return
   }
@@ -461,12 +546,15 @@ async function analyzePersonalPatterns(manual) {
   try {
     const dumpLines = dumps.map(d=>`[${d.date}] ${d.text}`).join('\n')
     const moodLines = moods.map(m=>`${m.date} שעה ${m.hour}: ${MOOD_LIB[m.mood]?MOOD_LIB[m.mood].label:m.mood} (${m.source})`).join('\n')
-    const prompt = 'להלן רשומות "פריקת מחשבות" ורישומי מצב-רוח שאורי (מנהל אזורי, ADHD) תיעד בעצמו באפליקציה שלו לאורך זמן.\n\n' +
+    const leadLines = leadEntries.map(e=>`[${e.date}] למה: ${e.why||'-'} | ביטחון לצוות: ${e.safetyWin||'-'} | פעולת זהות: ${e.habitWin||'-'} | לשיפור: ${e.improve||'-'}`).join('\n')
+    const wf = getWeeklyFocus()
+    const prompt = 'להלן רשומות "פריקת מחשבות", יומן מצבי-רוח, ויומן פיתוח מנהיגות יומי שאורי (מנהל אזורי, ADHD, בתהליך פיתוח מנהיגותי מבוסס על עקרונות Start With Why / Infinite Game / Leaders Eat Last / Atomic Habits, ותרגול ויסות עצמי מבוסס Fast Minds / ADHD is Awesome / Self-Regulation & Mindfulness) תיעד בעצמו באפליקציה שלו לאורך זמן. מוקד הלמידה השבוע שלו הוא: "' + wf.theme + '" (' + wf.book + ') - ' + wf.text + '\n\n' +
       'פריקות מחשבות:\n' + (dumpLines||'(אין)') + '\n\n' +
       'יומן מצבי-רוח:\n' + (moodLines||'(אין)') + '\n\n' +
-      'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, ומה שנשמע כמו דברים שעוזרים לו או מכבידים עליו. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), 3-5 משפטים קצרים בלבד, קונקרטי ולא כללי. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
+      'יומן פיתוח מנהיגות יומי:\n' + (leadLines||'(אין)') + '\n\n' +
+      'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, מה שנשמע כמו דברים שעוזרים לו או מכבידים עליו, ובנוסף — דפוסים ביומן המנהיגות: אילו נושאי "לשיפור" חוזרים על עצמם (אזורי צמיחה אמיתיים), והאם רואים התקדמות/נסיגה לאורך זמן בהשוואה לתקופה הקודמת. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), עד 6 משפטים קצרים, קונקרטי ולא כללי, כולל לפחות משפט אחד על התקדמות המנהיגות אם יש מספיק רשומות. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
     const result = await callClaude([{role:'user', content: prompt}])
-    setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length}})
+    setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length}})
     if(currentScreen==='home') renderHome()
   } catch(e) {
     if(btn) { btn.textContent='✕ שגיאה'; setTimeout(()=>{btn.textContent='🔍 נתח עכשיו'; btn.disabled=false},2000) }
@@ -708,6 +796,40 @@ const MEDITATIONS = [
   {title:'קירוב הריקות',duration:5,icon:'⭕',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
 ];
 
+// ── PERSONAL DEVELOPMENT: ADHD TOOLKIT ────────────
+// Practical, paraphrased techniques drawn from "ADHD is Awesome" (Holderness),
+// "Fast Minds" (Surman/Bilkey/Weintraub) and "Self-Regulation & Mindfulness" (Gibbs).
+// Own wording throughout — not quotes from the books.
+const ADHD_TOOLKIT = [
+  {icon:'🏃',title:'תנועה לפני התמדה',tip:'אם קשה להתרכז - אל תילחם בזה, תזוז. כמה דקות של הליכה או תנועה מאתחלות את המוח יותר מכוח רצון.'},
+  {icon:'😴',title:'שינה עקבית',tip:'שעת שינה קבועה משפיעה על יכולת הוויסות שלך יותר מכל טריק אחר. לילה גרוע = יום קשה יותר - זו עובדה על המוח, לא שיפוט על האופי.'},
+  {icon:'🔋',title:'בדיקת מצבר',tip:'לפני שאתה שופט את עצמך על יום קשה - תבדוק: ישנת? אכלת? התחברת עם מישהו? לרוב זו הבעיה, לא המוטיבציה.'},
+  {icon:'✍️',title:'תכתוב, אל תזכור',tip:'אם אפשר לכתוב משהו - תכתוב אותו. הזיכרון לא אמור לשאת הכל לבד; פתק גלוי שווה יותר מכוונה טובה.'},
+  {icon:'📋',title:'שבועי, לא חודשי',tip:'תצוגה חודשית מציפה; תצוגה שבועית נותנת מספיק טווח בלי להעמיס. תבדוק את השבוע הקרוב בערב שלפניו.'},
+  {icon:'🎯',title:'יעד אחד בכל פעם',tip:'לתקן הכל בבת אחת זה מתכון לוותר על הכל. תבחר נקודת כשל אחת ותתמקד רק בה עד שהיא מתייצבת.'},
+  {icon:'🏠',title:'שנה את הסביבה, לא את עצמך',tip:'פתק במקום הנכון או הסרת הסחת דעת משיגים יותר משכנוע עצמי. תבנה סביבה שעובדת בשבילך.'},
+  {icon:'🤝',title:'עבודה לצד מישהו',tip:'לפעמים רק הנוכחות של מישהו אחר - פיזית או בשיחה - מספיקה כדי להתחיל ולהתמיד במשימה.'}
+];
+
+// ── PERSONAL DEVELOPMENT: WEEKLY LEADERSHIP FOCUS ──
+// An 8-week rotating curriculum built from the four leadership books.
+// Own wording throughout — paraphrased ideas, not quotes.
+const WEEKLY_FOCUS = [
+  {theme:'הלמה שלי',book:'Start With Why · Simon Sinek',text:'השבוע: תזכיר לעצמך למה בכלל התחלת בתפקיד הזה. בכל החלטה קטנה - תבדוק אם היא מתיישרת עם ה"למה" הזה.'},
+  {theme:'המשחק האינסופי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תפסיק למדוד הצלחה רק מול אתמול. תשאל את עצמך - אני משחק כדי לנצח היום, או כדי להישאר במשחק לטווח ארוך?'},
+  {theme:'מעגל הביטחון',book:'Leaders Eat Last · Simon Sinek',text:'השבוע: שים לב מתי מישהו בצוות שלך הרגיש בטוח לבוא אליך עם בעיה - ומתי לא.'},
+  {theme:'זהות לפני הרגל',book:'Atomic Habits · James Clear',text:'השבוע: לפני פעולה, שאל - "האם זו פעולה של המנהיג שאני רוצה להיות?" ולא רק "האם זה נחוץ?"'},
+  {theme:'יריב ראוי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תחשוב על אדם או מצב שמאתגר אותך הכי הרבה בעבודה. מה הוא בעצם מלמד אותך על עצמך?'},
+  {theme:'המצבר שלך',book:'ADHD is Awesome · Holderness',text:'השבוע: עקוב יום־יום אחרי שינה, תנועה ותזונה - ובדוק אם יש קשר בין זה לימים שקשה יותר להוביל בהם.'},
+  {theme:'מבנה חיצוני',book:'Fast Minds · Surman, Bilkey & Weintraub',text:'השבוע: זהה נקודת כשל אחת חוזרת (שכחה, איחור, בלגן) ובנה עבורה כלי חיצוני אחד - פתק, תזכורת, צ׳קליסט.'},
+  {theme:'ויסות לפני ביצוע',book:'Self-Regulation & Mindfulness · Gibbs',text:'השבוע: לפני פגישה או שיחה קשה - קח שתי דקות לוויסות (נשימה, תנועה) לפני שאתה נכנס אליה.'}
+];
+function getWeeklyFocus() {
+  var days = Math.floor(new Date(getToday()).getTime()/86400000)
+  var weekNum = Math.floor(days/7)
+  return WEEKLY_FOCUS[weekNum % WEEKLY_FOCUS.length]
+}
+
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
@@ -783,6 +905,7 @@ function renderTao() {
 
 function renderTaoChapter(el, idx) {
   idx = Math.max(0, Math.min(79, idx));
+  var taoMode = localStorage.getItem('fieldy_tao_mode') || 'tao';
   var chapter = TAO_CHAPTERS[idx] || '';
   var title = TAO_TITLES[idx] || ('פרק ' + (idx + 1));
   var lines = chapter.split('\n').filter(function(l) { return l.trim(); });
@@ -803,30 +926,114 @@ function renderTaoChapter(el, idx) {
       '</div>';
   }).join('');
 
+  var qod = getQuoteOfTheDay();
+  var quoteHtml = qod ? (
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">💭 ציטוט</span>' +
+    '<button id="quote-reroll-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:3px 9px;color:#b3a077;font-size:11px;cursor:pointer">🔀 אחר</button>' +
+    '</div>' +
+    '<div style="font-size:16px;line-height:1.6;color:#f5ecd6;font-style:italic;text-align:center">"' + qod.text + '"</div>' +
+    '<div style="display:flex;gap:6px;margin-top:12px">' +
+    '<input id="quote-add-input" placeholder="הוסף ציטוט משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
+    '<button id="quote-add-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">+</button>' +
+    '</div>' +
+    '</div>'
+  ) : '';
+
+  var wf = getWeeklyFocus()
+  var weekHtml = wf ? (
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">📚 מוקד השבוע: ' + wf.theme + '</span>' +
+    '<span style="font-size:10px;color:#8a7857">' + wf.book + '</span>' +
+    '</div>' +
+    '<div style="font-size:13px;line-height:1.6;color:#d8c9a3">' + wf.text + '</div>' +
+    '</div>'
+  ) : '';
+
+  var todayLead = getTodayLeadershipEntry() || {}
+  var leadHtml =
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🎯 פיתוח מנהיגות יומי</div>' +
+    leadField('lead-why','מה ה\'למה\' שהוביל אותי היום?', todayLead.why) +
+    leadField('lead-safety','איפה יצרתי ביטחון/אמון לצוות שלי? איפה לא?', todayLead.safetyWin) +
+    leadField('lead-habit','פעולה קטנה אחת שהתאימה למנהיג שאני רוצה להיות', todayLead.habitWin) +
+    leadField('lead-improve','איפה לא הצלחתי / מה הייתי עושה אחרת?', todayLead.improve) +
+    '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">' +
+    '<button id="lead-save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:8px 16px;color:#1c1508;font-size:13px;font-weight:700">שמור</button>' +
+    '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">✓ נשמר</span>' +
+    '</div></div>';
+
+  var adhdCardsHtml = ADHD_TOOLKIT.map(function(c,i){
+    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
+      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
+      '</div>'
+  }).join('');
+  var adhdHtml =
+    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🧠 כלים להיום</div>' +
+    adhdCardsHtml;
+
+  var subnavHtml =
+    '<div style="display:flex;gap:6px;margin-bottom:18px;background:#120d06;border-radius:12px;padding:4px">' +
+    ['tao','lead','adhd'].map(function(m){
+      var labels = {tao:'☯️ טאו', lead:'🎯 מנהיגות', adhd:'🧠 ADHD'}
+      var active = m===taoMode
+      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 4px;border-radius:9px;font-size:13px;font-weight:600;' +
+        (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1c1508' : 'background:transparent;color:#b3a077') + '">' + labels[m] + '</button>'
+    }).join('') +
+    '</div>';
+
+  var modeContentHtml = '';
+  if(taoMode==='lead') {
+    modeContentHtml = quoteHtml + weekHtml + leadHtml;
+  } else if(taoMode==='adhd') {
+    modeContentHtml = adhdHtml;
+  } else {
+    modeContentHtml =
+      '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
+      '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;margin-bottom:16px">' +
+      '<div style="font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
+      '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+      '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">← הקודם</button>' +
+      '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
+      '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
+      '</div>' +
+      '<div style="font-size:11px;color:#e8c15c;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
+      medHtml;
+  }
+
   el.innerHTML =
     '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
-    '<div style="text-align:center;margin-bottom:6px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו טה צ׳ינג</span>' +
+    '<div style="text-align:center;margin-bottom:14px">' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו · מנהיגות · ADHD</span>' +
     '</div>' +
-    '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;margin-bottom:16px">' +
-    '<div style="font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
-    '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
-    '</div>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
-    '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">← הקודם</button>' +
-    '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
-    '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
-    '</div>' +
-    '<div style="font-size:11px;color:#e8c15c;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
-    medHtml +
+    subnavHtml +
+    modeContentHtml +
     '</div>';
 
   // Add click handlers AFTER innerHTML is set
+  document.querySelectorAll('.tao-subnav-btn').forEach(function(btn){
+    btn.onclick = function(){
+      localStorage.setItem('fieldy_tao_mode', btn.getAttribute('data-mode'))
+      renderTaoChapter(el, idx)
+    }
+  });
+
   var prevBtn = document.getElementById('tao-prev');
   var nextBtn = document.getElementById('tao-next');
   if (prevBtn) prevBtn.onclick = function() { renderTaoChapter(el, prevIdx); };
   if (nextBtn) nextBtn.onclick = function() { renderTaoChapter(el, nextIdx); };
+
+  var quoteRerollBtn = document.getElementById('quote-reroll-btn');
+  if (quoteRerollBtn) quoteRerollBtn.onclick = rerollQuote;
+  var quoteAddBtn = document.getElementById('quote-add-btn');
+  if (quoteAddBtn) quoteAddBtn.onclick = addQuote;
+  var leadSaveBtn = document.getElementById('lead-save-btn');
+  if (leadSaveBtn) leadSaveBtn.onclick = saveLeadershipEntry;
 
   // Bind meditation buttons (IIFE to capture i correctly)
   MEDITATIONS.forEach(function(m, i) {
@@ -837,8 +1044,9 @@ function renderTaoChapter(el, idx) {
   });
 
   el.scrollTop = 0;
-  playWater();
+  if(taoMode==='tao') playWater();
 }
+
 
 
 function startMeditation(idx) {
@@ -1085,11 +1293,12 @@ function renderHome() {
 
       <div class="card" style="margin-top:12px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧠 שאל את Fieldy</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'שאלה חופשית על ההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
-        ${serverConfigured()?`
-        <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: כמה ימים עברו בלי מדיטציה?" style="margin-bottom:10px"/>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${(serverConfigured()||apiKey)?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת או מפתח API בהגדרות.'}</div>
+        ${(serverConfigured()||apiKey)?`
+        <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
         <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">שאל</button>
         <div id="ask-fieldy-answer" style="margin-top:12px;font-size:15px;color:#211d17;line-height:1.6;display:none"></div>
+        <div id="ask-fieldy-maps-wrap"></div>
         `:''}
       </div>
     </div>
@@ -1818,22 +2027,46 @@ async function askFieldy() {
   const input = document.getElementById('ask-fieldy-input')
   const btn = document.getElementById('ask-fieldy-btn')
   const answerEl = document.getElementById('ask-fieldy-answer')
+  const mapsWrap = document.getElementById('ask-fieldy-maps-wrap')
   const question = input.value.trim()
   if(!question) return
   btn.textContent = 'חושב...'
   btn.disabled = true
   answerEl.style.display = 'none'
+  if(mapsWrap) mapsWrap.innerHTML = ''
   try {
-    const r = await fetch(serverUrl + '/api/ask', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
-      body: JSON.stringify({question})
-    })
-    const d = await r.json()
-    if(d.error) throw new Error(d.error)
+    const openSites = state.sites.filter(s=>s.status!=='resolved')
+    const siteLines = openSites.map(s=>{
+      let l = '- '+s.name+(s.province?' ('+s.province+')':'')+' | סטטוס: '+(s.status||'?')+' | קבלן: '+(s.contractor||'-')+' | בעיה: '+(s.issue||'-')
+      if(s.location) l += ' | מיקום: '+s.location
+      return l
+    }).join('\n')
+    const taskLines = [...state.tasks.now,...state.tasks.today].filter(t=>!t.done).slice(0,25)
+      .map(t=>'- ['+(t.color||'')+'] '+t.text+(t.site?(' (אתר: '+t.site+')'):'')).join('\n')
+    const peopleLines = state.people.map(p=>'- '+p.name+' ('+(p.role||'')+(p.company?', '+p.company:'')+')'+(p.pending?(' — ממתין: '+p.pending):'')).join('\n')
+    const curMood = getCurrentMood()
+    const context = 'תאריך היום: '+getToday()+(curMood&&MOOD_LIB[curMood.mood]?('\nמצב רוח נוכחי: '+MOOD_LIB[curMood.mood].label):'') +
+      '\n\nאתרים פתוחים:\n'+(siteLines||'(אין)') +
+      '\n\nמשימות פתוחות:\n'+(taskLines||'(אין)') +
+      '\n\nאנשי קשר:\n'+(peopleLines||'(אין)')
+    const prompt = 'אתה עוזר תכנון שטח לאורי, מנהל אזורי (Region II, Cagayan Valley, פיליפינים, מתקיני SPIS). להלן המצב הנוכחי שלו:\n\n' + context +
+      '\n\nהשאלה של אורי: ' + question +
+      '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
+    const answer = (await callClaude([{role:'user', content: prompt}])).trim()
     answerEl.style.color = '#211d17'
-    answerEl.textContent = d.answer || 'לא התקבלה תשובה.'
+    answerEl.textContent = answer || 'לא התקבלה תשובה.'
     answerEl.style.display = 'block'
+    // If the answer names specific sites that have a known location, offer a ready-made route
+    const mentioned = openSites.filter(s => s.location && answer.indexOf(s.name) !== -1)
+      .sort((a,b) => answer.indexOf(a.name) - answer.indexOf(b.name))
+    if(mapsWrap && mentioned.length >= 1) {
+      const pts = mentioned.map(s => encodeURIComponent(s.location))
+      const dest = pts[pts.length-1]
+      const wps = pts.slice(0,-1).join('|')
+      let url = 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving'
+      if(wps) url += '&waypoints=' + wps
+      mapsWrap.innerHTML = '<a href="'+url+'" target="_blank" style="display:inline-block;margin-top:10px;background:#1a73e8;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">📍 פתח מסלול בגוגל מפות ('+mentioned.length+' תחנות)</a>'
+    }
   } catch(e) {
     answerEl.style.color = '#c0392b'
     answerEl.textContent = '✕ שגיאה: ' + e.message
@@ -1847,7 +2080,7 @@ let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
