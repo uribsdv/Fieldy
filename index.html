@@ -18,7 +18,7 @@ body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;bac
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
 #app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
-.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:120px}
 .hidden{display:none!important}
 /* Nav */
 #nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#f0e7cf;border-top:1px solid var(--line);display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
@@ -488,6 +488,7 @@ function getQuoteOfTheDay() {
 function rerollQuote() {
   quoteRerollSeed++
   if(currentScreen==='tao') renderTao()
+  if(currentScreen==='home') renderHome()
 }
 function addQuote() {
   const input = document.getElementById('quote-add-input')
@@ -1201,7 +1202,49 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      <div class="card" style="margin-bottom:14px">
+      ${(function(){ var qod = getQuoteOfTheDay(); return qod ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px">💭 ציטוט</span>
+          <button onclick="rerollQuote()" style="background:#ffffff;border:1px solid #f0d9a3;border-radius:8px;padding:3px 9px;color:#6b6255;font-size:11px">🔀 אחר</button>
+        </div>
+        <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${qod.text}"</div>
+      </div>` : '' })()}
+      ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
+        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
+        <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
+      </div>` : ''}
+      ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
+      ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
+        <div style="font-size:15px;font-weight:600;color:#211d17">${t.text}</div>
+        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:6px">
+          ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
+          ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
+        </div>`:''}
+      </div>`).join('')}` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#e8940c,#d67d0a)">
+          <div style="font-size:20px">🖌️</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${urgent.length}</div>
+          <div style="font-size:14px;color:#fde8c4;margin-top:2px;font-weight:600">עכשיו</div>
+        </div>
+        <div onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#1a8f7a,#147263)">
+          <div style="font-size:20px">🪷</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${openSites}</div>
+          <div style="font-size:14px;color:#c8ebe3;margin-top:2px;font-weight:600">אתרים</div>
+        </div>
+        <div onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#6b46c1,#5936a3)">
+          <div style="font-size:20px">👥</div>
+          <div style="font-size:24px;font-weight:800;color:#ffffff">${pendingPeople}</div>
+          <div style="font-size:14px;color:#dfd3f5;margin-top:2px;font-weight:600">ממתין</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
+      ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
+      </div>`:''}
+
+      <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
           ${MOOD_ORDER.map(m=>{
@@ -1243,40 +1286,6 @@ function renderHome() {
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
         ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${it.icon} ${it.text}</div>`).join('')}
       </div>` : ''}
-      ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
-        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
-        <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
-      </div>` : ''}
-      ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
-      ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
-        <div style="font-size:15px;font-weight:600;color:#211d17">${t.text}</div>
-        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:6px">
-          ${t.site?`<span class="tag">📍 ${t.site}</span>`:''}
-          ${t.assignee?`<span class="tag">👤 ${ASSIGNEE[t.assignee]||t.assignee}</span>`:''}
-        </div>`:''}
-      </div>`).join('')}` : ''}
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        <div onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#e8940c,#d67d0a)">
-          <div style="font-size:20px">🖌️</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${urgent.length}</div>
-          <div style="font-size:14px;color:#fde8c4;margin-top:2px;font-weight:600">עכשיו</div>
-        </div>
-        <div onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#1a8f7a,#147263)">
-          <div style="font-size:20px">🪷</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${openSites}</div>
-          <div style="font-size:14px;color:#c8ebe3;margin-top:2px;font-weight:600">אתרים</div>
-        </div>
-        <div onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#6b46c1,#5936a3)">
-          <div style="font-size:20px">👥</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${pendingPeople}</div>
-          <div style="font-size:14px;color:#dfd3f5;margin-top:2px;font-weight:600">ממתין</div>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
-      ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
-        <div class="empty-icon">📋</div>
-        <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
-      </div>`:''}
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">🌱 מחוץ לעבודה</div>
