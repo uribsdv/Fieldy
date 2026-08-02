@@ -258,6 +258,9 @@ var musicMuted = false;
 var selectedVoiceIdx = -1;
 var ambientNodes = [];
 var ambientGain = null;
+var talkMessages = [];
+var talkScenario = null;
+var talkBusy = false;
 
 
 function getTodayPlus(days) {
@@ -797,7 +800,126 @@ const MEDITATIONS = [
   {title:'קירוב הריקות',duration:5,icon:'⭕',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
 ];
 
-// ── PERSONAL DEVELOPMENT: SINEK LEADERSHIP TOOLKIT ─
+// ── PERSONAL DEVELOPMENT: SOCIAL SKILLS / SMALL TALK TOOLKIT ─
+// Practical, paraphrased techniques drawn from "How to Win Friends and
+// Influence People" (Carnegie), "How to Talk to Anyone" (Lowndes),
+// "The Fine Art of Small Talk" (Fine) and "Supercommunicators" (Duhigg).
+// Own wording throughout — not quotes from the books.
+const TALK_TOOLKIT = [
+  {icon:'👂',title:'תתעניין לפני שתהיה מעניין',tip:'שאל שאלה אמיתית אחת על האדם מולך לפני שאתה מספר על עצמך. אנשים נמשכים למי שמתעניין בהם, לא רק למי שמרשים אותם.'},
+  {icon:'🏷️',title:'תזכור ותשתמש בשם',tip:'חזור על השם בתחילת השיחה ותשתמש בו שוב באמצע. זה אחד הדברים הכי אישיים שאפשר לתת למישהו בלי מאמץ.'},
+  {icon:'😊',title:'החיוך המושהה',tip:'במקום חיוך רפלקסיבי ומהיר - תן לעצמך רגע להביט באדם, ואז תחייך לאט. זה נתפס כאמיתי, לא כאוטומטי.'},
+  {icon:'🔑',title:'שאלה פותחת, לא סוגרת',tip:'במקום "איך העבודה?" (עונים "בסדר" וזהו) - שאל "מה הכי מעניין אותך בעבודה שלך כרגע?" שאלה פתוחה מזמינה סיפור.'},
+  {icon:'🚪',title:'יציאה אלגנטית',tip:'הכן משפט סיום מוכן מראש: "היה כיף לדבר איתך - אני חייב לזוז, אבל בוא נתפוס עוד שיחה." לא צריך תירוץ, רק כוונה טובה.'},
+  {icon:'🧭',title:'זהה את סוג השיחה',tip:'לפני שאתה עונה, שאל את עצמך - האדם מולי רוצה פתרון מעשי, הזדהות רגשית, או חיבור חברתי? התאם את התשובה לסוג.'},
+  {icon:'🌊',title:'שאלה עם "קלוריות רגשיות"',tip:'שאלה כמו "מה הכי אתגר אותך השבוע?" נותנת הרבה יותר מקום לשיחה מאשר "מה שלומך" - היא מזמינה תוכן, לא רק נימוס.'},
+  {icon:'🧵',title:'טכניקת ה-Thread',tip:'תפוס מילה או רגש מהתשובה של האדם מולך והמשך איתה, במקום לעבור לשאלה הבאה כמו בראיון עבודה.'}
+];
+const TALK_SCENARIOS = [
+  {label:'קולגה בכנס מקצועי', desc:'שיחת חולין עם מישהו חדש בהפסקת קפה בכנס'},
+  {label:'אורח בחתונה', desc:'יושב/ת ליד זר על שולחן בחתונה'},
+  {label:'ממתין/ה בתור לקפה', desc:'שיחה קלילה עם מישהו זר שממתין באותו תור'}
+];
+const TALK_SYSTEM_PROMPT = 'את/ה מאמן/ת כישורים חברתיים וסימולטור לשיחות חולין (Small Talk), שעוזר לאורי - מנהל אזורי שנוח לו בשיחות עומק ופילוסופיות אבל רוצה להתאמן על סמול טוק - להיות זכיר יותר בשיחה ולעבור בטבעיות בין שיחת חולין לחיבור משמעותי.\n\n' +
+  'התבסס על עקרונות מתוך: "The Fine Art of Small Talk" (דבורה פיין - איך לפתוח שיחה, להניע אותה כשנתקעים, ולצאת ממנה באלגנטיות), "How to Talk to Anyone" (לייל לואנדס - שפת גוף, הקשבה פעילה, תגובות זכירות), "Supercommunicators" (צ׳רלס דוהיג - זיהוי סוג השיחה: מעשית / רגשית / חברתית, והתאמת האנרגיה), ו-"How to Win Friends and Influence People" (דייל קרנגי - התעניינות אמיתית באדם השני וגרימה לו להרגיש חשוב).\n\n' +
+  '### שני מצבי פעולה:\n\n' +
+  'מצב 1 - סימולציה (roleplay פעיל): תיכנס/י לדמות ריאליסטית בתרחיש שאורי בחר (למשל קולגה בכנס, אורח בחתונה, מישהו בתור לקפה). התגובות שלך צריכות להיות טבעיות, שיחתיות, וקצרות יחסית (2-4 משפטים), כמו דיאלוג אנושי אמיתי. תן "ווים" בתגובות שלך (פרטים, רגשות, קצוות פתוחים) כדי לתת לאורי הזדמנות להרחיב את השיחה. התאם את האנרגיה שלך לאופן שבו הוא מגיב.\n\n' +
+  'מצב 2 - מאמן ומשוב: אחרי כל 3-4 חילופי דברים בדיאלוג, או כשאורי שואל במפורש "איך הלך לי?" - עצור זמנית את הסימולציה ותן משוב בונה ומעודד בעברית. המשוב צריך להעריך: (1) פתיחות - האם התגובה של אורי סגרה את השיחה או פתחה כיוון חדש; (2) חיבור רגשי - האם הוא שיתף רגש/סיפור ("קלוריות") או רק עובדות יבשות; (3) זכירות - האם התגובה הייתה מעניינת או טיפוסית; (4) הצעה מעשית - תן 1-2 ניסוחים חלופיים שהיו יכולים להיות מעניינים יותר. אחרי המשוב, המשך את הסימולציה.\n\n' +
+  'בתחילת השיחה - תיכנס ישר למצב סימולציה בתרחיש שנבחר, בלי הקדמות ארוכות.';
+
+function renderTalkTab() {
+  var toolkitHtml = TALK_TOOLKIT.map(function(c){
+    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
+      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
+      '</div>'
+  }).join('');
+  var toolkitBox =
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">📖 כלים מעשיים לשיחה</div>' +
+    toolkitHtml +
+    '</div>';
+
+  if(!talkScenario) {
+    var scenarioBtns = TALK_SCENARIOS.map(function(s,i){
+      return '<button class="talk-scenario-btn" data-idx="'+i+'" style="width:100%;text-align:right;background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer">' +
+        '<div style="font-size:14px;font-weight:600;color:#f5ecd6">'+s.label+'</div>' +
+        '<div style="font-size:12px;color:#b3a077;margin-top:3px">'+s.desc+'</div>' +
+        '</button>'
+    }).join('');
+    return toolkitBox +
+      '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px">' +
+      '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🎭 בחר תרחיש להתאמן</div>' +
+      scenarioBtns +
+      '<div style="display:flex;gap:6px;margin-top:6px">' +
+      '<input id="talk-custom-input" placeholder="או תאר תרחיש משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
+      '<button id="talk-custom-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">התחל</button>' +
+      '</div></div>';
+  }
+
+  var bubbles = talkMessages.map(function(m){
+    var isUser = m.role==='user'
+    return '<div style="display:flex;justify-content:'+(isUser?'flex-start':'flex-end')+';margin-bottom:8px">' +
+      '<div style="max-width:82%;background:'+(isUser?'#241b0d':'#3a2c10')+';border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.5;color:#f5ecd6;white-space:pre-line">' + m.content + '</div>' +
+      '</div>'
+  }).join('');
+
+  return toolkitBox +
+    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:14px 14px 16px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+    '<span style="font-size:12px;color:#e8c15c;font-weight:700">🎭 ' + talkScenario.label + '</span>' +
+    '<button id="talk-restart-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:4px 10px;color:#b3a077;font-size:11px;cursor:pointer">↻ תרחיש חדש</button>' +
+    '</div>' +
+    '<div id="talk-chat-log" style="max-height:340px;overflow-y:auto;margin-bottom:10px">' + bubbles +
+    (talkBusy ? '<div style="text-align:center;color:#8a7857;font-size:12px;padding:6px">...כותב</div>' : '') +
+    '</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:8px">' +
+    '<input id="talk-msg-input" placeholder="תגיב/י..." '+(talkBusy?'disabled':'')+' style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
+    '<button id="talk-send-btn" '+(talkBusy?'disabled':'')+' style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:0 16px;color:#1c1508;font-size:13px;font-weight:700">שלח</button>' +
+    '</div>' +
+    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">💬 תן לי משוב עכשיו</button>' +
+    '</div>';
+}
+
+function startTalkScenario(scenario) {
+  talkScenario = scenario
+  talkMessages = []
+  talkBusy = true
+  renderTao()
+  callClaude([{role:'user', content:'בוא נתחיל את התרחיש: ' + scenario.label + ' - ' + scenario.desc + '. תיכנס לדמות ותפתח את השיחה.'}], TALK_SYSTEM_PROMPT)
+    .then(function(reply){
+      talkMessages.push({role:'assistant', content: reply.trim() || '...'})
+      talkBusy = false
+      renderTao()
+    })
+    .catch(function(e){
+      talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message})
+      talkBusy = false
+      renderTao()
+    })
+}
+
+function sendTalkMessage(forcedText) {
+  var input = document.getElementById('talk-msg-input')
+  var text = forcedText || (input && input.value.trim())
+  if(!text || talkBusy) return
+  talkMessages.push({role:'user', content: text})
+  talkBusy = true
+  renderTao()
+  var apiMessages = talkMessages.map(function(m){ return {role:m.role, content:m.content} })
+  callClaude(apiMessages, TALK_SYSTEM_PROMPT)
+    .then(function(reply){
+      talkMessages.push({role:'assistant', content: reply.trim() || '...'})
+      talkBusy = false
+      renderTao()
+    })
+    .catch(function(e){
+      talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message})
+      talkBusy = false
+      renderTao()
+    })
+}
+
 // Practical, paraphrased exercises drawn from Start With Why, Find Your Why,
 // The Infinite Game and Leaders Eat Last (Simon Sinek).
 // Own wording throughout — not quotes from the books.
@@ -1005,10 +1127,10 @@ function renderTaoChapter(el, idx) {
 
   var subnavHtml =
     '<div style="display:flex;gap:6px;margin-bottom:18px;background:#120d06;border-radius:12px;padding:4px">' +
-    ['tao','lead','adhd'].map(function(m){
-      var labels = {tao:'☯️ טאו', lead:'🎯 מנהיגות', adhd:'🧠 ADHD'}
+    ['tao','lead','adhd','talk'].map(function(m){
+      var labels = {tao:'☯️ טאו', lead:'🎯 מנהיגות', adhd:'🧠 ADHD', talk:'🗣️ שיחה'}
       var active = m===taoMode
-      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 4px;border-radius:9px;font-size:13px;font-weight:600;' +
+      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 2px;border-radius:9px;font-size:12px;font-weight:600;' +
         (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1c1508' : 'background:transparent;color:#b3a077') + '">' + labels[m] + '</button>'
     }).join('') +
     '</div>';
@@ -1018,6 +1140,8 @@ function renderTaoChapter(el, idx) {
     modeContentHtml = quoteHtml + weekHtml + leadHtml + sinekHtml;
   } else if(taoMode==='adhd') {
     modeContentHtml = adhdHtml;
+  } else if(taoMode==='talk') {
+    modeContentHtml = renderTalkTab();
   } else {
     modeContentHtml =
       '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
@@ -1062,6 +1186,28 @@ function renderTaoChapter(el, idx) {
   if (quoteAddBtn) quoteAddBtn.onclick = addQuote;
   var leadSaveBtn = document.getElementById('lead-save-btn');
   if (leadSaveBtn) leadSaveBtn.onclick = saveLeadershipEntry;
+
+  document.querySelectorAll('.talk-scenario-btn').forEach(function(btn){
+    btn.onclick = function(){ startTalkScenario(TALK_SCENARIOS[parseInt(btn.getAttribute('data-idx'),10)]) }
+  });
+  var talkCustomBtn = document.getElementById('talk-custom-btn');
+  var talkCustomInput = document.getElementById('talk-custom-input');
+  if (talkCustomBtn) talkCustomBtn.onclick = function(){
+    var v = talkCustomInput && talkCustomInput.value.trim()
+    if(!v) return
+    startTalkScenario({label: v.slice(0,40), desc: v})
+  };
+  if (talkCustomInput) talkCustomInput.onkeydown = function(e){ if(e.key==='Enter') talkCustomBtn.click() };
+  var talkSendBtn = document.getElementById('talk-send-btn');
+  var talkMsgInput = document.getElementById('talk-msg-input');
+  if (talkSendBtn) talkSendBtn.onclick = function(){ sendTalkMessage() };
+  if (talkMsgInput) { talkMsgInput.onkeydown = function(e){ if(e.key==='Enter') sendTalkMessage() }; talkMsgInput.focus() }
+  var talkFeedbackBtn = document.getElementById('talk-feedback-btn');
+  if (talkFeedbackBtn) talkFeedbackBtn.onclick = function(){ sendTalkMessage('תן לי משוב עכשיו על השיחה עד כה.') };
+  var talkRestartBtn = document.getElementById('talk-restart-btn');
+  if (talkRestartBtn) talkRestartBtn.onclick = function(){ talkScenario=null; talkMessages=[]; renderTao() };
+  var talkChatLog = document.getElementById('talk-chat-log');
+  if (talkChatLog) talkChatLog.scrollTop = talkChatLog.scrollHeight;
 
   // Bind meditation buttons (IIFE to capture i correctly)
   MEDITATIONS.forEach(function(m, i) {
