@@ -1851,7 +1851,8 @@ function siteCard(s) {
         ${s.contractor?`<span class="tag">${s.contractor.toUpperCase()}</span>`:''}
         <span class="tag tag-status-${s.status}">${STATUS_LABEL[s.status]||s.status}</span>
         ${s.year?`<span class="tag">📅 ${s.year}</span>`:''}
-        ${s.remo?`<span class="tag">REMO ${s.remo}</span>`:''}
+        ${s.remo?`<button id="remo-copy-${s.id}" onclick="copyToClipboard('${s.remo.replace(/'/g,"\\'")}','remo-copy-${s.id}')" style="background:none;border:1px solid var(--line);border-radius:100px;padding:4px 10px;font-size:12px;color:#6b6255;cursor:pointer">📋 REMO ${s.remo}</button>
+        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">↗ Remo</a>`:''}
         ${s.location?`<a href="${mapsLinkFor(s.location)}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🗺️ Maps</a>`:''}
         ${s.mondayLink?`<a href="${s.mondayLink}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🔗 Monday.com</a>`:''}
       </div>
@@ -1899,8 +1900,8 @@ function showAddSite(name) {
             </select></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-          <div><label class="form-label">מספר REMO</label>
-            <input id="add-site-remo" class="form-input" placeholder="REMO-1234" value="${s?s.remo||'':''}" style="direction:ltr"/></div>
+          <div><label class="form-label">מספר מכשיר ב-Remo</label>
+            <input id="add-site-remo" class="form-input" placeholder="למשל 1234 - למציאה בחיפוש ב-Remo" value="${s?s.remo||'':''}" style="direction:ltr"/></div>
           <div><label class="form-label">שנת חוזה</label>
             <select id="add-site-year" class="form-select">
               <option value="" ${!s||!s.year?'selected':''}>—</option>
@@ -2083,6 +2084,17 @@ function copyResult() {
     btn.textContent='✓ הועתק!'
     btn.style.background='#a8711a'
     setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
+  })
+}
+
+function copyToClipboard(text, btnId) {
+  if(!text) return
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById(btnId)
+    if(!btn) return
+    const original = btn.textContent
+    btn.textContent = '✓ הועתק'
+    setTimeout(()=>{ btn.textContent = original }, 1500)
   })
 }
 
