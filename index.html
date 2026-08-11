@@ -323,6 +323,7 @@ if(!state.moods) state.moods = []
 if(!state.brainDumps) state.brainDumps = []
 if(!state.personalInsights) state.personalInsights = {text:'', updatedAt:null, basedOnCount:0}
 if(!state.quotes || !state.quotes.length) state.quotes = [{text:"Who's living your life?", addedAt: Date.now()}]
+if(!state.pettyCash) state.pettyCash = []
 if(!state.leadershipLog) state.leadershipLog = []
 const QUOTE_SEEDS_V2 = [
   "תזכור את ה'למה' שמנחה אותך - זה מה שצריך להוביל כל החלטה, לא הלוח זמנים.",
@@ -447,9 +448,17 @@ const MOOD_LIB = {
       'תדחה הפרעות ב-30-45 דקות אם אפשר, ותאריך את הבלוק הזה.',
       'תכבה התראות לא דחופות לחצי שעה, ותשאר בזרימה.',
       'תסיים קודם דבר אחד עד הסוף לפני שקופצים למשהו אחר.'
+    ]},
+  motivated: {label:'מוטיבציה גבוהה', icon:'🔥', color:'#e8940c', taskLimit:null,
+    actions:[
+      'זה הזמן לתקוף את המשימה שדחית הכי הרבה זמן — המוטיבציה הזו לא תמיד תהיה כאן.',
+      'לפני שקופצים למשימה חדשה — תסיים קודם דבר אחד שכבר בעבודה. מוטיבציה גבוהה נוטה לפתוח הרבה ולסגור מעט.',
+      'תכתוב רשימה קצרה של 2-3 דברים שאתה רוצה לדחוף היום, כדי שהאנרגיה תלך למשהו ממוקד ולא תתפזר.',
+      'תשמור קצת מהאנרגיה הזו למחר — לא צריך לשרוף הכל ביום אחד.',
+      'זה רגע טוב להתקדם גם בפיתוח האישי או במנהיגות, לא רק במשימות שטח.'
     ]}
 }
-const MOOD_ORDER = ['overwhelmed','scattered','tired','focused']
+const MOOD_ORDER = ['overwhelmed','scattered','tired','focused','motivated']
 
 // ── LEADERSHIP DEVELOPMENT ────────────────────────
 function leadField(id, label, value) {
@@ -1367,6 +1376,7 @@ function renderHome() {
   const pendingPeople = state.people.filter(p=>p.pending).length
   const pct = total ? Math.round((done/total)*100) : 0
   const moodPatterns = getMoodPatterns()
+  const stuckSites = state.sites.filter(function(s){ return s.stuckSince && daysStuck(s) >= STUCK_ALERT_DAYS })
 
   el.innerHTML = `
     <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
@@ -1397,6 +1407,13 @@ function renderHome() {
         </div>
         <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${qod.text}"</div>
       </div>` : '' })()}
+      ${stuckSites.length ? `<div style="background:#fdece0;border:1px solid #b8460055;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:12px;color:#b84600;font-weight:700;letter-spacing:1px;margin-bottom:8px">🚧 אתרים תקועים (מעל ${STUCK_ALERT_DAYS} ימים)</div>
+        ${stuckSites.map(function(s){ return `<div onclick="navigateTo('sites')" style="cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:14px;color:#211d17;font-weight:600">📍 ${s.name}</span>
+          <span style="font-size:13px;color:#b84600;font-weight:700">${daysStuck(s)} ימים</span>
+        </div>` }).join('')}
+      </div>` : ''}
       ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
         <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
         <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${state.focus}</div>
@@ -1427,6 +1444,15 @@ function renderHome() {
         </div>
       </div>
       <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
+      <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:14px;font-weight:700">💰 ליקוידציה שוטפת</div>
+            <div style="font-size:12px;color:#948a7a;margin-top:2px">חודש ${currentMonthKey()} · ${pettyCashThisMonth().length} הוצאות</div>
+          </div>
+          <div style="font-size:18px;font-weight:800;color:#211d17">₱${pettyCashMonthTotal().toLocaleString()}</div>
+        </div>
+      </div>
       ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
         <div class="empty-icon">📋</div>
         <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
@@ -1434,13 +1460,13 @@ function renderHome() {
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
           ${MOOD_ORDER.map(m=>{
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
-            return `<button onclick="logMood('${m}','manual')" style="padding:10px 2px;border-radius:12px;border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'#ffffff'};text-align:center">
-              <div style="font-size:18px">${d.icon}</div>
-              <div style="font-size:11px;font-weight:600;color:${active?d.color:'#6b6255'};margin-top:2px">${d.label}</div>
+            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:12px;border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'#ffffff'};text-align:center">
+              <div style="font-size:16px">${d.icon}</div>
+              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'#6b6255'};margin-top:2px;line-height:1.2">${d.label}</div>
             </button>`
           }).join('')}
         </div>
@@ -1809,6 +1835,104 @@ function doAddTask() {
 // ── SITES ────────────────────────────────────────
 let siteFilter = 'open'
 
+// ── PETTY CASH LIQUIDATION TRACKER ────────────────
+function currentMonthKey() { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') }
+function pettyCashThisMonth() {
+  const mk = currentMonthKey()
+  return (state.pettyCash||[]).filter(function(e){ return (e.date||'').slice(0,7)===mk })
+}
+function pettyCashMonthTotal() {
+  return pettyCashThisMonth().reduce(function(sum,e){ return sum + (parseFloat(e.amount)||0) }, 0)
+}
+function showPettyCashModal() {
+  const entries = pettyCashThisMonth().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') })
+  const total = pettyCashMonthTotal()
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="max-height:82vh;overflow-y:auto">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">💰 ליקוידציה שוטפת</div>
+        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">חודש ${currentMonthKey()} · סה"כ עד כה: <b style="color:#211d17">₱${total.toLocaleString()}</b></div>
+        <label class="form-label">תאריך</label><input id="pc-date" type="date" class="form-input" value="${getToday()}"/>
+        <label class="form-label">ספק / חנות</label><input id="pc-vendor" class="form-input" placeholder="למשל: Shell Gas Station"/>
+        <label class="form-label">סכום (₱)</label><input id="pc-amount" class="form-input" type="number" placeholder="0" style="direction:ltr"/>
+        <label class="form-label">הערה / אתר (רשות)</label><input id="pc-note" class="form-input" placeholder="למשל: נסיעה ל-Nambaran"/>
+        <button onclick="addPettyCashEntry()" class="btn-primary" style="margin-top:6px;margin-bottom:16px">+ הוסף הוצאה</button>
+        <div style="border-top:1px solid var(--line);padding-top:12px">
+          ${entries.length===0?`<div style="font-size:13px;color:#948a7a;text-align:center;padding:10px 0">אין הוצאות מתועדות החודש</div>`:''}
+          ${entries.map(function(e){
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:#211d17">${e.vendor||'—'}</div>
+                <div style="font-size:12px;color:#948a7a">${e.date}${e.note?' · '+e.note:''}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px;font-weight:700;color:#211d17">₱${(parseFloat(e.amount)||0).toLocaleString()}</span>
+                <button onclick="deletePettyCashEntry('${e.id}')" style="background:none;color:#c0392b;font-size:16px">🗑</button>
+              </div>
+            </div>`
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">📋 העתק סיכום</button>
+          <button onclick="closeModal()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">סגור</button>
+        </div>
+      </div>
+    </div>`
+}
+function addPettyCashEntry() {
+  const date = document.getElementById('pc-date').value || getToday()
+  const vendor = document.getElementById('pc-vendor').value.trim()
+  const amount = document.getElementById('pc-amount').value
+  const note = document.getElementById('pc-note').value.trim()
+  if(!vendor || !amount) { alert('נא למלא ספק וסכום'); return }
+  const entry = {id: 'pc_'+Date.now(), date, vendor, amount, note}
+  setState({pettyCash: [...(state.pettyCash||[]), entry]})
+  showPettyCashModal()
+}
+function deletePettyCashEntry(id) {
+  setState({pettyCash: (state.pettyCash||[]).filter(function(e){ return e.id!==id })})
+  showPettyCashModal()
+}
+function copyPettyCashSummary() {
+  const entries = pettyCashThisMonth().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') })
+  const total = pettyCashMonthTotal()
+  const lines = entries.map(function(e){ return e.date+' | '+(e.vendor||'-')+' | ₱'+(parseFloat(e.amount)||0).toLocaleString()+(e.note?' | '+e.note:'') })
+  const text = 'ליקוידציה - '+currentMonthKey()+'\n'+lines.join('\n')+'\n\nסה"כ: ₱'+total.toLocaleString()
+  navigator.clipboard.writeText(text).then(function(){
+    const btn = document.getElementById('pc-copy-btn')
+    if(btn){ const orig = btn.textContent; btn.textContent = '✓ הועתק'; setTimeout(function(){ btn.textContent = orig }, 1500) }
+  })
+}
+
+// General solar-pump-inverter troubleshooting knowledge — generic domain
+// knowledge, not tied to a specific proprietary manual.
+const SPIS_FAULTS = [
+  {icon:'🔒',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
+  {icon:'🔥',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
+  {icon:'⚡',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
+  {icon:'🌊',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
+  {icon:'🏜️',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
+  {icon:'📶',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
+];
+function showSpisModal() {
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="max-height:80vh;overflow-y:auto">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🔧 אבחון תקלות SPIS</div>
+        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
+        ${SPIS_FAULTS.map(function(f){
+          return `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:700;color:#211d17;margin-bottom:4px">${f.icon} ${f.title}</div>
+            <div style="font-size:13px;color:#7a6f5c;margin-bottom:8px;line-height:1.5">${f.cause}</div>
+            ${f.checks.map(function(c){ return `<div style="font-size:13px;color:#211d17;margin-bottom:3px">✓ ${c}</div>` }).join('')}
+          </div>`
+        }).join('')}
+        <div style="font-size:12px;color:#948a7a;margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
+        <button onclick="closeModal()" style="width:100%;margin-top:14px;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">סגור</button>
+      </div>
+    </div>`
+}
+
 function renderSites() {
   const el = document.getElementById('screen-sites')
   const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
@@ -1817,7 +1941,10 @@ function renderSites() {
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:18px;font-weight:700">אתרים</div>
-        <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="showSpisModal()" style="background:#f0e7cf;border-radius:10px;padding:8px 12px;color:#6b6255;font-size:14px;font-weight:600">🔧 אבחון</button>
+          <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600">+ הוסף</button>
+        </div>
       </div>
       <div style="display:flex;gap:6px">
         ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
@@ -1839,11 +1966,18 @@ function mapsLinkFor(loc) {
     : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc.trim())
 }
 
+const STUCK_ALERT_DAYS = 5
+function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
+
 function siteCard(s) {
   const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#6b6255'
+  const stuckDays = daysStuck(s)
   return `
-    <div class="card" style="border:1px solid ${col}33;margin-bottom:8px">
-      <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${s.name}</div>
+    <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${s.name}</div>
+        ${s.stuckSince?`<span style="background:#b84600;color:#fff;font-size:11px;font-weight:700;border-radius:100px;padding:3px 9px;flex-shrink:0">🚧 תקוע ${stuckDays} ימים</span>`:''}
+      </div>
       ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${s.province}</div>`:''}
       ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${s.issue}</div>`:''}
       ${s.photo?`<img src="${s.photo}" onclick="viewPhoto('${s.photo}')" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
@@ -1858,12 +1992,20 @@ function siteCard(s) {
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="updateSiteStatus('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange('${s.name}','${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
+        <button onclick="toggleSiteStuck('${s.name.replace(/'/g,"\\'")}')" style="background:${s.stuckSince?'#b8460022':'#f0e7cf'};border:1px solid ${s.stuckSince?'#b84600':'transparent'};border-radius:8px;padding:7px 9px;color:${s.stuckSince?'#b84600':'#6b6255'};font-size:14px">🚧</button>
         <button onclick="showAddSite('${s.name.replace(/'/g,"\\'")}')" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">✎</button>
         <button onclick="openAction({text:'${(s.name+': '+(s.issue||'')).replace(/'/g,"\\'")}',assignee:'${s.contractor||''}'})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">🖌️</button>
       </div>
     </div>`
+}
+
+function toggleSiteStuck(name) {
+  const site = state.sites.find(s=>s.name===name)
+  const nowStuck = !(site && site.stuckSince)
+  setState({sites:state.sites.map(s=>s.name===name?{...s,stuckSince: nowStuck ? Date.now() : null}:s)})
+  logEvent('site_stuck_toggled', {name, stuck: nowStuck})
 }
 
 function setSiteFilter(f) { siteFilter=f; renderSites() }
@@ -1871,6 +2013,77 @@ function updateSiteStatus(name, status) {
   const site = state.sites.find(s=>s.name===name)
   setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)})
   logEvent('site_status_changed', {name, status, contractor: site?site.contractor:null})
+}
+
+// ── STATUS CHANGE CONFIRMATION (Monday / Email) ───
+var statusChangeMondayDone = false
+var statusChangeEmailDone = false
+function requestStatusChange(name, status) {
+  const site = state.sites.find(s=>s.name===name)
+  if(site && site.status===status) return
+  statusChangeMondayDone = false
+  statusChangeEmailDone = false
+  showStatusChangeModal(name, status)
+}
+function toggleStatusFlag(flag) {
+  if(flag==='monday') statusChangeMondayDone = !statusChangeMondayDone
+  if(flag==='email') statusChangeEmailDone = !statusChangeEmailDone
+  showStatusChangeModal(window.__scName, window.__scStatus)
+}
+function showStatusChangeModal(name, status) {
+  window.__scName = name
+  window.__scStatus = status
+  const site = state.sites.find(s=>s.name===name)
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="max-height:85vh;overflow-y:auto">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">📍 ${name}</div>
+        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">משנה סטטוס ל: <b style="color:#211d17">${STATUS_LABEL[status]}</b></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button onclick="toggleStatusFlag('monday')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeMondayDone?'#1a8f7a':'var(--line)'};background:${statusChangeMondayDone?'#1a8f7a18':'#ffffff'};color:${statusChangeMondayDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">📝 עדכנת ב-Monday?${statusChangeMondayDone?' ✓':''}</button>
+          <button onclick="toggleStatusFlag('email')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeEmailDone?'#1a8f7a':'var(--line)'};background:${statusChangeEmailDone?'#1a8f7a18':'#ffffff'};color:${statusChangeEmailDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">📧 שלחת מייל?${statusChangeEmailDone?' ✓':''}</button>
+        </div>
+        ${(!statusChangeMondayDone || !statusChangeEmailDone) ? `
+        <label class="form-label">תאר את הבעיה / העדכון</label>
+        <textarea id="sc-desc" placeholder="למשל: הקבלן החליף את המשאבה, האתר פעיל שוב" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.5;direction:rtl;margin-bottom:10px">${site&&site.issue?site.issue:''}</textarea>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">✍️ נסח למונדיי</button>`:''}
+          ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">✍️ נסח למייל</button>`:''}
+        </div>
+        <div id="sc-draft-result"></div>
+        ` : ''}
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button onclick="closeModal()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">ביטול</button>
+          <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:700">✓ אשר שינוי סטטוס</button>
+        </div>
+      </div>
+    </div>`
+}
+function draftStatusMessage(kind) {
+  const name = window.__scName, status = window.__scStatus
+  const site = state.sites.find(s=>s.name===name)
+  const desc = (document.getElementById('sc-desc')||{}).value || ''
+  const resultEl = document.getElementById('sc-draft-result')
+  resultEl.innerHTML = '<div style="text-align:center;color:#948a7a;font-size:13px;padding:10px 0">...מנסח</div>'
+  const sys = kind==='monday'
+    ? 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח עדכון קצר וברור לתא הערות (update) בפריט Monday.com על אתר עבודה. כתוב באנגלית מקצועית, 2-4 משפטים, ישר לעניין, כולל שם האתר, הסטטוס החדש, ומה קרה בפועל. בלי פתיח מיותר, רק את טקסט העדכון עצמו.'
+    : 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח מייל עדכון קצר ומקצועי (באנגלית) על שינוי סטטוס באתר עבודה, מוכן לשליחה. כלול שורת נושא (Subject) ואז גוף מייל קצר - 3-5 משפטים, טון ענייני ומקצועי. פורמט: שורה ראשונה "Subject: ..." ואז שורה ריקה ואז גוף המייל.'
+  const userMsg = 'אתר: ' + name + (site&&site.province?(' ('+site.province+')'):'') + '\nסטטוס חדש: ' + STATUS_LABEL[status] + (site&&site.contractor?('\nקבלן: '+site.contractor):'') + '\nתיאור: ' + (desc || 'אין תיאור נוסף')
+  callClaude([{role:'user', content: userMsg}], sys).then(function(reply){
+    const text = reply.trim()
+    window.__scDraftText = text
+    resultEl.innerHTML = `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px">
+      <div style="font-size:13px;color:#211d17;line-height:1.6;white-space:pre-line;direction:ltr;text-align:left">${text}</div>
+      <button id="sc-copy-btn" onclick="copyToClipboard(window.__scDraftText,'sc-copy-btn')" style="width:100%;margin-top:8px;background:#f0e7cf;border-radius:8px;padding:8px;color:#6b6255;font-size:13px;font-weight:600">📋 העתק</button>
+    </div>`
+  }).catch(function(e){
+    resultEl.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:6px 0">✕ שגיאה: ' + e.message + '</div>'
+  })
+}
+function confirmStatusChange() {
+  const name = window.__scName, status = window.__scStatus
+  updateSiteStatus(name, status)
+  closeModal()
 }
 
 let editingSiteName = null
@@ -2289,7 +2502,7 @@ let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
-  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],updated:null}
+  state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],pettyCash:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
 
