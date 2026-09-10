@@ -330,6 +330,94 @@ function jsArg(v) { return esc(JSON.stringify(v === undefined ? null : v)) }
 // never turn into a clickable script.
 function safeUrl(u) { return (typeof u === 'string' && /^https?:\/\//i.test(u.trim())) ? u.trim() : '' }
 
+// ── RENDER HELPERS ────────────────────────────────
+// Shared building blocks for the HTML patterns that used to be repeated
+// by hand across screens. Each helper emits exactly the markup its call
+// sites produced before, so behaviour and pixels stay the same.
+
+// Bottom-sheet modal. By default tapping the dimmed overlay closes it.
+function modalHtml(inner, opts) {
+  opts = opts || {}
+  return '<div class="modal-overlay"' + (opts.closeOnOverlay === false ? '' : ' onclick="if(event.target===this)closeModal()"') + '>' +
+    '<div class="modal"' + (opts.modalStyle ? ' style="' + opts.modalStyle + '"' : '') + '>' + inner + '</div></div>'
+}
+function openModal(inner, opts) { document.getElementById('modal-container').innerHTML = modalHtml(inner, opts) }
+// Empty-state placeholder (icon + one line).
+function emptyHtml(icon, text, style) {
+  return '<div class="empty"' + (style ? ' style="' + style + '"' : '') + '><div class="empty-icon">' + icon + '</div><div class="empty-text">' + text + '</div></div>'
+}
+// Screen title row with an accent "+ הוסף" button (tasks / sites / people headers).
+function addBtnHtml(onclick) {
+  return '<button onclick="' + onclick + '" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600">+ הוסף</button>'
+}
+// Back-arrow header used by the input / action / settings screens.
+function backHeaderHtml(title, marginBottom) {
+  return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:' + (marginBottom || '20px') + '">' +
+    '<button onclick="navigateTo(\'home\')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>' +
+    '<div style="font-size:18px;font-weight:700">' + title + '</div>' +
+    '</div>'
+}
+// Small cream icon button on task / site / person cards (✎ 🖌️ 🗑 …).
+function iconBtnHtml(onclick, label, extraStyle) {
+  return '<button onclick="' + onclick + '" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
+}
+// The 🖌️ "draft a message about this" button — same on tasks, sites and people.
+function actionBtnHtml(text, assignee, extraStyle) {
+  return iconBtnHtml('openAction({text:' + jsArg(text) + ',assignee:' + jsArg(assignee || '') + '})', '🖌️', extraStyle)
+}
+// <option> list for a <select>: pairs of [value, label]; `selected` marks one.
+function optionsHtml(pairs, selected) {
+  return pairs.map(function(p){ return '<option value="' + esc(p[0]) + '" ' + (String(p[0]) === String(selected) ? 'selected' : '') + '>' + p[1] + '</option>' }).join('')
+}
+// Warm cream panel used on the home screen (quote, focus, patterns, insights).
+function creamPanelHtml(inner, style) {
+  return '<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;' + (style || 'padding:14px 16px;margin-bottom:16px') + '">' + inner + '</div>'
+}
+// Home-screen stat tile (count + label on a gradient).
+function statTileHtml(screen, gradient, icon, count, label, labelColor) {
+  return '<div onclick="navigateTo(\'' + screen + '\')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:' + gradient + '">' +
+    '<div style="font-size:20px">' + icon + '</div>' +
+    '<div style="font-size:24px;font-weight:800;color:#ffffff">' + count + '</div>' +
+    '<div style="font-size:14px;color:' + labelColor + ';margin-top:2px;font-weight:600">' + label + '</div>' +
+    '</div>'
+}
+// Gold-bordered dark panel and its small uppercase-style label, used all over the Tao screen.
+function taoPanelHtml(inner, style) {
+  return '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;' + (style || 'padding:16px 18px;margin-bottom:16px') + '">' + inner + '</div>'
+}
+function taoLabelHtml(text) {
+  return '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">' + text + '</div>'
+}
+// Dark "tip" card used by the Sinek, ADHD and small-talk toolkits.
+function toolkitCardHtml(c, isRelated) {
+  return '<div style="background:#120d06;border:1px solid ' + (isRelated ? '#b8860b' : '#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+    (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
+    '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
+    '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
+    '</div>'
+}
+// Temporarily swaps a button's label ("✓ הועתק" …) and restores it afterwards.
+function flashBtn(btn, text, ms, restoreText) {
+  if(!btn) return
+  var orig = restoreText !== undefined ? restoreText : btn.textContent
+  btn.textContent = text
+  setTimeout(function(){ btn.textContent = orig }, ms || 1500)
+}
+// Shows a "✓ נשמר" inline confirmation for a moment.
+function flashSaved(id) {
+  var el = document.getElementById(id)
+  if(el) { el.style.display = 'inline'; setTimeout(function(){ el.style.display = 'none' }, 1800) }
+}
+// Wires the ✕ delete button and tap-to-open of rendered event cards.
+function bindEventCards(events, delPrefix) {
+  events.forEach(function(ev){
+    var btn = document.getElementById(delPrefix + ev.id)
+    if(btn) btn.onclick = function(e){ e.stopPropagation(); deleteEvent(ev.id) }
+    var card = document.getElementById('evc-' + ev.id)
+    if(card) card.onclick = function(){ openEventLink(ev.id) }
+  })
+}
+
 // ── STATE ─────────────────────────────────────────
 const APP_VERSION = '2026.09.10-1'
 const KEY = 'fieldy_v2'
@@ -501,22 +589,18 @@ function logEvent(type, payload) {
 }
 
 // ── PERSONAL (outside work) ───────────────────────
-function toggleGymToday() {
+// Flips today's entry in one of the personal day-logs (gym / meditation).
+function togglePersonalLog(key, eventName, payload) {
   const today = getToday()
-  const log = {...(state.personal.gymLog||{})}
+  const log = {...(state.personal[key]||{})}
   const wasSet = !!log[today]
   if(wasSet) delete log[today]; else log[today] = true
-  setState({personal:{...state.personal, gymLog:log}})
-  if(!wasSet) logEvent('gym_completed', {date: today})
+  const personal = {...state.personal}; personal[key] = log
+  setState({personal})
+  if(!wasSet) logEvent(eventName, payload)
 }
-function toggleMeditationToday() {
-  const today = getToday()
-  const log = {...(state.personal.meditationLog||{})}
-  const wasSet = !!log[today]
-  if(wasSet) delete log[today]; else log[today] = true
-  setState({personal:{...state.personal, meditationLog:log}})
-  if(!wasSet) logEvent('meditation_completed', {source:'manual'})
-}
+function toggleGymToday() { togglePersonalLog('gymLog', 'gym_completed', {date: getToday()}) }
+function toggleMeditationToday() { togglePersonalLog('meditationLog', 'meditation_completed', {source:'manual'}) }
 function saveVacationGoal() {
   const val = document.getElementById('vacation-goal-input').value.trim()
   setState({personal:{...state.personal, vacationGoal: val}})
@@ -591,8 +675,7 @@ function saveLeadershipEntry() {
   const log = (state.leadershipLog||[]).filter(e=>e.date!==getToday())
   log.push(entry)
   setState({leadershipLog: log.length>365?log.slice(log.length-365):log})
-  const saved = document.getElementById('lead-saved')
-  if(saved) { saved.style.display='inline'; setTimeout(()=>{saved.style.display='none'},1800) }
+  flashSaved('lead-saved')
   if(shouldAnalyzePatterns()) analyzePersonalPatterns()
 }
 
@@ -637,8 +720,7 @@ function saveBrainDump() {
   const dumps = [...(state.brainDumps||[]), {ts: Date.now(), date: getToday(), text: text}]
   setState({brainDumps: dumps.length > 200 ? dumps.slice(dumps.length-200) : dumps})
   if(ta) ta.value = ''
-  const saved = document.getElementById('brain-dump-saved')
-  if(saved) { saved.style.display='inline'; setTimeout(()=>{ saved.style.display='none' }, 1800) }
+  flashSaved('brain-dump-saved')
   if(shouldAnalyzePatterns()) analyzePersonalPatterns()
 }
 
@@ -659,7 +741,7 @@ async function analyzePersonalPatterns(manual) {
   const moods = (state.moods||[]).slice(-80)
   const leadEntries = (state.leadershipLog||[]).slice(-30)
   if(dumps.length < 3 && moods.length < 5 && leadEntries.length < 3) {
-    if(manual) { const b=document.getElementById('insight-refresh-btn'); if(b){b.textContent='עדיין מעט נתונים'; setTimeout(()=>{b.textContent='🔍 נתח עכשיו'},2000)} }
+    if(manual) flashBtn(document.getElementById('insight-refresh-btn'), 'עדיין מעט נתונים', 2000, '🔍 נתח עכשיו')
     return
   }
   const btn = document.getElementById('insight-refresh-btn')
@@ -955,17 +1037,7 @@ const TALK_SYSTEM_PROMPT = 'את/ה מאמן/ת כישורים חברתיים ו
   'בתחילת השיחה - תיכנס ישר למצב סימולציה בתרחיש שנבחר, בלי הקדמות ארוכות.';
 
 function renderTalkTab() {
-  var toolkitHtml = TALK_TOOLKIT.map(function(c){
-    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
-      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
-      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
-      '</div>'
-  }).join('');
-  var toolkitBox =
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
-    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">📖 כלים מעשיים לשיחה</div>' +
-    toolkitHtml +
-    '</div>';
+  var toolkitBox = taoPanelHtml(taoLabelHtml('📖 כלים מעשיים לשיחה') + TALK_TOOLKIT.map(function(c){ return toolkitCardHtml(c, false) }).join(''));
 
   if(!talkScenario) {
     var scenarioBtns = TALK_SCENARIOS.map(function(s,i){
@@ -974,14 +1046,13 @@ function renderTalkTab() {
         '<div style="font-size:12px;color:#b3a077;margin-top:3px">'+s.desc+'</div>' +
         '</button>'
     }).join('');
-    return toolkitBox +
-      '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px">' +
-      '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🎭 בחר תרחיש להתאמן</div>' +
+    return toolkitBox + taoPanelHtml(
+      taoLabelHtml('🎭 בחר תרחיש להתאמן') +
       scenarioBtns +
       '<div style="display:flex;gap:6px;margin-top:6px">' +
       '<input id="talk-custom-input" placeholder="או תאר תרחיש משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
       '<button id="talk-custom-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">התחל</button>' +
-      '</div></div>';
+      '</div>', 'padding:16px 18px');
   }
 
   var bubbles = talkMessages.map(function(m){
@@ -991,8 +1062,7 @@ function renderTalkTab() {
       '</div>'
   }).join('');
 
-  return toolkitBox +
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:14px 14px 16px">' +
+  return toolkitBox + taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
     '<span style="font-size:12px;color:#e8c15c;font-weight:700">🎭 ' + esc(talkScenario.label) + '</span>' +
     '<button id="talk-restart-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:4px 10px;color:#b3a077;font-size:11px;cursor:pointer">↻ תרחיש חדש</button>' +
@@ -1004,26 +1074,25 @@ function renderTalkTab() {
     '<input id="talk-msg-input" placeholder="תגיב/י..." '+(talkBusy?'disabled':'')+' style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
     '<button id="talk-send-btn" '+(talkBusy?'disabled':'')+' style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:0 16px;color:#1c1508;font-size:13px;font-weight:700">שלח</button>' +
     '</div>' +
-    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">💬 תן לי משוב עכשיו</button>' +
-    '</div>';
+    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">💬 תן לי משוב עכשיו</button>',
+    'padding:14px 14px 16px');
+}
+
+// One round-trip to the small-talk coach: shows the "typing" state, appends
+// the reply (or the error) as a bubble, and re-renders.
+function talkRequest(messages) {
+  talkBusy = true
+  renderTao()
+  callClaude(messages, TALK_SYSTEM_PROMPT)
+    .then(function(reply){ talkMessages.push({role:'assistant', content: reply.trim() || '...'}) })
+    .catch(function(e){ talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message}) })
+    .then(function(){ talkBusy = false; renderTao() })
 }
 
 function startTalkScenario(scenario) {
   talkScenario = scenario
   talkMessages = []
-  talkBusy = true
-  renderTao()
-  callClaude([{role:'user', content:'בוא נתחיל את התרחיש: ' + scenario.label + ' - ' + scenario.desc + '. תיכנס לדמות ותפתח את השיחה.'}], TALK_SYSTEM_PROMPT)
-    .then(function(reply){
-      talkMessages.push({role:'assistant', content: reply.trim() || '...'})
-      talkBusy = false
-      renderTao()
-    })
-    .catch(function(e){
-      talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message})
-      talkBusy = false
-      renderTao()
-    })
+  talkRequest([{role:'user', content:'בוא נתחיל את התרחיש: ' + scenario.label + ' - ' + scenario.desc + '. תיכנס לדמות ותפתח את השיחה.'}])
 }
 
 function sendTalkMessage(forcedText) {
@@ -1031,20 +1100,7 @@ function sendTalkMessage(forcedText) {
   var text = forcedText || (input && input.value.trim())
   if(!text || talkBusy) return
   talkMessages.push({role:'user', content: text})
-  talkBusy = true
-  renderTao()
-  var apiMessages = talkMessages.map(function(m){ return {role:m.role, content:m.content} })
-  callClaude(apiMessages, TALK_SYSTEM_PROMPT)
-    .then(function(reply){
-      talkMessages.push({role:'assistant', content: reply.trim() || '...'})
-      talkBusy = false
-      renderTao()
-    })
-    .catch(function(e){
-      talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message})
-      talkBusy = false
-      renderTao()
-    })
+  talkRequest(talkMessages.map(function(m){ return {role:m.role, content:m.content} }))
 }
 
 // Practical, paraphrased exercises drawn from Start With Why, Find Your Why,
@@ -1192,8 +1248,7 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var qod = getQuoteOfTheDay();
-  var quoteHtml = qod ? (
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+  var quoteHtml = qod ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
     '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">💭 ציטוט</span>' +
     '<button id="quote-reroll-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:3px 9px;color:#b3a077;font-size:11px;cursor:pointer">🔀 אחר</button>' +
@@ -1202,7 +1257,6 @@ function renderTaoChapter(el, idx) {
     '<div style="display:flex;gap:6px;margin-top:12px">' +
     '<input id="quote-add-input" placeholder="הוסף ציטוט משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
     '<button id="quote-add-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">+</button>' +
-    '</div>' +
     '</div>'
   ) : '';
 
@@ -1210,8 +1264,7 @@ function renderTaoChapter(el, idx) {
   var relatedCard = null, relatedTab = null
   if(wf && wf.relatedSinek !== undefined) { relatedCard = SINEK_TOOLKIT[wf.relatedSinek]; relatedTab = 'lead' }
   else if(wf && wf.relatedAdhd !== undefined) { relatedCard = ADHD_TOOLKIT[wf.relatedAdhd]; relatedTab = 'adhd' }
-  var weekHtml = wf ? (
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
+  var weekHtml = wf ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
     '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">📚 מוקד השבוע: ' + wf.theme + '</span>' +
     '<span style="font-size:10px;color:#8a7857">' + wf.book + '</span>' +
@@ -1222,14 +1275,12 @@ function renderTaoChapter(el, idx) {
       '<div style="font-size:10px;color:#8a7857;margin-bottom:2px">🔗 כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
       '<div style="font-size:13px;color:#f5ecd6;font-weight:600">' + relatedCard.icon + ' ' + relatedCard.title + '</div>' +
       '</button>'
-    ) : '') +
-    '</div>'
+    ) : '')
   ) : '';
 
   var todayLead = getTodayLeadershipEntry() || {}
-  var leadHtml =
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
-    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🎯 פיתוח מנהיגות יומי</div>' +
+  var leadHtml = taoPanelHtml(
+    taoLabelHtml('🎯 פיתוח מנהיגות יומי') +
     leadField('lead-why','מה ה\'למה\' שהוביל אותי היום?', todayLead.why) +
     leadField('lead-safety','איפה יצרתי ביטחון/אמון לצוות שלי? איפה לא?', todayLead.safetyWin) +
     leadField('lead-habit','פעולה קטנה אחת שהתאימה למנהיג שאני רוצה להיות', todayLead.habitWin) +
@@ -1237,33 +1288,15 @@ function renderTaoChapter(el, idx) {
     '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">' +
     '<button id="lead-save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:8px 16px;color:#1c1508;font-size:13px;font-weight:700">שמור</button>' +
     '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">✓ נשמר</span>' +
-    '</div></div>';
+    '</div>');
 
-  var sinekCardsHtml = SINEK_TOOLKIT.map(function(c,i){
-    var isRelated = wf && wf.relatedSinek === i
-    return '<div style="background:#120d06;border:1px solid ' + (isRelated?'#b8860b':'#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
-      (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
-      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
-      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
-      '</div>'
-  }).join('');
-  var sinekHtml =
-    '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
-    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">📖 כלים מעשיים מהספרים</div>' +
-    sinekCardsHtml +
-    '</div>';
+  var sinekHtml = taoPanelHtml(
+    taoLabelHtml('📖 כלים מעשיים מהספרים') +
+    SINEK_TOOLKIT.map(function(c,i){ return toolkitCardHtml(c, wf && wf.relatedSinek === i) }).join(''));
 
-  var adhdCardsHtml = ADHD_TOOLKIT.map(function(c,i){
-    var isRelated = wf && wf.relatedAdhd === i
-    return '<div style="background:#120d06;border:1px solid ' + (isRelated?'#b8860b':'#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
-      (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
-      '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
-      '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
-      '</div>'
-  }).join('');
   var adhdHtml =
-    '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">🧠 כלים להיום</div>' +
-    adhdCardsHtml;
+    taoLabelHtml('🧠 כלים להיום') +
+    ADHD_TOOLKIT.map(function(c,i){ return toolkitCardHtml(c, wf && wf.relatedAdhd === i) }).join('');
 
   var subnavHtml =
     '<div style="display:flex;gap:6px;margin-bottom:18px;background:#120d06;border-radius:12px;padding:4px">' +
@@ -1294,7 +1327,7 @@ function renderTaoChapter(el, idx) {
       '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
       '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
       '</div>' +
-      '<div style="font-size:11px;color:#e8c15c;font-weight:600;letter-spacing:1.5px;margin-bottom:12px">🪷 מדיטציה ומיינדפולנס</div>' +
+      taoLabelHtml('🪷 מדיטציה ומיינדפולנס') +
       medHtml;
   }
 
@@ -1396,10 +1429,7 @@ function startMeditation(idx) {
   }).join('');
 
   const mins = med.duration.toString();
-  const modal = document.getElementById('modal-container');
-  modal.innerHTML =
-    '<div class="modal-overlay">' +
-    '<div class="modal" style="text-align:center">' +
+  openModal(
     '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + med.icon + ' ' + med.title + '</div>' +
     '<div style="font-size:12px;color:#b3a077;margin-bottom:20px">' + med.desc + '</div>' +
     '<div class="med-circle" id="med-circle">' +
@@ -1410,8 +1440,8 @@ function startMeditation(idx) {
     '<div style="margin:20px 0;padding:14px;background:#120d06;border-radius:12px;text-align:right">' +
     stepsHtml +
     '</div>' +
-    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #241b0d;background:transparent;color:#b3a077;font-size:14px">סיים מוקדם</button>' +
-    '</div></div>';
+    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #241b0d;background:transparent;color:#b3a077;font-size:14px">סיים מוקדם</button>',
+    {closeOnOverlay:false, modalStyle:'text-align:center'});
 
   drawMedCircle(1);
 
@@ -1496,6 +1526,11 @@ function refreshBadges() {
 }
 
 // ── HOME ─────────────────────────────────────────
+// "Done today?" toggle button for one of the personal day-logs.
+function personalToggleHtml(key, onclick, icon, doneLabel, todoLabel) {
+  const on = !!(state.personal[key]||{})[getToday()]
+  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${on?'#1a8f7a':'var(--line)'};background:${on?'#1a8f7a18':'#ffffff'};color:${on?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">${icon} ${on?doneLabel:todoLabel}</button>`
+}
 function renderHome() {
   const el = document.getElementById('screen-home')
   const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
@@ -1533,13 +1568,13 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      ${(function(){ var qod = getQuoteOfTheDay(); return qod ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px">💭 ציטוט</span>
           <button onclick="rerollQuote()" style="background:#ffffff;border:1px solid #f0d9a3;border-radius:8px;padding:3px 9px;color:#6b6255;font-size:11px">🔀 אחר</button>
         </div>
         <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${esc(qod.text)}"</div>
-      </div>` : '' })()}
+      `) : '' })()}
       ${stuckSites.length ? `<div style="background:#fdece0;border:1px solid #b8460055;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="font-size:12px;color:#b84600;font-weight:700;letter-spacing:1px;margin-bottom:8px">🚧 אתרים תקועים (מעל ${STUCK_ALERT_DAYS} ימים)</div>
         ${stuckSites.map(function(s){ return `<div onclick="navigateTo('sites')" style="cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px">
@@ -1547,10 +1582,10 @@ function renderHome() {
           <span style="font-size:13px;color:#b84600;font-weight:700">${daysStuck(s)} ימים</span>
         </div>` }).join('')}
       </div>` : ''}
-      ${state.focus ? `<div style="background:#fdf1da;border-radius:14px;padding:16px 18px;margin-bottom:16px;border:1px solid #f0d9a3">
+      ${state.focus ? creamPanelHtml(`
         <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
         <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${esc(state.focus)}</div>
-      </div>` : ''}
+      `, 'padding:16px 18px;margin-bottom:16px') : ''}
       ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
       ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
         <div style="font-size:15px;font-weight:600;color:#211d17">${esc(t.text)}</div>
@@ -1560,21 +1595,9 @@ function renderHome() {
         </div>`:''}
       </div>`).join('')}` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        <div onclick="navigateTo('tasks')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#e8940c,#d67d0a)">
-          <div style="font-size:20px">🖌️</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${urgent.length}</div>
-          <div style="font-size:14px;color:#fde8c4;margin-top:2px;font-weight:600">עכשיו</div>
-        </div>
-        <div onclick="navigateTo('sites')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#1a8f7a,#147263)">
-          <div style="font-size:20px">🪷</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${openSites}</div>
-          <div style="font-size:14px;color:#c8ebe3;margin-top:2px;font-weight:600">אתרים</div>
-        </div>
-        <div onclick="navigateTo('people')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:linear-gradient(150deg,#6b46c1,#5936a3)">
-          <div style="font-size:20px">👥</div>
-          <div style="font-size:24px;font-weight:800;color:#ffffff">${pendingPeople}</div>
-          <div style="font-size:14px;color:#dfd3f5;margin-top:2px;font-weight:600">ממתין</div>
-        </div>
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', '🖌️', urgent.length, 'עכשיו', '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', '🪷', openSites, 'אתרים', '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', '👥', pendingPeople, 'ממתין', '#dfd3f5')}
       </div>
       <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
@@ -1586,10 +1609,7 @@ function renderHome() {
           <div style="font-size:18px;font-weight:800;color:#211d17">₱${pettyCashMonthTotal().toLocaleString()}</div>
         </div>
       </div>
-      ${total===0&&!state.focus?`<div class="empty" style="margin-top:20px">
-        <div class="empty-icon">📋</div>
-        <div class="empty-text">הדבק הודעות מוואטסאפ כדי להתחיל</div>
-      </div>`:''}
+      ${total===0&&!state.focus?emptyHtml('📋', 'הדבק הודעות מוואטסאפ כדי להתחיל', 'margin-top:20px'):''}
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
@@ -1616,10 +1636,10 @@ function renderHome() {
           <span id="brain-dump-saved" style="display:none;font-size:13px;color:${moodDef.color};font-weight:600">✓ נשמר</span>
         </div>
       </div>` : ''}
-      ${moodPatterns.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      ${moodPatterns.length ? creamPanelHtml(`
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">📊 דפוס שחוזר</div>
         ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${MOOD_LIB[p.mood].icon} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
-      </div>` : ''}
+      `) : ''}
       ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:#eef2f7;border:1px solid #cdd9e8;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">🧠 מה שאני לומד עליך</div>
@@ -1629,16 +1649,16 @@ function renderHome() {
         <div style="font-size:12px;color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
         `<div style="font-size:14px;color:#6b6255;line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
       </div>` : ''}
-      ${latestInsights.items && latestInsights.items.length ? `<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      ${latestInsights.items && latestInsights.items.length ? creamPanelHtml(`
         <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
         ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${esc(it.icon)} ${esc(it.text)}</div>`).join('')}
-      </div>` : ''}
+      `) : ''}
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">🌱 מחוץ לעבודה</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
-          <button onclick="toggleGymToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${(state.personal.gymLog||{})[getToday()]?'#1a8f7a':'var(--line)'};background:${(state.personal.gymLog||{})[getToday()]?'#1a8f7a18':'#ffffff'};color:${(state.personal.gymLog||{})[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🏋️ ${(state.personal.gymLog||{})[getToday()]?'התאמנתי היום ✓':'סמן אימון'}</button>
-          <button onclick="toggleMeditationToday()" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a':'var(--line)'};background:${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a18':'#ffffff'};color:${(state.personal.meditationLog||{})[getToday()]?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">🧘 ${(state.personal.meditationLog||{})[getToday()]?'עשיתי היום ✓':'סמן מדיטציה'}</button>
+          ${personalToggleHtml('gymLog', 'toggleGymToday()', '🏋️', 'התאמנתי היום ✓', 'סמן אימון')}
+          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', '🧘', 'עשיתי היום ✓', 'סמן מדיטציה')}
         </div>
         <label class="form-label">יעד לחופשה הבאה</label>
         <div style="display:flex;gap:8px">
@@ -1666,10 +1686,7 @@ function renderInput() {
   const el = document.getElementById('screen-input')
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
-        <div style="font-size:18px;font-weight:700">הוסף הודעות</div>
-      </div>
+      ${backHeaderHtml('הוסף הודעות')}
       <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
       <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
       <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
@@ -1756,7 +1773,7 @@ function renderTasks() {
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:18px;font-weight:700">משימות</div>
-        <button onclick="showAddTask()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        ${addBtnHtml('showAddTask()')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
@@ -1771,7 +1788,7 @@ function renderTasks() {
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${tasks.length===0?`<div class="empty"><div class="empty-icon">🎋</div><div class="empty-text">${taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'}</div></div>`:''}
+      ${tasks.length===0?emptyHtml('🎋', taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
   `
@@ -1799,9 +1816,9 @@ function taskCard(t) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-          ${!t.done?`<button onclick="showAddTask(${jsArg(t.id)})" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">✎</button>`:''}
-          ${!t.done?`<button onclick="openAction({text:${jsArg(t.text)},assignee:${jsArg(t.assignee||'')}})" style="background:#f0e7cf;border-radius:8px;padding:6px 9px;color:#6b6255;font-size:14px">🖌️</button>`:''}
-          ${t.done?`<button onclick="deleteTask(${jsArg(t.id)})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:15px">🗑</button>`:''}
+          ${!t.done?iconBtnHtml('showAddTask('+jsArg(t.id)+')', '✎', 'padding:6px 9px'):''}
+          ${!t.done?actionBtnHtml(t.text, t.assignee, 'padding:6px 9px'):''}
+          ${t.done?iconBtnHtml('deleteTask('+jsArg(t.id)+')', '🗑', 'font-size:15px'):''}
         </div>
       </div>
     </div>`
@@ -1895,34 +1912,27 @@ function showAddTask(id) {
   editingTaskId = id || null
   const t = id ? [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) : null
   const bucketOf = id ? (state.tasks.now.some(x=>x.id===id)?'now':state.tasks.today.some(x=>x.id===id)?'today':'later') : 'now'
-  const modal = document.getElementById('modal-container')
-  modal.innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?'✎ עריכת משימה':'+ משימה חדשה'}</div>
         <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?esc(t.text):''}</textarea>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div><label class="form-label">אחראי</label>
             <select id="add-task-assignee" class="form-select">
-              <option value="uri" ${t&&t.assignee==='uri'?'selected':''}>אני</option><option value="gio" ${t&&t.assignee==='gio'?'selected':''}>ג'יו</option>
-              <option value="kenneth" ${t&&t.assignee==='kenneth'?'selected':''}>קנת'</option><option value="asc" ${t&&t.assignee==='asc'?'selected':''}>ASC</option><option value="11-16" ${t&&t.assignee==='11-16'?'selected':''}>11-16</option>
+              ${optionsHtml([['uri','אני'],['gio',"ג'יו"],['kenneth',"קנת'"],['asc','ASC'],['11-16','11-16']], t&&t.assignee)}
             </select></div>
           <div><label class="form-label">מתי</label>
             <select id="add-task-bucket" class="form-select">
-              <option value="now" ${bucketOf==='now'?'selected':''}>עכשיו</option><option value="today" ${bucketOf==='today'?'selected':''}>היום</option><option value="later" ${bucketOf==='later'?'selected':''}>אחר כך</option>
+              ${optionsHtml([['now','עכשיו'],['today','היום'],['later','אחר כך']], bucketOf)}
             </select></div>
           <div><label class="form-label">עדיפות</label>
             <select id="add-task-color" class="form-select">
-              <option value="red" ${t&&t.color==='red'?'selected':''}>דחוף</option><option value="orange" ${!t||t.color==='orange'?'selected':''}>חשוב</option><option value="green" ${t&&t.color==='green'?'selected':''}>שוטף</option>
+              ${optionsHtml([['red','דחוף'],['orange','חשוב'],['green','שוטף']], t?t.color:'orange')}
             </select></div>
         </div>
         <div style="margin-bottom:14px">
           <label class="form-label">הקשר — איפה אפשר לבצע?</label>
           <select id="add-task-context" class="form-select">
-            <option value="" ${!t||!t.context?'selected':''}>לא ידוע</option>
-            <option value="phone" ${t&&t.context==='phone'?'selected':''}>📞 טלפון</option>
-            <option value="office" ${t&&t.context==='office'?'selected':''}>💻 משרד</option>
-            <option value="site" ${t&&t.context==='site'?'selected':''}>📍 באתר</option>
+            ${optionsHtml([['','לא ידוע'],['phone','📞 טלפון'],['office','💻 משרד'],['site','📍 באתר']], (t&&t.context)||'')}
           </select>
         </div>
         <div style="margin-bottom:14px">
@@ -1933,9 +1943,7 @@ function showAddTask(id) {
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddTask()">${t?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
-        </div>
-      </div>
-    </div>`
+        </div>`)
 }
 
 function doAddTask() {
@@ -1980,9 +1988,7 @@ function pettyCashMonthTotal() {
 function showPettyCashModal() {
   const entries = pettyCashThisMonth().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') })
   const total = pettyCashMonthTotal()
-  document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal" style="max-height:82vh;overflow-y:auto">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:4px">💰 ליקוידציה שוטפת</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">חודש ${currentMonthKey()} · סה"כ עד כה: <b style="color:#211d17">₱${total.toLocaleString()}</b></div>
         <label class="form-label">תאריך</label><input id="pc-date" type="date" class="form-input" value="${getToday()}"/>
@@ -2008,9 +2014,7 @@ function showPettyCashModal() {
         <div style="display:flex;gap:8px;margin-top:14px">
           <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">📋 העתק סיכום</button>
           <button onclick="closeModal()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">סגור</button>
-        </div>
-      </div>
-    </div>`
+        </div>`, {modalStyle:'max-height:82vh;overflow-y:auto'})
 }
 function addPettyCashEntry() {
   const date = document.getElementById('pc-date').value || getToday()
@@ -2033,7 +2037,7 @@ function copyPettyCashSummary() {
   const text = 'ליקוידציה - '+currentMonthKey()+'\n'+lines.join('\n')+'\n\nסה"כ: ₱'+total.toLocaleString()
   navigator.clipboard.writeText(text).then(function(){
     const btn = document.getElementById('pc-copy-btn')
-    if(btn){ const orig = btn.textContent; btn.textContent = '✓ הועתק'; setTimeout(function(){ btn.textContent = orig }, 1500) }
+    flashBtn(btn, '✓ הועתק')
   })
 }
 
@@ -2048,9 +2052,7 @@ const SPIS_FAULTS = [
   {icon:'📶',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
 ];
 function showSpisModal() {
-  document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal" style="max-height:80vh;overflow-y:auto">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:4px">🔧 אבחון תקלות SPIS</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
         ${SPIS_FAULTS.map(function(f){
@@ -2061,9 +2063,7 @@ function showSpisModal() {
           </div>`
         }).join('')}
         <div style="font-size:12px;color:#948a7a;margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
-        <button onclick="closeModal()" style="width:100%;margin-top:14px;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">סגור</button>
-      </div>
-    </div>`
+        <button onclick="closeModal()" style="width:100%;margin-top:14px;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">סגור</button>`, {modalStyle:'max-height:80vh;overflow-y:auto'})
 }
 
 function renderSites() {
@@ -2076,7 +2076,7 @@ function renderSites() {
         <div style="font-size:18px;font-weight:700">אתרים</div>
         <div style="display:flex;gap:8px">
           <button onclick="showSpisModal()" style="background:#f0e7cf;border-radius:10px;padding:8px 12px;color:#6b6255;font-size:14px;font-weight:600">🔧 אבחון</button>
-          <button onclick="showAddSite()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600">+ הוסף</button>
+          ${addBtnHtml('showAddSite()')}
         </div>
       </div>
       <div style="display:flex;gap:6px">
@@ -2086,7 +2086,7 @@ function renderSites() {
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${sites.length===0?`<div class="empty"><div class="empty-icon">🪷</div><div class="empty-text">אין אתרים</div></div>`:''}
+      ${sites.length===0?emptyHtml('🪷', 'אין אתרים'):''}
       ${sites.map(s=>siteCard(s)).join('')}
     </div>`
 }
@@ -2100,10 +2100,11 @@ function mapsLinkFor(loc) {
 }
 
 const STUCK_ALERT_DAYS = 5
+const STATUS_HEX = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}
 function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
 
 function siteCard(s) {
-  const col = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[s.status]||'#6b6255'
+  const col = STATUS_HEX[s.status]||'#6b6255'
   const stuckDays = daysStuck(s)
   return `
     <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
@@ -2125,11 +2126,11 @@ function siteCard(s) {
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]+'33':'#f0e7cf'};color:${s.status===st?{open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?STATUS_HEX[st]+'33':'#f0e7cf'};color:${s.status===st?STATUS_HEX[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
         <button onclick="toggleSiteStuck(${jsArg(s.name)})" style="background:${s.stuckSince?'#b8460022':'#f0e7cf'};border:1px solid ${s.stuckSince?'#b84600':'transparent'};border-radius:8px;padding:7px 9px;color:${s.stuckSince?'#b84600':'#6b6255'};font-size:14px">🚧</button>
-        <button onclick="showAddSite(${jsArg(s.name)})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">✎</button>
-        <button onclick="openAction({text:${jsArg(s.name+': '+(s.issue||''))},assignee:${jsArg(s.contractor||'')}})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px">🖌️</button>
+        ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', '✎')}
+        ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
       </div>
     </div>`
 }
@@ -2167,9 +2168,7 @@ function showStatusChangeModal(name, status) {
   window.__scName = name
   window.__scStatus = status
   const site = state.sites.find(s=>s.name===name)
-  document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal" style="max-height:85vh;overflow-y:auto">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:4px">📍 ${esc(name)}</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">משנה סטטוס ל: <b style="color:#211d17">${STATUS_LABEL[status]}</b></div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -2188,9 +2187,7 @@ function showStatusChangeModal(name, status) {
         <div style="display:flex;gap:8px;margin-top:6px">
           <button onclick="closeModal()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">ביטול</button>
           <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:700">✓ אשר שינוי סטטוס</button>
-        </div>
-      </div>
-    </div>`
+        </div>`, {modalStyle:'max-height:85vh;overflow-y:auto'})
 }
 function draftStatusMessage(kind) {
   const name = window.__scName, status = window.__scStatus
@@ -2223,9 +2220,7 @@ let editingSiteName = null
 function showAddSite(name) {
   editingSiteName = name || null
   const s = name ? state.sites.find(x=>x.name===name) : null
-  document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?'✎ עריכת אתר':'+ אתר חדש'}</div>
         <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
@@ -2238,11 +2233,11 @@ function showAddSite(name) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;margin-top:12px">
           <div><label class="form-label">קבלן</label>
             <select id="add-site-contractor" class="form-select">
-              <option value="" ${!s||!s.contractor?'selected':''}>—</option><option value="asc" ${s&&s.contractor==='asc'?'selected':''}>ASC</option><option value="11-16" ${s&&s.contractor==='11-16'?'selected':''}>11-16</option>
+              ${optionsHtml([['','—'],['asc','ASC'],['11-16','11-16']], (s&&s.contractor)||'')}
             </select></div>
           <div><label class="form-label">סטטוס</label>
             <select id="add-site-status" class="form-select">
-              <option value="open" ${!s||s.status==='open'?'selected':''}>פתוח</option><option value="pending" ${s&&s.status==='pending'?'selected':''}>ממתין</option><option value="resolved" ${s&&s.status==='resolved'?'selected':''}>נפתר</option>
+              ${optionsHtml([['open','פתוח'],['pending','ממתין'],['resolved','נפתר']], s?s.status:'open')}
             </select></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
@@ -2250,19 +2245,14 @@ function showAddSite(name) {
             <input id="add-site-remo" class="form-input" placeholder="למשל 1234 - למציאה בחיפוש ב-Remo" value="${s?esc(s.remo):''}" style="direction:ltr"/></div>
           <div><label class="form-label">שנת חוזה</label>
             <select id="add-site-year" class="form-select">
-              <option value="" ${!s||!s.year?'selected':''}>—</option>
-              <option value="2024" ${s&&s.year==='2024'?'selected':''}>2024</option>
-              <option value="2025" ${s&&s.year==='2025'?'selected':''}>2025</option>
-              <option value="2026" ${s&&s.year==='2026'?'selected':''}>2026</option>
+              ${optionsHtml([['','—'],['2024','2024'],['2025','2025'],['2026','2026']], (s&&s.year)||'')}
             </select></div>
         </div>
         ${photoInputHtml('add-site-photo-input','add-site-photo-preview', s?s.photo:null)}
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
-        </div>
-      </div>
-    </div>`
+        </div>`)
 }
 
 function doAddSite() {
@@ -2303,11 +2293,11 @@ function renderPeople() {
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:18px;font-weight:700">אנשים</div>
-        <button onclick="showAddPerson()" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600" style="background:var(--bamboo)">+ הוסף</button>
+        ${addBtnHtml('showAddPerson()')}
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${state.people.length===0?`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-text">אנשים יתווספו מהודעות</div></div>`:''}
+      ${state.people.length===0?emptyHtml('🌿', 'אנשים יתווספו מהודעות'):''}
       ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
       ${withoutP.length>0?`${withP.length>0?`<div style="font-size:14px;color:#7a6f5c;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
     </div>`
@@ -2326,7 +2316,7 @@ function personCard(p) {
           </div>
         </div>
         <div style="display:flex;gap:6px">
-          <button onclick="openAction({text:${jsArg(p.pending||p.name)},assignee:${jsArg(p.name)}})" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:16px">🖌️</button>
+          ${actionBtnHtml(p.pending||p.name, p.name, 'font-size:16px')}
           ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
         </div>
       </div>
@@ -2340,24 +2330,19 @@ function personCard(p) {
 function clearPending(name) { setState({people:state.people.map(p=>p.name===name?{...p,pending:''}:p)}) }
 
 function showAddPerson() {
-  document.getElementById('modal-container').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal">
+  openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ איש קשר</div>
         <label class="form-label">שם</label><input id="add-person-name" class="form-input" placeholder="Dave"/>
         <label class="form-label">חברה</label><input id="add-person-company" class="form-input" placeholder="ASC Construction"/>
         <label class="form-label">ממתין ל...</label><input id="add-person-pending" class="form-input" placeholder="חתימה על waiver"/>
         <label class="form-label">תפקיד</label>
         <select id="add-person-role" class="form-select" style="margin-bottom:14px">
-          <option value="contractor">קבלן</option><option value="engineer">מהנדס</option>
-          <option value="nia">NIA</option><option value="other">אחר</option>
+          ${optionsHtml([['contractor','קבלן'],['engineer','מהנדס'],['nia','NIA'],['other','אחר']])}
         </select>
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddPerson()">הוסף</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
-        </div>
-      </div>
-    </div>`
+        </div>`)
 }
 
 function doAddPerson() {
@@ -2377,10 +2362,7 @@ function renderAction() {
   const el = document.getElementById('screen-action')
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
-        <div style="font-size:18px;font-weight:700">צור תוכן</div>
-      </div>
+      ${backHeaderHtml('צור תוכן')}
       ${actionCtx?.text?`<div class="card" style="border-right:3px solid var(--gold);margin-bottom:20px">
         <div style="font-size:14px;color:#211d17;line-height:1.5">${esc(actionCtx.text)}</div>
         ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">👤 ${esc(actionCtx.assignee)}</div>`:''}
@@ -2435,13 +2417,7 @@ function copyResult() {
 
 function copyToClipboard(text, btnId) {
   if(!text) return
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.getElementById(btnId)
-    if(!btn) return
-    const original = btn.textContent
-    btn.textContent = '✓ הועתק'
-    setTimeout(()=>{ btn.textContent = original }, 1500)
-  })
+  navigator.clipboard.writeText(text).then(()=>{ flashBtn(document.getElementById(btnId), '✓ הועתק') })
 }
 
 // ── SETTINGS ─────────────────────────────────────
@@ -2449,10 +2425,7 @@ function renderSettings() {
   const el = document.getElementById('screen-settings')
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-        <button onclick="navigateTo('home')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>
-        <div style="font-size:18px;font-weight:700">הגדרות</div>
-      </div>
+      ${backHeaderHtml('הגדרות', '24px')}
       <div class="card" style="margin-bottom:14px">
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🎨 ערכת צבע</div>
@@ -2525,7 +2498,7 @@ function dedupeEvents() {
   const kept = state.events.filter(e => !taskTexts.has(norm(e.title)))
   const removed = before - kept.length
   setState({events:kept})
-  if(btn) { btn.textContent = removed>0 ? `נוקו ${removed} כפילויות ✓` : 'לא נמצאו כפילויות'; setTimeout(()=>{if(btn)btn.textContent='נקה כפילויות'},2500) }
+  flashBtn(btn, removed>0 ? `נוקו ${removed} כפילויות ✓` : 'לא נמצאו כפילויות', 2500, 'נקה כפילויות')
 }
 
 async function forceRefreshApp() {
@@ -2565,8 +2538,7 @@ function exportBackup() {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
-  const btn = document.getElementById('export-backup-btn')
-  if(btn) { const orig = btn.textContent; btn.textContent = '✓ ירד'; setTimeout(()=>{btn.textContent=orig}, 1500) }
+  flashBtn(document.getElementById('export-backup-btn'), '✓ ירד')
 }
 function importBackup(file) {
   if(!file) return
@@ -2620,7 +2592,7 @@ async function testServerConfig() {
   const btn = document.getElementById('server-test-btn')
   const url = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
   const pass = document.getElementById('settings-server-passcode').value.trim()
-  if(!url || !pass) { btn.textContent = 'מלא קודם'; setTimeout(()=>btn.textContent='בדוק חיבור', 1800); return }
+  if(!url || !pass) { flashBtn(btn, 'מלא קודם', 1800, 'בדוק חיבור'); return }
   btn.textContent = 'בודק...'
   try {
     const r = await fetch(url + '/api/state', {headers:{'Authorization':'Bearer '+pass}})
@@ -2804,14 +2776,7 @@ function renderCalendar(){
     r.addEventListener('click',function(){showDayEvents(r.dataset.date);});
   });
   // Bind delete buttons + card-tap navigation in month event list
-  getEvents().forEach(function(ev){
-    var btn = document.getElementById('del-ev-'+ev.id);
-    if(btn) btn.onclick = (function(eid){
-      return function(e){ e.stopPropagation(); deleteEvent(eid); };
-    })(ev.id);
-    var card = document.getElementById('evc-'+ev.id);
-    if(card) card.onclick = (function(eid){ return function(){ openEventLink(eid); }; })(ev.id);
-  });
+  bindEventCards(getEvents(), 'del-ev-');
 }
 
 function renderMonthCal(){
@@ -2953,34 +2918,22 @@ function showDayEvents(dk){
   var parts=dk.split('-');
   var label=parts[2]+' '+MONTHS_HE[parseInt(parts[1])-1]+' '+parts[0];
   var evs=getEventsForDate(dk);
-  var modal=document.getElementById('modal-container');
-  modal.innerHTML=
-    '<div class="modal-overlay">'+
-    '<div class="modal">'+
+  openModal(
     '<div class="modal-handle"></div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
     '<div style="font-size:16px;font-weight:700;color:var(--t1)">📅 '+label+'</div>'+
     '<button class="btn-add" id="add-ev-day">+ הוסף</button>'+
     '</div>'+
-    (evs.length?evs.map(renderEvCard).join(''):
-     '<div class="empty" style="padding:20px 0"><div class="empty-icon">🌿</div><div class="empty-text">אין אירועים</div></div>')+
-    '</div></div>';
+    (evs.length?evs.map(renderEvCard).join(''):emptyHtml('🌿', 'אין אירועים', 'padding:20px 0')));
 
   document.getElementById('add-ev-day').onclick=function(){closeModal();showAddEvent(dk);};
-  document.querySelector('.modal-overlay').onclick=function(e){if(e.target===this)closeModal();};
   // Bind delete buttons + card-tap navigation
-  evs.forEach(function(e){
-    var btn=document.getElementById('del-'+e.id);
-    if(btn)btn.onclick=function(ev){ev.stopPropagation();deleteEvent(e.id);};
-    var card=document.getElementById('evc-'+e.id);
-    if(card)card.onclick=function(){openEventLink(e.id);};
-  });
+  bindEventCards(evs, 'del-');
 }
 
 function showAddEvent(dateStr){
   var td=dateStr||getToday();
-  var modal=document.getElementById('modal-container');
-  modal.innerHTML='<div class="modal-overlay"><div class="modal"><div class="modal-handle"></div>'+
+  openModal('<div class="modal-handle"></div>'+
     '<div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--t1)">+ אירוע חדש</div>'+
     '<label class="form-label">כותרת</label><input id="ev-title" class="form-input" placeholder="פגישה / הגשה..."/>'+
     '<label class="form-label">תאריך</label><input id="ev-date" type="date" class="form-input" value="'+td+'" style="direction:ltr"/>'+
@@ -2993,20 +2946,16 @@ function showAddEvent(dateStr){
     '</select>'+
     '<label class="form-label">חזרה</label>'+
     '<select id="ev-rec" class="form-select" style="margin-bottom:12px">'+
-    '<option value="">ללא</option><option value="daily">יומי</option>'+
-    '<option value="weekly">שבועי</option><option value="monthly">חודשי</option><option value="yearly">שנתי</option>'+
+    optionsHtml([['','ללא'],['daily','יומי'],['weekly','שבועי'],['monthly','חודשי'],['yearly','שנתי']])+
     '</select>'+
     '<label class="form-label">התראה</label>'+
     '<select id="ev-notify" class="form-select" style="margin-bottom:16px">'+
-    '<option value="">ללא</option><option value="0">בזמן</option>'+
-    '<option value="10">10 דק לפני</option><option value="30">30 דק לפני</option>'+
-    '<option value="60" selected>שעה לפני</option><option value="1440">יום לפני</option>'+
+    optionsHtml([['','ללא'],['0','בזמן'],['10','10 דק לפני'],['30','30 דק לפני'],['60','שעה לפני'],['1440','יום לפני']], '60')+
     '</select>'+
     '<div style="display:flex;gap:8px">'+
     '<button class="btn-primary" style="flex:1" id="save-ev-btn">שמור</button>'+
     '<button class="btn-secondary" id="cancel-ev-btn">ביטול</button>'+
-    '</div></div></div>';
-  document.querySelector('.modal-overlay').onclick=function(e){if(e.target===this)closeModal();};
+    '</div>');
   document.getElementById('cancel-ev-btn').onclick=closeModal;
   document.getElementById('save-ev-btn').onclick=doAddEvent;
 }
