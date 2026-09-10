@@ -734,6 +734,100 @@ async function main() {
     assert(!has, 'mic row rendered without API support'); assert(!errs.length, errs.join(' | '))
   })
 
+  // ═══ 4a2. Push notifications (mock server + stubbed browser push API) ══════
+  section('Push notifications')
+  {
+    const MOCK = 'http://127.0.0.1:1/mock'
+    const mockLog = []
+    await context.route(MOCK + '/**', route => {
+      const req = route.request(); const p = req.url().slice(MOCK.length)
+      mockLog.push({ method: req.method(), path: p, body: req.postDataJSON ? (() => { try { return req.postDataJSON() } catch (e) { return null } })() : null })
+      const reply = (obj, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Methods': 'GET,PUT,POST,OPTIONS' }, body: JSON.stringify(obj) })
+      if (req.method() === 'OPTIONS') return reply({})
+      if (p === '/api/state' && req.method() === 'GET') return reply({ data: null, updated_at: null })
+      if (p === '/api/state') return reply({ ok: true })
+      if (p === '/api/insights') return reply({ items: [] })
+      if (p === '/api/log') return reply({ ok: true })
+      if (p === '/api/push/vapid-public-key') return reply({ key: 'BFAKEKEY' })
+      if (p === '/api/push/subscribe') return reply({ ok: true })
+      if (p === '/api/push/unsubscribe') return reply({ ok: true })
+      if (p === '/api/push/test') return reply({ sent: 1, results: [{ device: 'x', status: 201, ok: true }] })
+      return reply({ error: 'not found' }, 404)
+    })
+    await context.grantPermissions(['notifications'], { origin: new URL(BASE).origin })   // headless Chromium denies by default
+    await page.goto(BASE, { waitUntil: 'load' })
+    await page.evaluate(([s, m]) => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_server_url', m); localStorage.setItem('fieldy_passcode', 'pw') }, [seededState(), MOCK])
+    resetLogs(); await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(500)
+    await check('service worker registers and sw.js carries push + notificationclick handlers', async () => {
+      const r = await page.evaluate(async () => { const reg = await navigator.serviceWorker.getRegistration('/Fieldy/'); const txt = await (await fetch('/Fieldy/sw.js')).text(); return { reg: !!reg, push: /addEventListener\('push'/.test(txt), click: /addEventListener\('notificationclick'/.test(txt) } })
+      assert(r.reg && r.push && r.click, JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('settings shows the notifications card: not active yet, enable button ready, test disabled', async () => {
+      // headless-shell Chromium reports the permission as denied no matter what; the flow is what's under test here
+      await page.evaluate(() => { Object.defineProperty(Notification, 'permission', { get: () => 'granted', configurable: true }); navigateTo('settings') })
+      await page.waitForFunction(() => document.getElementById('push-status') && !/בודק/.test(document.getElementById('push-status').textContent), null, { timeout: 5000 })
+      const r = await page.evaluate(() => ({ status: document.getElementById('push-status').textContent, enable: document.getElementById('push-enable-btn') && !document.getElementById('push-enable-btn').disabled, test: document.getElementById('push-test-btn').disabled, prefs: !!document.getElementById('pref-lead-time') }))
+      assert(/לא פעיל/.test(r.status) && r.enable && r.test && r.prefs, JSON.stringify(r))
+    })
+    await check('enable → permission, VAPID key from server, subscribe posted with keys + device; status becomes active', async () => {
+      await page.evaluate(() => {
+        window.__fakeSub = null
+        const mk = () => ({ endpoint: 'https://push.example/abc', toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'P256', auth: 'AUTH' } } }, async unsubscribe() { window.__fakeSub = null; return true } })
+        window.getPushSubscription = async () => window.__fakeSub
+        window.createPushSubscription = async (key) => { window.__lastKey = key; window.__fakeSub = mk(); return window.__fakeSub }
+        Notification.requestPermission = async () => 'granted'
+      })
+      mockLog.length = 0
+      await page.click('#push-enable-btn')
+      await page.waitForFunction(() => /✓ פעיל במכשיר/.test((document.getElementById('push-status') || {}).textContent || ''), null, { timeout: 5000 })
+      const sub = mockLog.find(m => m.path === '/api/push/subscribe' && m.method === 'POST')
+      const dbg = () => ' | calls: ' + JSON.stringify(mockLog.map(m => m.method + ' ' + m.path)) + ' | msg: ' + (await_msg || '')
+      const await_msg = await page.evaluate(() => (document.getElementById('push-msg') || {}).textContent)
+      assert(sub, 'no subscribe POST reached the server' + dbg())
+      assert(sub.body && sub.body.subscription && sub.body.subscription.keys.p256dh === 'P256' && sub.body.subscription.endpoint === 'https://push.example/abc' && /·/.test(sub.body.device), 'subscribe body wrong: ' + JSON.stringify(sub) + dbg())
+      const r = await page.evaluate(() => ({ key: window.__lastKey, on: localStorage.getItem('fieldy_push_on'), prefs: state.notifyPrefs, test: document.getElementById('push-test-btn').disabled, disable: !!document.getElementById('push-disable-btn') }))
+      assert(r.key === 'BFAKEKEY' && r.on === '1' && !r.test && r.disable, JSON.stringify(r))
+      assert(r.prefs && typeof r.prefs.tzOffsetMinutes === 'number' && r.prefs.leadershipTime === '20:00', 'default prefs with timezone not written: ' + JSON.stringify(r.prefs))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('"שלח בדיקה" posts to /api/push/test for this device and confirms', async () => {
+      mockLog.length = 0
+      await page.click('#push-test-btn')
+      await page.waitForFunction(() => /נשלחה/.test((document.getElementById('push-msg') || {}).textContent || ''), null, { timeout: 5000 })
+      const t = mockLog.find(m => m.path === '/api/push/test'); assert(t && t.body.endpoint === 'https://push.example/abc', JSON.stringify(t))
+    })
+    await check('reminder preferences save into state (with timezone) and persist', async () => {
+      await page.uncheck('#pref-stuck')
+      await page.fill('#pref-lead-time', '21:30')
+      await page.dispatchEvent('#pref-lead-time', 'change')
+      const r = await page.evaluate(() => ({ live: state.notifyPrefs, stored: JSON.parse(localStorage.getItem('fieldy_v2')).notifyPrefs, msg: document.getElementById('push-msg').textContent }))
+      assert(r.live.stuckSites === false && r.live.leadershipTime === '21:30' && r.live.events === true, JSON.stringify(r.live))
+      assert(r.stored.leadershipTime === '21:30' && typeof r.stored.tzOffsetMinutes === 'number', 'not persisted: ' + JSON.stringify(r.stored))
+      assert(/נשמר/.test(r.msg), 'no confirmation message')
+      assert(await page.evaluate(() => document.getElementById('pref-lead-time').value === '21:30'), 'time input lost its value (card re-rendered mid-edit)')
+    })
+    await check('disable → browser unsubscribe + server unsubscribe; local timers resume', async () => {
+      mockLog.length = 0
+      await page.click('#push-disable-btn')
+      await page.waitForFunction(() => /לא פעיל/.test((document.getElementById('push-status') || {}).textContent || ''), null, { timeout: 5000 })
+      const u = mockLog.find(m => m.path === '/api/push/unsubscribe'); assert(u && u.body.endpoint === 'https://push.example/abc', JSON.stringify(u))
+      assert((await page.evaluate(() => localStorage.getItem('fieldy_push_on'))) === '0', 'fieldy_push_on not cleared')
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('opening /Fieldy/#sites (what a tapped notification does) lands on the sites screen', async () => {
+      await page.goto(BASE + '?reload=1#sites', { waitUntil: 'load' }); await page.waitForTimeout(300)   // fresh load with a hash
+      let r = await page.evaluate(() => ({ screen: currentScreen, shown: !document.getElementById('screen-sites').classList.contains('hidden') }))
+      assert(r.screen === 'sites' && r.shown, 'on load: ' + JSON.stringify(r))
+      await page.evaluate(() => { location.hash = '#people' }); await page.waitForTimeout(200)           // hash change while open
+      assert((await page.evaluate(() => currentScreen)) === 'people', 'hashchange while open not honoured')
+      await page.goto(BASE + '?reload=2#nonsense', { waitUntil: 'load' }); await page.waitForTimeout(200)
+      assert((await page.evaluate(() => currentScreen)) === 'home', 'unknown hash should stay on home')
+      await context.clearPermissions()
+    })
+    await context.unroute(MOCK + '/**')
+  }
+
   // ═══ 4b. No browser-side API key ═══════════════════════════════════════════
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {

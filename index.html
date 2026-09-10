@@ -446,7 +446,7 @@ function bindEventCards(events, delPrefix) {
 }
 
 // ── STATE ─────────────────────────────────────────
-const APP_VERSION = '2026.09.10-2'
+const APP_VERSION = '2026.09.10-3'
 const KEY = 'fieldy_v2'
 
 // ── STATE VALIDATION (safety net) ─────────────────
@@ -476,7 +476,7 @@ function validateState(s) {
   ;['moods','brainDumps','quotes','leadershipLog','pettyCash'].forEach(function(k){
     if(s[k] != null && !Array.isArray(s[k])) problems.push(k + ' קיים אך אינו רשימה')
   })
-  ;['personal','personalInsights'].forEach(function(k){
+  ;['personal','personalInsights','notifyPrefs'].forEach(function(k){
     if(s[k] != null && !isObj(s[k])) problems.push(k + ' קיים אך אינו אובייקט')
   })
   if(s.focus != null && typeof s.focus !== 'string') problems.push('focus אינו טקסט')
@@ -2604,6 +2604,11 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔔 התראות לטלפון</div>
+        <div style="font-size:12px;color:#948a7a;margin-bottom:10px">תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.</div>
+        <div id="push-card-body">${pushCardBodyHtml()}</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧹 ניקוי כפילויות בלוח</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
         <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">נקה כפילויות</button>
@@ -2620,6 +2625,7 @@ function renderSettings() {
         <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
       </div>
     </div>`
+  refreshPushCard()   // async: fills in whether this device is subscribed
 }
 
 function dedupeEvents() {
@@ -2785,6 +2791,132 @@ function confirmClear() {
   if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
   state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],pettyCash:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
+}
+
+// ── PUSH NOTIFICATIONS ────────────────────────────
+// Real phone notifications even when the app is closed. The browser gives
+// this device a push subscription; it is stored on the Worker, whose cron
+// sends the reminders (calendar events, stuck sites, the evening leadership
+// reflection). sw.js shows them and opens the right screen on tap.
+const NOTIFY_DEFAULTS = {events:true, stuckSites:true, leadership:true, stuckTime:'08:00', leadershipTime:'20:00'}
+function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window }
+let pushSub = undefined      // undefined = not checked yet · null = none on this device · object = active
+// Thin wrappers around the browser APIs, kept separate so the flow can be
+// exercised in tests without a real push service.
+async function getPushSubscription() {
+  if(!pushSupported()) return null
+  const reg = await navigator.serviceWorker.ready
+  return reg.pushManager.getSubscription()
+}
+async function createPushSubscription(publicKey) {
+  const reg = await navigator.serviceWorker.ready
+  return reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey: b64uToBytes(publicKey)})
+}
+function b64uToBytes(s) {
+  s = String(s).replace(/-/g,'+').replace(/_/g,'/'); s += '='.repeat((4 - s.length % 4) % 4)
+  const bin = atob(s), out = new Uint8Array(bin.length)
+  for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i)
+  return out
+}
+function deviceLabel() {
+  const ua = navigator.userAgent
+  const os = (/Android|iPhone|iPad|Windows|Mac OS/.exec(ua) || ['מכשיר'])[0]
+  const br = /Chrome\/(\d+)/.test(ua) ? 'Chrome ' + RegExp.$1 : (/Safari/.test(ua) ? 'Safari' : 'דפדפן')
+  return os + ' · ' + br
+}
+async function serverJson(method, path, body) {
+  const r = await fetch(serverUrl + path, {method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode}, body: body ? JSON.stringify(body) : undefined})
+  let d = null; try { d = await r.json() } catch(e) {}
+  if(!r.ok) throw new Error((d && d.error && (d.error.message || d.error)) || ('שגיאת שרת ' + r.status))
+  return d
+}
+function notifyPrefs() { return Object.assign({}, NOTIFY_DEFAULTS, state.notifyPrefs || {}) }
+function pushStatus() {
+  if(!pushSupported()) return {text:'הדפדפן הזה לא תומך בהתראות Push. באייפון: קודם "הוסף למסך הבית", ואז לפתוח משם.', ok:false, canEnable:false}
+  if(!serverConfigured()) return {text:'דורש חיבור לשרת (בכרטיס למעלה) — השרת הוא מה ששולח את ההתראות.', ok:false, canEnable:false}
+  if(Notification.permission === 'denied') return {text:'ההרשאה נחסמה בדפדפן. לפתוח: הגדרות האתר בכרום ← התראות ← אפשר.', ok:false, canEnable:false}
+  if(pushSub === undefined) return {text:'בודק…', ok:false, canEnable:false}
+  if(pushSub) return {text:'✓ פעיל במכשיר הזה — תזכורות יגיעו גם כשהאפליקציה סגורה.', ok:true, canEnable:false}
+  return {text:'לא פעיל במכשיר הזה.', ok:false, canEnable:true}
+}
+function pushCardBodyHtml() {
+  const st = pushStatus(), prefs = notifyPrefs()
+  const toggle = (id, label, on) => `<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:#211d17;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="saveNotifyPrefs()" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0"/> ${label}</label>`
+  const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin:-4px 26px 10px 0;font-size:13px;color:#6b6255">בשעה <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
+  return `<div id="push-status" style="font-size:14px;color:${st.ok?'#1a8f7a':'#6b6255'};margin-bottom:12px;line-height:1.6">${esc(st.text)}</div>
+    <ol style="font-size:13px;color:#948a7a;margin:0 18px 12px 0;padding:0;line-height:1.7">
+      <li>לחץ "הפעל התראות" ואשר את ההרשאה בחלון של הדפדפן.</li>
+      <li>לחץ "שלח בדיקה" — אמורה להגיע התראה תוך כמה שניות.</li>
+      <li>בחר למטה אילו תזכורות לקבל.</li>
+    </ol>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      ${pushSub ? `<button id="push-disable-btn" onclick="disablePush()" class="btn-secondary" style="flex:1">בטל במכשיר הזה</button>` : `<button id="push-enable-btn" onclick="enablePush()" class="btn-primary" style="flex:1;padding:12px" ${st.canEnable?'':'disabled'}>🔔 הפעל התראות</button>`}
+      <button id="push-test-btn" onclick="sendTestPush()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px" ${pushSub?'':'disabled'}>שלח בדיקה</button>
+    </div>
+    <div style="font-size:12px;color:#948a7a;margin-bottom:8px;letter-spacing:.5px;font-weight:700">אילו תזכורות</div>
+    ${toggle('pref-events','📅 אירועים בלוח, לפי ההתראה שנבחרה בכל אירוע', prefs.events)}
+    ${toggle('pref-stuck','🚧 אתרים שתקועים מעל 5 ימים — פעם ביום בבוקר', prefs.stuckSites)}
+    ${timeRow('pref-stuck-time', prefs.stuckTime)}
+    ${toggle('pref-lead','🎯 רפלקציית מנהיגות בערב — רק אם עוד לא כתבת היום', prefs.leadership)}
+    ${timeRow('pref-lead-time', prefs.leadershipTime)}
+    <div id="push-msg" style="font-size:13px;color:#948a7a;margin-top:6px;min-height:18px"></div>`
+}
+function pushMsg(text, isErr) { const el = document.getElementById('push-msg'); if(el) { el.textContent = text; el.style.color = isErr ? '#c0392b' : '#1a8f7a' } }
+async function refreshPushCard() {
+  try { pushSub = await getPushSubscription() } catch(e) { pushSub = null }
+  localStorage.setItem('fieldy_push_on', pushSub ? '1' : '0')
+  const el = document.getElementById('push-card-body'); if(el) el.innerHTML = pushCardBodyHtml()
+}
+// Writes the reminder preferences (plus this device's timezone offset, which
+// the Worker needs to turn "20:00" into a UTC moment) into the synced state.
+// Deliberately not setState(): a full re-render would steal focus from the
+// time input mid-edit.
+function writeNotifyPrefs(prefs) {
+  Object.assign(state, {notifyPrefs: Object.assign({}, prefs, {tzOffsetMinutes: new Date().getTimezoneOffset()}), updated: new Date().toISOString()})
+  save()
+}
+function saveNotifyPrefs() {
+  const val = (id, fallback) => { const el = document.getElementById(id); return el ? (el.type === 'checkbox' ? el.checked : (el.value || fallback)) : fallback }
+  writeNotifyPrefs({events: val('pref-events', true), stuckSites: val('pref-stuck', true), leadership: val('pref-lead', true), stuckTime: val('pref-stuck-time', '08:00'), leadershipTime: val('pref-lead-time', '20:00')})
+  pushMsg('✓ נשמר — נכנס לתוקף בסבב הבא של השרת (עד 5 דקות)')
+}
+async function enablePush() {
+  const btn = document.getElementById('push-enable-btn')
+  if(btn) { btn.textContent = 'מבקש הרשאה…'; btn.disabled = true }
+  try {
+    const perm = await Notification.requestPermission()
+    if(perm !== 'granted') throw new Error('ההרשאה לא ניתנה')
+    const vapid = await serverJson('GET', '/api/push/vapid-public-key')
+    const sub = await createPushSubscription(vapid.key)
+    await serverJson('POST', '/api/push/subscribe', {subscription: sub.toJSON ? sub.toJSON() : sub, device: deviceLabel()})
+    if(!state.notifyPrefs) writeNotifyPrefs(NOTIFY_DEFAULTS)   // make sure the server knows this device's timezone
+    await refreshPushCard()
+    pushMsg('✓ ההתראות הופעלו. לחץ "שלח בדיקה" כדי לוודא שהן מגיעות.')
+  } catch(e) {
+    await refreshPushCard()
+    pushMsg('✕ ' + e.message, true)
+  }
+}
+async function disablePush() {
+  try {
+    const sub = await getPushSubscription()
+    if(sub) { const endpoint = sub.endpoint; await sub.unsubscribe(); await serverJson('POST', '/api/push/unsubscribe', {endpoint}) }
+    await refreshPushCard()
+    pushMsg('ההתראות בוטלו במכשיר הזה.')
+  } catch(e) { await refreshPushCard(); pushMsg('✕ ' + e.message, true) }
+}
+async function sendTestPush() {
+  const btn = document.getElementById('push-test-btn')
+  if(btn) { btn.textContent = 'שולח…'; btn.disabled = true }
+  try {
+    const r = await serverJson('POST', '/api/push/test', {endpoint: pushSub ? pushSub.endpoint : null})
+    const mine = (r.results || [])[0]
+    if(r.sent >= 1) pushMsg('✓ נשלחה — אמורה להופיע תוך כמה שניות.')
+    else pushMsg('✕ השרת לא הצליח לשלוח' + (mine ? ' (סטטוס ' + mine.status + ')' : ' — המכשיר הזה לא רשום בשרת, נסה לבטל ולהפעיל מחדש'), true)
+  } catch(e) {
+    pushMsg(/VAPID/.test(e.message) ? '✕ בשרת עדיין לא הוגדרו מפתחות VAPID (ראה הוראות הפריסה).' : '✕ ' + e.message, true)
+  }
+  if(btn) { btn.textContent = 'שלח בדיקה'; btn.disabled = false }
 }
 
 // ── UNDO ──────────────────────────────────────────
@@ -3244,6 +3376,9 @@ function requestNotificationPermission(){
 }
 
 function scheduleNotification(ev){
+  // Once this device gets reminders from the server, the in-page timers
+  // would only produce duplicates (and only while the app is open anyway).
+  if(localStorage.getItem('fieldy_push_on')==='1')return;
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(!ev.notify&&ev.notify!==0)return;
   var parts=ev.date.split('-').map(Number);
@@ -3633,6 +3768,11 @@ if('Notification' in window && Notification.permission==='default') Notification
 if('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Fieldy/sw.js')
 }
+// A tapped notification opens /Fieldy/#<screen>; land on that screen (also
+// when the app is already open and only the hash changes).
+function goToHashScreen() { var h = (location.hash || '').replace('#', ''); if(h && NAV_SCREENS.includes(h)) navigateTo(h) }
+goToHashScreen()
+window.addEventListener('hashchange', goToHashScreen)
 </script>
 </body>
 </html>

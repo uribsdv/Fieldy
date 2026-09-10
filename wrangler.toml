@@ -1,0 +1,22 @@
+# Fieldy backend — wrangler config (for deploying worker.js from your computer)
+#
+#   npx wrangler login
+#   npx wrangler d1 execute <database_name> --remote --file schema.sql   # once: adds the push tables
+#   npx wrangler secret put VAPID_PUBLIC_KEY                             # once, see README-DEPLOY.md
+#   npx wrangler secret put VAPID_PRIVATE_KEY
+#   npx wrangler secret put VAPID_SUBJECT
+#   npx wrangler deploy
+#
+# Fill in the three values marked ← from the Cloudflare dashboard.
+name = "fieldy-proxy"                    # ← the Worker's name (Workers & Pages → your worker)
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"                           # must stay "DB" — worker.js uses env.DB
+database_name = "fieldy"                 # ← D1 → your database → name
+database_id = "REPLACE-WITH-DATABASE-ID" # ← D1 → your database → Database ID
+
+[triggers]
+# Daily insights (any non-frequent schedule) + reminders check every 5 min.
+crons = ["0 3 * * *", "*/5 * * * *"]
