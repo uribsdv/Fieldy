@@ -490,7 +490,97 @@ async function main() {
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
 
-  // ═══ 4. State-load validation ══════════════════════════════════════════════
+  // ═══ 4. Injection safety (free text must render as text) ═══════════════════
+  section('Injection safety')
+  await boot(seededState())
+  const EVIL_TEXT = '<img src=x onerror="window.__pwned=1"> משימה "עם" מרכאות ו\'גרש\' & סימנים'
+  const EVIL_NOTE = 'הערה "כפולה" ו\'בודדת\' <b>bold</b>'
+  await check('task text/note with HTML and quotes renders as literal text, no script runs', async () => {
+    await page.evaluate(() => { navigateTo('tasks'); showAddTask() })
+    await page.fill('#add-task-text', EVIL_TEXT); await page.fill('#add-task-note', EVIL_NOTE)
+    await page.selectOption('#add-task-bucket', 'now')
+    await page.evaluate(() => doAddTask())
+    await page.evaluate(() => setTaskBucket('now'))
+    const r = await page.evaluate(() => ({
+      pwned: window.__pwned, imgs: document.querySelectorAll('#screen-tasks img').length,
+      text: document.getElementById('screen-tasks').textContent
+    }))
+    assert(!r.pwned, 'onerror handler executed'); assert(r.imgs === 0, 'injected <img> became an element')
+    assert(r.text.includes('<img src=x') && r.text.includes('<b>bold</b>'), 'markup was not shown literally')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  await check('edit modal round-trips the exact text and note (quotes intact)', async () => {
+    const card = page.locator('#screen-tasks > div > div', { hasText: 'משימה "עם" מרכאות' }).first()
+    await card.locator('button:has-text("✎")').click()
+    const r = await page.evaluate(() => ({ text: document.getElementById('add-task-text').value, note: document.getElementById('add-task-note').value }))
+    assert(r.text === EVIL_TEXT, 'text changed: ' + r.text); assert(r.note === EVIL_NOTE, 'note changed: ' + r.note)
+    await page.evaluate(() => closeModal())
+  })
+  await check('🖌️ button passes the exact text through the onclick attribute', async () => {
+    const card = page.locator('#screen-tasks > div > div', { hasText: 'משימה "עם" מרכאות' }).first()
+    await card.locator('button:has-text("🖌️")').click()
+    const r = await page.evaluate(() => ({ screen: currentScreen, text: actionCtx && actionCtx.text, shown: document.getElementById('screen-action').textContent.includes('משימה "עם" מרכאות') }))
+    assert(r.screen === 'action' && r.text === EVIL_TEXT && r.shown, JSON.stringify(r))
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  const EVIL_SITE = 'O\'Brien "Deep" Well <b>x</b>'
+  await check('site with quotes/HTML in its name: add, status modal, stuck, edit all work via real clicks', async () => {
+    await page.evaluate(() => { navigateTo('sites'); showAddSite() })
+    await page.fill('#add-site-name', EVIL_SITE); await page.fill('#add-site-issue', 'issue <i>x</i> "q"')
+    await page.fill('#add-site-monday', 'javascript:alert(1)')
+    await page.evaluate(() => doAddSite())
+    await page.evaluate(() => setSiteFilter('all'))
+    const card = page.locator('#screen-sites .card', { hasText: 'O\'Brien' }).first()
+    assert(await card.count() === 1, 'site card not rendered')
+    const injected = await page.evaluate(() => document.querySelectorAll('#screen-sites b, #screen-sites i').length)
+    assert(injected === 0, 'HTML in site fields became elements')
+    const badLinks = await page.evaluate(() => [...document.querySelectorAll('#screen-sites a')].filter(a => /^javascript:/i.test(a.getAttribute('href') || '')).length)
+    assert(badLinks === 0, 'javascript: link rendered as href')
+    await card.locator('button:has-text("ממתין")').click()
+    let r = await page.evaluate(() => ({ name: window.__scName, open: document.getElementById('modal-container').textContent.includes('O\'Brien "Deep" Well') }))
+    assert(r.name === EVIL_SITE && r.open, 'status modal got wrong name: ' + JSON.stringify(r))
+    await page.evaluate(() => confirmStatusChange())
+    r = await page.evaluate(n => state.sites.find(x => x.name === n).status, EVIL_SITE)
+    assert(r === 'pending', 'status not changed: ' + r)
+    await card.locator('button:has-text("🚧")').click()
+    r = await page.evaluate(n => !!state.sites.find(x => x.name === n).stuckSince, EVIL_SITE)
+    assert(r, 'stuck toggle did not reach the right site')
+    await page.locator('#screen-sites .card', { hasText: 'O\'Brien' }).first().locator('button:has-text("✎")').click()
+    r = await page.evaluate(() => ({ name: document.getElementById('add-site-name').value, issue: document.getElementById('add-site-issue').value }))
+    assert(r.name === EVIL_SITE && r.issue === 'issue <i>x</i> "q"', 'edit modal values changed: ' + JSON.stringify(r))
+    await page.evaluate(() => closeModal())
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  await check('person with quotes in name: ✓ (clear pending) and 🖌️ work via real clicks', async () => {
+    await page.evaluate(() => { navigateTo('people'); showAddPerson() })
+    await page.fill('#add-person-name', 'Dave "the" O\'Neil'); await page.fill('#add-person-pending', 'waiver <b>now</b>')
+    await page.evaluate(() => doAddPerson())
+    const card = page.locator('#screen-people .card', { hasText: 'O\'Neil' }).first()
+    await card.locator('button:has-text("🖌️")').click()
+    let r = await page.evaluate(() => actionCtx)
+    assert(r.assignee === 'Dave "the" O\'Neil' && r.text === 'waiver <b>now</b>', JSON.stringify(r))
+    await page.evaluate(() => navigateTo('people'))
+    await page.locator('#screen-people .card', { hasText: 'O\'Neil' }).first().locator('button:has-text("✓")').click()
+    r = await page.evaluate(() => state.people.find(x => x.name === 'Dave "the" O\'Neil').pending)
+    assert(r === '', 'pending not cleared: ' + r)
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  await check('event title / quote / focus / insights with HTML render literally', async () => {
+    await page.evaluate(() => {
+      setState({ events: [...state.events, { id: 'evx', title: '<b>meeting</b>', date: getToday(), time: '', note: '<i>n</i>', recurring: '', notify: '', color: 'var(--bamboo)', site: null }],
+                 focus: '<u>focus</u>', quotes: [{ text: '<s>quote</s>', addedAt: 1 }], personalInsights: { text: '<em>insight</em>', updatedAt: 1, basedOnCount: 1 } })
+      navigateTo('calendar'); setCalView('month')
+    })
+    let n = await page.evaluate(() => document.querySelectorAll('#screen-calendar b, #screen-calendar i').length)
+    assert(n === 0, 'event HTML became elements')
+    await page.evaluate(() => navigateTo('home'))
+    n = await page.evaluate(() => document.querySelectorAll('#screen-home u, #screen-home s, #screen-home em').length)
+    assert(n === 0, 'home HTML became elements')
+    const t = await page.textContent('#screen-home'); assert(t.includes('<u>focus</u>') && t.includes('<s>quote</s>'), 'literal text missing')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+
+  // ═══ 5. State-load validation ══════════════════════════════════════════════
   section('State-load validation (fail loudly, never corrupt)')
   await check('corrupt JSON in localStorage → clear error screen, data left untouched', async () => {
     const raw = '{"tasks":{"now":[],"today":[' // truncated on purpose
