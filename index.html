@@ -968,14 +968,14 @@ const ADHD_TOOLKIT = [
 // An 8-week rotating curriculum built from the four leadership books.
 // Own wording throughout — paraphrased ideas, not quotes.
 const WEEKLY_FOCUS = [
-  {theme:'הלמה שלי',book:'Start With Why · Simon Sinek',text:'השבוע: תזכיר לעצמך למה בכלל התחלת בתפקיד הזה. בכל החלטה קטנה - תבדוק אם היא מתיישרת עם ה"למה" הזה.'},
-  {theme:'המשחק האינסופי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תפסיק למדוד הצלחה רק מול אתמול. תשאל את עצמך - אני משחק כדי לנצח היום, או כדי להישאר במשחק לטווח ארוך?'},
-  {theme:'מעגל הביטחון',book:'Leaders Eat Last · Simon Sinek',text:'השבוע: שים לב מתי מישהו בצוות שלך הרגיש בטוח לבוא אליך עם בעיה - ומתי לא.'},
-  {theme:'זהות לפני הרגל',book:'Atomic Habits · James Clear',text:'השבוע: לפני פעולה, שאל - "האם זו פעולה של המנהיג שאני רוצה להיות?" ולא רק "האם זה נחוץ?"'},
-  {theme:'יריב ראוי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תחשוב על אדם או מצב שמאתגר אותך הכי הרבה בעבודה. מה הוא בעצם מלמד אותך על עצמך?'},
-  {theme:'המצבר שלך',book:'ADHD is Awesome · Holderness',text:'השבוע: עקוב יום־יום אחרי שינה, תנועה ותזונה - ובדוק אם יש קשר בין זה לימים שקשה יותר להוביל בהם.'},
-  {theme:'מבנה חיצוני',book:'Fast Minds · Surman, Bilkey & Weintraub',text:'השבוע: זהה נקודת כשל אחת חוזרת (שכחה, איחור, בלגן) ובנה עבורה כלי חיצוני אחד - פתק, תזכורת, צ׳קליסט.'},
-  {theme:'ויסות לפני ביצוע',book:'Self-Regulation & Mindfulness · Gibbs',text:'השבוע: לפני פגישה או שיחה קשה - קח שתי דקות לוויסות (נשימה, תנועה) לפני שאתה נכנס אליה.'}
+  {theme:'הלמה שלי',book:'Start With Why · Simon Sinek',text:'השבוע: תזכיר לעצמך למה בכלל התחלת בתפקיד הזה. בכל החלטה קטנה - תבדוק אם היא מתיישרת עם ה"למה" הזה.',relatedSinek:0},
+  {theme:'המשחק האינסופי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תפסיק למדוד הצלחה רק מול אתמול. תשאל את עצמך - אני משחק כדי לנצח היום, או כדי להישאר במשחק לטווח ארוך?',relatedSinek:3},
+  {theme:'מעגל הביטחון',book:'Leaders Eat Last · Simon Sinek',text:'השבוע: שים לב מתי מישהו בצוות שלך הרגיש בטוח לבוא אליך עם בעיה - ומתי לא.',relatedSinek:5},
+  {theme:'זהות לפני הרגל',book:'Atomic Habits · James Clear',text:'השבוע: לפני פעולה, שאל - "האם זו פעולה של המנהיג שאני רוצה להיות?" ולא רק "האם זה נחוץ?"',relatedAdhd:5},
+  {theme:'יריב ראוי',book:'The Infinite Game · Simon Sinek',text:'השבוע: תחשוב על אדם או מצב שמאתגר אותך הכי הרבה בעבודה. מה הוא בעצם מלמד אותך על עצמך?',relatedSinek:4},
+  {theme:'המצבר שלך',book:'ADHD is Awesome · Holderness',text:'השבוע: עקוב יום־יום אחרי שינה, תנועה ותזונה - ובדוק אם יש קשר בין זה לימים שקשה יותר להוביל בהם.',relatedAdhd:2},
+  {theme:'מבנה חיצוני',book:'Fast Minds · Surman, Bilkey & Weintraub',text:'השבוע: זהה נקודת כשל אחת חוזרת (שכחה, איחור, בלגן) ובנה עבורה כלי חיצוני אחד - פתק, תזכורת, צ׳קליסט.',relatedAdhd:6},
+  {theme:'ויסות לפני ביצוע',book:'Self-Regulation & Mindfulness · Gibbs',text:'השבוע: לפני פגישה או שיחה קשה - קח שתי דקות לוויסות (נשימה, תנועה) לפני שאתה נכנס אליה.',relatedAdhd:0}
 ];
 function getWeeklyFocus() {
   var days = Math.floor(new Date(getToday()).getTime()/86400000)
@@ -1095,6 +1095,9 @@ function renderTaoChapter(el, idx) {
   ) : '';
 
   var wf = getWeeklyFocus()
+  var relatedCard = null, relatedTab = null
+  if(wf && wf.relatedSinek !== undefined) { relatedCard = SINEK_TOOLKIT[wf.relatedSinek]; relatedTab = 'lead' }
+  else if(wf && wf.relatedAdhd !== undefined) { relatedCard = ADHD_TOOLKIT[wf.relatedAdhd]; relatedTab = 'adhd' }
   var weekHtml = wf ? (
     '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;padding:16px 18px;margin-bottom:16px">' +
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
@@ -1102,6 +1105,12 @@ function renderTaoChapter(el, idx) {
     '<span style="font-size:10px;color:#8a7857">' + wf.book + '</span>' +
     '</div>' +
     '<div style="font-size:13px;line-height:1.6;color:#d8c9a3">' + wf.text + '</div>' +
+    (relatedCard ? (
+      '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:#120d06;border:1px solid #3a2c10;border-radius:10px;padding:10px 12px;margin-top:12px">' +
+      '<div style="font-size:10px;color:#8a7857;margin-bottom:2px">🔗 כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
+      '<div style="font-size:13px;color:#f5ecd6;font-weight:600">' + relatedCard.icon + ' ' + relatedCard.title + '</div>' +
+      '</button>'
+    ) : '') +
     '</div>'
   ) : '';
 
@@ -1119,7 +1128,9 @@ function renderTaoChapter(el, idx) {
     '</div></div>';
 
   var sinekCardsHtml = SINEK_TOOLKIT.map(function(c,i){
-    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+    var isRelated = wf && wf.relatedSinek === i
+    return '<div style="background:#120d06;border:1px solid ' + (isRelated?'#b8860b':'#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+      (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
       '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
       '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
       '</div>'
@@ -1131,7 +1142,9 @@ function renderTaoChapter(el, idx) {
     '</div>';
 
   var adhdCardsHtml = ADHD_TOOLKIT.map(function(c,i){
-    return '<div style="background:#120d06;border:1px solid #241b0d;border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+    var isRelated = wf && wf.relatedAdhd === i
+    return '<div style="background:#120d06;border:1px solid ' + (isRelated?'#b8860b':'#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
+      (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
       '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
       '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
       '</div>'
@@ -1173,12 +1186,20 @@ function renderTaoChapter(el, idx) {
       medHtml;
   }
 
+  var threadHtml = (wf && taoMode!=='lead') ? (
+    '<button class="tao-subnav-btn" data-mode="lead" style="width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;background:#120d06;border:1px solid #241b0d;border-radius:10px;padding:8px 12px;margin-bottom:14px">' +
+    '<span style="font-size:11px;color:#8a7857">📚 מוקד השבוע</span>' +
+    '<span style="font-size:12px;color:#e8c15c;font-weight:600">' + wf.theme + ' ←</span>' +
+    '</button>'
+  ) : '';
+
   el.innerHTML =
     '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
     '<div style="text-align:center;margin-bottom:14px">' +
     '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו · מנהיגות · ADHD</span>' +
     '</div>' +
     subnavHtml +
+    threadHtml +
     modeContentHtml +
     '</div>';
 
@@ -2358,7 +2379,8 @@ function renderSettings() {
         <div style="font-size:12px;color:#948a7a;margin-bottom:8px">${serverConfigured()?'לא בשימוש כרגע — השרת מטפל בזה. אפשר להשאיר ריק.':'משמש רק כל עוד אין חיבור לשרת למעלה.'}</div>
         <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
         <div style="position:relative;margin-bottom:10px">
-          <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px 40px 12px 12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block"/>
+          <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px 74px 12px 12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block"/>
+          <button id="settings-key-copy-btn" onclick="copyToClipboard(document.getElementById('settings-key').value,'settings-key-copy-btn')" style="position:absolute;left:36px;top:50%;transform:translateY(-50%);background:none;font-size:16px">📋</button>
           <button onclick="const i=document.getElementById('settings-key');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;font-size:16px">👁️</button>
         </div>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
