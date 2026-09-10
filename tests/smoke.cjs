@@ -348,8 +348,15 @@ async function main() {
     assert(done === true, 'task not marked done')
     await page.evaluate(() => setTaskBucket('now'))
     await page.evaluate(i => deleteTask(i), id)
-    const gone = await page.evaluate(i => ![...state.tasks.now, ...state.tasks.today, ...state.tasks.later].some(x => x.id === i), id)
+    let gone = await page.evaluate(i => ![...state.tasks.now, ...state.tasks.today, ...state.tasks.later].some(x => x.id === i), id)
     assert(gone, 'task still in state after delete')
+    assert(await page.evaluate(() => !!document.getElementById('undo-toast')), 'no undo toast after task delete')
+    await page.evaluate(() => undoLast())
+    const back = await page.evaluate(i => state.tasks.now.some(x => x.id === i), id)
+    assert(back, 'undo did not restore the task to its bucket')
+    await page.evaluate(i => { deleteTask(i); commitUndo() }, id)
+    gone = await page.evaluate(i => ![...state.tasks.now, ...state.tasks.today, ...state.tasks.later].some(x => x.id === i), id)
+    assert(gone, 'task still present after final delete')
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
   await check('changes persisted to localStorage', async () => {
@@ -402,7 +409,23 @@ async function main() {
     const t = await page.textContent('#screen-sites'); assert(t.includes('Test Site Alpha'), 'site not listed under "all"')
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
-  record(true, 'delete site — NOT TESTED: the current UI has no delete action for sites (noted for a later phase)')
+  await check('delete site from the edit modal, then undo brings it back at the same position', async () => {
+    await page.evaluate(() => { setSiteFilter('all'); showAddSite('Test Site Alpha') })
+    const idxBefore = await page.evaluate(() => state.sites.findIndex(x => x.name === 'Test Site Alpha'))
+    await page.click('#delete-site-btn')
+    let r = await page.evaluate(() => ({ gone: !state.sites.some(x => x.name === 'Test Site Alpha'), toast: !!document.getElementById('undo-toast'), modal: document.getElementById('modal-container').innerHTML.trim().length }))
+    assert(r.gone, 'site still in state'); assert(r.toast, 'no undo toast shown'); assert(r.modal === 0, 'modal still open')
+    await page.click('#undo-toast button')
+    r = await page.evaluate(() => ({ idx: state.sites.findIndex(x => x.name === 'Test Site Alpha'), toast: !!document.getElementById('undo-toast'), rendered: document.getElementById('screen-sites').textContent.includes('Test Site Alpha') }))
+    assert(r.idx === idxBefore, 'site not restored at its old position: ' + r.idx + ' vs ' + idxBefore); assert(!r.toast, 'toast still visible after undo'); assert(r.rendered, 'restored site not re-rendered')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  await check('delete site without undo is final and persisted', async () => {
+    await page.evaluate(() => deleteSite('Test Site Alpha'))
+    await page.evaluate(() => commitUndo()) // simulate the toast timing out
+    const r = await page.evaluate(() => ({ inState: state.sites.some(x => x.name === 'Test Site Alpha'), inStorage: JSON.parse(localStorage.getItem('fieldy_v2')).sites.some(x => x.name === 'Test Site Alpha'), toast: !!document.getElementById('undo-toast') }))
+    assert(!r.inState && !r.inStorage && !r.toast, JSON.stringify(r))
+  })
 
   section('People: add / clear pending')
   await check('add a person through the modal', async () => {
@@ -422,7 +445,19 @@ async function main() {
     assert(p === '', 'pending not cleared')
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
-  record(true, 'edit/delete person — NOT TESTED: the current UI has no edit or delete action for people (noted for a later phase)')
+  await check('delete person via 🗑 on the card, undo restores', async () => {
+    await page.locator('#screen-people .card', { hasText: 'Test Person' }).first().locator('button:has-text("🗑")').click()
+    let r = await page.evaluate(() => ({ gone: !state.people.some(x => x.name === 'Test Person'), toast: !!document.getElementById('undo-toast') }))
+    assert(r.gone && r.toast, JSON.stringify(r))
+    await page.click('#undo-toast button')
+    r = await page.evaluate(() => state.people.some(x => x.name === 'Test Person'))
+    assert(r, 'person not restored')
+    await page.evaluate(() => { deletePerson('Test Person'); commitUndo() })
+    r = await page.evaluate(() => state.people.some(x => x.name === 'Test Person'))
+    assert(!r, 'person still present after final delete')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  record(true, 'edit person — NOT TESTED: the current UI has no edit action for people (noted for a later phase)')
 
   section('Calendar events: add / delete')
   await check('add an event', async () => {
@@ -437,8 +472,13 @@ async function main() {
   await check('delete the event', async () => {
     const id = await page.evaluate(() => state.events.find(x => x.title === 'Smoke test meeting').id)
     await page.evaluate(i => deleteEvent(i), id)
-    const gone = await page.evaluate(() => !state.events.some(x => x.title === 'Smoke test meeting'))
+    let gone = await page.evaluate(() => !state.events.some(x => x.title === 'Smoke test meeting'))
     assert(gone, 'event still present')
+    await page.evaluate(() => undoLast())
+    assert(await page.evaluate(() => state.events.some(x => x.title === 'Smoke test meeting')), 'undo did not restore the event')
+    await page.evaluate(i => { deleteEvent(i); commitUndo() }, id)
+    gone = await page.evaluate(() => !state.events.some(x => x.title === 'Smoke test meeting'))
+    assert(gone, 'event still present after final delete')
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
 
@@ -484,9 +524,10 @@ async function main() {
   })
   await check('state survives a reload', async () => {
     resetLogs()
+    await page.evaluate(() => setState({ focus: 'reload-marker', focusDate: getToday() }))
     await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(300)
-    const r = await page.evaluate(() => ({ site: state.sites.some(x => x.name === 'Test Site Alpha'), person: state.people.some(x => x.name === 'Test Person'), ready: document.getElementById('screen-home').innerHTML.length > 100 }))
-    assert(r.site && r.person && r.ready, JSON.stringify(r))
+    const r = await page.evaluate(() => ({ focus: state.focus, sites: state.sites.length, person: state.people.some(x => x.name === 'Dave'), ready: document.getElementById('screen-home').innerHTML.length > 100 }))
+    assert(r.focus === 'reload-marker' && r.sites === 3 && r.person && r.ready, JSON.stringify(r))
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
 

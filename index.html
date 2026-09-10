@@ -231,6 +231,9 @@ body::before {
 .week-dnum{font-size:var(--fs-2xl);font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
 .week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:var(--radius-sm);padding:5px var(--space-2-5);margin-bottom:var(--space-1);font-size:var(--fs-base);color:var(--t1);font-weight:500}
+/* Undo toast (shown for a few seconds after any delete) */
+#undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#211d17;color:#fdf9ee;padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
+#undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
 </style>
 </head>
 <body>
@@ -1850,8 +1853,15 @@ function taskCard(t) {
 function setTaskBucket(b) { taskBucket=b; renderTasks() }
 
 function deleteTask(id) {
+  const bucket = ['now','today','later'].find(b => state.tasks[b].some(t=>t.id===id))
+  if(!bucket) return
+  const idx = state.tasks[bucket].findIndex(t=>t.id===id)
+  const task = state.tasks[bucket][idx]
   const strip = arr => arr.filter(t=>t.id!==id)
   setState({tasks:{now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}})
+  offerUndo('המשימה נמחקה', function(){
+    setState({tasks:{...state.tasks, [bucket]: insertAt(state.tasks[bucket], idx, task)}})
+  })
 }
 
 function toggleTask(id) {
@@ -2166,6 +2176,17 @@ function toggleSiteStuck(name) {
 }
 
 function setSiteFilter(f) { siteFilter=f; renderSites() }
+function deleteSite(name) {
+  const idx = state.sites.findIndex(s=>s.name===name)
+  if(idx < 0) return
+  const site = state.sites[idx]
+  setState({sites: state.sites.filter((s,i)=>i!==idx)})
+  offerUndo('האתר ' + name + ' נמחק', function(){
+    setState({sites: insertAt(state.sites, idx, site)})
+  }, function(){
+    logEvent('site_deleted', {name: site.name, status: site.status||null, contractor: site.contractor||null})
+  })
+}
 function updateSiteStatus(name, status) {
   const site = state.sites.find(s=>s.name===name)
   setState({sites:state.sites.map(s=>s.name===name?{...s,status}:s)})
@@ -2275,7 +2296,8 @@ function showAddSite(name) {
         <div style="display:flex;gap:8px">
           <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
-        </div>`)
+        </div>
+        ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:10px;padding:10px;color:#ef4444;font-size:14px">🗑 מחק אתר</button>`:''}`)
 }
 
 function doAddSite() {
@@ -2340,6 +2362,7 @@ function personCard(p) {
         </div>
         <div style="display:flex;gap:6px">
           ${actionBtnHtml(p.pending||p.name, p.name, 'font-size:16px')}
+          ${iconBtnHtml('deletePerson('+jsArg(p.name)+')', '🗑', 'font-size:15px')}
           ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
         </div>
       </div>
@@ -2351,6 +2374,15 @@ function personCard(p) {
 }
 
 function clearPending(name) { setState({people:state.people.map(p=>p.name===name?{...p,pending:''}:p)}) }
+function deletePerson(name) {
+  const idx = state.people.findIndex(p=>p.name===name)
+  if(idx < 0) return
+  const person = state.people[idx]
+  setState({people: state.people.filter((p,i)=>i!==idx)})
+  offerUndo(name + ' הוסר מאנשי הקשר', function(){
+    setState({people: insertAt(state.people, idx, person)})
+  })
+}
 
 function showAddPerson() {
   openModal(`
@@ -2665,6 +2697,35 @@ function confirmClear() {
   state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],pettyCash:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
+
+// ── UNDO ──────────────────────────────────────────
+// Deleting is a one-tap action, and impulsive taps happen. Instead of a
+// confirm dialog on every delete (friction each time, and people learn to
+// tap through it), the item is removed immediately and a small toast offers
+// to bring it back for a few seconds. Anything that should only happen once
+// the delete is final (history log) runs in onCommit, after that window
+// closes without an undo.
+const UNDO_MS = 6000
+let _undo = null
+function offerUndo(label, restore, onCommit) {
+  commitUndo()
+  const el = document.createElement('div')
+  el.id = 'undo-toast'
+  el.innerHTML = '<span>' + esc(label) + '</span><button onclick="undoLast()">בטל</button>'
+  document.body.appendChild(el)
+  _undo = {restore, onCommit, timer: setTimeout(commitUndo, UNDO_MS)}
+}
+function _closeUndo() {
+  clearTimeout(_undo.timer)
+  const u = _undo; _undo = null
+  const el = document.getElementById('undo-toast'); if(el) el.remove()
+  return u
+}
+function commitUndo() { if(_undo) { const u = _closeUndo(); if(u.onCommit) u.onCommit() } }
+function undoLast() { if(_undo) { const u = _closeUndo(); u.restore() } }
+// Puts `item` back into a copy of `arr` at its old position (or the end, if
+// the list got shorter in the meantime).
+function insertAt(arr, idx, item) { const out = arr.slice(); out.splice(Math.min(idx, out.length), 0, item); return out }
 
 // ── MODAL ─────────────────────────────────────────
 function closeModal() { document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
@@ -2982,9 +3043,16 @@ function doAddEvent(){
 }
 
 function deleteEvent(id){
+  var idx = getEvents().findIndex(function(e){return e.id===id;});
+  if(idx < 0) return;
+  var ev = getEvents()[idx];
   setState({events:getEvents().filter(function(e){return e.id!==id;})});
   closeModal();
   renderCalendar();
+  offerUndo('האירוע נמחק', function(){
+    setState({events: insertAt(getEvents(), idx, ev)});
+    if(currentScreen==='calendar') renderCalendar();
+  });
 }
 
 // Clicking an event card jumps to whatever it's actually about: a linked
