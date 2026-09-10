@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "smoke": "node tests/smoke.cjs"
+    "smoke": "node tests/smoke.cjs",
+    "snapshots": "node tests/snapshots.cjs"
   },
   "dependencies": {
     "react": "^18.2.0",
