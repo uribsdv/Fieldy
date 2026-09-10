@@ -2333,6 +2333,15 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">📦 גיבוי / העברה לטלפון חדש</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".</div>
+        <div style="display:flex;gap:8px">
+          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">⬇️ הורד גיבוי</button>
+          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">⬆️ טען מקובץ</button>
+        </div>
+        <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">☁️ שרת (Cloudflare)</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת.':'לא מחובר — הנתונים נשארים רק במכשיר הזה.'}</div>
         <label class="form-label">כתובת השרת</label>
@@ -2406,6 +2415,39 @@ function saveApiKey() {
   btn.textContent = '✓ נשמר!'
   btn.style.background = '#a8711a'
   setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
+}
+
+function exportBackup() {
+  const data = JSON.stringify(state, null, 2)
+  const blob = new Blob([data], {type:'application/json'})
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'fieldy-backup-' + getToday() + '.json'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+  const btn = document.getElementById('export-backup-btn')
+  if(btn) { const orig = btn.textContent; btn.textContent = '✓ ירד'; setTimeout(()=>{btn.textContent=orig}, 1500) }
+}
+function importBackup(file) {
+  if(!file) return
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result)
+      if(!imported || typeof imported !== 'object') throw new Error('bad file')
+      if(!confirm('זה יחליף את כל הנתונים הנוכחיים באפליקציה בנתונים מהקובץ. להמשיך?')) return
+      state = imported
+      save()
+      alert('✓ הנתונים נטענו בהצלחה')
+      renderCurrentScreen()
+    } catch(err) {
+      alert('שגיאה בטעינת הקובץ — ודא שזה קובץ גיבוי תקין של Fieldy')
+    }
+  }
+  reader.readAsText(file)
 }
 
 async function saveServerConfig() {
