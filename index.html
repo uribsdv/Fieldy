@@ -437,7 +437,7 @@ function bindEventCards(events, delPrefix) {
 }
 
 // ── STATE ─────────────────────────────────────────
-const APP_VERSION = '2026.09.10-1'
+const APP_VERSION = '2026.09.10-2'
 const KEY = 'fieldy_v2'
 
 // ── STATE VALIDATION (safety net) ─────────────────
@@ -571,7 +571,12 @@ QUOTE_SEEDS_V3.forEach(function(t){
   if(!state.quotes.some(function(q){ return q.text===t })) state.quotes.push({text:t, addedAt: Date.now()})
 })
 localStorage.setItem(KEY, JSON.stringify(state))
-let apiKey = localStorage.getItem('fieldy_key') || ''
+// The Anthropic API key used to be typed into Settings and kept in
+// localStorage as a fallback for calling the API straight from the browser.
+// All AI calls now go through the Cloudflare Worker, which holds the key as a
+// server-side secret, so the browser never needs it. A key left behind by an
+// older version is removed here so it doesn't linger on the device.
+if(localStorage.getItem('fieldy_key') !== null) localStorage.removeItem('fieldy_key')
 
 // ── SERVER SYNC ───────────────────────────────────
 // Optional: if a server URL + passcode are set (Settings screen), the app
@@ -746,7 +751,7 @@ function saveBrainDump() {
 // last analysis) and it hasn't run in the last 24h — keeps this from firing
 // on every keystroke or burning API calls needlessly.
 function shouldAnalyzePatterns() {
-  if(!apiKey && !serverConfigured()) return false
+  if(!serverConfigured()) return false
   const pi = state.personalInsights || {basedOnCount:0, updatedAt:null}
   const newCount = (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length
   const enoughNew = (newCount - (pi.basedOnCount||0)) >= 5
@@ -1574,9 +1579,9 @@ function renderHome() {
         </div>
         <button onclick="navigateTo('settings')" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">☯️</button>
       </div>
-      ${!apiKey ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
-        <div style="font-size:14px;color:var(--gold);font-weight:700">⚠️ נדרש API Key</div>
-        <div style="font-size:14px;color:#948a7a;margin-top:2px">לחץ להגדרות</div>
+      ${!serverConfigured() ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
+        <div style="font-size:14px;color:var(--gold);font-weight:700">⚠️ נדרש חיבור לשרת</div>
+        <div style="font-size:14px;color:#948a7a;margin-top:2px">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
         <div style="display:flex;justify-content:space-between;font-size:14px;color:#6b6255;margin-bottom:6px">
@@ -1661,7 +1666,7 @@ function renderHome() {
       ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:#eef2f7;border:1px solid #cdd9e8;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">🧠 מה שאני לומד עליך</div>
-          ${(apiKey||serverConfigured())?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">🔍 נתח עכשיו</button>`:''}
+          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">🔍 נתח עכשיו</button>`:''}
         </div>
         ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:14px;color:#211d17;line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
         <div style="font-size:12px;color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
@@ -1687,8 +1692,8 @@ function renderHome() {
 
       <div class="card" style="margin-top:12px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧠 שאל את Fieldy</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${(serverConfigured()||apiKey)?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת או מפתח API בהגדרות.'}</div>
-        ${(serverConfigured()||apiKey)?`
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
+        ${serverConfigured()?`
         <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
         <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">שאל</button>
         <div id="ask-fieldy-answer" style="margin-top:12px;font-size:15px;color:#211d17;line-height:1.6;display:none"></div>
@@ -1708,7 +1713,7 @@ function renderInput() {
       <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
       <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
       <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
-      ${!apiKey?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ חסר API Key — הגדר בהגדרות</div>`:''}
+      ${!serverConfigured()?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
     </div>
   `
@@ -1718,7 +1723,7 @@ async function doAnalyze() {
   const text = document.getElementById('input-text')?.value?.trim()
   const btn = document.getElementById('input-btn')
   const err = document.getElementById('input-error')
-  if(!text || !apiKey) return
+  if(!text || !serverConfigured()) return
   btn.textContent = '⚙️ מסדר...'
   btn.style.background = '#ffffff'
   btn.style.color = '#7a6f5c'
@@ -2466,7 +2471,8 @@ function renderSettings() {
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">☁️ שרת (Cloudflare)</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת.':'לא מחובר — הנתונים נשארים רק במכשיר הזה.'}</div>
+        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
+        <div style="font-size:12px;color:#948a7a;margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
         <label class="form-label">כתובת השרת</label>
         <input id="settings-server-url" value="${esc(serverUrl)}" placeholder="https://fieldy-proxy.xxx.workers.dev" class="form-input" style="direction:ltr"/>
         <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
@@ -2475,17 +2481,6 @@ function renderSettings() {
           <button id="server-save-btn" class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
           <button id="server-test-btn" onclick="testServerConfig()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px">בדוק חיבור</button>
         </div>
-      </div>
-      <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
-        <div style="font-size:12px;color:#948a7a;margin-bottom:8px">${serverConfigured()?'לא בשימוש כרגע — השרת מטפל בזה. אפשר להשאיר ריק.':'משמש רק כל עוד אין חיבור לשרת למעלה.'}</div>
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
-        <div style="position:relative;margin-bottom:10px">
-          <input type="password" id="settings-key" value="${esc(apiKey)}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px 74px 12px 12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block"/>
-          <button id="settings-key-copy-btn" onclick="copyToClipboard(document.getElementById('settings-key').value,'settings-key-copy-btn')" style="position:absolute;left:36px;top:50%;transform:translateY(-50%);background:none;font-size:16px">📋</button>
-          <button onclick="const i=document.getElementById('settings-key');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;font-size:16px">👁️</button>
-        </div>
-        <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧹 ניקוי כפילויות בלוח</div>
@@ -2532,16 +2527,6 @@ async function forceRefreshApp() {
     }
   } catch(e) { console.log('refresh cleanup error:', e) }
   location.href = location.pathname + '?v=' + Date.now()
-}
-
-function saveApiKey() {
-  const val = document.getElementById('settings-key').value.trim()
-  apiKey = val
-  localStorage.setItem('fieldy_key', val)
-  const btn = document.getElementById('settings-save-btn')
-  btn.textContent = '✓ נשמר!'
-  btn.style.background = '#a8711a'
-  setTimeout(()=>{btn.textContent='שמור';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';navigateTo('home')},1500)
 }
 
 function exportBackup() {
@@ -2688,26 +2673,18 @@ function closeModal() { document.getElementById('modal-container').innerHTML='';
 const SYSTEM_PROMPT = buildSystemPrompt()
 
 
+// Every AI call goes through the Worker's /api/claude, which adds the
+// Anthropic key server-side. There is deliberately no browser-direct fallback:
+// the key must never be in the page or in localStorage.
 async function callClaude(messages, system=null) {
-  if(serverConfigured()) {
-    const r = await fetch(serverUrl + '/api/claude', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
-      body:JSON.stringify({messages, system})
-    })
-    const d = await r.json()
-    if(d.error) throw new Error(typeof d.error === 'string' ? d.error : (d.error.message || 'server error'))
-    return d.content?.find(b=>b.type==='text')?.text || ''
-  }
-  const body = {model:'claude-sonnet-4-6',max_tokens:1500,messages}
-  if(system) body.system = system
-  const r = await fetch('https://api.anthropic.com/v1/messages',{
+  if(!serverConfigured()) throw new Error('אין חיבור לשרת — הגדר כתובת וסיסמה בהגדרות')
+  const r = await fetch(serverUrl + '/api/claude', {
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify(body)
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+serverPasscode},
+    body:JSON.stringify({messages, system})
   })
   const d = await r.json()
-  if(d.error) throw new Error(d.error.message)
+  if(d.error) throw new Error(typeof d.error === 'string' ? d.error : (d.error.message || 'server error'))
   return d.content?.find(b=>b.type==='text')?.text || ''
 }
 

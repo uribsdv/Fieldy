@@ -580,6 +580,25 @@ async function main() {
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
 
+  // ═══ 4b. No browser-side API key ═══════════════════════════════════════════
+  section('API key never lives in the browser')
+  await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {
+    await page.goto(BASE, { waitUntil: 'load' })
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_key', 'sk-ant-legacy') }, seededState())
+    resetLogs(); await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(300)
+    const r = await page.evaluate(() => ({ key: localStorage.getItem('fieldy_key'), src: document.documentElement.outerHTML.includes('anthropic-dangerous-direct-browser-access'), settings: (navigateTo('settings'), document.getElementById('screen-settings').textContent) }))
+    assert(r.key === null, 'fieldy_key still in localStorage')
+    assert(!r.src, 'direct-browser Anthropic header still present in the page')
+    assert(!/sk-ant/.test(r.settings) && !r.settings.includes('Anthropic API Key'), 'settings still offers an API-key field')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
+  })
+  await check('without a server, callClaude rejects with a clear message and makes no network call', async () => {
+    const r = await page.evaluate(async () => { try { await callClaude([{ role: 'user', content: 'x' }]); return { threw: false } } catch (e) { return { threw: true, msg: e.message } } })
+    assert(r.threw && /שרת/.test(r.msg), JSON.stringify(r))
+    const home = await page.evaluate(() => { navigateTo('home'); return document.getElementById('screen-home').textContent })
+    assert(home.includes('נדרש חיבור לשרת'), 'home does not point to the server settings')
+  })
+
   // ═══ 5. State-load validation ══════════════════════════════════════════════
   section('State-load validation (fail loudly, never corrupt)')
   await check('corrupt JSON in localStorage → clear error screen, data left untouched', async () => {
