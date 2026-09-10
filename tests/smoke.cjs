@@ -662,6 +662,78 @@ async function main() {
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
 
+  // ═══ 4a. Voice input (Web Speech API, stubbed) ═════════════════════════════
+  section('Voice input')
+  {
+    const vctx = await browser.newContext({ viewport: { width: 400, height: 800 }, locale: 'he-IL' })
+    await vctx.route('**/*', route => (route.request().url().startsWith(BASE) ? route.continue() : route.abort()))
+    await vctx.addInitScript(() => {
+      window.__recs = []
+      window.SpeechRecognition = class { constructor() { window.__recs.push(this); this.started = 0 } start() { this.started++ } stop() { if (this.onend) this.onend() } abort() { if (this.onend) this.onend() } }
+      window.webkitSpeechRecognition = window.SpeechRecognition
+    })
+    const vp = await vctx.newPage()
+    const verrs = []; vp.on('pageerror', e => verrs.push(e.message))
+    await vp.goto(BASE, { waitUntil: 'load' })
+    await vp.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, seededState())
+    await vp.goto(BASE, { waitUntil: 'load' }); await vp.waitForTimeout(300)
+    const fire = (page, idx, transcript, isFinal) => page.evaluate(([i, t, f]) => { const r = window.__recs[i]; r.onresult({ resultIndex: 0, results: [Object.assign([{ transcript: t }], { isFinal: f })] }) }, [idx, transcript, isFinal])
+    await check('task modal shows a mic row; dictation appends live text and keeps it on stop', async () => {
+      await vp.evaluate(() => { navigateTo('tasks'); showAddTask() })
+      assert(await vp.$('#voice-btn-add-task-text'), 'no mic button in task modal')
+      await vp.fill('#add-task-text', 'קיים')
+      await vp.click('#voice-btn-add-task-text')
+      let r = await vp.evaluate(() => ({ n: window.__recs.length, lang: window.__recs[0].lang, started: window.__recs[0].started, label: document.getElementById('voice-btn-add-task-text').textContent, rec: document.getElementById('voice-btn-add-task-text').classList.contains('recording') }))
+      assert(r.n === 1 && r.started === 1 && r.lang === 'he-IL' && r.rec && /עצור/.test(r.label), JSON.stringify(r))
+      await fire(vp, 0, 'להתקשר', false)
+      assert((await vp.inputValue('#add-task-text')) === 'קיים להתקשר', 'interim text not shown live')
+      await fire(vp, 0, 'להתקשר לדייב', true)
+      await vp.evaluate(() => window.__recs[0].onend())
+      r = await vp.evaluate(() => ({ v: document.getElementById('add-task-text').value, rec: document.getElementById('voice-btn-add-task-text').classList.contains('recording') }))
+      assert(r.v === 'קיים להתקשר לדייב' && !r.rec, JSON.stringify(r))
+      await vp.evaluate(() => doAddTask())
+      assert(await vp.evaluate(() => state.tasks.now.some(t => t.text === 'קיים להתקשר לדייב')), 'dictated task not saved')
+    })
+    await check('language toggle cycles he → en → fil and persists; errors show a readable status', async () => {
+      await vp.evaluate(() => showAddSite())
+      await vp.click('#voice-lang-add-site-issue')
+      let r = await vp.evaluate(() => ({ stored: localStorage.getItem('fieldy_voice_lang'), label: document.getElementById('voice-lang-add-site-issue').textContent }))
+      assert(r.stored === 'en-US' && /EN/.test(r.label), JSON.stringify(r))
+      await vp.click('#voice-btn-add-site-issue')
+      r = await vp.evaluate(() => window.__recs[window.__recs.length - 1].lang)
+      assert(r === 'en-US', 'recognition did not use the chosen language: ' + r)
+      await vp.evaluate(() => { const rec = window.__recs[window.__recs.length - 1]; rec.onerror({ error: 'not-allowed' }) })
+      r = await vp.evaluate(() => ({ status: document.getElementById('voice-status-add-site-issue').textContent, rec: document.getElementById('voice-btn-add-site-issue').classList.contains('recording') }))
+      assert(/מיקרופון/.test(r.status) && !r.rec, JSON.stringify(r))
+      await vp.click('#voice-lang-add-site-issue'); await vp.click('#voice-lang-add-site-issue')
+      assert((await vp.evaluate(() => localStorage.getItem('fieldy_voice_lang'))) === 'he-IL', 'cycle did not wrap back to he-IL')
+      await vp.evaluate(() => closeModal())
+    })
+    await check('input screen has a mic row; closing a modal stops an active recording', async () => {
+      await vp.evaluate(() => navigateTo('input'))
+      assert(await vp.$('#voice-btn-input-text'), 'no mic on the WhatsApp input screen')
+      await vp.evaluate(() => { navigateTo('tasks'); showAddTask() })
+      await vp.click('#voice-btn-add-task-text')
+      const before = await vp.evaluate(() => window.__recs.length)
+      await vp.evaluate(() => closeModal())
+      const stopped = await vp.evaluate(() => _voice === null)
+      assert(stopped, 'recording still active after closeModal')
+      assert(!verrs.length, 'page errors: ' + verrs.join(' | '))
+    })
+    await vctx.close()
+  }
+  await check('without Web Speech support the mic row is simply absent (no errors)', async () => {
+    const nctx = await browser.newContext({ viewport: { width: 400, height: 800 } })
+    await nctx.route('**/*', route => (route.request().url().startsWith(BASE) ? route.continue() : route.abort()))
+    await nctx.addInitScript(() => { try { delete window.SpeechRecognition; delete window.webkitSpeechRecognition } catch (e) {} Object.defineProperty(window, 'webkitSpeechRecognition', { value: undefined, configurable: true }); Object.defineProperty(window, 'SpeechRecognition', { value: undefined, configurable: true }) })
+    const np = await nctx.newPage(); const errs = []; np.on('pageerror', e => errs.push(e.message))
+    await np.goto(BASE, { waitUntil: 'load' }); await np.waitForTimeout(200)
+    await np.evaluate(() => { navigateTo('tasks'); showAddTask() })
+    const has = await np.$('#voice-btn-add-task-text')
+    await nctx.close()
+    assert(!has, 'mic row rendered without API support'); assert(!errs.length, errs.join(' | '))
+  })
+
   // ═══ 4b. No browser-side API key ═══════════════════════════════════════════
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {

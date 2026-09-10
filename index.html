@@ -234,6 +234,12 @@ body::before {
 /* Undo toast (shown for a few seconds after any delete) */
 #undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#211d17;color:#fdf9ee;padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
 #undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
+/* Voice input row under a text field */
+.voice-row{display:flex;align-items:center;gap:var(--space-1-5);margin:-4px 0 var(--space-2-5)}
+.voice-btn{background:#f0e7cf;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-3);font-size:var(--fs-base);color:#6b6255;font-weight:600}
+.voice-btn.recording{background:#fdeaea;border-color:#ef4444;color:#c0392b}
+.voice-lang{background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-2-5);font-size:var(--fs-sm);color:#948a7a}
+.voice-status{font-size:var(--fs-sm);color:#948a7a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1780,6 +1786,7 @@ function renderInput() {
       ${backHeaderHtml('הוסף הודעות')}
       <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
       <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      ${voiceRowHtml('input-text')}
       <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
       ${!serverConfigured()?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
@@ -2027,6 +2034,7 @@ function showAddTask(id) {
   openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?'✎ עריכת משימה':'+ משימה חדשה'}</div>
         <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?esc(t.text):''}</textarea>
+        ${voiceRowHtml('add-task-text')}
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div><label class="form-label">אחראי</label>
             <select id="add-task-assignee" class="form-select">
@@ -2346,8 +2354,10 @@ function showAddSite(name) {
   openModal(`
         <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?'✎ עריכת אתר':'+ אתר חדש'}</div>
         <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
+        ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
         <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?esc(s.issue):''}"/>
+        ${voiceRowHtml('add-site-issue')}
         <label class="form-label">מיקום / קואורדינטות</label>
         <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?esc(s.location):''}"/>
         <div style="font-size:12px;color:#948a7a;margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
@@ -2806,8 +2816,79 @@ function undoLast() { if(_undo) { const u = _closeUndo(); u.restore() } }
 // the list got shorter in the meantime).
 function insertAt(arr, idx, item) { const out = arr.slice(); out.splice(Math.min(idx, out.length), 0, item); return out }
 
+// ── VOICE INPUT ───────────────────────────────────
+// Web Speech API dictation into a text field — for adding a task or a site
+// with dirty or gloved hands, or when typing on a phone is the friction that
+// stops a thought from being captured at all. Chrome on Android supports it;
+// where the API is missing the row simply isn't rendered. Words appear live
+// (interim results) and are appended to whatever was already typed.
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null
+const VOICE_LANGS = [['he-IL','עב'],['en-US','EN'],['fil-PH','FIL']]
+let voiceLang = localStorage.getItem('fieldy_voice_lang') || 'he-IL'
+let _voice = null   // {rec, targetId, base}
+function voiceLangLabel() { const l = VOICE_LANGS.find(x => x[0] === voiceLang); return l ? l[1] : voiceLang }
+function voiceRowHtml(targetId) {
+  if(!SpeechRec) return ''
+  return '<div class="voice-row" id="voice-row-' + esc(targetId) + '">' +
+    '<button type="button" class="voice-btn" id="voice-btn-' + esc(targetId) + '" onclick="toggleVoice(' + jsArg(targetId) + ')">🎤 הקלט</button>' +
+    '<button type="button" class="voice-lang" id="voice-lang-' + esc(targetId) + '" onclick="cycleVoiceLang(' + jsArg(targetId) + ')" title="שפת זיהוי">🌐 ' + voiceLangLabel() + '</button>' +
+    '<span class="voice-status" id="voice-status-' + esc(targetId) + '"></span>' +
+    '</div>'
+}
+function cycleVoiceLang(targetId) {
+  const i = VOICE_LANGS.findIndex(x => x[0] === voiceLang)
+  voiceLang = VOICE_LANGS[(i + 1) % VOICE_LANGS.length][0]
+  localStorage.setItem('fieldy_voice_lang', voiceLang)
+  const b = document.getElementById('voice-lang-' + targetId); if(b) b.textContent = '🌐 ' + voiceLangLabel()
+  if(_voice) stopVoiceInput()
+}
+function setVoiceUi(targetId, recording, status) {
+  const b = document.getElementById('voice-btn-' + targetId)
+  if(b) { b.classList.toggle('recording', recording); b.textContent = recording ? '⏹ עצור' : '🎤 הקלט' }
+  const s = document.getElementById('voice-status-' + targetId); if(s) s.textContent = status || ''
+}
+function stopVoiceInput() {
+  if(!_voice) return
+  const v = _voice; _voice = null
+  try { v.rec.stop() } catch(e) {}
+  setVoiceUi(v.targetId, false, '')
+}
+function toggleVoice(targetId) {
+  if(_voice) { const same = _voice.targetId === targetId; stopVoiceInput(); if(same) return }
+  const target = document.getElementById(targetId)
+  if(!SpeechRec || !target) return
+  const rec = new SpeechRec()
+  rec.lang = voiceLang
+  rec.interimResults = true
+  rec.continuous = false
+  rec.maxAlternatives = 1
+  const base = target.value ? target.value.replace(/\s+$/, '') + ' ' : ''
+  _voice = {rec, targetId, base}
+  rec.onresult = function(e) {
+    let done = '', interim = ''
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i]
+      if(r.isFinal) done += r[0].transcript; else interim += r[0].transcript
+    }
+    if(done) _voice.base = (_voice.base + done).replace(/\s+$/, '') + ' '
+    target.value = _voice.base + interim
+    setVoiceUi(targetId, true, interim ? '…' : 'מקשיב')
+  }
+  rec.onerror = function(e) {
+    const msg = {'not-allowed':'אין הרשאה למיקרופון', 'no-speech':'לא נקלט דיבור', 'network':'אין רשת לזיהוי דיבור', 'audio-capture':'לא נמצא מיקרופון'}[e.error] || ('שגיאה: ' + e.error)
+    _voice = null
+    setVoiceUi(targetId, false, msg)
+  }
+  rec.onend = function() {
+    if(_voice && _voice.rec === rec) { _voice = null; setVoiceUi(targetId, false, '') }
+    target.value = target.value.replace(/\s+$/, '')
+  }
+  setVoiceUi(targetId, true, 'מקשיב')
+  try { rec.start() } catch(e) { _voice = null; setVoiceUi(targetId, false, 'לא ניתן להתחיל הקלטה') }
+}
+
 // ── MODAL ─────────────────────────────────────────
-function closeModal() { document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
+function closeModal() { stopVoiceInput(); document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
 
 // ── CLAUDE API ────────────────────────────────────
 const SYSTEM_PROMPT = buildSystemPrompt()
