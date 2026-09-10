@@ -300,9 +300,50 @@ async function main() {
   section('Boot with seeded state')
   await boot(seededState())
   await check('app boots with seeded data', async () => { assert(await appReady(), 'home did not render'); const e = errorsSince(); assert(!e.length, e.join('\n')) })
-  await check('home shows focus, stuck-site alert, urgent task and mood card', async () => {
+  await check('home shows one ranked "עכשיו" list: focus first, urgent task, stuck site, mood card', async () => {
     const t = await page.textContent('#screen-home')
-    for (const needle of ['הכי חשוב היום', 'אתרים תקועים', 'להתקשר לדייב', 'איך אתה מרגיש', 'ליקוידציה']) assert(t.includes(needle), 'missing: ' + needle)
+    for (const needle of ['🎯 עכשיו', 'הכי חשוב היום', 'להתקשר לדייב', 'תקוע 7 ימים', 'איך אתה מרגיש', 'ליקוידציה']) assert(t.includes(needle), 'missing: ' + needle)
+    const r = await page.evaluate(() => { const items = rankRightNow(null); return { first: items[0].kind, kinds: items.map(i => i.kind), rows: document.querySelectorAll('#screen-home .rn-item').length } })
+    // The focus headline sits at the top unless something is literally overdue right now (the fixture's 08:00 task is, after 8am).
+    assert(r.kinds.indexOf('focus') <= 1 && ['focus', 'task'].includes(r.first), 'focus should be first or right behind an overdue task: ' + JSON.stringify(r))
+    assert(r.kinds.includes('task') && r.kinds.includes('site'), 'ranking misses tasks or stuck sites: ' + JSON.stringify(r))
+    assert(r.rows >= 3 && r.rows <= 6, 'unexpected row count ' + r.rows)
+  })
+  await check('ranking: "now" beats "today", overdue beats not-overdue, tired prefers phone over site, motivated the reverse', async () => {
+    const r = await page.evaluate(() => {
+      const saved = JSON.stringify(state.tasks)
+      state.tasks = { now: [{ id: 'a', text: 'now-task', color: 'orange', done: false }], today: [
+        { id: 'b', text: 'today-phone', color: 'orange', context: 'phone', done: false },
+        { id: 'c', text: 'today-site', color: 'orange', context: 'site', done: false },
+        { id: 'd', text: 'today-overdue', color: 'orange', time: '00:01', date: getToday(), done: false }], later: [] }
+      const ids = m => rankRightNow(m).filter(i => i.kind === 'task').map(i => i.id)
+      const out = { neutral: ids(null), tired: ids('tired'), motivated: ids('motivated') }
+      state.tasks = JSON.parse(saved)
+      return out
+    })
+    assert(r.neutral[0] === 'd' || r.neutral[0] === 'a', 'overdue/now should lead: ' + JSON.stringify(r.neutral))
+    assert(r.neutral.indexOf('a') < r.neutral.indexOf('b'), 'now-bucket should beat today-bucket')
+    assert(r.tired.indexOf('b') < r.tired.indexOf('c'), 'tired: phone task should beat site task: ' + JSON.stringify(r.tired))
+    assert(r.motivated.indexOf('c') < r.motivated.indexOf('b'), 'motivated: site task should beat phone task: ' + JSON.stringify(r.motivated))
+  })
+  await check('overwhelmed mood shows exactly one item (home + tasks), with an "הצג הכל" escape hatch', async () => {
+    await page.evaluate(() => logMood('overwhelmed', 'manual'))
+    let r = await page.evaluate(() => ({ rows: document.querySelectorAll('#screen-home .rn-item').length, toggle: !!document.querySelector('#screen-home .right-now-toggle') }))
+    assert(r.rows === 1 && r.toggle, 'home: ' + JSON.stringify(r))
+    await page.click('#screen-home .right-now-toggle')
+    r = await page.evaluate(() => document.querySelectorAll('#screen-home .rn-item').length)
+    assert(r > 1, 'הצג הכל did not expand the list')
+    await page.click('#screen-home .right-now-toggle')
+    await page.evaluate(() => { setTaskBucket('today'); navigateTo('tasks') })
+    r = await page.evaluate(() => ({ cards: document.querySelectorAll('#screen-tasks > div:last-child > div').length, banner: !!document.querySelector('#screen-tasks .right-now-toggle'), undoneToday: state.tasks.today.filter(t => !t.done).length }))
+    assert(r.undoneToday >= 2, 'fixture should have 2+ undone today tasks')
+    assert(r.banner, 'tasks screen shows no mood banner')
+    const visibleTasks = await page.evaluate(() => [...document.querySelectorAll('#screen-tasks > div:last-child > div')].filter(d => d.querySelector('div[onclick^="toggleTask"]')).length)
+    assert(visibleTasks === 1, 'tasks screen shows ' + visibleTasks + ' tasks under overwhelmed, expected 1')
+    await page.evaluate(() => { logMood('focused', 'manual'); navigateTo('home') })
+    r = await page.evaluate(() => document.querySelectorAll('#screen-home .rn-item').length)
+    assert(r > 1, 'focused mood should not limit the list')
+    const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
   await check('nav badges reflect the data', async () => {
     const b = await page.evaluate(() => ({ tasks: document.getElementById('badge-tasks').textContent, sites: document.getElementById('badge-sites').textContent, people: document.getElementById('badge-people').textContent }))

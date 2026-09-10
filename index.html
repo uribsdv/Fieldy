@@ -819,6 +819,7 @@ function logMood(mood, source) {
   var entry = {ts: now.getTime(), date: getToday(), hour: now.getHours(), weekday: now.getDay(), mood: mood, source: source || 'manual', actions: pickRandom(lib.actions, Math.min(3, lib.actions.length))}
   var moods = [...(state.moods||[]), entry]
   if(moods.length > 500) moods = moods.slice(moods.length - 500)
+  rightNowExpanded = false   // a new mood starts with its own limit applied
   setState({moods: moods})
   logEvent('mood_logged', {mood: mood, source: source || 'manual'})
   if(currentScreen === 'home') renderHome()
@@ -1551,6 +1552,90 @@ function refreshBadges() {
   });
 }
 
+// ── RIGHT NOW (single-focus ranking) ──────────────
+// One ranked answer to "what should I look at right now?", built only from
+// data the app already collects: the AI focus headline, open tasks (bucket,
+// priority, clock time, context), sites flagged stuck, and today's timed
+// events. The current mood changes both the order — tired → things that can
+// be closed by phone first, site visits last — and how many items are shown
+// (overwhelmed → exactly one). Scores are plain integers so the order stays
+// explainable: bucket base + priority + time pressure + mood/context bias.
+const MOOD_RANK_BIAS = {
+  overwhelmed: {phone:15, office:0,  site:-20, note:'מצב מוצף: מוצג רק הדבר האחד הכי חשוב. השאר מחכה.'},
+  scattered:   {phone:15, office:5,  site:-10, note:'מצב מפוזר: שני דברים קטנים וברורים, לא יותר.'},
+  tired:       {phone:20, office:0,  site:-25, note:'מצב עייף: קודם מה שנסגר בטלפון. השטח מחכה למחר.'},
+  focused:     {phone:-5, office:10, site:10,  note:null},
+  motivated:   {phone:0,  office:5,  site:15,  note:null}
+}
+const PRIORITY_HEX = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
+let rightNowExpanded = false   // "הצג הכל" escape hatch while a mood limit is active
+function moodLimit(mood) { return (mood && MOOD_LIB[mood] && MOOD_LIB[mood].taskLimit) || null }
+function rankRightNow(mood) {
+  const items = []
+  const today = getToday(), nowMs = Date.now()
+  const bias = MOOD_RANK_BIAS[mood] || {}
+  const ctxBias = c => (c && typeof bias[c] === 'number') ? bias[c] : 0
+  if(state.focus && (!state.focusDate || state.focusDate === today)) {
+    items.push({kind:'focus', score:100, icon:'🎯', title:state.focus, sub:'הכי חשוב היום', color:'var(--gold)', go:null})
+  }
+  const addBucket = (bucket, base) => (state.tasks[bucket]||[]).forEach(t => {
+    if(t.done) return
+    let score = base + ({red:20,orange:10,green:0}[t.color]||0) + ctxBias(t.context)
+    const overdue = isOverdue(t)
+    if(overdue) score += 40
+    else if(t.time && (t.date||today) === today) {
+      const mins = (new Date(today + 'T' + t.time) - nowMs) / 60000
+      if(mins >= 0 && mins <= 120) score += 30
+    }
+    const sub = [t.site ? '📍 ' + t.site : null, t.time ? '⏰ ' + t.time + (overdue ? ' · עבר הזמן' : '') : null, t.context && CONTEXT_LABEL[t.context]].filter(Boolean).join(' · ')
+    items.push({kind:'task', id:t.id, bucket, score, icon:null, title:t.text, sub, color: overdue ? '#ef4444' : (PRIORITY_HEX[t.color]||PRIORITY_HEX.orange), go:'openTaskFromRightNow(' + jsArg(t.id) + ')'})
+  })
+  addBucket('now', 70); addBucket('today', 45); addBucket('later', 10)
+  state.sites.forEach(s => {
+    const d = daysStuck(s)
+    if(!s.stuckSince || d < STUCK_ALERT_DAYS || s.status === 'resolved') return
+    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'🚧', title:s.name, sub:'תקוע ' + d + ' ימים' + (s.issue ? ' · ' + s.issue : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
+  })
+  getEventsForDate(today).forEach(e => {
+    if(!e.time) return
+    const mins = (new Date(today + 'T' + e.time) - nowMs) / 60000
+    if(mins < -30) return
+    items.push({kind:'event', score: mins <= 180 ? 90 : 50, icon:'📅', title:e.title, sub:e.time + (e.site ? ' · 📍 ' + e.site : ''), color:'var(--gold)', go: e.site ? 'openSiteFromRightNow(' + jsArg(e.site) + ')' : "navigateTo('calendar')"})
+  })
+  return items.sort((a,b) => b.score - a.score)
+}
+function openTaskFromRightNow(id) {
+  taskBucket = ['now','today','later'].find(b => state.tasks[b].some(t=>t.id===id)) || taskBucket
+  navigateTo('tasks')
+}
+function openSiteFromRightNow(name) { siteFilter = 'all'; navigateTo('sites') }
+function toggleRightNowExpanded() { rightNowExpanded = !rightNowExpanded; renderCurrentScreen() }
+// Small banner explaining that the current mood is limiting what's shown,
+// with the escape hatch. Shared by the home list and the tasks screen.
+function moodLimitBarHtml(mood, hidden, style) {
+  const def = MOOD_LIB[mood], note = (MOOD_RANK_BIAS[mood] && MOOD_RANK_BIAS[mood].note) || ''
+  if(!def || (!hidden && !rightNowExpanded)) return ''
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:${def.color}12;border:1px solid ${def.color}44;border-radius:10px;padding:8px 12px;font-size:12px;color:#6b6255;${style||''}">
+      <span>${def.icon} ${esc(note)}</span>
+      <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:12px;white-space:nowrap">${rightNowExpanded ? 'הסתר שוב' : 'הצג הכל (' + hidden + ')'}</button>
+    </div>`
+}
+function rightNowHtml(mood) {
+  const all = rankRightNow(mood)
+  if(!all.length) return ''
+  const limit = moodLimit(mood)
+  const cap = (limit && !rightNowExpanded) ? limit : 6
+  const shown = all.slice(0, cap), hidden = all.length - shown.length
+  const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:#ffffff;border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:12px;padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
+      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:#211d17;line-height:1.4">${it.icon ? it.icon + ' ' : ''}${esc(it.title)}</div>
+      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:#948a7a;margin-top:4px">${esc(it.sub)}</div>` : ''}
+    </div>`
+  return `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎯 עכשיו</div>
+    ${row(shown[0], true)}
+    ${shown.slice(1).map(it => row(it, false)).join('')}
+    ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:12px;color:#948a7a;margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
+}
+
 // ── HOME ─────────────────────────────────────────
 // "Done today?" toggle button for one of the personal day-logs.
 function personalToggleHtml(key, onclick, icon, doneLabel, todoLabel) {
@@ -1564,13 +1649,11 @@ function renderHome() {
   const total = all.length
   const curMood = getCurrentMood()
   const moodDef = curMood ? MOOD_LIB[curMood.mood] : null
-  const urgentLimit = (moodDef && moodDef.taskLimit) ? moodDef.taskLimit : 3
-  const urgent = state.tasks.now.filter(t=>!t.done).slice(0,urgentLimit)
+  const nowCount = state.tasks.now.filter(t=>!t.done).length
   const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
   const pendingPeople = state.people.filter(p=>p.pending).length
   const pct = total ? Math.round((done/total)*100) : 0
   const moodPatterns = getMoodPatterns()
-  const stuckSites = state.sites.filter(function(s){ return s.stuckSince && daysStuck(s) >= STUCK_ALERT_DAYS })
 
   el.innerHTML = `
     <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
@@ -1601,27 +1684,9 @@ function renderHome() {
         </div>
         <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
-      ${stuckSites.length ? `<div style="background:#fdece0;border:1px solid #b8460055;border-radius:14px;padding:14px 16px;margin-bottom:16px">
-        <div style="font-size:12px;color:#b84600;font-weight:700;letter-spacing:1px;margin-bottom:8px">🚧 אתרים תקועים (מעל ${STUCK_ALERT_DAYS} ימים)</div>
-        ${stuckSites.map(function(s){ return `<div onclick="navigateTo('sites')" style="cursor:pointer;display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:14px;color:#211d17;font-weight:600">📍 ${esc(s.name)}</span>
-          <span style="font-size:13px;color:#b84600;font-weight:700">${daysStuck(s)} ימים</span>
-        </div>` }).join('')}
-      </div>` : ''}
-      ${state.focus ? creamPanelHtml(`
-        <div style="font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:6px">🎯 הכי חשוב היום</div>
-        <div style="font-size:15px;color:#211d17;line-height:1.5;font-weight:600">${esc(state.focus)}</div>
-      `, 'padding:16px 18px;margin-bottom:16px') : ''}
-      ${urgent.length > 0 ? `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎋 עכשיו</div>
-      ${urgent.map(t=>`<div onclick="navigateTo('tasks')" style="cursor:pointer;margin-bottom:8px;background:#ffffff;border:1px solid var(--line);border-right:3px solid #ef4444;border-radius:12px;padding:14px 16px">
-        <div style="font-size:15px;font-weight:600;color:#211d17">${esc(t.text)}</div>
-        ${t.site||t.assignee?`<div style="display:flex;gap:8px;margin-top:6px">
-          ${t.site?`<span class="tag">📍 ${esc(t.site)}</span>`:''}
-          ${t.assignee?`<span class="tag">👤 ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
-        </div>`:''}
-      </div>`).join('')}` : ''}
+      ${rightNowHtml(curMood ? curMood.mood : null)}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', '🖌️', urgent.length, 'עכשיו', '#fde8c4')}
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', '🖌️', nowCount, 'עכשיו', '#fde8c4')}
         ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', '🪷', openSites, 'אתרים', '#c8ebe3')}
         ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', '👥', pendingPeople, 'ממתין', '#dfd3f5')}
       </div>
@@ -1791,7 +1856,20 @@ function renderTasks() {
   const el = document.getElementById('screen-tasks')
   const counts = {now:state.tasks.now.filter(t=>!t.done).length,today:state.tasks.today.filter(t=>!t.done).length,later:state.tasks.later.filter(t=>!t.done).length}
   const allTasks = state.tasks[taskBucket] || []
-  const tasks = taskContextFilter==='all' ? allTasks : allTasks.filter(t=>t.context===taskContextFilter)
+  let tasks = taskContextFilter==='all' ? allTasks : allTasks.filter(t=>t.context===taskContextFilter)
+  // Mood-aware order and limit — the same ranking the home "עכשיו" list uses,
+  // so the two never disagree. Without a logged mood the list is untouched.
+  const curMood = getCurrentMood(), mood = curMood ? curMood.mood : null
+  let hiddenByMood = 0
+  if(mood) {
+    const score = {}; rankRightNow(mood).forEach(it => { if(it.kind==='task') score[it.id] = it.score })
+    tasks = tasks.slice().sort((a,b) => ((a.done?1:0)-(b.done?1:0)) || ((score[b.id]||0)-(score[a.id]||0)))
+    const limit = moodLimit(mood)
+    if(limit && !rightNowExpanded) {
+      const undone = tasks.filter(t=>!t.done)
+      if(undone.length > limit || tasks.length > undone.length) { hiddenByMood = tasks.length - Math.min(limit, undone.length); tasks = undone.slice(0, limit) }
+    }
+  }
   const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
   const CTX = [['all','הכל'],['phone','📞'],['office','💻'],['site','📍']]
 
@@ -1814,6 +1892,7 @@ function renderTasks() {
       </div>
     </div>
     <div style="padding:12px 16px">
+      ${mood && moodLimit(mood) ? moodLimitBarHtml(mood, hiddenByMood, 'margin-bottom:10px') : ''}
       ${tasks.length===0?emptyHtml('🎋', taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
