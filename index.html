@@ -2357,7 +2357,10 @@ function renderSettings() {
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 Anthropic API Key</div>
         <div style="font-size:12px;color:#948a7a;margin-bottom:8px">${serverConfigured()?'לא בשימוש כרגע — השרת מטפל בזה. אפשר להשאיר ריק.':'משמש רק כל עוד אין חיבור לשרת למעלה.'}</div>
         <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);font-size:14px;display:block;margin-bottom:12px">קבל מפתח כאן ←</a>
-        <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block;margin-bottom:10px"/>
+        <div style="position:relative;margin-bottom:10px">
+          <input type="password" id="settings-key" value="${apiKey}" placeholder="sk-ant-..." style="width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:10px;padding:12px 40px 12px 12px;color:#211d17;font-size:14px;outline:none;direction:ltr;display:block"/>
+          <button onclick="const i=document.getElementById('settings-key');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;font-size:16px">👁️</button>
+        </div>
         <button id="settings-save-btn" class="btn-primary" onclick="saveApiKey()">שמור</button>
       </div>
       <div class="card" style="margin-bottom:14px">
