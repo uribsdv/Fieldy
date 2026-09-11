@@ -241,7 +241,8 @@ body::before {
 .cal-dn{font-size:var(--fs-base);font-weight:500;color:var(--t2);line-height:1}
 .cal-dots{display:flex;gap:2px;margin-top:2px}
 .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--gold)}
-.ev-card{background:var(--ink3);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-3-5);margin-bottom:var(--space-2);border-right:3px solid var(--gold);cursor:pointer}
+.ev-card{background:var(--ink3);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-3) var(--space-3-5);margin-bottom:var(--space-2);border-right:3px solid var(--gold);cursor:pointer;box-shadow:var(--shadow-sm)}
+.week-epill{box-shadow:var(--shadow-sm)}
 .ev-time{font-size:var(--fs-base);color:var(--gold);font-weight:700;margin-bottom:3px}
 .ev-title{font-size:var(--fs-base);color:var(--t1);font-weight:600;line-height:1.4}
 .ev-note{font-size:var(--fs-base);color:var(--t2);margin-top:3px;line-height:1.5}
@@ -2127,7 +2128,7 @@ function taskCard(t) {
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
-    <div style="background:var(--surface);border:1px solid var(--line);border-right:3px solid ${t.done?'var(--t5)':(overdue?'var(--red)':c)};border-radius:var(--radius-lg);padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
+    <div class="card" style="border:1px solid var(--line);border-right:3px solid ${t.done?'var(--t5)':(overdue?'var(--red)':c)};padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s,box-shadow .15s">
       <div style="display:flex;align-items:flex-start;gap:12px">
         <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
         <div style="flex:1">
@@ -2458,20 +2459,23 @@ function copyPettyCashSummary() {
 // General solar-pump-inverter troubleshooting knowledge — generic domain
 // knowledge, not tied to a specific proprietary manual.
 const SPIS_FAULTS = [
-  {icon:'lock',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
-  {icon:'flame',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
-  {icon:'zap',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
-  {icon:'waves',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
-  {icon:'alert-circle',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
-  {icon:'wifi',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
+  {icon:'lock',color:'var(--red)',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
+  {icon:'flame',color:'var(--orange)',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
+  {icon:'zap',color:'var(--amber)',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
+  {icon:'waves',color:'var(--blue)',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
+  {icon:'alert-circle',color:'var(--stuck)',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
+  {icon:'wifi',color:'var(--purple)',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
 ];
 function showSpisModal() {
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
         <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
         ${SPIS_FAULTS.map(function(f){
-          return `<div style="background:var(--surface-3);border:1px solid var(--line);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px">
-            <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin-bottom:4px">${icon(f.icon)} ${f.title}</div>
+          return `<div class="card" style="border:1px solid var(--line);border-right:3px solid ${f.color};padding:12px 14px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              ${iconBadge(f.icon, f.color)}
+              <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${f.title}</div>
+            </div>
             <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>
             ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
           </div>`
@@ -2889,10 +2893,13 @@ function renderAction() {
         ${actionCtx.assignee?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:4px">${icon('user')} ${esc(actionCtx.assignee)}</div>`:''}
       </div>`:''}
       <div id="action-buttons">
-        ${[['whatsapp',icon('message-circle'),'הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email',icon('mail'),'מייל','ASC / 11-16 / NIA'],['monday',icon('clipboard'),'עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
-          <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
-            <div style="font-size:var(--fs-xl);font-weight:600">${i} ${l}</div>
-            <div style="font-size:var(--fs-base);color:var(--t2);margin-top:3px">${s}</div>
+        ${[['whatsapp','message-circle','var(--green)','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','mail','var(--blue)','מייל','ASC / 11-16 / NIA'],['monday','clipboard','var(--purple)','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,c,l,s])=>`
+          <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:12px">
+            ${iconBadge(i, c)}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:var(--fs-xl);font-weight:600">${l}</div>
+              <div style="font-size:var(--fs-base);color:var(--t2);margin-top:3px">${s}</div>
+            </div>
           </div>`).join('')}
       </div>
       <div id="action-loading" style="display:none;padding:10px 0">${skeletonHtml(5, 'כותב…')}</div>
@@ -3558,7 +3565,7 @@ function renderMonthCal(){
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
         var dateLabel = dayNum ? dayNum+'.'+monthNum : '';
         var col = esc(e.color||'var(--bamboo)');
-        return '<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+esc(e.id)+'">'+
+        return '<div class="card" style="border:1px solid var(--line);padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+esc(e.id)+'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
           '<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+esc(e.time):'')+'</div>'+
