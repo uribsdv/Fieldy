@@ -70,6 +70,12 @@ textarea,select,input{font-family:inherit}
 .form-select{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:var(--t1);font-size:var(--fs-base);outline:none}
 /* Tags */
 .tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--t2)}
+/* Per-kind tint for the small pills on a task card (site/person/context/
+   time) — was one flat muted colour for everything, which read as bland. */
+.tag-site{background:var(--blue-soft);color:var(--blue)}
+.tag-person{background:rgba(107,70,193,.11);color:var(--purple)}
+.tag-context{background:rgba(26,143,122,.11);color:var(--green)}
+.tag-time{background:var(--accent-soft);color:var(--gold)}
 .tag-red{background:#ef444422;color:var(--red);font-weight:600}
 .tag-orange{background:#f59e0b22;color:var(--amber);font-weight:600}
 .tag-green{background:#4ade8022;color:var(--green-light);font-weight:600}
@@ -587,9 +593,13 @@ function backHeaderHtml(title, marginBottom) {
     '<div style="font-size:var(--fs-2xl);font-weight:700">' + title + '</div>' +
     '</div>'
 }
-// Small cream icon button on task / site / person cards (✎ 🖌️ 🗑 …).
+// Small tinted icon button on task / site / person cards (✎ 🖌️ 🗑 …) — each
+// action gets its own colour (edit/blue, delete/red, draft-message/green)
+// instead of one flat muted-gray square for everything.
+const ICON_BTN_TINT = { edit: ['var(--blue-soft)', 'var(--blue)'], delete: ['var(--red-soft)', 'var(--red)'], draft: ['rgba(26,143,122,.13)', 'var(--green)'] }
 function iconBtnHtml(onclick, label, extraStyle, act) {
-  return '<button onclick="' + onclick + '"' + (act ? ' data-act="' + act + '" aria-label="' + act + '"' : '') + ' style="background:var(--surface-2);border-radius:var(--radius-sm);padding:7px 9px;color:var(--t2);font-size:var(--fs-base)' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
+  const tint = ICON_BTN_TINT[act] || ['var(--surface-2)', 'var(--t2)']
+  return '<button onclick="' + onclick + '"' + (act ? ' data-act="' + act + '" aria-label="' + act + '"' : '') + ' style="background:' + tint[0] + ';border-radius:var(--radius-sm);padding:7px 9px;color:' + tint[1] + ';font-size:var(--fs-base)' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
 }
 // The 🖌️ "draft a message about this" button — same on tasks, sites and people.
 function actionBtnHtml(text, assignee, extraStyle) {
@@ -2178,10 +2188,10 @@ function taskCard(t) {
           ${t.note?`<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
           ${t.photo?`<img src="${esc(t.photo)}" onclick="viewPhoto(${jsArg(t.photo)})" style="width:100%;max-height:140px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-            ${t.site?`<span class="tag">${icon('map-pin')} ${esc(t.site)}</span>`:''}
-            ${t.assignee?`<span class="tag">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
-            ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag">${CONTEXT_LABEL[t.context]}</span>`:''}
-            ${t.time?`<span class="tag" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
+            ${t.site?`<span class="tag tag-site">${icon('map-pin')} ${esc(t.site)}</span>`:''}
+            ${t.assignee?`<span class="tag tag-person">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
+            ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag tag-context">${CONTEXT_LABEL[t.context]}</span>`:''}
+            ${t.time?`<span class="tag tag-time" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
