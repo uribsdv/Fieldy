@@ -495,6 +495,8 @@ function icon(name, extraClass) {
 // mapped onto the same set; anything unknown is shown as-is.
 const EMOJI_ICON = {"\u2713":'check', "\u2715":'x', "\ud83d\udccd":'map-pin', "\u2190":'arrow-left', "\u2192":'arrow-right', "\ud83c\udfaf":'target', "\ud83d\udccb":'clipboard', "\ud83d\udcc5":'calendar', "\ud83d\uddd1":'trash', "\u270e":'edit', "\ud83d\udd17":'link', "\ud83d\udd04":'refresh', "\ud83c\udf3f":'leaf', "\ud83d\udd8c\ufe0f":'message-square', "\ud83c\udf0a":'waves', "\ud83d\udd0d":'search', "\ud83e\udeb7":'flower', "\u270d\ufe0f":'edit-3', "\ud83e\udde0":'brain', "\ud83d\udea7":'alert-triangle', "\ud83c\udfa4":'mic', "\u26a0\ufe0f":'alert-triangle', "\ud83d\udd25":'flame', "\u262f\ufe0f":'yin-yang', "\u23f0":'clock', "\u26a1":'zap', "\ud83d\udcde":'phone', "\ud83d\udcbb":'monitor', "\u23f3":'hourglass', "\u2b07\ufe0f":'download', "\ud83d\udd0b":'battery', "\u2699\ufe0f":'settings', "\ud83d\udcd6":'book-open', "\ud83c\udfad":'smile', "\ud83d\udcac":'message-circle', "\ud83d\udcdc":'file-text', "\ud83d\udcad":'quote', "\ud83d\udd00":'shuffle', "\ud83d\udcda":'book', "\ud83d\udcb0":'wallet', "\ud83c\udf8b":'zap', "\ud83d\udc64":'user', "\ud83d\udcf7":'camera', "\ud83d\udd27":'tool', "\ud83d\udce7":'mail', "\ud83d\udd14":'bell', "\ud83c\udf10":'globe', "\ud83d\udd07":'volume-x', "\ud83c\udfb5":'music', "\ud83c\udf00":'wind', "\ud83c\udfd4\ufe0f":'mountain', "\ud83d\udca7":'droplet', "\u2b55":'circle', "\ud83d\udc42":'headphones', "\ud83c\udff7\ufe0f":'tag', "\ud83d\ude0a":'smile', "\ud83d\udd11":'key', "\ud83d\udeaa":'log-out', "\ud83e\udded":'compass', "\ud83e\uddf5":'link-2', "\u21bb":'rotate-ccw', "\ud83d\udd35":'circle', "\u267e\ufe0f":'infinity', "\ud83e\udd4a":'crosshair', "\ud83d\udee1\ufe0f":'shield', "\ud83c\udf7d\ufe0f":'coffee', "\ud83c\udfc3":'activity', "\ud83d\ude34":'moon', "\ud83c\udfe0":'home', "\ud83e\udd1d":'users', "\ud83d\udde3\ufe0f":'message-circle', "\u2600\ufe0f":'sun', "\ud83d\udc65":'users', "\ud83d\udcca":'bar-chart-2', "\ud83d\udca1":'lightbulb', "\ud83c\udf31":'leaf', "\ud83c\udfcb\ufe0f":'dumbbell', "\ud83e\uddd8":'flower', "\ud83d\udd4a\ufe0f":'feather', "\ud83d\udd12":'lock', "\ud83c\udfdc\ufe0f":'alert-circle', "\ud83d\udcf6":'wifi', "\u2197":'external-link', "\ud83d\uddfa\ufe0f":'map', "\ud83d\udcdd":'edit-3', "\ud83c\udfa8":'palette', "\ud83d\udce6":'package', "\u2b06\ufe0f":'upload', "\u2601\ufe0f":'cloud', "\ud83e\uddf9":'trash-2', "\u23f9":'square'}  // keys are emoji, written as \u escapes
 function iconFor(glyph) { return EMOJI_ICON[glyph] ? icon(EMOJI_ICON[glyph]) : esc(glyph) }
+// Helpers below accept either an icon name or already-rendered icon markup.
+function iconAny(x) { return ICONS[x] ? icon(x) : (x || '') }
 
 // ── RENDER HELPERS ────────────────────────────────
 // Shared building blocks for the HTML patterns that used to be repeated
@@ -510,7 +512,7 @@ function modalHtml(inner, opts) {
 function openModal(inner, opts) { document.getElementById('modal-container').innerHTML = modalHtml(inner, opts) }
 // Empty-state placeholder (icon + one line).
 function emptyHtml(iconName, text, style) {
-  return '<div class="empty"' + (style ? ' style="' + style + '"' : '') + '><div class="empty-icon">' + icon(iconName) + '</div><div class="empty-text">' + text + '</div></div>'
+  return '<div class="empty"' + (style ? ' style="' + style + '"' : '') + '><div class="empty-icon">' + iconAny(iconName) + '</div><div class="empty-text">' + text + '</div></div>'
 }
 // Screen title row with an accent "+ הוסף" button (tasks / sites / people headers).
 function addBtnHtml(onclick) {
@@ -542,7 +544,7 @@ function creamPanelHtml(inner, style) {
 // Home-screen stat tile (count + label on a gradient).
 function statTileHtml(screen, gradient, iconName, count, label, labelColor) {
   return '<div onclick="navigateTo(\'' + screen + '\')" style="cursor:pointer;text-align:center;border-radius:var(--radius-2xl);padding:16px 8px;background:' + gradient + '">' +
-    '<div style="font-size:20px;line-height:1;color:var(--surface);margin-bottom:4px">' + icon(iconName) + '</div>' +
+    '<div style="font-size:20px;line-height:1;color:var(--surface);margin-bottom:4px">' + iconAny(iconName) + '</div>' +
     '<div style="font-size:24px;font-weight:800;color:var(--surface)">' + count + '</div>' +
     '<div style="font-size:var(--fs-base);color:' + labelColor + ';margin-top:2px;font-weight:600">' + label + '</div>' +
     '</div>'
@@ -1809,7 +1811,7 @@ function rightNowHtml(mood) {
 // "Done today?" toggle button for one of the personal day-logs.
 function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
   const on = !!(state.personal[key]||{})[getToday()]
-  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${on?'var(--green)':'var(--line)'};background:${on?'#1a8f7a18':'var(--surface)'};color:${on?'var(--green)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon(iconName)} ${on?doneLabel:todoLabel}</button>`
+  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${on?'var(--green)':'var(--line)'};background:${on?'#1a8f7a18':'var(--surface)'};color:${on?'var(--green)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${iconAny(iconName)} ${on?doneLabel:todoLabel}</button>`
 }
 function renderHome() {
   const el = document.getElementById('screen-home')
@@ -1883,6 +1885,7 @@ function renderHome() {
             </button>`
           }).join('')}
         </div>
+        ${moodTrendHtml(30)}
       </div>
       ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -2262,6 +2265,82 @@ function doAddTask() {
 // ── SITES ────────────────────────────────────────
 let siteFilter = 'open'
 
+// ── CHARTS (inline SVG, no dependencies) ──────────
+// Quiet marks, one hue for magnitude, text in text colours, a legend or a
+// list next to every chart so nothing depends on colour alone.
+function niceCeil(v) {
+  if(!(v > 0)) return 1
+  const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p
+}
+function fmtPeso(n) { return '₱' + Math.round(n).toLocaleString() }
+// Last N days of mood, one tile per day (the last mood logged that day),
+// plus a legend with counts — the legend doubles as the table view.
+function moodTrendHtml(days) {
+  days = days || 30
+  const moods = state.moods || []
+  if(moods.length < 3) return ''
+  const byDay = {}; moods.forEach(m => { byDay[m.date] = m.mood })
+  const today = new Date(getToday() + 'T00:00:00')
+  const W = 360, H = 22, gap = 2, w = (W - gap * (days - 1)) / days
+  let rects = ''; const counts = {}
+  for(let i = days - 1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i)
+    const key = dateKey(d), mood = byDay[key], x = ((days - 1 - i) * (w + gap)).toFixed(2)
+    if(mood && MOOD_LIB[mood]) { counts[mood] = (counts[mood] || 0) + 1
+      rects += `<rect class="mood-day" x="${x}" y="2" width="${w.toFixed(2)}" height="${H - 4}" rx="3" fill="${MOOD_LIB[mood].color}"><title>${key} · ${MOOD_LIB[mood].label}</title></rect>`
+    } else rects += `<rect x="${x}" y="${H / 2 - 1}" width="${w.toFixed(2)}" height="2" rx="1" fill="var(--line)"/>`
+  }
+  const legend = MOOD_ORDER.filter(m => counts[m]).map(m => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${MOOD_LIB[m].color}"></span>${icon(MOOD_LIB[m].icon)} ${MOOD_LIB[m].label} · ${counts[m]}</span>`).join('')
+  return `<div id="mood-trend" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+    <div class="panel-label" style="margin-bottom:6px">${icon('bar-chart-2')} ${days} הימים האחרונים</div>
+    <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;direction:ltr"><span>לפני ${days} יום</span><span>היום</span></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block;direction:ltr" role="img" aria-label="מצב רוח לפי יום">${rects}</svg>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">${legend}</div>
+  </div>`
+}
+function monthKeyOffset(n) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') }
+function pettyCashForMonth(mk) { return (state.pettyCash || []).filter(e => (e.date || '').slice(0, 7) === mk) }
+// Six months of totals as thin columns; the current month is the emphasis,
+// earlier months recede. Value labels only on the current and the highest.
+function pettyCashMonthChartHtml() {
+  const months = 6
+  const rows = []
+  for(let i = months - 1; i >= 0; i--) { const mk = monthKeyOffset(i); rows.push({mk, total: pettyCashForMonth(mk).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0)}) }
+  if(!rows.some(r => r.total > 0)) return ''
+  const W = 360, H = 130, padT = 16, padB = 18, top = niceCeil(Math.max(...rows.map(r => r.total)))
+  const base = H - padB, plotH = base - padT
+  const band = W / months, barW = Math.min(24, band * 0.5)
+  const maxIdx = rows.reduce((bi, r, i) => r.total > rows[bi].total ? i : bi, 0)
+  const y = v => base - (v / top) * plotH
+  const grid = [0.5, 1].map(f => `<line x1="0" y1="${y(top * f).toFixed(1)}" x2="${W}" y2="${y(top * f).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="2" y="${(y(top * f) - 3).toFixed(1)}" font-size="9" fill="var(--t3)">${fmtPeso(top * f)}</text>`).join('')
+  const bars = rows.map((r, i) => {
+    const x = band * i + (band - barW) / 2, h = Math.max(r.total > 0 ? 3 : 0, (r.total / top) * plotH), yy = base - h
+    const rx = Math.min(4, h / 2), cur = i === months - 1
+    const path = h > 0 ? `<path class="cash-bar" d="M${x} ${base} V${yy + rx} a${rx} ${rx} 0 0 1 ${rx} -${rx} H${x + barW - rx} a${rx} ${rx} 0 0 1 ${rx} ${rx} V${base} Z" fill="var(--gold)" opacity="${cur ? 1 : 0.45}"><title>${r.mk} · ${fmtPeso(r.total)}</title></path>` : ''
+    const label = (cur || i === maxIdx) && r.total > 0 ? `<text x="${(x + barW / 2).toFixed(1)}" y="${(yy - 4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="var(--t1)">${fmtPeso(r.total)}</text>` : ''
+    const m = parseInt(r.mk.slice(5), 10) - 1
+    return path + label + `<text x="${(band * i + band / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10" fill="${cur ? 'var(--t1)' : 'var(--t3)'}" font-weight="${cur ? 700 : 400}">${MONTHS_HE[m].slice(0, 4)}</text>`
+  }).join('')
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;direction:ltr" role="img" aria-label="הוצאות לפי חודש">${grid}<line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--t4)" stroke-width="1"/>${bars}</svg>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;margin-top:8px;font-size:var(--fs-xs);color:var(--t3)">${rows.map(r => `<span>${r.mk} · <b style="color:var(--t2)">${fmtPeso(r.total)}</b></span>`).join('')}</div>`
+}
+// This month's spend by vendor (the closest thing to a category the data has).
+function pettyCashVendorHtml() {
+  const byV = {}
+  pettyCashThisMonth().forEach(e => { const k = (e.vendor || '—').trim(); byV[k] = (byV[k] || 0) + (parseFloat(e.amount) || 0) })
+  const rows = Object.keys(byV).map(k => ({k, v: byV[k]})).sort((a, b) => b.v - a.v)
+  if(!rows.length) return ''
+  const top = rows.slice(0, 5), rest = rows.slice(5).reduce((s, r) => s + r.v, 0)
+  if(rest > 0) top.push({k: 'אחר (' + (rows.length - 5) + ')', v: rest})
+  const max = Math.max(...top.map(r => r.v))
+  return top.map(r => `<div class="cash-vendor" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="width:120px;flex-shrink:0;font-size:var(--fs-sm);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(r.k)}">${esc(r.k)}</span>
+      <div style="flex:1;height:8px;background:var(--surface-2);border-radius:var(--radius-pill);overflow:hidden;direction:ltr"><div style="width:${(r.v / max * 100).toFixed(1)}%;height:100%;background:var(--gold);border-radius:var(--radius-pill)"></div></div>
+      <span style="min-width:56px;text-align:left;font-size:var(--fs-sm);color:var(--t1);font-weight:600;direction:ltr">${fmtPeso(r.v)}</span>
+    </div>`).join('')
+}
+
 // ── PETTY CASH LIQUIDATION TRACKER ────────────────
 function currentMonthKey() { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') }
 function pettyCashThisMonth() {
@@ -2282,6 +2361,10 @@ function showPettyCashModal() {
         <label class="form-label">סכום (₱)</label><input id="pc-amount" class="form-input" type="number" placeholder="0" style="direction:ltr"/>
         <label class="form-label">הערה / אתר (רשות)</label><input id="pc-note" class="form-input" placeholder="למשל: נסיעה ל-Nambaran"/>
         <button onclick="addPettyCashEntry()" class="btn-primary" style="margin-top:6px;margin-bottom:16px">+ הוסף הוצאה</button>
+        ${(function(){ const mc = pettyCashMonthChartHtml(), vc = pettyCashVendorHtml(); return (mc || vc) ? `<div style="border-top:1px solid var(--line);padding-top:12px;margin-bottom:12px">
+          ${mc ? `<div class="panel-label" style="margin-bottom:4px">${icon('bar-chart-2')} לפי חודש</div>${mc}` : ''}
+          ${vc ? `<div class="panel-label" style="margin:14px 0 8px">${icon('tag')} החודש לפי ספק</div>${vc}` : ''}
+        </div>` : '' })()}
         <div style="border-top:1px solid var(--line);padding-top:12px">
           ${entries.length===0?`<div style="font-size:var(--fs-md);color:var(--t3);text-align:center;padding:10px 0">אין הוצאות מתועדות החודש</div>`:''}
           ${entries.map(function(e){
@@ -2361,6 +2444,7 @@ function renderSites() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:var(--fs-2xl);font-weight:700">אתרים</div>
         <div style="display:flex;gap:8px">
+          <button onclick="toggleSitesMap()" id="sites-map-toggle" aria-pressed="${sitesMapOn}" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};border-radius:var(--radius-md);padding:8px 12px;color:${sitesMapOn?'var(--gold)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('map')} מפה</button>
           <button onclick="showSpisModal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('tool')} אבחון</button>
           ${addBtnHtml('showAddSite()')}
         </div>
@@ -2372,9 +2456,90 @@ function renderSites() {
       </div>
     </div>
     <div style="padding:12px 16px">
+      ${sitesMapOn ? sitesMapHtml(sites) : ''}
       ${sites.length===0?emptyHtml(icon('flower'), 'אין אתרים'):''}
       ${sites.map(s=>siteCard(s)).join('')}
     </div>`
+}
+
+// ── SITES MAP (dependency-free, works offline) ────
+// A pin map drawn as inline SVG from the coordinates already stored on each
+// site — no tile server, so it works with no signal in the field. Accepts
+// decimal "16.9754, 121.8107" or DMS like 18°17'50.89"N 121°24'1.57"E.
+let sitesMapOn = false, mapSelected = null
+function toggleSitesMap() { sitesMapOn = !sitesMapOn; renderSites() }
+function selectMapSite(name) { mapSelected = (mapSelected === name) ? null : name; renderSites() }
+function parseLatLon(str) {
+  if(!str) return null
+  const s = String(str).trim()
+  const dec = s.match(/^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/)
+  if(dec) { const lat = +dec[1], lon = +dec[2]; return (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) ? {lat, lon} : null }
+  const dms = /(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*([NSEW])/gi
+  const parts = []; let d
+  while((d = dms.exec(s))) parts.push({v: (+d[1]) + (+d[2]) / 60 + ((+d[3]) || 0) / 3600, h: d[4].toUpperCase()})
+  if(parts.length < 2) return null
+  let lat = null, lon = null
+  parts.forEach(pt => { if(pt.h === 'N' || pt.h === 'S') lat = pt.h === 'S' ? -pt.v : pt.v; else lon = pt.h === 'W' ? -pt.v : pt.v })
+  return (lat != null && lon != null) ? {lat, lon} : null
+}
+function sitesMapHtml(sites) {
+  const pts = sites.map(s => ({s, p: parseLatLon(s.location)})).filter(x => x.p)
+  const missing = sites.filter(s => !parseLatLon(s.location))
+  if(!pts.length) return `<div class="card" style="text-align:center;color:var(--t3);font-size:var(--fs-base);padding:24px 16px;line-height:1.6">${icon('map')} אין עדיין אתרים עם קואורדינטות ברשימה הזו.<br>הוסף מיקום (עשרוני או DMS) בעריכת האתר.</div>`
+  const W = 400, H = 300, PAD = 30
+  let minLat = Math.min(...pts.map(x => x.p.lat)), maxLat = Math.max(...pts.map(x => x.p.lat))
+  let minLon = Math.min(...pts.map(x => x.p.lon)), maxLon = Math.max(...pts.map(x => x.p.lon))
+  if(maxLat - minLat < 0.02) { minLat -= 0.05; maxLat += 0.05 }
+  if(maxLon - minLon < 0.02) { minLon -= 0.05; maxLon += 0.05 }
+  const kx = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180)   // equirectangular with latitude correction
+  const spanX = (maxLon - minLon) * kx, spanY = maxLat - minLat
+  const scale = Math.min((W - 2 * PAD) / spanX, (H - 2 * PAD) / spanY)
+  const ox = (W - spanX * scale) / 2, oy = (H - spanY * scale) / 2
+  const X = lon => ox + (lon - minLon) * kx * scale, Y = lat => H - (oy + (lat - minLat) * scale)
+  const kmPerPx = 111.32 / scale                     // 1° latitude ≈ 111.32 km
+  const barKm = [0.5, 1, 2, 5, 10, 20, 50, 100].find(k => k / kmPerPx >= 50) || 100
+  const barPx = barKm / kmPerPx
+  let grid = ''
+  for(let x = 60; x < W; x += 60) grid += `<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`
+  for(let y = 60; y < H; y += 60) grid += `<line x1="0" y1="${y}" x2="${W}" y2="${y}"/>`
+  const pins = pts.slice().sort((a, b) => b.p.lat - a.p.lat).map(({s, p}) => {
+    const x = X(p.lon).toFixed(1), y = Y(p.lat).toFixed(1)
+    const col = STATUS_HEX[s.status] || 'var(--t3)'
+    const sel = mapSelected === s.name
+    return `<g class="map-pin" onclick="selectMapSite(${jsArg(s.name)})" style="cursor:pointer">
+      <circle cx="${x}" cy="${y}" r="16" fill="transparent"/>
+      ${sel ? `<circle cx="${x}" cy="${y}" r="12" fill="none" stroke="var(--gold)" stroke-width="2"/>` : ''}
+      <circle cx="${x}" cy="${y}" r="9" fill="var(--surface)"/>
+      <circle cx="${x}" cy="${y}" r="7" fill="${col}"/>
+      ${s.stuckSince ? `<circle cx="${(+x) + 7}" cy="${(+y) - 7}" r="4" fill="var(--stuck)" stroke="var(--surface)" stroke-width="1.5"/>` : ''}
+      <text x="${x}" y="${(+y) + 22}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--t1)" stroke="var(--surface-3)" stroke-width="3" paint-order="stroke" style="font-family:inherit">${esc(s.name)}</text>
+      <title>${esc(s.name)} · ${STATUS_LABEL[s.status] || esc(s.status)}${s.issue ? ' · ' + esc(s.issue) : ''}</title>
+    </g>`
+  }).join('')
+  const selSite = mapSelected ? pts.find(x => x.s.name === mapSelected) : null
+  const info = selSite ? `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)">
+      <div style="min-width:0">
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(selSite.s.name)}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${STATUS_LABEL[selSite.s.status] || ''}${selSite.s.issue ? ' · ' + esc(selSite.s.issue) : ''}${selSite.s.stuckSince ? ' · תקוע ' + daysStuck(selSite.s) + ' ימים' : ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <a href="${esc(mapsLinkFor(selSite.s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} ניווט</a>
+        ${iconBtnHtml('showAddSite(' + jsArg(selSite.s.name) + ')', icon('edit'), '', 'edit')}
+      </div>
+    </div>` : ''
+  return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;background:var(--surface-3);direction:ltr" role="img" aria-label="מפת אתרים">
+      <g stroke="var(--line)" stroke-width="1">${grid}</g>
+      ${pins}
+      <g transform="translate(${W - PAD - barPx}, ${H - 14})"><line x1="0" y1="0" x2="${barPx.toFixed(1)}" y2="0" stroke="var(--t2)" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" stroke="var(--t2)" stroke-width="2"/><line x1="${barPx.toFixed(1)}" y1="-4" x2="${barPx.toFixed(1)}" y2="4" stroke="var(--t2)" stroke-width="2"/><text x="${(barPx / 2).toFixed(1)}" y="-6" text-anchor="middle" font-size="10" fill="var(--t2)">${barKm} ק״מ</text></g>
+    </svg>
+    ${info}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--line);font-size:var(--fs-xs);color:var(--t3)">
+      ${['open','pending','resolved'].map(st => `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${STATUS_HEX[st]}"></span>${STATUS_LABEL[st]}</span>`).join('')}
+      <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--stuck)"></span>תקוע</span>
+      ${missing.length ? `<span style="margin-right:auto">${missing.length} בלי קואורדינטות</span>` : ''}
+    </div>
+  </div>`
 }
 
 function mapsLinkFor(loc) {

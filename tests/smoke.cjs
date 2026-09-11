@@ -848,6 +848,58 @@ async function main() {
     })
     await context.unroute(MOCK + '/**')
   }
+  section('Map + charts')
+  await boot(seededState())
+  await check('parseLatLon handles decimal and DMS, rejects junk', async () => {
+    const r = await page.evaluate(() => ({
+      dec: parseLatLon('18.6083, 121.0833'), dms: parseLatLon('18°17\'50.89"N 121°24\'1.57"E'), s: parseLatLon('12°30\'S 45°15\'W'),
+      bad1: parseLatLon('Nambaran, Bagabag'), bad2: parseLatLon('999, 5'), bad3: parseLatLon('')
+    }))
+    assert(r.dec && Math.abs(r.dec.lat - 18.6083) < 1e-6 && Math.abs(r.dec.lon - 121.0833) < 1e-6, 'decimal: ' + JSON.stringify(r.dec))
+    assert(r.dms && Math.abs(r.dms.lat - 18.29747) < 1e-3 && Math.abs(r.dms.lon - 121.40044) < 1e-3, 'dms: ' + JSON.stringify(r.dms))
+    assert(r.s && r.s.lat < 0 && r.s.lon < 0, 'south/west sign: ' + JSON.stringify(r.s))
+    assert(!r.bad1 && !r.bad2 && !r.bad3, 'junk accepted: ' + JSON.stringify([r.bad1, r.bad2, r.bad3]))
+  })
+  await check('sites map toggles on, draws one pin per site with coordinates, counts the rest, and selects on tap', async () => {
+    await page.evaluate(() => { setState({ sites: [...state.sites, { id: 9, name: 'DMS Site', status: 'pending', location: '18°17\'50.89"N 121°24\'1.57"E', createdAt: new Date().toISOString() }] }); setSiteFilter('all'); navigateTo('sites') })
+    await page.click('#sites-map-toggle')
+    let r = await page.evaluate(() => ({ pins: document.querySelectorAll('#screen-sites .map-pin').length, svg: !!document.querySelector('#screen-sites svg[aria-label="מפת אתרים"]'), text: document.getElementById('screen-sites').textContent }))
+    assert(r.svg && r.pins === 2, 'expected 2 pins: ' + JSON.stringify({ pins: r.pins, svg: r.svg }))
+    assert(/2 בלי קואורדינטות/.test(r.text) && /ק״מ/.test(r.text), 'missing-count or scale bar absent')
+    await page.locator('#screen-sites .map-pin').filter({ hasText: 'DMS Site' }).first().click()
+    r = await page.evaluate(() => ({ sel: mapSelected, nav: [...document.querySelectorAll('#screen-sites a[href*="google.com/maps"]')].some(a => /ניווט/.test(a.textContent)) }))
+    assert(r.sel === 'DMS Site' && r.nav, 'pin selection failed: ' + JSON.stringify(r))
+    await page.click('#sites-map-toggle')
+    assert((await page.evaluate(() => document.querySelectorAll('#screen-sites .map-pin').length)) === 0, 'map did not toggle off')
+    await page.evaluate(() => { setSiteFilter('resolved'); sitesMapOn = true; renderSites() })
+    assert(/אין עדיין אתרים עם קואורדינטות/.test(await page.textContent('#screen-sites')), 'no empty-map message for a filter without coordinates')
+    await page.evaluate(() => { sitesMapOn = false; mapSelected = null; setSiteFilter('open') })
+    const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+  })
+  await check('mood trend appears once there are 3+ logged days, with one tile per logged day and a legend with counts', async () => {
+    await page.evaluate(() => navigateTo('home'))
+    assert((await page.evaluate(() => document.querySelectorAll('#mood-trend .mood-day').length)) === 6, 'seeded fixture (6 days of moods) should show 6 tiles')
+    await page.evaluate(() => setState({ moods: state.moods.slice(0, 1) }))
+    assert(!(await page.$('#mood-trend')), 'trend shown with only one mood logged')
+    await page.evaluate(() => { const t = Date.now(); setState({ moods: [
+      { ts: t - 3 * 86400e3, date: getTodayPlus(-3), hour: 10, weekday: 1, mood: 'tired', source: 'manual' },
+      { ts: t - 2 * 86400e3, date: getTodayPlus(-2), hour: 10, weekday: 2, mood: 'focused', source: 'manual' },
+      { ts: t - 1 * 86400e3, date: getTodayPlus(-1), hour: 10, weekday: 3, mood: 'overwhelmed', source: 'manual' },
+      { ts: t - 1 * 86400e3 + 3600e3, date: getTodayPlus(-1), hour: 11, weekday: 3, mood: 'focused', source: 'manual' }] }) })
+    const r = await page.evaluate(() => ({ tiles: document.querySelectorAll('#mood-trend .mood-day').length, legend: document.getElementById('mood-trend').textContent }))
+    assert(r.tiles === 3, 'expected 3 day tiles (last mood per day), got ' + r.tiles)
+    assert(/פוקוס · 2/.test(r.legend) && /עייף · 1/.test(r.legend) && !/מוצף/.test(r.legend), 'legend counts wrong: ' + r.legend)
+  })
+  await check('petty-cash modal shows a 6-month column chart and this month by vendor', async () => {
+    await page.evaluate(() => { const prev = monthKeyOffset(1) + '-15'; setState({ pettyCash: [...state.pettyCash, { id: 'pc_old', date: prev, vendor: 'Old Vendor', amount: '900', note: '' }] }); showPettyCashModal() })
+    const r = await page.evaluate(() => ({ bars: document.querySelectorAll('#modal-container .cash-bar').length, vendors: [...document.querySelectorAll('#modal-container .cash-vendor')].map(d => d.textContent.replace(/\s+/g, ' ').trim()), months: (document.querySelector('#modal-container svg[aria-label="הוצאות לפי חודש"]') || {}).outerHTML || '' }))
+    assert(r.bars === 2, 'expected 2 non-empty bars (this month + last), got ' + r.bars)
+    assert(r.vendors.length === 2 && /Shell/.test(r.vendors[0]) && /₱1,500/.test(r.vendors[0]), 'vendor bars: ' + JSON.stringify(r.vendors))
+    assert(/₱1,850/.test(r.months), 'current-month value label missing from the chart')
+    await page.evaluate(() => closeModal())
+    const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+  })
+
   section('Motion + haptics')
   await boot(seededState())
   await check('navigating adds a short enter animation class to the target screen', async () => {
