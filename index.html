@@ -1814,10 +1814,10 @@ function rightNowHtml(mood) {
   const cap = (limit && !rightNowExpanded) ? limit : 6
   const shown = all.slice(0, cap), hidden = all.length - shown.length
   const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:var(--surface);border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:var(--radius-lg);padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
-      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:var(--t1);line-height:1.4">${it.icon ? icon(it.icon) + ' ' : ''}${esc(it.title)}</div>
+      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:var(--t1);line-height:1.4">${it.icon ? '<span style="color:'+it.color+'">'+icon(it.icon)+'</span> ' : ''}${esc(it.title)}</div>
       ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
     </div>`
-  return `<div style="font-size:var(--fs-base);color:var(--t2);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
+  return `<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
     ${row(shown[0], true)}
     ${shown.slice(1).map(it => row(it, false)).join('')}
     ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
@@ -1896,7 +1896,7 @@ function renderHome() {
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
             return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
-              <div style="font-size:var(--fs-2xl);line-height:1">${icon(d.icon)}</div>
+              <div style="font-size:var(--fs-2xl);line-height:1;color:${d.color}">${icon(d.icon)}</div>
               <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${d.label}</div>
             </button>`
           }).join('')}
