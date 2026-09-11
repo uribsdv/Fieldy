@@ -191,18 +191,54 @@ body {
 ::-webkit-scrollbar { width: 2px; }
 ::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius:var(--radius-pill); }
 
-/* Signature: a single quiet topographic contour, not a bamboo garden —
-   ties back to the actual subject (field survey / terrain), used once, faint. */
-body::before {
-  content: '';
+/* Signature backdrop: a few soft colour glows (the same accent colours used
+   for icon badges elsewhere — gold, teal-green, terracotta, purple) drifting
+   very slowly, a faint topographic contour (ties back to the actual subject
+   — field survey / terrain), and a fine grain for texture. Replaces the old
+   flat single-colour page + one 5%-opacity line pattern, which read as
+   dated/empty behind screens with few cards. Purely atmospheric — very low
+   opacity, pointer-events:none, sits behind #app — and the drift is skipped
+   entirely for reduced-motion users (see prefers-reduced-motion below). */
+#bg-atmosphere {
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20430%20800'%20opacity='0.05'%3E%3Cstyle%3Epath%7Bfill:none;stroke:%23c9a227;stroke-width:1%7D%3C/style%3E%3Cpath%20d='M-20%20120%20Q100%2080%20220%20130%20Q320%20170%20460%20110'/%3E%3Cpath%20d='M-20%20180%20Q110%20145%20230%20190%20Q330%20225%20460%20170'/%3E%3Cpath%20d='M-20%20560%20Q120%20520%20240%20565%20Q330%20600%20460%20545'/%3E%3Cpath%20d='M-20%20620%20Q130%20585%20250%20625%20Q340%20655%20460%20605'/%3E%3Cpath%20d='M-20%20680%20Q140%20648%20260%20685%20Q350%20712%20460%20665'/%3E%3C/svg%3E");
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
+#bg-atmosphere::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20430%20800'%20opacity='0.05'%3E%3Cstyle%3Epath%7Bfill:none;stroke:%23c9a227;stroke-width:1%7D%3C/style%3E%3Cpath%20d='M-20%20120%20Q100%2080%20220%20130%20Q320%20170%20460%20110'/%3E%3Cpath%20d='M-20%20180%20Q110%20145%20230%20190%20Q330%20225%20460%20170'/%3E%3Cpath%20d='M-20%20560%20Q120%20520%20240%20565%20Q330%20600%20460%20545'/%3E%3Cpath%20d='M-20%20620%20Q130%20585%20250%20625%20Q340%20655%20460%20605'/%3E%3Cpath%20d='M-20%20680%20Q140%20648%20260%20685%20Q350%20712%20460%20665'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+}
+#bg-atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+  opacity: .05;
+  mix-blend-mode: overlay;
+}
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .38;
+  will-change: transform;
+}
+.bg-blob-gold { width: 260px; height: 260px; top: -70px; right: -50px; background: radial-gradient(circle, var(--gold), transparent 70%); animation: blob-drift-a 46s ease-in-out infinite alternate; }
+.bg-blob-teal { width: 220px; height: 220px; top: 32%; left: -80px; background: radial-gradient(circle, var(--green), transparent 70%); animation: blob-drift-b 52s ease-in-out infinite alternate; }
+.bg-blob-terracotta { width: 280px; height: 280px; bottom: -90px; right: 8%; background: radial-gradient(circle, var(--terracotta), transparent 70%); animation: blob-drift-c 60s ease-in-out infinite alternate; }
+.bg-blob-purple { width: 200px; height: 200px; bottom: 12%; left: -60px; background: radial-gradient(circle, var(--purple), transparent 70%); animation: blob-drift-d 55s ease-in-out infinite alternate; }
+@keyframes blob-drift-a { from { transform: translate(0,0); } to { transform: translate(-26px, 30px); } }
+@keyframes blob-drift-b { from { transform: translate(0,0); } to { transform: translate(32px, -22px); } }
+@keyframes blob-drift-c { from { transform: translate(0,0); } to { transform: translate(-22px, -28px); } }
+@keyframes blob-drift-d { from { transform: translate(0,0); } to { transform: translate(26px, 24px); } }
+@media (prefers-reduced-motion: reduce) { .bg-blob { animation: none !important; } }
 
 #app {
   position: relative;
@@ -288,6 +324,12 @@ button:active{opacity:.85}
 </style>
 </head>
 <body>
+<div id="bg-atmosphere" aria-hidden="true">
+  <span class="bg-blob bg-blob-gold"></span>
+  <span class="bg-blob bg-blob-teal"></span>
+  <span class="bg-blob bg-blob-terracotta"></span>
+  <span class="bg-blob bg-blob-purple"></span>
+</div>
 <div id="app">
   <div id="screen-home" class="screen"></div>
   <div id="screen-tasks" class="screen hidden"></div>
