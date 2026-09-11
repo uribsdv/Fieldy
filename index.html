@@ -864,7 +864,7 @@ function saveLeadershipEntry() {
   log.push(entry)
   setState({leadershipLog: log.length>365?log.slice(log.length-365):log})
   flashSaved('lead-saved')
-  haptic('success')
+  haptic('success'); playFx('save')
   if(shouldAnalyzePatterns()) analyzePersonalPatterns()
 }
 
@@ -1370,6 +1370,22 @@ const playZenBell = () => { playTone(528,2.5); setTimeout(()=>playTone(396,1.5),
 const playTibetanBowl = () => { playTone(256,3); setTimeout(()=>playTone(384,2),250); setTimeout(()=>playTone(512,1.5),600); };
 const playTaskComplete = () => { playTone(440,0.3); setTimeout(()=>playTone(554,0.3),150); setTimeout(()=>playTone(659,1),300); };
 const playTaskAdd = () => playTone(396,0.5,'triangle',0.2);
+// Soft two-note chime for "saved" moments (leadership entry) — quieter than
+// the task-complete run, so it registers without demanding attention.
+const playSaveChime = () => { playTone(523,0.25,'triangle',0.16); setTimeout(()=>playTone(659,0.5,'triangle',0.14),120); };
+
+// ── ACTION SOUND FEEDBACK ─────────────────────────
+// Short sounds on key actions (finish a task, save the daily reflection,
+// finish a meditation): immediate positive feedback, which matters for an
+// ADHD brain. Always optional — the Settings toggle silences all of them for
+// meetings and the field, and every action also confirms itself visually
+// (ripple, check, "נשמר"), so sound is never the only signal. The Tao
+// screen's ambient water and the meditation narration have their own mute.
+function soundOn() { return localStorage.getItem('fieldy_sound') !== '0' }
+function setSoundOn(on) { localStorage.setItem('fieldy_sound', on ? '1' : '0'); if(on) playFx('save') }
+function setHapticsOn(on) { localStorage.setItem('fieldy_haptics', on ? '1' : '0'); if(on) haptic('light') }
+const FX = {complete: () => playTaskComplete(), add: () => playTaskAdd(), save: () => playSaveChime(), done: () => playTibetanBowl()}
+function playFx(kind) { if(!soundOn()) return; const f = FX[kind]; if(f) f() }
 
 const showRipple = () => {
   const el = document.createElement('div');
@@ -1692,7 +1708,7 @@ function stopMeditation(completed) {
   document.getElementById('modal-container').innerHTML = '';
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
   try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
-  if(completed) { playTibetanBowl(); showRipple(); haptic('success'); logEvent('meditation_completed', {}); }
+  if(completed) { playFx('done'); showRipple(); haptic('success'); logEvent('meditation_completed', {}); }
 }
 
 function renderCurrentScreen() {
@@ -2134,7 +2150,7 @@ function toggleTask(id) {
   }
   setState(patch)
   if(wasUndone){
-    playTaskComplete();showRipple();haptic('success');
+    playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
 }
@@ -2257,7 +2273,7 @@ function doAddTask() {
   } else {
     const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,note,photo}
     setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
-    playTaskAdd(); haptic('light')
+    playFx('add'); haptic('light')
   }
   closeModal()
 }
@@ -2910,6 +2926,12 @@ function renderSettings() {
               <div style="font-size:var(--fs-sm);font-weight:600;color:${currentTheme===name?THEMES[name].gold:'var(--t2)'}">${THEMES[name].label}</div>
             </button>`).join('')}
         </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('volume-2')} משוב לפעולות</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px;line-height:1.6">צליל קצר ורטט עדין כשמסיימים משימה, שומרים רפלקציה או מסיימים מדיטציה. כל פעולה מאשרת את עצמה גם בלי זה — אפשר לכבות לפגישות ולשטח.</div>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-bottom:10px;cursor:pointer"><input type="checkbox" id="pref-sound" ${soundOn()?'checked':''} onchange="setSoundOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('music')} צלילי פעולה</label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);cursor:pointer"><input type="checkbox" id="pref-haptics" ${localStorage.getItem('fieldy_haptics')!=='0'?'checked':''} onchange="setHapticsOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('activity')} רטט</label>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('package')} גיבוי / העברה לטלפון חדש</div>
