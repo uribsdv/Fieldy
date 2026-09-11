@@ -29,9 +29,17 @@
   --shadow-none:none;--shadow-sm:0 1px 2px rgba(43,38,32,.06);--shadow-md:0 4px 12px rgba(43,38,32,.08);--shadow-lg:0 10px 30px rgba(43,38,32,.12);
   /* type scale */
   --fs-2xs:10px;--fs-xs:11px;--fs-sm:12px;--fs-md:13px;--fs-base:14px;--fs-lg:15px;--fs-xl:16px;--fs-2xl:18px;--fs-3xl:22px;--fs-4xl:26px;
+  /* surfaces */
+  --surface:#ffffff;--surface-2:#f0e7cf;--surface-3:#fdf9ee;--surface-input:#fffdf6;--accent-soft:#fdf1da;--accent-line:#f0d9a3;--gold-deep:#a8711a;--t5:#e3d9bd;
+  /* status / meaning colours (fixed across themes — they carry meaning) */
+  --red:#ef4444;--red-dark:#c0392b;--red-soft:#fdeaea;--orange:#e8940c;--amber:#f59e0b;--amber-line:#f5c877;--green:#1a8f7a;--green-light:#4ade80;--purple:#6b46c1;--stuck:#b84600;--stuck-soft:#fdece0;--blue:#3d5a80;--blue-soft:#eef2f7;--blue-line:#cdd9e8;
+  /* the Tao screen's quiet dark palette */
+  --tao-bg:#0d0a05;--tao-bg2:#120d06;--tao-panel:#1c1508;--tao-panel2:#1c140a;--tao-line:#241b0d;--tao-line2:#3a2c10;--tao-t1:#f5ecd6;--tao-t1b:#d8c9a3;--tao-t2:#b3a077;--tao-t3:#8a7857;--tao-gold:#e8c15c;--tao-gold2:#cf9d2e;--tao-gold3:#b8860b;
+  /* motion */
+  --ease-out:cubic-bezier(.2,.8,.2,1);--dur-fast:120ms;--dur-base:180ms;--dur-slow:260ms;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#f6efdb;color:#211d17;direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:var(--fs-lg)}
+body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:var(--ink);color:var(--t1);direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:var(--fs-lg)}
 .font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
@@ -39,48 +47,48 @@ textarea,select,input{font-family:inherit}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:120px}
 .hidden{display:none!important}
 /* Nav */
-#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#f0e7cf;border-top:1px solid var(--line);display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface-2);border-top:1px solid var(--line);display:grid;grid-template-columns: repeat(6, 1fr);align-items:start;padding:8px 0 24px;z-index:100}
 .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:var(--space-1-5) 2px;cursor:pointer;background:none;border:none;position:relative;min-width:0}
 .nav-icon{display:flex;align-items:center;justify-content:center;line-height:1}
-.nav-label{font-size:10.5px;color:#948a7a;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav-label{font-size:10.5px;color:var(--t3);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nav-btn.active .nav-label{color:var(--gold);font-weight:700}
-.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:#e8940c;color:#fff;border-radius:var(--radius-pill);font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:var(--orange);color:#fff;border-radius:var(--radius-pill);font-size:var(--fs-2xs);font-weight:700;padding:1px 5px;min-width:16px;text-align:center}
 /* Cards */
-.card{background:#ffffff;border-radius:var(--radius-xl);padding:var(--space-3-5);margin-bottom:var(--space-2)}
-.card-red{border:1.5px solid #ef444460;background:#fdeaea}
+.card{background:var(--surface);border-radius:var(--radius-xl);padding:var(--space-3-5);margin-bottom:var(--space-2)}
+.card-red{border:1.5px solid #ef444460;background:var(--red-soft)}
 .card-orange{border:1.5px solid #f59e0b60;background:#f59e0b18}
 .card-green{border:1.5px solid #4ade8060;background:#4ade8018}
 /* Buttons */
 .btn-primary{width:100%;padding:var(--space-4);border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:var(--fs-xl);font-weight:700;display:block;border:none;cursor:pointer}
-.btn-secondary{padding:var(--space-3-5) var(--space-4-5);border-radius:var(--radius-lg);border:1px solid #b0a68f;background:transparent;color:#6b6255;font-size:var(--fs-base);cursor:pointer}
+.btn-secondary{padding:var(--space-3-5) var(--space-4-5);border-radius:var(--radius-lg);border:1px solid var(--t4);background:transparent;color:var(--t2);font-size:var(--fs-base);cursor:pointer}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:#000d;z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:#ffffff;width:100%;max-width:430px;border-radius:var(--radius-3xl) var(--radius-3xl) 0 0;padding:22px var(--space-4) var(--space-10);max-height:85vh;overflow-y:auto}
+.modal{background:var(--surface);width:100%;max-width:430px;border-radius:var(--radius-3xl) var(--radius-3xl) 0 0;padding:22px var(--space-4) var(--space-10);max-height:85vh;overflow-y:auto}
 /* Form */
-.form-label{font-size:var(--fs-base);color:#6b6255;margin-bottom:var(--space-1);display:block}
-.form-input{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:var(--radius-md);padding:11px var(--space-3);color:#211d17;font-size:var(--fs-base);outline:none;display:block;margin-bottom:var(--space-2-5);direction:rtl}
-.form-select{width:100%;background:#f0e7cf;border:1px solid #b0a68f;border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:#211d17;font-size:var(--fs-base);outline:none}
+.form-label{font-size:var(--fs-base);color:var(--t2);margin-bottom:var(--space-1);display:block}
+.form-input{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-md);padding:11px var(--space-3);color:var(--t1);font-size:var(--fs-base);outline:none;display:block;margin-bottom:var(--space-2-5);direction:rtl}
+.form-select{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:var(--t1);font-size:var(--fs-base);outline:none}
 /* Tags */
-.tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:#f0e7cf;color:#6b6255}
-.tag-red{background:#ef444422;color:#ef4444;font-weight:600}
-.tag-orange{background:#f59e0b22;color:#f59e0b;font-weight:600}
-.tag-green{background:#4ade8022;color:#4ade80;font-weight:600}
-.tag-status-open{background:#ef444422;color:#ef4444;font-weight:600}
-.tag-status-pending{background:#f59e0b22;color:#f59e0b;font-weight:600}
-.tag-status-resolved{background:#4ade8022;color:#4ade80;font-weight:600}
+.tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--t2)}
+.tag-red{background:#ef444422;color:var(--red);font-weight:600}
+.tag-orange{background:#f59e0b22;color:var(--amber);font-weight:600}
+.tag-green{background:#4ade8022;color:var(--green-light);font-weight:600}
+.tag-status-open{background:#ef444422;color:var(--red);font-weight:600}
+.tag-status-pending{background:#f59e0b22;color:var(--amber);font-weight:600}
+.tag-status-resolved{background:#4ade8022;color:var(--green-light);font-weight:600}
 /* Checkbox */
 .cb{width:26px;height:26px;border-radius:var(--radius-sm);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
 .progress-bar{background:#eee3c9;border-radius:var(--radius-pill);height:6px;overflow:hidden}
 .progress-fill{height:100%;border-radius:var(--radius-pill);transition:width 0.4s;background:linear-gradient(90deg,var(--gold),var(--gold2))}
 /* Screens header */
-.screen-header{padding:var(--space-12) var(--space-4) var(--space-3);background:linear-gradient(180deg,#fdf9ee,#f6efdb);position:sticky;top:0;z-index:10}
+.screen-header{padding:var(--space-12) var(--space-4) var(--space-3);background:linear-gradient(180deg,var(--surface-3),var(--ink));position:sticky;top:0;z-index:10}
 /* Empty state */
-.empty{text-align:center;padding:60px 0;color:#b0a68f}
+.empty{text-align:center;padding:60px 0;color:var(--t4)}
 .empty-icon{font-size:40px;margin-bottom:var(--space-2-5)}
 .empty-text{font-size:var(--fs-base)}
 /* Action result */
-.action-result{background:#ffffff;border:1px solid var(--line);border-radius:var(--radius-xl);padding:var(--space-4);font-size:var(--fs-lg);color:#211d17;line-height:1.8;white-space:pre-wrap;margin-bottom:var(--space-3);direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
+.action-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-xl);padding:var(--space-4);font-size:var(--fs-lg);color:var(--t1);line-height:1.8;white-space:pre-wrap;margin-bottom:var(--space-3);direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
 
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
@@ -96,28 +104,28 @@ textarea,select,input{font-family:inherit}
   --border:rgba(43,38,32,.14);--glass2:rgba(255,255,255,.92);
   --line:rgba(43,38,32,.09);
 }
-.tao-screen{background:linear-gradient(180deg,#f6efdb 0%,#f6efdb 100%);min-height:100%}
-.tao-card{background:linear-gradient(135deg,#fdf9ee,#fdf9ee);border:1px solid #a8711a;border-radius:var(--radius-2xl);padding:var(--space-5);position:relative;overflow:hidden}
-.tao-verse{font-size:var(--fs-xl);line-height:2.4;color:#211d17;text-align:center;font-weight:300;letter-spacing:0.5px}
+.tao-screen{background:linear-gradient(180deg,var(--ink) 0%,var(--ink) 100%);min-height:100%}
+.tao-card{background:linear-gradient(135deg,var(--surface-3),var(--surface-3));border:1px solid var(--gold-deep);border-radius:var(--radius-2xl);padding:var(--space-5);position:relative;overflow:hidden}
+.tao-verse{font-size:var(--fs-xl);line-height:2.4;color:var(--t1);text-align:center;font-weight:300;letter-spacing:0.5px}
 .tao-chapter-num{font-size:var(--fs-base);color:#b8790f;font-weight:600;letter-spacing:2px;margin-bottom:var(--space-3);text-align:center}
-.tao-title{font-size:var(--fs-base);color:#6b6255;text-align:center;margin-bottom:var(--space-4);font-style:italic}
-.med-timer{font-size:48px;font-weight:200;color:#211d17;text-align:center;letter-spacing:4px}
-.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid #a8711a;display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
-.breath-text{font-size:var(--fs-2xl);color:#e8c15c;text-align:center;margin-top:var(--space-4);font-weight:300;letter-spacing:1px}
-.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:#a8711a}
+.tao-title{font-size:var(--fs-base);color:var(--t2);text-align:center;margin-bottom:var(--space-4);font-style:italic}
+.med-timer{font-size:48px;font-weight:200;color:var(--t1);text-align:center;letter-spacing:4px}
+.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
+.breath-text{font-size:var(--fs-2xl);color:var(--tao-gold);text-align:center;margin-top:var(--space-4);font-weight:300;letter-spacing:1px}
+.brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:var(--gold-deep)}
 @keyframes ripple{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
-.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid #a8711a;pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
+.success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid var(--gold-deep);pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
 
 
 /* === CONSOLE ATMOSPHERE === */
 
 body {
-  background: #f6efdb;
+  background: var(--ink);
 }
 
 /* Flat header, no wash gradient */
 .screen-header {
-  background: #f6efdb !important;
+  background: var(--ink) !important;
   border-bottom: 1px solid var(--line) !important;
 }
 
@@ -130,7 +138,7 @@ body {
 
 /* Flat nav, no blur */
 #nav {
-  background: #fdf9ee !important;
+  background: var(--surface-3) !important;
   border-top: 1px solid var(--line) !important;
 }
 
@@ -149,7 +157,7 @@ body {
 
 /* Flat modal, thin top rule */
 .modal {
-  background: #fffdf6 !important;
+  background: var(--surface-input) !important;
   border-top: 1px solid var(--line) !important;
 }
 
@@ -159,17 +167,17 @@ body {
 
 /* Tao screen keeps its own quiet, separate dark atmosphere on purpose */
 #screen-tao {
-  background: linear-gradient(180deg, #f6efdb 0%, #f6efdb 100%);
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 100%);
 }
 
 .form-input, .form-select {
-  background: #fffdf6 !important;
+  background: var(--surface-input) !important;
   border: 1px solid var(--line) !important;
   color: var(--text1) !important;
 }
 
 ::-webkit-scrollbar { width: 2px; }
-::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius:var(--radius-pill); }
 
 /* Signature: a single quiet topographic contour, not a bamboo garden —
    ties back to the actual subject (field survey / terrain), used once, faint. */
@@ -204,7 +212,7 @@ body::before {
   z-index: 1;
 }
 
-.cal-header{padding:52px var(--space-4-5) var(--space-3);background:#f6efdb;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.cal-header{padding:52px var(--space-4-5) var(--space-3);background:var(--ink);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
 .cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-2-5)}
 .cal-nav-btn{background:var(--ink3);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3-5);color:var(--t2);font-size:var(--fs-2xl);cursor:pointer}
 .cal-month-title{font-size:var(--fs-2xl);font-weight:700;color:var(--t1);text-align:center}
@@ -231,17 +239,39 @@ body::before {
 .week-dnum{font-size:var(--fs-2xl);font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
 .week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:var(--radius-sm);padding:5px var(--space-2-5);margin-bottom:var(--space-1);font-size:var(--fs-base);color:var(--t1);font-weight:500}
+/* Component classes shared by the render helpers */
+.panel-label{font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:var(--space-2)}
+.tao-label{font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:700;margin-bottom:var(--space-3)}
+.muted{color:var(--t3)}
+/* Screen + sheet motion (kept short; skipped entirely for reduced-motion users) */
+@keyframes screen-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes sheet-up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.screen.enter{animation:screen-in var(--dur-base) var(--ease-out)}
+.modal-overlay{animation:fade-in var(--dur-fast) ease-out}
+.modal{animation:sheet-up var(--dur-slow) var(--ease-out)}
+.nav-btn .nav-icon{transition:transform var(--dur-fast) var(--ease-out)}
+.nav-btn:active .nav-icon{transform:scale(.88)}
+button:active{opacity:.85}
+@media (prefers-reduced-motion:reduce){.screen.enter,.modal-overlay,.modal{animation:none}*{transition:none!important}}
+/* Skeleton placeholder shown while an AI call is in flight */
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.skel{padding:var(--space-1) 0}
+.skel-line{height:12px;border-radius:var(--radius-pill);margin:var(--space-2) 0;background:linear-gradient(90deg,var(--surface-2) 25%,var(--accent-soft) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.skel.dark .skel-line{background:linear-gradient(90deg,var(--tao-line) 25%,var(--tao-line2) 50%,var(--tao-line) 75%);background-size:200% 100%}
+.skel-note{font-size:var(--fs-sm);color:var(--t3);margin-top:var(--space-1)}
+.skel.dark .skel-note{color:var(--tao-t3)}
 /* Inline icons */
 .ic{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 /* Undo toast (shown for a few seconds after any delete) */
-#undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#211d17;color:#fdf9ee;padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
+#undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--t1);color:var(--surface-3);padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
 #undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
 /* Voice input row under a text field */
 .voice-row{display:flex;align-items:center;gap:var(--space-1-5);margin:-4px 0 var(--space-2-5)}
-.voice-btn{background:#f0e7cf;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-3);font-size:var(--fs-base);color:#6b6255;font-weight:600}
-.voice-btn.recording{background:#fdeaea;border-color:#ef4444;color:#c0392b}
-.voice-lang{background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-2-5);font-size:var(--fs-sm);color:#948a7a}
-.voice-status{font-size:var(--fs-sm);color:#948a7a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.voice-btn{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-3);font-size:var(--fs-base);color:var(--t2);font-weight:600}
+.voice-btn.recording{background:var(--red-soft);border-color:var(--red);color:var(--red-dark)}
+.voice-lang{background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-2-5);font-size:var(--fs-sm);color:var(--t3)}
+.voice-status{font-size:var(--fs-sm);color:var(--t3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -484,18 +514,18 @@ function emptyHtml(iconName, text, style) {
 }
 // Screen title row with an accent "+ הוסף" button (tasks / sites / people headers).
 function addBtnHtml(onclick) {
-  return '<button onclick="' + onclick + '" style="background:var(--bamboo);border-radius:10px;padding:8px 14px;color:#fff;font-size:14px;font-weight:600">+ הוסף</button>'
+  return '<button onclick="' + onclick + '" style="background:var(--bamboo);border-radius:var(--radius-md);padding:8px 14px;color:#fff;font-size:var(--fs-base);font-weight:600">+ הוסף</button>'
 }
 // Back-arrow header used by the input / action / settings screens.
 function backHeaderHtml(title, marginBottom) {
   return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:' + (marginBottom || '20px') + '">' +
-    '<button onclick="navigateTo(\'home\')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">' + icon('arrow-left') + '</button>' +
-    '<div style="font-size:18px;font-weight:700">' + title + '</div>' +
+    '<button onclick="navigateTo(\'home\')" style="background:var(--surface);border-radius:var(--radius-md);padding:10px 14px;color:var(--t2);font-size:var(--fs-2xl)">' + icon('arrow-left') + '</button>' +
+    '<div style="font-size:var(--fs-2xl);font-weight:700">' + title + '</div>' +
     '</div>'
 }
 // Small cream icon button on task / site / person cards (✎ 🖌️ 🗑 …).
 function iconBtnHtml(onclick, label, extraStyle, act) {
-  return '<button onclick="' + onclick + '"' + (act ? ' data-act="' + act + '" aria-label="' + act + '"' : '') + ' style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
+  return '<button onclick="' + onclick + '"' + (act ? ' data-act="' + act + '" aria-label="' + act + '"' : '') + ' style="background:var(--surface-2);border-radius:var(--radius-sm);padding:7px 9px;color:var(--t2);font-size:var(--fs-base)' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
 }
 // The 🖌️ "draft a message about this" button — same on tasks, sites and people.
 function actionBtnHtml(text, assignee, extraStyle) {
@@ -507,29 +537,44 @@ function optionsHtml(pairs, selected) {
 }
 // Warm cream panel used on the home screen (quote, focus, patterns, insights).
 function creamPanelHtml(inner, style) {
-  return '<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;' + (style || 'padding:14px 16px;margin-bottom:16px') + '">' + inner + '</div>'
+  return '<div style="background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:var(--radius-xl);' + (style || 'padding:14px 16px;margin-bottom:16px') + '">' + inner + '</div>'
 }
 // Home-screen stat tile (count + label on a gradient).
 function statTileHtml(screen, gradient, iconName, count, label, labelColor) {
-  return '<div onclick="navigateTo(\'' + screen + '\')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:' + gradient + '">' +
-    '<div style="font-size:20px;line-height:1;color:#ffffff;margin-bottom:4px">' + icon(iconName) + '</div>' +
-    '<div style="font-size:24px;font-weight:800;color:#ffffff">' + count + '</div>' +
-    '<div style="font-size:14px;color:' + labelColor + ';margin-top:2px;font-weight:600">' + label + '</div>' +
+  return '<div onclick="navigateTo(\'' + screen + '\')" style="cursor:pointer;text-align:center;border-radius:var(--radius-2xl);padding:16px 8px;background:' + gradient + '">' +
+    '<div style="font-size:20px;line-height:1;color:var(--surface);margin-bottom:4px">' + icon(iconName) + '</div>' +
+    '<div style="font-size:24px;font-weight:800;color:var(--surface)">' + count + '</div>' +
+    '<div style="font-size:var(--fs-base);color:' + labelColor + ';margin-top:2px;font-weight:600">' + label + '</div>' +
     '</div>'
 }
 // Gold-bordered dark panel and its small uppercase-style label, used all over the Tao screen.
 function taoPanelHtml(inner, style) {
-  return '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid rgba(184,134,11,.4);border-radius:14px;' + (style || 'padding:16px 18px;margin-bottom:16px') + '">' + inner + '</div>'
+  return '<div style="background:linear-gradient(135deg,var(--tao-panel),var(--tao-panel2));border:1px solid rgba(184,134,11,.4);border-radius:var(--radius-xl);' + (style || 'padding:16px 18px;margin-bottom:16px') + '">' + inner + '</div>'
 }
-function taoLabelHtml(text) {
-  return '<div style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600;margin-bottom:12px">' + text + '</div>'
+function taoLabelHtml(text) { return '<div class="tao-label">' + text + '</div>' }
+// Placeholder for an answer that is still being generated: a few shimmering
+// lines instead of a bare "…", so the wait reads as progress. `note` is the
+// one short line of copy under it (what is happening, in plain words).
+function skeletonHtml(lines, note, dark) {
+  const widths = [92, 78, 85, 60, 70, 88]
+  let h = '<div class="skel' + (dark ? ' dark' : '') + '" role="status" aria-live="polite">'
+  for(let i = 0; i < (lines || 3); i++) h += '<div class="skel-line" style="width:' + widths[i % widths.length] + '%"></div>'
+  return h + (note ? '<div class="skel-note">' + note + '</div>' : '') + '</div>'
+}
+// Short vibration on key actions (phones only; a no-op elsewhere). Off via
+// the "משוב" toggle in Settings.
+const HAPTIC = {light:[10], success:[15, 40, 25], warn:[30, 50, 30]}
+function haptic(kind) {
+  if(localStorage.getItem('fieldy_haptics') === '0') return
+  if(!('vibrate' in navigator)) return
+  try { navigator.vibrate(HAPTIC[kind] || HAPTIC.light) } catch(e) {}
 }
 // Dark "tip" card used by the Sinek, ADHD and small-talk toolkits.
 function toolkitCardHtml(c, isRelated) {
-  return '<div style="background:#120d06;border:1px solid ' + (isRelated ? '#b8860b' : '#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
-    (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">' + icon('link') + ' קשור למוקד השבוע</div>' : '') +
-    '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + icon(c.icon) + ' ' + c.title + '</div>' +
-    '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
+  return '<div style="background:var(--tao-bg2);border:1px solid ' + (isRelated ? 'var(--tao-gold3)' : 'var(--tao-line)') + ';border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px">' +
+    (isRelated ? '<div style="font-size:var(--fs-2xs);color:var(--tao-gold);font-weight:600;margin-bottom:4px">' + icon('link') + ' קשור למוקד השבוע</div>' : '') +
+    '<div style="font-size:var(--fs-md);font-weight:600;color:var(--tao-t1);margin-bottom:4px">' + icon(c.icon) + ' ' + c.title + '</div>' +
+    '<div style="font-size:var(--fs-sm);color:var(--tao-t2);line-height:1.5">' + c.tip + '</div>' +
     '</div>'
 }
 // Temporarily swaps a button's label ("✓ הועתק" …) and restores it afterwards.
@@ -628,14 +673,14 @@ function loadSavedState() {
 function showStateLoadError(err) {
   var raw = err.raw || ''
   document.getElementById('app').innerHTML =
-    '<div id="state-load-error" style="padding:56px 20px 40px;min-height:100vh;background:#fdeaea">' +
-    '<div style="font-size:22px;font-weight:800;color:#b91c1c;margin-bottom:10px">' + icon('alert-triangle') + ' Fieldy לא הצליח לטעון את הנתונים השמורים</div>' +
-    '<div style="font-size:15px;color:#211d17;line-height:1.7;margin-bottom:14px">' + esc(err.message) + '</div>' +
-    '<div style="font-size:14px;color:#6b6255;line-height:1.7;margin-bottom:20px">שום דבר לא נמחק ולא נדרס — הנתונים נשארו במכשיר בדיוק כפי שהיו. כדי לא לאבד אותם, קודם הורד עותק, ואז אפשר לנסות שוב או להתחיל מחדש.</div>' +
+    '<div id="state-load-error" style="padding:56px 20px 40px;min-height:100vh;background:var(--red-soft)">' +
+    '<div style="font-size:var(--fs-3xl);font-weight:800;color:#b91c1c;margin-bottom:10px">' + icon('alert-triangle') + ' Fieldy לא הצליח לטעון את הנתונים השמורים</div>' +
+    '<div style="font-size:var(--fs-lg);color:var(--t1);line-height:1.7;margin-bottom:14px">' + esc(err.message) + '</div>' +
+    '<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.7;margin-bottom:20px">שום דבר לא נמחק ולא נדרס — הנתונים נשארו במכשיר בדיוק כפי שהיו. כדי לא לאבד אותם, קודם הורד עותק, ואז אפשר לנסות שוב או להתחיל מחדש.</div>' +
     '<button id="state-error-download" class="btn-primary" style="margin-bottom:10px">' + icon('download') + ' הורד עותק של הנתונים הגולמיים</button>' +
     '<button id="state-error-retry" class="btn-secondary" style="width:100%;margin-bottom:10px">' + icon('refresh') + ' נסה לטעון שוב</button>' +
     '<button id="state-error-reset" class="btn-secondary" style="width:100%;color:#b91c1c;border-color:#b91c1c66">התחל מחדש עם נתונים ריקים (העותק הפגום יישמר בגיבוי במכשיר)</button>' +
-    '<div style="font-size:12px;color:#948a7a;margin-top:18px;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px">' + esc(raw.slice(0,600)) + (raw.length > 600 ? '…' : '') + '</div>' +
+    '<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:18px;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px">' + esc(raw.slice(0,600)) + (raw.length > 600 ? '…' : '') + '</div>' +
     '</div>'
   document.getElementById('state-error-download').onclick = function(){
     var blob = new Blob([raw], {type:'text/plain'})
@@ -796,8 +841,8 @@ const MOOD_ORDER = ['overwhelmed','scattered','tired','focused','motivated']
 // ── LEADERSHIP DEVELOPMENT ────────────────────────
 function leadField(id, label, value) {
   return '<div style="margin-bottom:10px">' +
-    '<div style="font-size:12px;color:#b3a077;margin-bottom:4px">' + label + '</div>' +
-    '<textarea id="' + id + '" style="width:100%;min-height:44px;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;resize:none;outline:none;line-height:1.5;direction:rtl;font-family:inherit">' + esc(value) + '</textarea>' +
+    '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-bottom:4px">' + label + '</div>' +
+    '<textarea id="' + id + '" style="width:100%;min-height:44px;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);resize:none;outline:none;line-height:1.5;direction:rtl;font-family:inherit">' + esc(value) + '</textarea>' +
     '</div>'
 }
 function getTodayLeadershipEntry() {
@@ -817,6 +862,7 @@ function saveLeadershipEntry() {
   log.push(entry)
   setState({leadershipLog: log.length>365?log.slice(log.length-365):log})
   flashSaved('lead-saved')
+  haptic('success')
   if(shouldAnalyzePatterns()) analyzePersonalPatterns()
 }
 
@@ -935,6 +981,7 @@ function logMood(mood, source) {
   var moods = [...(state.moods||[]), entry]
   if(moods.length > 500) moods = moods.slice(moods.length - 500)
   rightNowExpanded = false   // a new mood starts with its own limit applied
+  if(source !== 'auto') haptic('light')
   setState({moods: moods})
   logEvent('mood_logged', {mood: mood, source: source || 'manual'})
   if(currentScreen === 'home') renderHome()
@@ -1092,8 +1139,14 @@ function navigateTo(screen, ctx=null) {
   // Hide all screens
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'))
   
-  // Show target
-  document.getElementById('screen-' + screen).classList.remove('hidden')
+  // Show target (with a short enter animation, see .screen.enter)
+  const target = document.getElementById('screen-' + screen)
+  target.classList.remove('hidden')
+  if(screen !== currentScreen) {
+    target.classList.remove('enter'); void target.offsetWidth
+    target.classList.add('enter')
+    target.addEventListener('animationend', function(){ target.classList.remove('enter') }, {once:true})
+  }
   
   // Update nav
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
@@ -1183,40 +1236,40 @@ function renderTalkTab() {
 
   if(!talkScenario) {
     var scenarioBtns = TALK_SCENARIOS.map(function(s,i){
-      return '<button class="talk-scenario-btn" data-idx="'+i+'" style="width:100%;text-align:right;background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer">' +
-        '<div style="font-size:14px;font-weight:600;color:#f5ecd6">'+s.label+'</div>' +
-        '<div style="font-size:12px;color:#b3a077;margin-top:3px">'+s.desc+'</div>' +
+      return '<button class="talk-scenario-btn" data-idx="'+i+'" style="width:100%;text-align:right;background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;cursor:pointer">' +
+        '<div style="font-size:var(--fs-base);font-weight:600;color:var(--tao-t1)">'+s.label+'</div>' +
+        '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-top:3px">'+s.desc+'</div>' +
         '</button>'
     }).join('');
     return toolkitBox + taoPanelHtml(
       taoLabelHtml(icon('smile') + ' בחר תרחיש להתאמן') +
       scenarioBtns +
       '<div style="display:flex;gap:6px;margin-top:6px">' +
-      '<input id="talk-custom-input" placeholder="או תאר תרחיש משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
-      '<button id="talk-custom-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">התחל</button>' +
+      '<input id="talk-custom-input" placeholder="או תאר תרחיש משלך..." style="flex:1;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);font-family:inherit"/>' +
+      '<button id="talk-custom-btn" style="background:var(--tao-panel);border:1px solid rgba(184,134,11,.4);border-radius:var(--radius-sm);padding:0 14px;color:var(--tao-gold);font-size:var(--fs-md);cursor:pointer">התחל</button>' +
       '</div>', 'padding:16px 18px');
   }
 
   var bubbles = talkMessages.map(function(m){
     var isUser = m.role==='user'
     return '<div style="display:flex;justify-content:'+(isUser?'flex-start':'flex-end')+';margin-bottom:8px">' +
-      '<div style="max-width:82%;background:'+(isUser?'#241b0d':'#3a2c10')+';border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.5;color:#f5ecd6;white-space:pre-line">' + esc(m.content) + '</div>' +
+      '<div style="max-width:82%;background:'+(isUser?'var(--tao-line)':'var(--tao-line2)')+';border-radius:var(--radius-xl);padding:10px 14px;font-size:var(--fs-base);line-height:1.5;color:var(--tao-t1);white-space:pre-line">' + esc(m.content) + '</div>' +
       '</div>'
   }).join('');
 
   return toolkitBox + taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-    '<span style="font-size:12px;color:#e8c15c;font-weight:700">' + icon('smile') + ' ' + esc(talkScenario.label) + '</span>' +
-    '<button id="talk-restart-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:4px 10px;color:#b3a077;font-size:11px;cursor:pointer">' + icon('rotate-ccw') + ' תרחיש חדש</button>' +
+    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:700">' + icon('smile') + ' ' + esc(talkScenario.label) + '</span>' +
+    '<button id="talk-restart-btn" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--tao-t2);font-size:var(--fs-xs);cursor:pointer">' + icon('rotate-ccw') + ' תרחיש חדש</button>' +
     '</div>' +
     '<div id="talk-chat-log" style="max-height:340px;overflow-y:auto;margin-bottom:10px">' + bubbles +
-    (talkBusy ? '<div style="text-align:center;color:#8a7857;font-size:12px;padding:6px">...כותב</div>' : '') +
+    (talkBusy ? '<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><div style="width:70%;background:var(--tao-line2);border-radius:14px;padding:6px 14px">' + skeletonHtml(2, null, true) + '</div></div>' : '') +
     '</div>' +
     '<div style="display:flex;gap:6px;margin-bottom:8px">' +
-    '<input id="talk-msg-input" placeholder="תגיב/י..." '+(talkBusy?'disabled':'')+' style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
-    '<button id="talk-send-btn" '+(talkBusy?'disabled':'')+' style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:0 16px;color:#1c1508;font-size:13px;font-weight:700">שלח</button>' +
+    '<input id="talk-msg-input" placeholder="תגיב/י..." '+(talkBusy?'disabled':'')+' style="flex:1;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);font-family:inherit"/>' +
+    '<button id="talk-send-btn" '+(talkBusy?'disabled':'')+' style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-sm);padding:0 16px;color:var(--tao-panel);font-size:var(--fs-md);font-weight:700">שלח</button>' +
     '</div>' +
-    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">' + icon('message-circle') + ' תן לי משוב עכשיו</button>',
+    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:var(--tao-panel);border:1px solid rgba(184,134,11,.4);border-radius:var(--radius-sm);padding:8px;color:var(--tao-gold);font-size:var(--fs-sm);font-weight:600">' + icon('message-circle') + ' תן לי משוב עכשיו</button>',
     'padding:14px 14px 16px');
 }
 
@@ -1380,25 +1433,25 @@ function renderTaoChapter(el, idx) {
   }).join('');
 
   var medHtml = MEDITATIONS.map(function(m, i) {
-    return '<div id="med-btn-' + i + '" style="background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+    return '<div id="med-btn-' + i + '" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
-      '<div style="font-size:15px;font-weight:600;color:#f5ecd6">' + icon(m.icon) + ' ' + m.title + '</div>' +
-      '<div style="font-size:12px;color:#b3a077;margin-top:3px">' + m.desc + '</div>' +
+      '<div style="font-size:var(--fs-lg);font-weight:600;color:var(--tao-t1)">' + icon(m.icon) + ' ' + m.title + '</div>' +
+      '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-top:3px">' + m.desc + '</div>' +
       '</div>' +
-      '<div style="font-size:13px;color:#cf9d2e;flex-shrink:0">' + m.duration + ' דק</div>' +
+      '<div style="font-size:var(--fs-md);color:var(--tao-gold2);flex-shrink:0">' + m.duration + ' דק</div>' +
       '</div>';
   }).join('');
 
   var qod = getQuoteOfTheDay();
   var quoteHtml = qod ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">' + icon('quote') + ' ציטוט</span>' +
-    '<button id="quote-reroll-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:3px 9px;color:#b3a077;font-size:11px;cursor:pointer">' + icon('shuffle') + ' אחר</button>' +
+    '<span style="font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:600">' + icon('quote') + ' ציטוט</span>' +
+    '<button id="quote-reroll-btn" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--tao-t2);font-size:var(--fs-xs);cursor:pointer">' + icon('shuffle') + ' אחר</button>' +
     '</div>' +
-    '<div style="font-size:16px;line-height:1.6;color:#f5ecd6;font-style:italic;text-align:center">"' + esc(qod.text) + '"</div>' +
+    '<div style="font-size:var(--fs-xl);line-height:1.6;color:var(--tao-t1);font-style:italic;text-align:center">"' + esc(qod.text) + '"</div>' +
     '<div style="display:flex;gap:6px;margin-top:12px">' +
-    '<input id="quote-add-input" placeholder="הוסף ציטוט משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
-    '<button id="quote-add-btn" style="background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:0 14px;color:#e8c15c;font-size:13px;cursor:pointer">+</button>' +
+    '<input id="quote-add-input" placeholder="הוסף ציטוט משלך..." style="flex:1;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);font-family:inherit"/>' +
+    '<button id="quote-add-btn" style="background:var(--tao-panel);border:1px solid rgba(184,134,11,.4);border-radius:var(--radius-sm);padding:0 14px;color:var(--tao-gold);font-size:var(--fs-md);cursor:pointer">+</button>' +
     '</div>'
   ) : '';
 
@@ -1408,14 +1461,14 @@ function renderTaoChapter(el, idx) {
   else if(wf && wf.relatedAdhd !== undefined) { relatedCard = ADHD_TOOLKIT[wf.relatedAdhd]; relatedTab = 'adhd' }
   var weekHtml = wf ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">' + icon('book') + ' מוקד השבוע: ' + wf.theme + '</span>' +
-    '<span style="font-size:10px;color:#8a7857">' + wf.book + '</span>' +
+    '<span style="font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:600">' + icon('book') + ' מוקד השבוע: ' + wf.theme + '</span>' +
+    '<span style="font-size:var(--fs-2xs);color:var(--tao-t3)">' + wf.book + '</span>' +
     '</div>' +
-    '<div style="font-size:13px;line-height:1.6;color:#d8c9a3">' + wf.text + '</div>' +
+    '<div style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b)">' + wf.text + '</div>' +
     (relatedCard ? (
-      '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:#120d06;border:1px solid #3a2c10;border-radius:10px;padding:10px 12px;margin-top:12px">' +
-      '<div style="font-size:10px;color:#8a7857;margin-bottom:2px">' + icon('link') + ' כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
-      '<div style="font-size:13px;color:#f5ecd6;font-weight:600">' + icon(relatedCard.icon) + ' ' + relatedCard.title + '</div>' +
+      '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:var(--tao-bg2);border:1px solid var(--tao-line2);border-radius:var(--radius-md);padding:10px 12px;margin-top:12px">' +
+      '<div style="font-size:var(--fs-2xs);color:var(--tao-t3);margin-bottom:2px">' + icon('link') + ' כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
+      '<div style="font-size:var(--fs-md);color:var(--tao-t1);font-weight:600">' + icon(relatedCard.icon) + ' ' + relatedCard.title + '</div>' +
       '</button>'
     ) : '')
   ) : '';
@@ -1428,8 +1481,8 @@ function renderTaoChapter(el, idx) {
     leadField('lead-habit','פעולה קטנה אחת שהתאימה למנהיג שאני רוצה להיות', todayLead.habitWin) +
     leadField('lead-improve','איפה לא הצלחתי / מה הייתי עושה אחרת?', todayLead.improve) +
     '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">' +
-    '<button id="lead-save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:8px 16px;color:#1c1508;font-size:13px;font-weight:700">שמור</button>' +
-    '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">' + icon('check') + ' נשמר</span>' +
+    '<button id="lead-save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-sm);padding:8px 16px;color:var(--tao-panel);font-size:var(--fs-md);font-weight:700">שמור</button>' +
+    '<span id="lead-saved" style="display:none;font-size:var(--fs-md);color:var(--tao-gold);font-weight:600">' + icon('check') + ' נשמר</span>' +
     '</div>');
 
   var sinekHtml = taoPanelHtml(
@@ -1441,12 +1494,12 @@ function renderTaoChapter(el, idx) {
     ADHD_TOOLKIT.map(function(c,i){ return toolkitCardHtml(c, wf && wf.relatedAdhd === i) }).join('');
 
   var subnavHtml =
-    '<div style="display:flex;gap:6px;margin-bottom:18px;background:#120d06;border-radius:12px;padding:4px">' +
+    '<div style="display:flex;gap:6px;margin-bottom:18px;background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px">' +
     ['tao','lead','adhd','talk'].map(function(m){
       var labels = {tao:icon('yin-yang') + ' טאו', lead:icon('target') + ' מנהיגות', adhd:icon('brain') + ' ADHD', talk:icon('message-circle') + ' שיחה'}
       var active = m===taoMode
-      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 2px;border-radius:9px;font-size:12px;font-weight:600;' +
-        (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1c1508' : 'background:transparent;color:#b3a077') + '">' + labels[m] + '</button>'
+      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 2px;border-radius:9px;font-size:var(--fs-sm);font-weight:600;' +
+        (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--tao-panel)' : 'background:transparent;color:var(--tao-t2)') + '">' + labels[m] + '</button>'
     }).join('') +
     '</div>';
 
@@ -1459,31 +1512,31 @@ function renderTaoChapter(el, idx) {
     modeContentHtml = renderTalkTab();
   } else {
     modeContentHtml =
-      '<div style="font-size:11px;color:#cf9d2e;font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
-      '<div style="background:linear-gradient(135deg,#1c1508,#1c140a);border:1px solid #b8860b;border-radius:16px;padding:20px;margin-bottom:16px">' +
-      '<div style="font-size:13px;color:#d8c9a3;text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
-      '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
+      '<div style="font-size:var(--fs-xs);color:var(--tao-gold2);font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">פרק ' + (idx + 1) + ' מתוך 80</div>' +
+      '<div style="background:linear-gradient(135deg,var(--tao-panel),var(--tao-panel2));border:1px solid var(--tao-gold3);border-radius:var(--radius-2xl);padding:20px;margin-bottom:16px">' +
+      '<div style="font-size:var(--fs-md);color:var(--tao-t1b);text-align:center;margin-bottom:14px;font-style:italic">' + title + '</div>' +
+      '<div style="font-size:var(--fs-xl);line-height:2.2;color:var(--tao-t1);text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
-      '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">' + icon('arrow-left') + ' הקודם</button>' +
-      '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
-      '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא ' + icon('arrow-right') + '</button>' +
+      '<button id="tao-prev" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-md);padding:10px 16px;color:var(--tao-t2);font-size:var(--fs-base);cursor:pointer">' + icon('arrow-left') + ' הקודם</button>' +
+      '<span style="color:var(--tao-t2);font-size:var(--fs-sm)">' + (idx + 1) + ' / 80</span>' +
+      '<button id="tao-next" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-md);padding:10px 16px;color:var(--tao-t2);font-size:var(--fs-base);cursor:pointer">הבא ' + icon('arrow-right') + '</button>' +
       '</div>' +
       taoLabelHtml(icon('flower') + ' מדיטציה ומיינדפולנס') +
       medHtml;
   }
 
   var threadHtml = (wf && taoMode!=='lead') ? (
-    '<button class="tao-subnav-btn" data-mode="lead" style="width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;background:#120d06;border:1px solid #241b0d;border-radius:10px;padding:8px 12px;margin-bottom:14px">' +
-    '<span style="font-size:11px;color:#8a7857">' + icon('book') + ' מוקד השבוע</span>' +
-    '<span style="font-size:12px;color:#e8c15c;font-weight:600">' + wf.theme + ' ' + icon('arrow-left') + '</span>' +
+    '<button class="tao-subnav-btn" data-mode="lead" style="width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px">' +
+    '<span style="font-size:var(--fs-xs);color:var(--tao-t3)">' + icon('book') + ' מוקד השבוע</span>' +
+    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:600">' + wf.theme + ' ' + icon('arrow-left') + '</span>' +
     '</button>'
   ) : '';
 
   el.innerHTML =
-    '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
+    '<div style="background:linear-gradient(180deg,var(--tao-bg),var(--tao-bg2));min-height:100%;padding:48px 16px 16px">' +
     '<div style="text-align:center;margin-bottom:14px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">' + icon('yin-yang') + ' טאו · מנהיגות · ADHD</span>' +
+    '<span style="font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:2px;font-weight:600">' + icon('yin-yang') + ' טאו · מנהיגות · ADHD</span>' +
     '</div>' +
     subnavHtml +
     threadHtml +
@@ -1566,23 +1619,23 @@ function startMeditation(idx) {
   playTibetanBowl();
 
   const stepsHtml = med.steps.map(function(s, i) {
-    return '<div style="font-size:12px;color:#b3a077;padding:4px 0;border-bottom:' +
-      (i < med.steps.length - 1 ? '1px solid #241b0d' : 'none') + '">' + s + '</div>';
+    return '<div style="font-size:var(--fs-sm);color:var(--tao-t2);padding:4px 0;border-bottom:' +
+      (i < med.steps.length - 1 ? '1px solid var(--tao-line)' : 'none') + '">' + s + '</div>';
   }).join('');
 
   const mins = med.duration.toString();
   openModal(
-    '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + icon(med.icon) + ' ' + med.title + '</div>' +
-    '<div style="font-size:12px;color:#b3a077;margin-bottom:20px">' + med.desc + '</div>' +
+    '<div style="font-size:var(--fs-md);color:var(--tao-gold2);font-weight:600;margin-bottom:4px">' + icon(med.icon) + ' ' + med.title + '</div>' +
+    '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-bottom:20px">' + med.desc + '</div>' +
     '<div class="med-circle" id="med-circle">' +
     '<canvas id="med-canvas" width="180" height="180" style="position:absolute;inset:0;border-radius:50%"></canvas>' +
     '<div class="med-timer" id="med-timer">' + mins + ':00</div>' +
     '</div>' +
     '<div class="breath-text" id="breath-text">היכון...</div>' +
-    '<div style="margin:20px 0;padding:14px;background:#120d06;border-radius:12px;text-align:right">' +
+    '<div style="margin:20px 0;padding:14px;background:var(--tao-bg2);border-radius:var(--radius-lg);text-align:right">' +
     stepsHtml +
     '</div>' +
-    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:12px;border:1px solid #241b0d;background:transparent;color:#b3a077;font-size:14px">סיים מוקדם</button>',
+    '<button onclick="stopMeditation(false)" style="width:100%;padding:14px;border-radius:var(--radius-lg);border:1px solid var(--tao-line);background:transparent;color:var(--tao-t2);font-size:var(--fs-base)">סיים מוקדם</button>',
     {closeOnOverlay:false, modalStyle:'text-align:center'});
 
   drawMedCircle(1);
@@ -1637,7 +1690,7 @@ function stopMeditation(completed) {
   document.getElementById('modal-container').innerHTML = '';
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
   try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
-  if(completed) { playTibetanBowl(); showRipple(); logEvent('meditation_completed', {}); }
+  if(completed) { playTibetanBowl(); showRipple(); haptic('success'); logEvent('meditation_completed', {}); }
 }
 
 function renderCurrentScreen() {
@@ -1731,9 +1784,9 @@ function toggleRightNowExpanded() { rightNowExpanded = !rightNowExpanded; render
 function moodLimitBarHtml(mood, hidden, style) {
   const def = MOOD_LIB[mood], note = (MOOD_RANK_BIAS[mood] && MOOD_RANK_BIAS[mood].note) || ''
   if(!def || (!hidden && !rightNowExpanded)) return ''
-  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:${def.color}12;border:1px solid ${def.color}44;border-radius:10px;padding:8px 12px;font-size:12px;color:#6b6255;${style||''}">
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:${def.color}12;border:1px solid ${def.color}44;border-radius:var(--radius-md);padding:8px 12px;font-size:var(--fs-sm);color:var(--t2);${style||''}">
       <span>${icon(def.icon)} ${esc(note)}</span>
-      <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:12px;white-space:nowrap">${rightNowExpanded ? 'הסתר שוב' : 'הצג הכל (' + hidden + ')'}</button>
+      <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:var(--fs-sm);white-space:nowrap">${rightNowExpanded ? 'הסתר שוב' : 'הצג הכל (' + hidden + ')'}</button>
     </div>`
 }
 function rightNowHtml(mood) {
@@ -1742,21 +1795,21 @@ function rightNowHtml(mood) {
   const limit = moodLimit(mood)
   const cap = (limit && !rightNowExpanded) ? limit : 6
   const shown = all.slice(0, cap), hidden = all.length - shown.length
-  const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:#ffffff;border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:12px;padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
-      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:#211d17;line-height:1.4">${it.icon ? icon(it.icon) + ' ' : ''}${esc(it.title)}</div>
-      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:#948a7a;margin-top:4px">${it.sub}</div>` : ''}
+  const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:var(--surface);border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:var(--radius-lg);padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
+      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:var(--t1);line-height:1.4">${it.icon ? icon(it.icon) + ' ' : ''}${esc(it.title)}</div>
+      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
     </div>`
-  return `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
+  return `<div style="font-size:var(--fs-base);color:var(--t2);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
     ${row(shown[0], true)}
     ${shown.slice(1).map(it => row(it, false)).join('')}
-    ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:12px;color:#948a7a;margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
+    ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
 }
 
 // ── HOME ─────────────────────────────────────────
 // "Done today?" toggle button for one of the personal day-logs.
 function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
   const on = !!(state.personal[key]||{})[getToday()]
-  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${on?'#1a8f7a':'var(--line)'};background:${on?'#1a8f7a18':'#ffffff'};color:${on?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">${icon(iconName)} ${on?doneLabel:todoLabel}</button>`
+  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${on?'var(--green)':'var(--line)'};background:${on?'#1a8f7a18':'var(--surface)'};color:${on?'var(--green)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon(iconName)} ${on?doneLabel:todoLabel}</button>`
 }
 function renderHome() {
   const el = document.getElementById('screen-home')
@@ -1772,33 +1825,33 @@ function renderHome() {
   const moodPatterns = getMoodPatterns()
 
   el.innerHTML = `
-    <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
+    <div style="background:var(--surface-3);padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${state.streak} ימים`:''}</div>
-          <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ${icon('sun')}</div>
-          <div style="font-size:14px;color:#948a7a;margin-top:2px">Region II · Cagayan Valley</div>
+          <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${state.streak} ימים`:''}</div>
+          <div style="font-size:var(--fs-4xl);font-weight:800;color:var(--t1);letter-spacing:-0.01em">בוקר טוב, אורי ${icon('sun')}</div>
+          <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">Region II · Cagayan Valley</div>
         </div>
-        <button onclick="navigateTo('settings')" aria-label="הגדרות" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">${icon('settings')}</button>
+        <button onclick="navigateTo('settings')" aria-label="הגדרות" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 10px;color:var(--t2);font-size:var(--fs-xl)">${icon('settings')}</button>
       </div>
-      ${!serverConfigured() ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
-        <div style="font-size:14px;color:var(--gold);font-weight:700">${icon('alert-triangle')} נדרש חיבור לשרת</div>
-        <div style="font-size:14px;color:#948a7a;margin-top:2px">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
+      ${!serverConfigured() ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:var(--accent-soft);border:1px solid var(--amber-line);border-radius:var(--radius-md);cursor:pointer;margin-bottom:10px">
+        <div style="font-size:var(--fs-base);color:var(--gold);font-weight:700">${icon('alert-triangle')} נדרש חיבור לשרת</div>
+        <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
-        <div style="display:flex;justify-content:space-between;font-size:14px;color:#6b6255;margin-bottom:6px">
-          <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'#1a8f7a':'#211d17'}">${done}/${total}</span>
+        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--t2);margin-bottom:6px">
+          <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'var(--green)':'var(--t1)'}">${done}/${total}</span>
         </div>
-        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'#1a8f7a':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
+        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'var(--green)':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
       </div>` : ''}
     </div>
     <div style="padding:16px">
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
-          <button onclick="rerollQuote()" style="background:#ffffff;border:1px solid #f0d9a3;border-radius:8px;padding:3px 9px;color:#6b6255;font-size:11px">${icon('shuffle')} אחר</button>
+          <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
+          <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} אחר</button>
         </div>
-        <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${esc(qod.text)}"</div>
+        <div style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
@@ -1810,59 +1863,59 @@ function renderHome() {
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:14px;font-weight:700">${icon('wallet')} ליקוידציה שוטפת</div>
-            <div style="font-size:12px;color:#948a7a;margin-top:2px">חודש ${currentMonthKey()} · ${pettyCashThisMonth().length} הוצאות</div>
+            <div style="font-size:var(--fs-base);font-weight:700">${icon('wallet')} ליקוידציה שוטפת</div>
+            <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">חודש ${currentMonthKey()} · ${pettyCashThisMonth().length} הוצאות</div>
           </div>
-          <div style="font-size:18px;font-weight:800;color:#211d17">₱${pettyCashMonthTotal().toLocaleString()}</div>
+          <div style="font-size:var(--fs-2xl);font-weight:800;color:var(--t1)">₱${pettyCashMonthTotal().toLocaleString()}</div>
         </div>
       </div>
       ${total===0&&!state.focus?emptyHtml(icon('clipboard'), 'הדבק הודעות מוואטסאפ כדי להתחיל', 'margin-top:20px'):''}
 
       <div class="card" style="margin-top:16px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
           ${MOOD_ORDER.map(m=>{
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
-            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:12px;border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'#ffffff'};text-align:center">
-              <div style="font-size:18px;line-height:1">${icon(d.icon)}</div>
-              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'#6b6255'};margin-top:2px;line-height:1.2">${d.label}</div>
+            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
+              <div style="font-size:var(--fs-2xl);line-height:1">${icon(d.icon)}</div>
+              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${d.label}</div>
             </button>`
           }).join('')}
         </div>
       </div>
-      ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${moodDef.label} · המלצות עכשיו</div>
-          <button onclick="rerollMoodTip()" style="background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:8px;padding:4px 10px;color:${moodDef.color};font-size:12px;font-weight:600">${icon('refresh')} טיפ אחר</button>
+          <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${moodDef.label} · המלצות עכשיו</div>
+          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} טיפ אחר</button>
         </div>
-        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:14px;color:#211d17;margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
-        <textarea id="brain-dump-input" placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..." style="width:100%;min-height:70px;background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
+        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
+        <textarea id="brain-dump-input" placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..." style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:8px;padding:8px 16px;color:#ffffff;font-size:13px;font-weight:600">שמור ופנה מקום</button>
-          <span id="brain-dump-saved" style="display:none;font-size:13px;color:${moodDef.color};font-weight:600">${icon('check')} נשמר</span>
+          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">שמור ופנה מקום</button>
+          <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} נשמר</span>
         </div>
       </div>` : ''}
       ${moodPatterns.length ? creamPanelHtml(`
-        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('bar-chart-2')} דפוס שחוזר</div>
-        ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
+        <div style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('bar-chart-2')} דפוס שחוזר</div>
+        ${moodPatterns.map(p=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
       `) : ''}
-      ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:#eef2f7;border:1px solid #cdd9e8;border-radius:14px;padding:14px 16px;margin-bottom:16px">
+      ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">${icon('brain')} מה שאני לומד עליך</div>
-          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">${icon('search')} נתח עכשיו</button>`:''}
+          <div style="font-size:var(--fs-sm);color:var(--blue);font-weight:700;letter-spacing:1px">${icon('brain')} מה שאני לומד עליך</div>
+          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600">${icon('search')} נתח עכשיו</button>`:''}
         </div>
-        ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:14px;color:#211d17;line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
-        <div style="font-size:12px;color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
-        `<div style="font-size:14px;color:#6b6255;line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
+        ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
+        <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
+        `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
       </div>` : ''}
       ${latestInsights.items && latestInsights.items.length ? creamPanelHtml(`
-        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('lightbulb')} שמתי לב</div>
-        ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${iconFor(it.icon)} ${esc(it.text)}</div>`).join('')}
+        <div style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('lightbulb')} שמתי לב</div>
+        ${latestInsights.items.map(it=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${iconFor(it.icon)} ${esc(it.text)}</div>`).join('')}
       `) : ''}
 
       <div class="card" style="margin-top:16px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:10px">${icon('leaf')} מחוץ לעבודה</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} מחוץ לעבודה</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
           ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), 'התאמנתי היום ' + icon('check'), 'סמן אימון')}
           ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), 'עשיתי היום ' + icon('check'), 'סמן מדיטציה')}
@@ -1870,17 +1923,17 @@ function renderHome() {
         <label class="form-label">יעד לחופשה הבאה</label>
         <div style="display:flex;gap:8px">
           <input id="vacation-goal-input" class="form-input" style="margin-bottom:0" placeholder="לדוגמה: בורקאי, דצמבר" value="${esc(state.personal.vacationGoal)}"/>
-          <button onclick="saveVacationGoal()" style="background:#f0e7cf;border-radius:10px;padding:0 16px;color:#6b6255;font-size:14px">שמור</button>
+          <button onclick="saveVacationGoal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-size:var(--fs-base)">שמור</button>
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('brain')} שאל את Fieldy</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('brain')} שאל את Fieldy</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
         ${serverConfigured()?`
         <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
         <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">שאל</button>
-        <div id="ask-fieldy-answer" style="margin-top:12px;font-size:15px;color:#211d17;line-height:1.6;display:none"></div>
+        <div id="ask-fieldy-answer" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
         <div id="ask-fieldy-maps-wrap"></div>
         `:''}
       </div>
@@ -1894,11 +1947,12 @@ function renderInput() {
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml('הוסף הודעות')}
-      <div style="font-size:14px;color:#7a6f5c;margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
-      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:10px;line-height:1.6">הדבק הודעות מוואטסאפ — בכל שפה.</div>
+      <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:var(--surface);border:1px solid var(--t4);border-radius:var(--radius-lg);padding:14px;color:var(--t1);font-size:var(--fs-lg);resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
       ${voiceRowHtml('input-text')}
-      <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
-      ${!serverConfigured()?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">${icon('alert-triangle')} אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
+      <div id="input-skel" style="display:none;margin-bottom:8px"></div>
+      <div id="input-error" style="color:var(--red);font-size:var(--fs-base);margin-bottom:8px;display:none"></div>
+      ${!serverConfigured()?`<div style="color:var(--amber);font-size:var(--fs-base);margin-bottom:8px">${icon('alert-triangle')} אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">${icon('zap')} ארגן את היום</button>
     </div>
   `
@@ -1910,9 +1964,10 @@ async function doAnalyze() {
   const err = document.getElementById('input-error')
   if(!text || !serverConfigured()) return
   btn.innerHTML = icon('settings') + ' מסדר...'
-  btn.style.background = '#ffffff'
-  btn.style.color = '#7a6f5c'
+  btn.style.background = 'var(--surface)'
+  btn.style.color = 'var(--t2)'
   err.style.display = 'none'
+  const skel = document.getElementById('input-skel'); if(skel) { skel.innerHTML = skeletonHtml(4, 'מפרק את ההודעה למשימות, אתרים ואירועים…'); skel.style.display = 'block' }
   try {
     const parsed = await callClaude([{role:'user',content:text}], SYSTEM_PROMPT)
     console.log('AI raw:', parsed.slice(0,500))
@@ -1948,7 +2003,7 @@ async function doAnalyze() {
     if(p.moodGuess && MOOD_LIB[p.moodGuess]) logMood(p.moodGuess, 'auto')
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:var(--t1);padding:10px 18px;border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:600;z-index:999;backdrop-filter:blur(8px)';
       toast.innerHTML = icon('calendar') + ' ' + (p.events||[]).length + ' אירועים נוספו ללוח';
       document.body.appendChild(toast);
       setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
@@ -1956,6 +2011,7 @@ async function doAnalyze() {
     navigateTo('home')
 
   } catch(e) {
+    const skel2 = document.getElementById('input-skel'); if(skel2) skel2.style.display = 'none'
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
     btn.innerHTML = icon('zap') + ' ארגן את היום'
@@ -1993,19 +2049,19 @@ function renderTasks() {
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:18px;font-weight:700">משימות</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">משימות</div>
         ${addBtnHtml('showAddTask()')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#ffffff'};color:${taskBucket===b?BCOLS[b]:'#6b6255'};cursor:pointer">
-            <div style="font-size:16px">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
-            <div style="font-size:14px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
-            ${counts[b]>0?`<div style="font-size:14px;font-weight:700">${counts[b]}</div>`:''}
+          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
+            <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
+            <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
+            ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
           </button>`).join('')}
       </div>
       <div style="display:flex;gap:6px">
-        ${CTX.map(([v,l])=>`<button onclick="setTaskContextFilter('${v}')" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid ${taskContextFilter===v?'var(--gold)':'var(--line)'};background:${taskContextFilter===v?'#fdf1da':'#ffffff'};color:${taskContextFilter===v?'var(--gold)':'#6b6255'};font-size:13px;font-weight:600">${l}</button>`).join('')}
+        ${CTX.map(([v,l])=>`<button onclick="setTaskContextFilter('${v}')" style="flex:1;padding:6px 4px;border-radius:var(--radius-sm);border:1px solid ${taskContextFilter===v?'var(--gold)':'var(--line)'};background:${taskContextFilter===v?'var(--accent-soft)':'var(--surface)'};color:${taskContextFilter===v?'var(--gold)':'var(--t2)'};font-size:var(--fs-md);font-weight:600">${l}</button>`).join('')}
       </div>
     </div>
     <div style="padding:12px 16px">
@@ -2023,18 +2079,18 @@ function taskCard(t) {
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
-    <div style="background:#ffffff;border:1px solid var(--line);border-right:3px solid ${t.done?'#e3d9bd':(overdue?'#ef4444':c)};border-radius:12px;padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
+    <div style="background:var(--surface);border:1px solid var(--line);border-right:3px solid ${t.done?'var(--t5)':(overdue?'var(--red)':c)};border-radius:var(--radius-lg);padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?icon('check'):''}</div>
+        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
         <div style="flex:1">
-          <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${esc(t.text)}</div>
-          ${t.note?`<div style="font-size:12px;color:#948a7a;margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
-          ${t.photo?`<img src="${esc(t.photo)}" onclick="viewPhoto(${jsArg(t.photo)})" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
+          <div style="font-size:var(--fs-xl);font-weight:500;color:var(--t1);text-decoration:${t.done?'line-through':'none'};line-height:1.4">${esc(t.text)}</div>
+          ${t.note?`<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
+          ${t.photo?`<img src="${esc(t.photo)}" onclick="viewPhoto(${jsArg(t.photo)})" style="width:100%;max-height:140px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag">${icon('map-pin')} ${esc(t.site)}</span>`:''}
             ${t.assignee?`<span class="tag">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
             ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag">${CONTEXT_LABEL[t.context]}</span>`:''}
-            ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
+            ${t.time?`<span class="tag" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
@@ -2075,7 +2131,7 @@ function toggleTask(id) {
   }
   setState(patch)
   if(wasUndone){
-    playTaskComplete();showRipple();
+    playTaskComplete();showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
 }
@@ -2116,23 +2172,23 @@ function removePendingPhoto(previewId) {
 function renderPhotoPreview(previewId) {
   const prev = document.getElementById(previewId); if(!prev) return
   prev.innerHTML = pendingPhoto
-    ? '<div style="position:relative"><img src="'+esc(pendingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>'+
-      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:14px">' + icon('x') + ' הסר</button></div>'
-    : '<div style="text-align:center;color:#948a7a;font-size:14px">' + icon('camera') + ' הוסף תמונה</div>'
+    ? '<div style="position:relative"><img src="'+esc(pendingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-md);display:block"/>'+
+      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:var(--radius-sm);padding:4px 8px;font-size:var(--fs-base)">' + icon('x') + ' הסר</button></div>'
+    : '<div style="text-align:center;color:var(--t3);font-size:var(--fs-base)">' + icon('camera') + ' הוסף תמונה</div>'
 }
 function photoInputHtml(inputId, previewId, existingPhoto) {
   pendingPhoto = existingPhoto || null
   return '<div style="margin-bottom:14px">'+
     '<label class="form-label">תמונה (רשות)</label>'+
     '<input type="file" accept="image/*" id="'+inputId+'" onchange="handlePhotoPick(this,\''+previewId+'\')" style="display:none"/>'+
-    '<div id="'+previewId+'" onclick="document.getElementById(\''+inputId+'\').click()" style="border:1.5px dashed var(--line);border-radius:10px;padding:14px;cursor:pointer;background:#ffffff">'+
-    (existingPhoto ? '<img src="'+esc(existingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>' : '<div style="text-align:center;color:#948a7a;font-size:14px">' + icon('camera') + ' הוסף תמונה</div>')+
+    '<div id="'+previewId+'" onclick="document.getElementById(\''+inputId+'\').click()" style="border:1.5px dashed var(--line);border-radius:var(--radius-md);padding:14px;cursor:pointer;background:var(--surface)">'+
+    (existingPhoto ? '<img src="'+esc(existingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-md);display:block"/>' : '<div style="text-align:center;color:var(--t3);font-size:var(--fs-base)">' + icon('camera') + ' הוסף תמונה</div>')+
     '</div></div>'
 }
 function viewPhoto(src) {
   document.getElementById('modal-container').innerHTML =
     '<div class="modal-overlay" onclick="closeModal()" style="align-items:center;justify-content:center;padding:20px">'+
-    '<img src="'+esc(src)+'" style="max-width:100%;max-height:80vh;border-radius:14px"/>'+
+    '<img src="'+esc(src)+'" style="max-width:100%;max-height:80vh;border-radius:var(--radius-xl)"/>'+
     '</div>'
 }
 
@@ -2142,7 +2198,7 @@ function showAddTask(id) {
   const t = id ? [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) : null
   const bucketOf = id ? (state.tasks.now.some(x=>x.id===id)?'now':state.tasks.today.some(x=>x.id===id)?'today':'later') : 'now'
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?icon('edit') + ' עריכת משימה':'+ משימה חדשה'}</div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${t?icon('edit') + ' עריכת משימה':'+ משימה חדשה'}</div>
         <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?esc(t.text):''}</textarea>
         ${voiceRowHtml('add-task-text')}
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
@@ -2198,7 +2254,7 @@ function doAddTask() {
   } else {
     const task = {id:`m${Date.now()}`,text,assignee,color,done:false,site:null,context,note,photo}
     setState({tasks:{...state.tasks,[bucket]:[...state.tasks[bucket],task]}})
-    playTaskAdd()
+    playTaskAdd(); haptic('light')
   }
   closeModal()
 }
@@ -2219,31 +2275,31 @@ function showPettyCashModal() {
   const entries = pettyCashThisMonth().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') })
   const total = pettyCashMonthTotal()
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('wallet')} ליקוידציה שוטפת</div>
-        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">חודש ${currentMonthKey()} · סה"כ עד כה: <b style="color:#211d17">₱${total.toLocaleString()}</b></div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('wallet')} ליקוידציה שוטפת</div>
+        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">חודש ${currentMonthKey()} · סה"כ עד כה: <b style="color:var(--t1)">₱${total.toLocaleString()}</b></div>
         <label class="form-label">תאריך</label><input id="pc-date" type="date" class="form-input" value="${getToday()}"/>
         <label class="form-label">ספק / חנות</label><input id="pc-vendor" class="form-input" placeholder="למשל: Shell Gas Station"/>
         <label class="form-label">סכום (₱)</label><input id="pc-amount" class="form-input" type="number" placeholder="0" style="direction:ltr"/>
         <label class="form-label">הערה / אתר (רשות)</label><input id="pc-note" class="form-input" placeholder="למשל: נסיעה ל-Nambaran"/>
         <button onclick="addPettyCashEntry()" class="btn-primary" style="margin-top:6px;margin-bottom:16px">+ הוסף הוצאה</button>
         <div style="border-top:1px solid var(--line);padding-top:12px">
-          ${entries.length===0?`<div style="font-size:13px;color:#948a7a;text-align:center;padding:10px 0">אין הוצאות מתועדות החודש</div>`:''}
+          ${entries.length===0?`<div style="font-size:var(--fs-md);color:var(--t3);text-align:center;padding:10px 0">אין הוצאות מתועדות החודש</div>`:''}
           ${entries.map(function(e){
             return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
               <div>
-                <div style="font-size:14px;font-weight:600;color:#211d17">${e.vendor?esc(e.vendor):'—'}</div>
-                <div style="font-size:12px;color:#948a7a">${esc(e.date)}${e.note?' · '+esc(e.note):''}</div>
+                <div style="font-size:var(--fs-base);font-weight:600;color:var(--t1)">${e.vendor?esc(e.vendor):'—'}</div>
+                <div style="font-size:var(--fs-sm);color:var(--t3)">${esc(e.date)}${e.note?' · '+esc(e.note):''}</div>
               </div>
               <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:14px;font-weight:700;color:#211d17">₱${(parseFloat(e.amount)||0).toLocaleString()}</span>
-                <button onclick="deletePettyCashEntry(${jsArg(e.id)})" style="background:none;color:#c0392b;font-size:16px">${icon('trash')}</button>
+                <span style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">₱${(parseFloat(e.amount)||0).toLocaleString()}</span>
+                <button onclick="deletePettyCashEntry(${jsArg(e.id)})" style="background:none;color:var(--red-dark);font-size:var(--fs-xl)">${icon('trash')}</button>
               </div>
             </div>`
           }).join('')}
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
-          <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">${icon('clipboard')} העתק סיכום</button>
-          <button onclick="closeModal()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">סגור</button>
+          <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('clipboard')} העתק סיכום</button>
+          <button onclick="closeModal()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">סגור</button>
         </div>`, {modalStyle:'max-height:82vh;overflow-y:auto'})
 }
 function addPettyCashEntry() {
@@ -2283,17 +2339,17 @@ const SPIS_FAULTS = [
 ];
 function showSpisModal() {
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
-        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
+        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
         ${SPIS_FAULTS.map(function(f){
-          return `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px">
-            <div style="font-size:14px;font-weight:700;color:#211d17;margin-bottom:4px">${icon(f.icon)} ${f.title}</div>
-            <div style="font-size:13px;color:#7a6f5c;margin-bottom:8px;line-height:1.5">${f.cause}</div>
-            ${f.checks.map(function(c){ return `<div style="font-size:13px;color:#211d17;margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
+          return `<div style="background:var(--surface-3);border:1px solid var(--line);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px">
+            <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin-bottom:4px">${icon(f.icon)} ${f.title}</div>
+            <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>
+            ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
           </div>`
         }).join('')}
-        <div style="font-size:12px;color:#948a7a;margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
-        <button onclick="closeModal()" style="width:100%;margin-top:14px;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">סגור</button>`, {modalStyle:'max-height:80vh;overflow-y:auto'})
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
+        <button onclick="closeModal()" style="width:100%;margin-top:14px;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">סגור</button>`, {modalStyle:'max-height:80vh;overflow-y:auto'})
 }
 
 function renderSites() {
@@ -2303,15 +2359,15 @@ function renderSites() {
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:18px;font-weight:700">אתרים</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">אתרים</div>
         <div style="display:flex;gap:8px">
-          <button onclick="showSpisModal()" style="background:#f0e7cf;border-radius:10px;padding:8px 12px;color:#6b6255;font-size:14px;font-weight:600">${icon('tool')} אבחון</button>
+          <button onclick="showSpisModal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('tool')} אבחון</button>
           ${addBtnHtml('showAddSite()')}
         </div>
       </div>
       <div style="display:flex;gap:6px">
         ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:10px;background:${siteFilter===v?'var(--gold)':'#ffffff'};color:${siteFilter===v?'#fff':'#6b6255'};font-size:14px;font-weight:600">${l}</button>`
+          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:var(--radius-md);background:${siteFilter===v?'var(--gold)':'var(--surface)'};color:${siteFilter===v?'#fff':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${l}</button>`
         ).join('')}
       </div>
     </div>
@@ -2339,26 +2395,26 @@ function siteCard(s) {
   return `
     <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="font-size:15px;font-weight:700;color:#211d17">${icon('map-pin')} ${esc(s.name)}</div>
-        ${s.stuckSince?`<span style="background:#b84600;color:#fff;font-size:11px;font-weight:700;border-radius:100px;padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
+        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(s.name)}</div>
+        ${s.stuckSince?`<span style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
       </div>
-      ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${esc(s.province)}</div>`:''}
-      ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
-      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
+      ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${esc(s.province)}</div>`:''}
+      ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
+      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${esc(String(s.contractor).toUpperCase())}</span>`:''}
         <span class="tag tag-status-${esc(s.status)}">${STATUS_LABEL[s.status]||esc(s.status)}</span>
         ${s.year?`<span class="tag">${icon('calendar')} ${esc(s.year)}</span>`:''}
-        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:100px;padding:4px 10px;font-size:12px;color:#6b6255;cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
+        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:4px 10px;font-size:var(--fs-sm);color:var(--t2);cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
         <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} Remo</a>`:''}
         ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>`:''}
         ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('link')} Monday.com</a>`:''}
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?STATUS_HEX[st]+'33':'#f0e7cf'};color:${s.status===st?STATUS_HEX[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" style="background:${s.stuckSince?'#b8460022':'#f0e7cf'};border:1px solid ${s.stuckSince?'#b84600':'transparent'};border-radius:8px;padding:7px 9px;color:${s.stuckSince?'#b84600':'#6b6255'};font-size:14px">${icon('alert-triangle')}</button>
+        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" style="background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:7px 9px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base)">${icon('alert-triangle')}</button>
         ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', icon('edit'), '', 'edit')}
         ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
       </div>
@@ -2410,24 +2466,24 @@ function showStatusChangeModal(name, status) {
   window.__scStatus = status
   const site = state.sites.find(s=>s.name===name)
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('map-pin')} ${esc(name)}</div>
-        <div style="font-size:13px;color:#948a7a;margin-bottom:14px">משנה סטטוס ל: <b style="color:#211d17">${STATUS_LABEL[status]}</b></div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('map-pin')} ${esc(name)}</div>
+        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">משנה סטטוס ל: <b style="color:var(--t1)">${STATUS_LABEL[status]}</b></div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button onclick="toggleStatusFlag('monday')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeMondayDone?'#1a8f7a':'var(--line)'};background:${statusChangeMondayDone?'#1a8f7a18':'#ffffff'};color:${statusChangeMondayDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">${icon('edit-3')} עדכנת ב-Monday?${statusChangeMondayDone?' ' + icon('check'):''}</button>
-          <button onclick="toggleStatusFlag('email')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeEmailDone?'#1a8f7a':'var(--line)'};background:${statusChangeEmailDone?'#1a8f7a18':'#ffffff'};color:${statusChangeEmailDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">${icon('mail')} שלחת מייל?${statusChangeEmailDone?' ' + icon('check'):''}</button>
+          <button onclick="toggleStatusFlag('monday')" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${statusChangeMondayDone?'var(--green)':'var(--line)'};background:${statusChangeMondayDone?'#1a8f7a18':'var(--surface)'};color:${statusChangeMondayDone?'var(--green)':'var(--t2)'};font-size:var(--fs-md);font-weight:600">${icon('edit-3')} עדכנת ב-Monday?${statusChangeMondayDone?' ' + icon('check'):''}</button>
+          <button onclick="toggleStatusFlag('email')" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${statusChangeEmailDone?'var(--green)':'var(--line)'};background:${statusChangeEmailDone?'#1a8f7a18':'var(--surface)'};color:${statusChangeEmailDone?'var(--green)':'var(--t2)'};font-size:var(--fs-md);font-weight:600">${icon('mail')} שלחת מייל?${statusChangeEmailDone?' ' + icon('check'):''}</button>
         </div>
         ${(!statusChangeMondayDone || !statusChangeEmailDone) ? `
         <label class="form-label">תאר את הבעיה / העדכון</label>
-        <textarea id="sc-desc" placeholder="למשל: הקבלן החליף את המשאבה, האתר פעיל שוב" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.5;direction:rtl;margin-bottom:10px">${site&&site.issue?esc(site.issue):''}</textarea>
+        <textarea id="sc-desc" placeholder="למשל: הקבלן החליף את המשאבה, האתר פעיל שוב" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;direction:rtl;margin-bottom:10px">${site&&site.issue?esc(site.issue):''}</textarea>
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">${icon('edit-3')} נסח למונדיי</button>`:''}
-          ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">${icon('edit-3')} נסח למייל</button>`:''}
+          ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-md);font-weight:600">${icon('edit-3')} נסח למונדיי</button>`:''}
+          ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-md);font-weight:600">${icon('edit-3')} נסח למייל</button>`:''}
         </div>
         <div id="sc-draft-result"></div>
         ` : ''}
         <div style="display:flex;gap:8px;margin-top:6px">
-          <button onclick="closeModal()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">ביטול</button>
-          <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:700">${icon('check')} אשר שינוי סטטוס</button>
+          <button onclick="closeModal()" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">ביטול</button>
+          <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:700">${icon('check')} אשר שינוי סטטוס</button>
         </div>`, {modalStyle:'max-height:85vh;overflow-y:auto'})
 }
 function draftStatusMessage(kind) {
@@ -2435,7 +2491,7 @@ function draftStatusMessage(kind) {
   const site = state.sites.find(s=>s.name===name)
   const desc = (document.getElementById('sc-desc')||{}).value || ''
   const resultEl = document.getElementById('sc-draft-result')
-  resultEl.innerHTML = '<div style="text-align:center;color:#948a7a;font-size:13px;padding:10px 0">...מנסח</div>'
+  resultEl.innerHTML = skeletonHtml(3, 'מנסח…')
   const sys = kind==='monday'
     ? 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח עדכון קצר וברור לתא הערות (update) בפריט Monday.com על אתר עבודה. כתוב באנגלית מקצועית, 2-4 משפטים, ישר לעניין, כולל שם האתר, הסטטוס החדש, ומה קרה בפועל. בלי פתיח מיותר, רק את טקסט העדכון עצמו.'
     : 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח מייל עדכון קצר ומקצועי (באנגלית) על שינוי סטטוס באתר עבודה, מוכן לשליחה. כלול שורת נושא (Subject) ואז גוף מייל קצר - 3-5 משפטים, טון ענייני ומקצועי. פורמט: שורה ראשונה "Subject: ..." ואז שורה ריקה ואז גוף המייל.'
@@ -2443,16 +2499,17 @@ function draftStatusMessage(kind) {
   callClaude([{role:'user', content: userMsg}], sys).then(function(reply){
     const text = reply.trim()
     window.__scDraftText = text
-    resultEl.innerHTML = `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px">
-      <div style="font-size:13px;color:#211d17;line-height:1.6;white-space:pre-line;direction:ltr;text-align:left">${esc(text)}</div>
-      <button id="sc-copy-btn" onclick="copyToClipboard(window.__scDraftText,'sc-copy-btn')" style="width:100%;margin-top:8px;background:#f0e7cf;border-radius:8px;padding:8px;color:#6b6255;font-size:13px;font-weight:600">${icon('clipboard')} העתק</button>
+    resultEl.innerHTML = `<div style="background:var(--surface-3);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px;margin-bottom:10px">
+      <div style="font-size:var(--fs-md);color:var(--t1);line-height:1.6;white-space:pre-line;direction:ltr;text-align:left">${esc(text)}</div>
+      <button id="sc-copy-btn" onclick="copyToClipboard(window.__scDraftText,'sc-copy-btn')" style="width:100%;margin-top:8px;background:var(--surface-2);border-radius:var(--radius-sm);padding:8px;color:var(--t2);font-size:var(--fs-md);font-weight:600">${icon('clipboard')} העתק</button>
     </div>`
   }).catch(function(e){
-    resultEl.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:6px 0">' + icon('x') + ' שגיאה: ' + esc(e.message) + '</div>'
+    resultEl.innerHTML = '<div style="color:var(--red-dark);font-size:var(--fs-md);padding:6px 0">' + icon('x') + ' שגיאה: ' + esc(e.message) + '</div>'
   })
 }
 function confirmStatusChange() {
   const name = window.__scName, status = window.__scStatus
+  haptic('light')
   updateSiteStatus(name, status)
   closeModal()
 }
@@ -2462,7 +2519,7 @@ function showAddSite(name) {
   editingSiteName = name || null
   const s = name ? state.sites.find(x=>x.name===name) : null
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
         <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
         ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
@@ -2470,7 +2527,7 @@ function showAddSite(name) {
         ${voiceRowHtml('add-site-issue')}
         <label class="form-label">מיקום / קואורדינטות</label>
         <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?esc(s.location):''}"/>
-        <div style="font-size:12px;color:#948a7a;margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
         <label class="form-label">קישור Monday.com (רשות)</label>
         <input id="add-site-monday" class="form-input" placeholder="הדבק קישור לפריט ב-Monday" value="${s?esc(s.mondayLink):''}" style="direction:ltr"/>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;margin-top:12px">
@@ -2496,7 +2553,7 @@ function showAddSite(name) {
           <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
-        ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:10px;padding:10px;color:#ef4444;font-size:14px">${icon('trash')} מחק אתר</button>`:''}`)
+        ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:var(--radius-md);padding:10px;color:var(--red);font-size:var(--fs-base)">${icon('trash')} מחק אתר</button>`:''}`)
 }
 
 function doAddSite() {
@@ -2536,14 +2593,14 @@ function renderPeople() {
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:18px;font-weight:700">אנשים</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">אנשים</div>
         ${addBtnHtml('showAddPerson()')}
       </div>
     </div>
     <div style="padding:12px 16px">
       ${state.people.length===0?emptyHtml(icon('leaf'), 'אנשים יתווספו מהודעות'):''}
-      ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('hourglass')} ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
-      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:14px;color:#7a6f5c;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
+      ${withP.length>0?`<div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('hourglass')} ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
+      ${withoutP.length>0?`${withP.length>0?`<div style="font-size:var(--fs-base);color:var(--t2);font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
     </div>`
 }
 
@@ -2553,21 +2610,21 @@ function personCard(p) {
     <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:8px;flex:1">
-          <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:14px;color:${rc};font-weight:700;flex-shrink:0">${esc((p.name||'')[0]?.toUpperCase()||'?')}</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:${rc};font-weight:700;flex-shrink:0">${esc((p.name||'')[0]?.toUpperCase()||'?')}</div>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#211d17">${esc(p.name)}</div>
-            ${p.company?`<div style="font-size:14px;color:#6b6255">${esc(p.company)}</div>`:''}
+            <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${esc(p.name)}</div>
+            ${p.company?`<div style="font-size:var(--fs-base);color:var(--t2)">${esc(p.company)}</div>`:''}
           </div>
         </div>
         <div style="display:flex;gap:6px">
           ${actionBtnHtml(p.pending||p.name, p.name, 'font-size:16px')}
           ${iconBtnHtml('deletePerson('+jsArg(p.name)+')', icon('trash'), 'font-size:15px', 'delete')}
-          ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" data-act="clear" aria-label="clear" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">${icon('check')}</button>`:''}
+          ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" data-act="clear" aria-label="clear" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:var(--radius-sm);padding:7px 9px;color:var(--green-light);font-size:var(--fs-base);font-weight:700">${icon('check')}</button>`:''}
         </div>
       </div>
-      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
-        <div style="font-size:14px;color:#f59e0b;font-weight:700;margin-bottom:3px">${icon('hourglass')} ממתין</div>
-        <div style="font-size:14px;color:#7a6f5c;line-height:1.5">${esc(p.pending)}</div>
+      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:var(--radius-sm);border:1px solid #f59e0b22">
+        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${icon('hourglass')} ממתין</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);line-height:1.5">${esc(p.pending)}</div>
       </div>`:''}
     </div>`
 }
@@ -2585,7 +2642,7 @@ function deletePerson(name) {
 
 function showAddPerson() {
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">+ איש קשר</div>
+        <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">+ איש קשר</div>
         <label class="form-label">שם</label><input id="add-person-name" class="form-input" placeholder="Dave"/>
         <label class="form-label">חברה</label><input id="add-person-company" class="form-input" placeholder="ASC Construction"/>
         <label class="form-label">ממתין ל...</label><input id="add-person-pending" class="form-input" placeholder="חתימה על waiver"/>
@@ -2618,19 +2675,17 @@ function renderAction() {
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml('צור תוכן')}
       ${actionCtx?.text?`<div class="card" style="border-right:3px solid var(--gold);margin-bottom:20px">
-        <div style="font-size:14px;color:#211d17;line-height:1.5">${esc(actionCtx.text)}</div>
-        ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">${icon('user')} ${esc(actionCtx.assignee)}</div>`:''}
+        <div style="font-size:var(--fs-base);color:var(--t1);line-height:1.5">${esc(actionCtx.text)}</div>
+        ${actionCtx.assignee?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:4px">${icon('user')} ${esc(actionCtx.assignee)}</div>`:''}
       </div>`:''}
       <div id="action-buttons">
         ${[['whatsapp',icon('message-circle'),'הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email',icon('mail'),'מייל','ASC / 11-16 / NIA'],['monday',icon('clipboard'),'עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
           <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
-            <div style="font-size:16px;font-weight:600">${i} ${l}</div>
-            <div style="font-size:14px;color:#6b6255;margin-top:3px">${s}</div>
+            <div style="font-size:var(--fs-xl);font-weight:600">${i} ${l}</div>
+            <div style="font-size:var(--fs-base);color:var(--t2);margin-top:3px">${s}</div>
           </div>`).join('')}
       </div>
-      <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#6b6255">
-        <div style="font-size:32px;margin-bottom:10px">${icon('edit-3')}</div><div style="font-size:14px">כותב...</div>
-      </div>
+      <div id="action-loading" style="display:none;padding:10px 0">${skeletonHtml(5, 'כותב…')}</div>
       <div id="action-result-container" style="display:none">
         <div id="action-result" class="action-result"></div>
         <button id="action-copy-btn" class="btn-primary" onclick="copyResult()" style="margin-bottom:10px">${icon('file-text')} העתק</button>
@@ -2664,7 +2719,7 @@ function copyResult() {
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('action-copy-btn')
     btn.innerHTML=icon('check') + ' הועתק!'
-    btn.style.background='#a8711a'
+    btn.style.background='var(--gold-deep)'
     setTimeout(()=>{btn.innerHTML=icon('clipboard') + ' העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
   })
 }
@@ -2681,58 +2736,58 @@ function renderSettings() {
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml('הגדרות', '24px')}
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('palette')} ערכת צבע</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('palette')} ערכת צבע</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
         <div style="display:flex;gap:8px">
           ${Object.keys(THEMES).map(name=>`
-            <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:10px;border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'#ffffff'};cursor:pointer">
+            <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'var(--surface)'};cursor:pointer">
               <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,${THEMES[name].gold},${THEMES[name].gold2});margin:0 auto 6px"></div>
-              <div style="font-size:12px;font-weight:600;color:${currentTheme===name?THEMES[name].gold:'#6b6255'}">${THEMES[name].label}</div>
+              <div style="font-size:var(--fs-sm);font-weight:600;color:${currentTheme===name?THEMES[name].gold:'var(--t2)'}">${THEMES[name].label}</div>
             </button>`).join('')}
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('package')} גיבוי / העברה לטלפון חדש</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('package')} גיבוי / העברה לטלפון חדש</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".</div>
         <div style="display:flex;gap:8px">
-          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">${icon('download')} הורד גיבוי</button>
-          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">${icon('upload')} טען מקובץ</button>
+          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('download')} הורד גיבוי</button>
+          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען מקובץ</button>
         </div>
         <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
-        <div style="font-size:12px;color:#948a7a;margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
         <label class="form-label">כתובת השרת</label>
         <input id="settings-server-url" value="${esc(serverUrl)}" placeholder="https://fieldy-proxy.xxx.workers.dev" class="form-input" style="direction:ltr"/>
         <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
         <input id="settings-server-passcode" type="password" value="${esc(serverPasscode)}" placeholder="הסיסמה שהגדרת ב-Cloudflare" class="form-input" style="direction:ltr;margin-bottom:12px"/>
         <div style="display:flex;gap:8px">
           <button id="server-save-btn" class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
-          <button id="server-test-btn" onclick="testServerConfig()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px">בדוק חיבור</button>
+          <button id="server-test-btn" onclick="testServerConfig()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 14px;color:var(--t2);font-size:var(--fs-base)">בדוק חיבור</button>
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('bell')} התראות לטלפון</div>
-        <div style="font-size:12px;color:#948a7a;margin-bottom:10px">תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('bell')} התראות לטלפון</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:10px">תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.</div>
         <div id="push-card-body">${pushCardBodyHtml()}</div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('trash-2')} ניקוי כפילויות בלוח</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
-        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">נקה כפילויות</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash-2')} ניקוי כפילויות בלוח</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
+        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">נקה כפילויות</button>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('trash')} נקה נתוני יום</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
-        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:14px">נקה הכל</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash')} נקה נתוני יום</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
+        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid #ef444444;background:transparent;color:var(--red);font-size:var(--fs-base)">נקה הכל</button>
       </div>
       <div class="card">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('refresh')} רענון האפליקציה</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
-        <div style="font-size:14px;color:#6b6255;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
-        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('refresh')} רענון האפליקציה</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:4px">גרסה: ${APP_VERSION}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">רענן עכשיו</button>
       </div>
     </div>`
   refreshPushCard()   // async: fills in whether this device is subscribed
@@ -2820,9 +2875,9 @@ async function saveServerConfig() {
   try {
     await loadStateFromServer()
     checkChronology(); refreshBadges()
-    if(btn) { btn.innerHTML = icon('check') + ' מחובר וסונכרן!'; btn.style.background = '#1a8f7a' }
+    if(btn) { btn.innerHTML = icon('check') + ' מחובר וסונכרן!'; btn.style.background = 'var(--green)' }
   } catch(e) {
-    if(btn) { btn.innerHTML = icon('x') + ' נכשל, נשמר מקומית'; btn.style.background = '#c0392b' }
+    if(btn) { btn.innerHTML = icon('x') + ' נכשל, נשמר מקומית'; btn.style.background = 'var(--red-dark)' }
   }
   setTimeout(()=>renderSettings(), 1800)
 }
@@ -2851,7 +2906,8 @@ async function askFieldy() {
   if(!question) return
   btn.textContent = 'חושב...'
   btn.disabled = true
-  answerEl.style.display = 'none'
+  answerEl.innerHTML = skeletonHtml(3, 'עובר על האתרים והמשימות שלך…')
+  answerEl.style.display = 'block'
   if(mapsWrap) mapsWrap.innerHTML = ''
   try {
     const openSites = state.sites.filter(s=>s.status!=='resolved')
@@ -2872,7 +2928,7 @@ async function askFieldy() {
       '\n\nהשאלה של אורי: ' + question +
       '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
     const answer = (await callClaude([{role:'user', content: prompt}])).trim()
-    answerEl.style.color = '#211d17'
+    answerEl.style.color = 'var(--t1)'
     answerEl.textContent = answer || 'לא התקבלה תשובה.'
     answerEl.style.display = 'block'
     // If the answer names specific sites that have a known location, offer a ready-made route
@@ -2884,10 +2940,10 @@ async function askFieldy() {
       const wps = pts.slice(0,-1).join('|')
       let url = 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving'
       if(wps) url += '&waypoints=' + wps
-      mapsWrap.innerHTML = '<a href="'+url+'" target="_blank" style="display:inline-block;margin-top:10px;background:#1a73e8;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">' + icon('map-pin') + ' פתח מסלול בגוגל מפות ('+mentioned.length+' תחנות)</a>'
+      mapsWrap.innerHTML = '<a href="'+url+'" target="_blank" style="display:inline-block;margin-top:10px;background:#1a73e8;color:#fff;padding:8px 14px;border-radius:var(--radius-sm);font-size:var(--fs-md);font-weight:600;text-decoration:none">' + icon('map-pin') + ' פתח מסלול בגוגל מפות ('+mentioned.length+' תחנות)</a>'
     }
   } catch(e) {
-    answerEl.style.color = '#c0392b'
+    answerEl.style.color = 'var(--red-dark)'
     answerEl.innerHTML = icon('x') + ' שגיאה: ' + esc(e.message)
     answerEl.style.display = 'block'
   }
@@ -2898,7 +2954,7 @@ async function askFieldy() {
 let clearConfirm = false
 function confirmClear() {
   const btn = document.getElementById('clear-btn')
-  if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='#ef4444'; btn.style.color='#fff'; return }
+  if(!clearConfirm) { clearConfirm=true; btn.textContent='בטוח? לחץ שוב'; btn.style.background='var(--red)'; btn.style.color='#fff'; return }
   state = {tasks:{now:[],today:[],later:[]},sites:[],people:[],events:[],focus:'',focusDate:null,lastSeenDate:null,streak:0,lastStreakDate:null,personal:{gymLog:{},meditationLog:{},vacationGoal:''},moods:[],brainDumps:[],personalInsights:{text:'',updatedAt:null,basedOnCount:0},quotes:[{text:"Who's living your life?",addedAt:Date.now()}],leadershipLog:[],pettyCash:[],updated:null}
   save(); clearConfirm=false; navigateTo('home')
 }
@@ -2951,25 +3007,25 @@ function pushStatus() {
 }
 function pushCardBodyHtml() {
   const st = pushStatus(), prefs = notifyPrefs()
-  const toggle = (id, label, on) => `<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:#211d17;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="saveNotifyPrefs()" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0"/> ${label}</label>`
-  const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin:-4px 26px 10px 0;font-size:13px;color:#6b6255">בשעה <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
-  return `<div id="push-status" style="font-size:14px;color:${st.ok?'#1a8f7a':'#6b6255'};margin-bottom:12px;line-height:1.6">${st.text}</div>
-    <ol style="font-size:13px;color:#948a7a;margin:0 18px 12px 0;padding:0;line-height:1.7">
+  const toggle = (id, label, on) => `<label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-base);color:var(--t1);margin-bottom:8px;cursor:pointer"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="saveNotifyPrefs()" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0"/> ${label}</label>`
+  const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin:-4px 26px 10px 0;font-size:var(--fs-md);color:var(--t2)">בשעה <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
+  return `<div id="push-status" style="font-size:var(--fs-base);color:${st.ok?'var(--green)':'var(--t2)'};margin-bottom:12px;line-height:1.6">${st.text}</div>
+    <ol style="font-size:var(--fs-md);color:var(--t3);margin:0 18px 12px 0;padding:0;line-height:1.7">
       <li>לחץ "הפעל התראות" ואשר את ההרשאה בחלון של הדפדפן.</li>
       <li>לחץ "שלח בדיקה" — אמורה להגיע התראה תוך כמה שניות.</li>
       <li>בחר למטה אילו תזכורות לקבל.</li>
     </ol>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       ${pushSub ? `<button id="push-disable-btn" onclick="disablePush()" class="btn-secondary" style="flex:1">בטל במכשיר הזה</button>` : `<button id="push-enable-btn" onclick="enablePush()" class="btn-primary" style="flex:1;padding:12px" ${st.canEnable?'':'disabled'}>${icon('bell')} הפעל התראות</button>`}
-      <button id="push-test-btn" onclick="sendTestPush()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px" ${pushSub?'':'disabled'}>שלח בדיקה</button>
+      <button id="push-test-btn" onclick="sendTestPush()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 14px;color:var(--t2);font-size:var(--fs-base)" ${pushSub?'':'disabled'}>שלח בדיקה</button>
     </div>
-    <div style="font-size:12px;color:#948a7a;margin-bottom:8px;letter-spacing:.5px;font-weight:700">אילו תזכורות</div>
+    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:8px;letter-spacing:.5px;font-weight:700">אילו תזכורות</div>
     ${toggle('pref-events',icon('calendar') + ' אירועים בלוח, לפי ההתראה שנבחרה בכל אירוע', prefs.events)}
     ${toggle('pref-stuck',icon('alert-triangle') + ' אתרים שתקועים מעל 5 ימים — פעם ביום בבוקר', prefs.stuckSites)}
     ${timeRow('pref-stuck-time', prefs.stuckTime)}
     ${toggle('pref-lead',icon('target') + ' רפלקציית מנהיגות בערב — רק אם עוד לא כתבת היום', prefs.leadership)}
     ${timeRow('pref-lead-time', prefs.leadershipTime)}
-    <div id="push-msg" style="font-size:13px;color:#948a7a;margin-top:6px;min-height:18px"></div>`
+    <div id="push-msg" style="font-size:var(--fs-md);color:var(--t3);margin-top:6px;min-height:18px"></div>`
 }
 function pushMsg(html, isErr) { const el = document.getElementById('push-msg'); if(el) { el.innerHTML = html; el.style.color = isErr ? '#c0392b' : '#1a8f7a' } }
 async function refreshPushCard() {
@@ -3040,6 +3096,7 @@ const UNDO_MS = 6000
 let _undo = null
 function offerUndo(label, restore, onCommit) {
   commitUndo()
+  haptic('warn')
   const el = document.createElement('div')
   el.id = 'undo-toast'
   el.innerHTML = '<span>' + esc(label) + '</span><button onclick="undoLast()">בטל</button>'
@@ -3053,7 +3110,7 @@ function _closeUndo() {
   return u
 }
 function commitUndo() { if(_undo) { const u = _closeUndo(); if(u.onCommit) u.onCommit() } }
-function undoLast() { if(_undo) { const u = _closeUndo(); u.restore() } }
+function undoLast() { if(_undo) { const u = _closeUndo(); haptic('light'); u.restore() } }
 // Puts `item` back into a copy of `arr` at its old position (or the end, if
 // the list got shorter in the meantime).
 function insertAt(arr, idx, item) { const out = arr.slice(); out.splice(Math.min(idx, out.length), 0, item); return out }
@@ -3279,23 +3336,23 @@ function renderMonthCal(){
     '<div class="cal-grid">'+days+'</div>'+
     '<div style="padding:10px 18px 0">'+
     (monthEvs.length?
-      '<div style="font-size:14px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">' + icon('calendar') + ' אירועי החודש</div>'+
+      '<div style="font-size:var(--fs-base);color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">' + icon('calendar') + ' אירועי החודש</div>'+
       monthEvs.map(function(e){
         var dayNum = parseInt((e.date||'').split('-')[2]||'0');
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
         var dateLabel = dayNum ? dayNum+'.'+monthNum : '';
         var col = esc(e.color||'var(--bamboo)');
-        return '<div style="background:#ffffff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+esc(e.id)+'">'+
+        return '<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+esc(e.id)+'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
-          '<div style="font-size:14px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+esc(e.time):'')+'</div>'+
-          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
-          (e.note?'<div style="font-size:14px;color:var(--t2);margin-top:2px">'+esc(e.note)+'</div>':'')+
+          '<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+esc(e.time):'')+'</div>'+
+          '<div style="font-size:var(--fs-base);color:var(--t1);font-weight:600">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:var(--fs-base)">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
+          (e.note?'<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">'+esc(e.note)+'</div>':'')+
           '</div>'+
-          '<button id="del-ev-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">' + icon('x') + '</button>'+
+          '<button id="del-ev-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:var(--fs-base);padding:2px 6px;cursor:pointer">' + icon('x') + '</button>'+
           '</div></div>';
       }).join(''):
-      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">' + icon('leaf') + '</div><div style="font-size:14px;margin-top:6px">אין אירועים החודש</div></div>')+
+      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">' + icon('leaf') + '</div><div style="font-size:var(--fs-base);margin-top:6px">אין אירועים החודש</div></div>')+
     '</div>';
 }
 
@@ -3313,7 +3370,7 @@ function renderWeekCal(){
       '<div class="week-dnum'+(isT?' today':'')+'">'+(d.getDate())+'</div></div>'+
       '<div style="flex:1">'+
       (evs.length?evs.map(function(e){return '<div class="week-epill">'+(e.time?esc(e.time)+' · ':'')+esc(e.title)+'</div>';}).join(''):
-       (isT?'<div style="font-size:14px;color:var(--t4);padding:4px 0">יום פנוי</div>':''))+
+       (isT?'<div style="font-size:var(--fs-base);color:var(--t4);padding:4px 0">יום פנוי</div>':''))+
       '</div></div>';
   }
   return html;
@@ -3332,11 +3389,11 @@ function renderYearCal(){
       var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       var evs=getEventsForDate(dk);
       var isT=dk===tk;
-      mini+='<div style="font-size:14px;text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
+      mini+='<div style="font-size:var(--fs-base);text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
     }
     var mm=m,yy=y;
-    html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px" data-ym="'+y+'-'+m+'">'+
-      '<div style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:4px;text-align:center">'+MONTHS_HE[m]+'</div>'+
+    html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px" data-ym="'+y+'-'+m+'">'+
+      '<div style="font-size:var(--fs-base);font-weight:700;color:var(--t2);margin-bottom:4px;text-align:center">'+MONTHS_HE[m]+'</div>'+
       '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px">'+mini+'</div></div>';
   }
   html+='</div>';
@@ -3363,11 +3420,11 @@ function renderEvCard(e){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div style="flex:1">'+
     (e.time?'<div class="ev-time">' + icon('clock') + ' '+esc(e.time)+'</div>':'')+
-    '<div class="ev-title">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
+    '<div class="ev-title">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:var(--fs-base)">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
     (e.note?'<div class="ev-note">'+esc(e.note)+'</div>':'')+
     (e.recurring?'<div class="rec-badge">' + icon('refresh') + ' '+(RECUR_HE[e.recurring]||esc(e.recurring))+'</div>':'')+
     '</div>'+
-    '<button id="del-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:16px;padding:4px;cursor:pointer">' + icon('x') + '</button>'+
+    '<button id="del-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:var(--fs-xl);padding:4px;cursor:pointer">' + icon('x') + '</button>'+
     '</div></div>';
 }
 
@@ -3378,7 +3435,7 @@ function showDayEvents(dk){
   openModal(
     '<div class="modal-handle"></div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div style="font-size:16px;font-weight:700;color:var(--t1)">' + icon('calendar') + ' '+label+'</div>'+
+    '<div style="font-size:var(--fs-xl);font-weight:700;color:var(--t1)">' + icon('calendar') + ' '+label+'</div>'+
     '<button class="btn-add" id="add-ev-day">+ הוסף</button>'+
     '</div>'+
     (evs.length?evs.map(renderEvCard).join(''):emptyHtml(icon('leaf'), 'אין אירועים', 'padding:20px 0')));
@@ -3391,7 +3448,7 @@ function showDayEvents(dk){
 function showAddEvent(dateStr){
   var td=dateStr||getToday();
   openModal('<div class="modal-handle"></div>'+
-    '<div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--t1)">+ אירוע חדש</div>'+
+    '<div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:16px;color:var(--t1)">+ אירוע חדש</div>'+
     '<label class="form-label">כותרת</label><input id="ev-title" class="form-input" placeholder="פגישה / הגשה..."/>'+
     '<label class="form-label">תאריך</label><input id="ev-date" type="date" class="form-input" value="'+td+'" style="direction:ltr"/>'+
     '<label class="form-label">שעה (אופציונלי)</label><input id="ev-time" type="time" class="form-input" style="direction:ltr"/>'+
@@ -3764,12 +3821,12 @@ function startMeditationWithVoice(idx){
       });
       var ctrl = document.createElement('div');
       ctrl.style.cssText = 'margin-top:10px';
-      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:14px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ' + icon('arrow-left') + ' נגישות ' + icon('arrow-left') + ' המרת טקסט לדיבור.</div>' : '';
+      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ' + icon('arrow-left') + ' נגישות ' + icon('arrow-left') + ' המרת טקסט לדיבור.</div>' : '';
       ctrl.innerHTML = lowVoiceNote +
-        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:14px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
+        '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:var(--radius-md);padding:9px 12px;color:var(--t1);font-size:var(--fs-base);font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
         '<div style="display:flex;gap:7px">'+
-        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">' + icon('music') + ' מוסיקה</button>'+
-        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">' + icon('mic') + ' הדרכה</button>'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:var(--fs-base);cursor:pointer;font-family:inherit">' + icon('music') + ' מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:var(--fs-base);cursor:pointer;font-family:inherit">' + icon('mic') + ' הדרכה</button>'+
         '</div>';
       modal.appendChild(ctrl);
       var vs=document.getElementById('voice-select');
