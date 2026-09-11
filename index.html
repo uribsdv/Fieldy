@@ -117,53 +117,65 @@ textarea,select,input{font-family:inherit}
 .success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid var(--gold-deep);pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
 
 
-/* === CONSOLE ATMOSPHERE === */
+/* === WARM ATMOSPHERE ===
+   Cards lift softly off the page (a hint of shadow, not a hairline outline)
+   so the eye can group content by depth, the way Calm's cards separate from
+   its background — while staying in Fieldy's own warm cream/gold palette,
+   not switching to a dark theme. */
 
 body {
   background: var(--ink);
 }
 
-/* Flat header, no wash gradient */
 .screen-header {
-  background: var(--ink) !important;
-  border-bottom: 1px solid var(--line) !important;
+  background: linear-gradient(180deg, var(--surface-3), var(--ink)) !important;
+  border-bottom: none !important;
 }
 
-/* Flat cards — thin hairline border, no blur, no glow */
 .card {
-  background: var(--ink3) !important;
-  border: 1px solid var(--line) !important;
-  transition: border-color 0.15s;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s ease, transform .1s ease;
 }
+.card:active { box-shadow: none; transform: translateY(1px); }
+/* Cards that don't set their own border keep the old hairline; ones that do
+   (status-coloured site cards, the right-now list) are left alone — no
+   !important here on purpose, so a per-instance border always wins. */
+.card:not([style*="border"]) { border: 1px solid var(--line); }
 
-/* Flat nav, no blur */
 #nav {
   background: var(--surface-3) !important;
-  border-top: 1px solid var(--line) !important;
+  border-top: none !important;
+  box-shadow: 0 -4px 16px rgba(43,38,32,.07);
 }
 
-/* Active nav: flat accent color + underline, no glow */
+/* Active nav: accent colour + a soft pill underline */
 .nav-btn.active .nav-icon svg { stroke: var(--gold); }
 .nav-btn .nav-icon svg { stroke: var(--t3); transition: stroke .15s; }
 .nav-btn.active::after {
   content:'';
   position:absolute; top:0; left:50%; transform:translateX(-50%);
-  width:20px; height:2px; background:var(--gold); border-radius:2px;
+  width:24px; height:3px; background:var(--gold); border-radius:var(--radius-pill);
 }
 
 .success-ring {
   border-color: var(--gold) !important;
 }
 
-/* Flat modal, thin top rule */
 .modal {
   background: var(--surface-input) !important;
-  border-top: 1px solid var(--line) !important;
+  border-top: none !important;
+  box-shadow: var(--shadow-lg);
 }
 
 .screen {
   transition: opacity 0.15s ease;
 }
+
+/* Circular colour badge behind an identity icon (mood, right-now, personal
+   toggles) — the "colourful chip" treatment, kept in-palette per colour. */
+.icon-badge { display:inline-flex; align-items:center; justify-content:center; width:2.3em; height:2.3em; border-radius:50%; flex-shrink:0 }
+.icon-badge .ic { width:1.15em; height:1.15em }
 
 /* Tao screen keeps its own quiet, separate dark atmosphere on purpose */
 #screen-tao {
@@ -497,6 +509,13 @@ const EMOJI_ICON = {"\u2713":'check', "\u2715":'x', "\ud83d\udccd":'map-pin', "\
 function iconFor(glyph) { return EMOJI_ICON[glyph] ? icon(EMOJI_ICON[glyph]) : esc(glyph) }
 // Helpers below accept either an icon name or already-rendered icon markup.
 function iconAny(x) { return ICONS[x] ? icon(x) : (x || '') }
+// A circular colour chip behind an icon (mood picker, right-now list,
+// personal toggles) — the icon renders in `color`, the disc is a soft tint
+// of the same colour, so identity reads at a glance instead of resting on a
+// flat black-on-cream line.
+function iconBadge(name, color, tint) {
+  return '<span class="icon-badge" style="background:' + (tint || color + '1c') + ';color:' + color + '">' + icon(name) + '</span>'
+}
 
 // ── RENDER HELPERS ────────────────────────────────
 // Shared building blocks for the HTML patterns that used to be repeated
@@ -1813,10 +1832,20 @@ function rightNowHtml(mood) {
   const limit = moodLimit(mood)
   const cap = (limit && !rightNowExpanded) ? limit : 6
   const shown = all.slice(0, cap), hidden = all.length - shown.length
-  const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:var(--surface);border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:var(--radius-lg);padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
-      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:var(--t1);line-height:1.4">${it.icon ? '<span style="color:'+it.color+'">'+icon(it.icon)+'</span> ' : ''}${esc(it.title)}</div>
-      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
+  const row = (it, big) => {
+    const wrap = 'class="rn-item card" ' + (it.go ? `onclick="${it.go}" ` : '') + 'style="' + (it.go?'cursor:pointer;':'') + 'border-right:3px solid ' + it.color + ';padding:' + (big?'14px 16px':'10px 14px') + ';margin-bottom:8px'
+    if(!big) return `<div ${wrap}">
+      <div style="font-size:14px;font-weight:600;color:var(--t1);line-height:1.4">${it.icon ? '<span style="color:'+it.color+'">'+icon(it.icon)+'</span> ' : ''}${esc(it.title)}</div>
+      ${it.sub ? `<div style="font-size:12px;color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
     </div>`
+    return `<div ${wrap};display:flex;align-items:center;gap:12px">
+      ${it.icon ? iconBadge(it.icon, it.color) : ''}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4">${esc(it.title)}</div>
+        ${it.sub ? `<div style="font-size:13px;color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
+      </div>
+    </div>`
+  }
   return `<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
     ${row(shown[0], true)}
     ${shown.slice(1).map(it => row(it, false)).join('')}
@@ -1896,7 +1925,7 @@ function renderHome() {
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
             return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
-              <div style="font-size:var(--fs-2xl);line-height:1;color:${d.color}">${icon(d.icon)}</div>
+              <div style="display:flex;justify-content:center;margin-bottom:2px">${iconBadge(d.icon, d.color)}</div>
               <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${d.label}</div>
             </button>`
           }).join('')}
