@@ -195,6 +195,8 @@ async function main() {
         assert(r.ok, 'threw: ' + r.err)
         assert(!r.hidden, 'screen still hidden')
         assert(r.len > 100, 'screen looks empty (' + r.len + ' chars)')
+        const leak = await page.evaluate(sc => { const tx = document.getElementById('screen-' + sc).textContent; return /<svg|class="ic"/.test(tx) }, s)
+        assert(!leak, 'icon markup rendered as literal text on ' + s)
         if (NAV.includes(s)) assert(r.nav === 'grid', 'nav should be visible on ' + s); else assert(r.nav === 'none', 'nav should be hidden on ' + s)
         await page.waitForTimeout(50)
         const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
@@ -272,12 +274,14 @@ async function main() {
             eval('(' + src + ')()')
             const html = document.getElementById('modal-container').innerHTML
             const opened = html.trim().length > 50
+            const leak = /<svg|class="ic"/.test(document.getElementById('modal-container').textContent)
             closeModal()
-            return { ok: true, opened, name: src }
+            return { ok: true, opened, leak, name: src }
           } catch (e) { return { ok: false, err: e.message } }
         }, fn.toString())
         assert(r.ok, 'threw: ' + r.err)
         if (!name.startsWith('meditation')) assert(r.opened, 'modal container stayed empty')
+        assert(!r.leak, 'icon markup rendered as literal text in modal ' + name)
         const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
       })
     }
@@ -302,7 +306,7 @@ async function main() {
   await check('app boots with seeded data', async () => { assert(await appReady(), 'home did not render'); const e = errorsSince(); assert(!e.length, e.join('\n')) })
   await check('home shows one ranked "עכשיו" list: focus first, urgent task, stuck site, mood card', async () => {
     const t = await page.textContent('#screen-home')
-    for (const needle of ['🎯 עכשיו', 'הכי חשוב היום', 'להתקשר לדייב', 'תקוע 7 ימים', 'איך אתה מרגיש', 'ליקוידציה']) assert(t.includes(needle), 'missing: ' + needle)
+    for (const needle of ['עכשיו', 'הכי חשוב היום', 'להתקשר לדייב', 'תקוע 7 ימים', 'איך אתה מרגיש', 'ליקוידציה']) assert(t.includes(needle), 'missing: ' + needle)
     const r = await page.evaluate(() => { const items = rankRightNow(null); return { first: items[0].kind, kinds: items.map(i => i.kind), rows: document.querySelectorAll('#screen-home .rn-item').length } })
     // The focus headline sits at the top unless something is literally overdue right now (the fixture's 08:00 task is, after 8am).
     assert(r.kinds.indexOf('focus') <= 1 && ['focus', 'task'].includes(r.first), 'focus should be first or right behind an overdue task: ' + JSON.stringify(r))
@@ -487,7 +491,7 @@ async function main() {
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
   await check('delete person via 🗑 on the card, undo restores', async () => {
-    await page.locator('#screen-people .card', { hasText: 'Test Person' }).first().locator('button:has-text("🗑")').click()
+    await page.locator('#screen-people .card', { hasText: 'Test Person' }).first().locator('button[data-act=delete]').click()
     let r = await page.evaluate(() => ({ gone: !state.people.some(x => x.name === 'Test Person'), toast: !!document.getElementById('undo-toast') }))
     assert(r.gone && r.toast, JSON.stringify(r))
     await page.click('#undo-toast button')
@@ -593,14 +597,14 @@ async function main() {
   })
   await check('edit modal round-trips the exact text and note (quotes intact)', async () => {
     const card = page.locator('#screen-tasks > div > div', { hasText: 'משימה "עם" מרכאות' }).first()
-    await card.locator('button:has-text("✎")').click()
+    await card.locator('button[data-act=edit]').click()
     const r = await page.evaluate(() => ({ text: document.getElementById('add-task-text').value, note: document.getElementById('add-task-note').value }))
     assert(r.text === EVIL_TEXT, 'text changed: ' + r.text); assert(r.note === EVIL_NOTE, 'note changed: ' + r.note)
     await page.evaluate(() => closeModal())
   })
   await check('🖌️ button passes the exact text through the onclick attribute', async () => {
     const card = page.locator('#screen-tasks > div > div', { hasText: 'משימה "עם" מרכאות' }).first()
-    await card.locator('button:has-text("🖌️")').click()
+    await card.locator('button[data-act=draft]').click()
     const r = await page.evaluate(() => ({ screen: currentScreen, text: actionCtx && actionCtx.text, shown: document.getElementById('screen-action').textContent.includes('משימה "עם" מרכאות') }))
     assert(r.screen === 'action' && r.text === EVIL_TEXT && r.shown, JSON.stringify(r))
     const e = errorsSince(); assert(!e.length, e.join('\n'))
@@ -624,10 +628,10 @@ async function main() {
     await page.evaluate(() => confirmStatusChange())
     r = await page.evaluate(n => state.sites.find(x => x.name === n).status, EVIL_SITE)
     assert(r === 'pending', 'status not changed: ' + r)
-    await card.locator('button:has-text("🚧")').click()
+    await card.locator('button[data-act=stuck]').click()
     r = await page.evaluate(n => !!state.sites.find(x => x.name === n).stuckSince, EVIL_SITE)
     assert(r, 'stuck toggle did not reach the right site')
-    await page.locator('#screen-sites .card', { hasText: 'O\'Brien' }).first().locator('button:has-text("✎")').click()
+    await page.locator('#screen-sites .card', { hasText: 'O\'Brien' }).first().locator('button[data-act=edit]').click()
     r = await page.evaluate(() => ({ name: document.getElementById('add-site-name').value, issue: document.getElementById('add-site-issue').value }))
     assert(r.name === EVIL_SITE && r.issue === 'issue <i>x</i> "q"', 'edit modal values changed: ' + JSON.stringify(r))
     await page.evaluate(() => closeModal())
@@ -638,11 +642,11 @@ async function main() {
     await page.fill('#add-person-name', 'Dave "the" O\'Neil'); await page.fill('#add-person-pending', 'waiver <b>now</b>')
     await page.evaluate(() => doAddPerson())
     const card = page.locator('#screen-people .card', { hasText: 'O\'Neil' }).first()
-    await card.locator('button:has-text("🖌️")').click()
+    await card.locator('button[data-act=draft]').click()
     let r = await page.evaluate(() => actionCtx)
     assert(r.assignee === 'Dave "the" O\'Neil' && r.text === 'waiver <b>now</b>', JSON.stringify(r))
     await page.evaluate(() => navigateTo('people'))
-    await page.locator('#screen-people .card', { hasText: 'O\'Neil' }).first().locator('button:has-text("✓")').click()
+    await page.locator('#screen-people .card', { hasText: 'O\'Neil' }).first().locator('button[data-act=clear]').click()
     r = await page.evaluate(() => state.people.find(x => x.name === 'Dave "the" O\'Neil').pending)
     assert(r === '', 'pending not cleared: ' + r)
     const e = errorsSince(); assert(!e.length, e.join('\n'))
@@ -780,7 +784,7 @@ async function main() {
       })
       mockLog.length = 0
       await page.click('#push-enable-btn')
-      await page.waitForFunction(() => /✓ פעיל במכשיר/.test((document.getElementById('push-status') || {}).textContent || ''), null, { timeout: 5000 })
+      await page.waitForFunction(() => /^\s*פעיל במכשיר/.test((document.getElementById('push-status') || {}).textContent || ''), null, { timeout: 5000 })
       const sub = mockLog.find(m => m.path === '/api/push/subscribe' && m.method === 'POST')
       const dbg = () => ' | calls: ' + JSON.stringify(mockLog.map(m => m.method + ' ' + m.path)) + ' | msg: ' + (await_msg || '')
       const await_msg = await page.evaluate(() => (document.getElementById('push-msg') || {}).textContent)

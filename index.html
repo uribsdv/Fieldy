@@ -231,6 +231,8 @@ body::before {
 .week-dnum{font-size:var(--fs-2xl);font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
 .week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:var(--radius-sm);padding:5px var(--space-2-5);margin-bottom:var(--space-1);font-size:var(--fs-base);color:var(--t1);font-weight:500}
+/* Inline icons */
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 /* Undo toast (shown for a few seconds after any delete) */
 #undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#211d17;color:#fdf9ee;padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
 #undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
@@ -357,6 +359,113 @@ function jsArg(v) { return esc(JSON.stringify(v === undefined ? null : v)) }
 // never turn into a clickable script.
 function safeUrl(u) { return (typeof u === 'string' && /^https?:\/\//i.test(u.trim())) ? u.trim() : '' }
 
+// ── ICONS ─────────────────────────────────────────
+// One consistent outline icon set (24px grid, stroke-based, currentColor),
+// rendered inline as SVG so it looks the same on every phone and OS. This
+// replaced the emoji that used to sit in labels, buttons and cards — emoji
+// render differently everywhere and read as casual. Size follows the
+// surrounding font-size (1em), colour follows the text colour.
+const ICONS = {
+  'check': '<polyline points="20 6 9 17 4 12"/>',
+  'x': '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  'plus': '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  'map-pin': '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  'arrow-right': '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+  'chevron-left': '<polyline points="15 18 9 12 15 6"/>',
+  'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
+  'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  'clipboard': '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
+  'calendar': '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  'trash': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  'trash-2': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+  'edit': '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+  'edit-3': '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+  'link': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  'link-2': '<path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/>',
+  'refresh': '<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>',
+  'rotate-ccw': '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+  'leaf': '<path d="M20 4C10 4 5 9 5 17c0 1 .3 2 .7 3C13 20 20 15 20 4z"/><path d="M5.7 20C9 15 13 11 17 8"/>',
+  'message-square': '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  'message-circle': '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  'waves': '<path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 13c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  'search': '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  'flower': '<path d="M12 20c-3 0-6-2-7-5 2-1 4-1 5 0-2-3-1-7 2-10 3 3 4 7 2 10 1-1 3-1 5 0-1 3-4 5-7 5z"/>',
+  'brain': '<path d="M9.5 3a3 3 0 0 0-3 3v.3A3.5 3.5 0 0 0 5 12a3.5 3.5 0 0 0 1 6.5A3 3 0 0 0 12 20V6a3 3 0 0 0-2.5-3z"/><path d="M14.5 3a3 3 0 0 1 3 3v.3A3.5 3.5 0 0 1 19 12a3.5 3.5 0 0 1-1 6.5A3 3 0 0 1 12 20"/>',
+  'alert-triangle': '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  'mic': '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+  'flame': '<path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-8 0 4-4 6-4 12 0 4 3 7 7 7z"/>',
+  'yin-yang': '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="12" cy="16.5" r="1"/>',
+  'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  'phone': '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  'monitor': '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  'hourglass': '<path d="M6 2h12M6 22h12M7 2v4l5 6-5 6v4M17 2v4l-5 6 5 6v4"/>',
+  'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  'upload': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  'battery': '<rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/><line x1="5" y1="10" x2="5" y2="14"/>',
+  'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  'book-open': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  'book': '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  'file-text': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  'quote': '<path d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4"/><path d="M20 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4"/>',
+  'shuffle': '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
+  'wallet': '<path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-1"/><path d="M16 3H6a2 2 0 0 0-2 2v2"/><path d="M22 12h-5a2 2 0 0 0 0 4h5v-4z"/>',
+  'user': '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  'users': '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  'camera': '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  'tool': '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  'mail': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+  'bell': '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  'globe': '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  'volume-x': '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>',
+  'volume-2': '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+  'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  'wind': '<path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>',
+  'mountain': '<path d="M3 20l6-11 4 6 2-3 6 8z"/><path d="M8 13l1.5 2 1.5-1"/>',
+  'droplet': '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>',
+  'circle': '<circle cx="12" cy="12" r="10"/>',
+  'headphones': '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
+  'tag': '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  'smile': '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+  'key': '<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',
+  'log-out': '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  'compass': '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+  'infinity': '<path d="M18.18 8c-2.4 0-3.6 2-4.68 4-1.08 2-2.28 4-4.68 4a4 4 0 1 1 0-8c2.4 0 3.6 2 4.68 4 1.08 2 2.28 4 4.68 4a4 4 0 1 0 0-8z"/>',
+  'crosshair': '<circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>',
+  'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  'coffee': '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
+  'activity': '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  'moon': '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  'home': '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  'sun': '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+  'bar-chart-2': '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  'lightbulb': '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+  'dumbbell': '<path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/>',
+  'feather': '<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>',
+  'lock': '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  'wifi': '<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  'external-link': '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
+  'map': '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+  'palette': '<circle cx="12" cy="12" r="10"/><circle cx="8" cy="10" r="1.2" fill="currentColor"/><circle cx="12" cy="7" r="1.2" fill="currentColor"/><circle cx="16" cy="10" r="1.2" fill="currentColor"/><path d="M12 22c-2 0-2-2-1-3s2-2 4-2h2a5 5 0 0 0 5-5"/>',
+  'package': '<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  'cloud': '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  'square': '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+  'sparkles': '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z"/>',
+  'send': '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  'volume': '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>'
+}
+function icon(name, extraClass) {
+  const d = ICONS[name]
+  if(!d) return ''
+  return '<svg class="ic' + (extraClass ? ' ' + extraClass : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>'
+}
+// Emoji that still arrive from data (e.g. the server's insight items) are
+// mapped onto the same set; anything unknown is shown as-is.
+const EMOJI_ICON = {"\u2713":'check', "\u2715":'x', "\ud83d\udccd":'map-pin', "\u2190":'arrow-left', "\u2192":'arrow-right', "\ud83c\udfaf":'target', "\ud83d\udccb":'clipboard', "\ud83d\udcc5":'calendar', "\ud83d\uddd1":'trash', "\u270e":'edit', "\ud83d\udd17":'link', "\ud83d\udd04":'refresh', "\ud83c\udf3f":'leaf', "\ud83d\udd8c\ufe0f":'message-square', "\ud83c\udf0a":'waves', "\ud83d\udd0d":'search', "\ud83e\udeb7":'flower', "\u270d\ufe0f":'edit-3', "\ud83e\udde0":'brain', "\ud83d\udea7":'alert-triangle', "\ud83c\udfa4":'mic', "\u26a0\ufe0f":'alert-triangle', "\ud83d\udd25":'flame', "\u262f\ufe0f":'yin-yang', "\u23f0":'clock', "\u26a1":'zap', "\ud83d\udcde":'phone', "\ud83d\udcbb":'monitor', "\u23f3":'hourglass', "\u2b07\ufe0f":'download', "\ud83d\udd0b":'battery', "\u2699\ufe0f":'settings', "\ud83d\udcd6":'book-open', "\ud83c\udfad":'smile', "\ud83d\udcac":'message-circle', "\ud83d\udcdc":'file-text', "\ud83d\udcad":'quote', "\ud83d\udd00":'shuffle', "\ud83d\udcda":'book', "\ud83d\udcb0":'wallet', "\ud83c\udf8b":'zap', "\ud83d\udc64":'user', "\ud83d\udcf7":'camera', "\ud83d\udd27":'tool', "\ud83d\udce7":'mail', "\ud83d\udd14":'bell', "\ud83c\udf10":'globe', "\ud83d\udd07":'volume-x', "\ud83c\udfb5":'music', "\ud83c\udf00":'wind', "\ud83c\udfd4\ufe0f":'mountain', "\ud83d\udca7":'droplet', "\u2b55":'circle', "\ud83d\udc42":'headphones', "\ud83c\udff7\ufe0f":'tag', "\ud83d\ude0a":'smile', "\ud83d\udd11":'key', "\ud83d\udeaa":'log-out', "\ud83e\udded":'compass', "\ud83e\uddf5":'link-2', "\u21bb":'rotate-ccw', "\ud83d\udd35":'circle', "\u267e\ufe0f":'infinity', "\ud83e\udd4a":'crosshair', "\ud83d\udee1\ufe0f":'shield', "\ud83c\udf7d\ufe0f":'coffee', "\ud83c\udfc3":'activity', "\ud83d\ude34":'moon', "\ud83c\udfe0":'home', "\ud83e\udd1d":'users', "\ud83d\udde3\ufe0f":'message-circle', "\u2600\ufe0f":'sun', "\ud83d\udc65":'users', "\ud83d\udcca":'bar-chart-2', "\ud83d\udca1":'lightbulb', "\ud83c\udf31":'leaf', "\ud83c\udfcb\ufe0f":'dumbbell', "\ud83e\uddd8":'flower', "\ud83d\udd4a\ufe0f":'feather', "\ud83d\udd12":'lock', "\ud83c\udfdc\ufe0f":'alert-circle', "\ud83d\udcf6":'wifi', "\u2197":'external-link', "\ud83d\uddfa\ufe0f":'map', "\ud83d\udcdd":'edit-3', "\ud83c\udfa8":'palette', "\ud83d\udce6":'package', "\u2b06\ufe0f":'upload', "\u2601\ufe0f":'cloud', "\ud83e\uddf9":'trash-2', "\u23f9":'square'}  // keys are emoji, written as \u escapes
+function iconFor(glyph) { return EMOJI_ICON[glyph] ? icon(EMOJI_ICON[glyph]) : esc(glyph) }
+
 // ── RENDER HELPERS ────────────────────────────────
 // Shared building blocks for the HTML patterns that used to be repeated
 // by hand across screens. Each helper emits exactly the markup its call
@@ -370,8 +479,8 @@ function modalHtml(inner, opts) {
 }
 function openModal(inner, opts) { document.getElementById('modal-container').innerHTML = modalHtml(inner, opts) }
 // Empty-state placeholder (icon + one line).
-function emptyHtml(icon, text, style) {
-  return '<div class="empty"' + (style ? ' style="' + style + '"' : '') + '><div class="empty-icon">' + icon + '</div><div class="empty-text">' + text + '</div></div>'
+function emptyHtml(iconName, text, style) {
+  return '<div class="empty"' + (style ? ' style="' + style + '"' : '') + '><div class="empty-icon">' + icon(iconName) + '</div><div class="empty-text">' + text + '</div></div>'
 }
 // Screen title row with an accent "+ הוסף" button (tasks / sites / people headers).
 function addBtnHtml(onclick) {
@@ -380,17 +489,17 @@ function addBtnHtml(onclick) {
 // Back-arrow header used by the input / action / settings screens.
 function backHeaderHtml(title, marginBottom) {
   return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:' + (marginBottom || '20px') + '">' +
-    '<button onclick="navigateTo(\'home\')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">←</button>' +
+    '<button onclick="navigateTo(\'home\')" style="background:#ffffff;border-radius:10px;padding:10px 14px;color:#7a6f5c;font-size:18px">' + icon('arrow-left') + '</button>' +
     '<div style="font-size:18px;font-weight:700">' + title + '</div>' +
     '</div>'
 }
 // Small cream icon button on task / site / person cards (✎ 🖌️ 🗑 …).
-function iconBtnHtml(onclick, label, extraStyle) {
-  return '<button onclick="' + onclick + '" style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
+function iconBtnHtml(onclick, label, extraStyle, act) {
+  return '<button onclick="' + onclick + '"' + (act ? ' data-act="' + act + '" aria-label="' + act + '"' : '') + ' style="background:#f0e7cf;border-radius:8px;padding:7px 9px;color:#6b6255;font-size:14px' + (extraStyle ? ';' + extraStyle : '') + '">' + label + '</button>'
 }
 // The 🖌️ "draft a message about this" button — same on tasks, sites and people.
 function actionBtnHtml(text, assignee, extraStyle) {
-  return iconBtnHtml('openAction({text:' + jsArg(text) + ',assignee:' + jsArg(assignee || '') + '})', '🖌️', extraStyle)
+  return iconBtnHtml('openAction({text:' + jsArg(text) + ',assignee:' + jsArg(assignee || '') + '})', icon('message-square'), extraStyle, 'draft')
 }
 // <option> list for a <select>: pairs of [value, label]; `selected` marks one.
 function optionsHtml(pairs, selected) {
@@ -401,9 +510,9 @@ function creamPanelHtml(inner, style) {
   return '<div style="background:#fdf1da;border:1px solid #f0d9a3;border-radius:14px;' + (style || 'padding:14px 16px;margin-bottom:16px') + '">' + inner + '</div>'
 }
 // Home-screen stat tile (count + label on a gradient).
-function statTileHtml(screen, gradient, icon, count, label, labelColor) {
+function statTileHtml(screen, gradient, iconName, count, label, labelColor) {
   return '<div onclick="navigateTo(\'' + screen + '\')" style="cursor:pointer;text-align:center;border-radius:16px;padding:16px 8px;background:' + gradient + '">' +
-    '<div style="font-size:20px">' + icon + '</div>' +
+    '<div style="font-size:20px;line-height:1;color:#ffffff;margin-bottom:4px">' + icon(iconName) + '</div>' +
     '<div style="font-size:24px;font-weight:800;color:#ffffff">' + count + '</div>' +
     '<div style="font-size:14px;color:' + labelColor + ';margin-top:2px;font-weight:600">' + label + '</div>' +
     '</div>'
@@ -418,17 +527,17 @@ function taoLabelHtml(text) {
 // Dark "tip" card used by the Sinek, ADHD and small-talk toolkits.
 function toolkitCardHtml(c, isRelated) {
   return '<div style="background:#120d06;border:1px solid ' + (isRelated ? '#b8860b' : '#241b0d') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px">' +
-    (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">🔗 קשור למוקד השבוע</div>' : '') +
-    '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + c.icon + ' ' + c.title + '</div>' +
+    (isRelated ? '<div style="font-size:10px;color:#e8c15c;font-weight:600;margin-bottom:4px">' + icon('link') + ' קשור למוקד השבוע</div>' : '') +
+    '<div style="font-size:13px;font-weight:600;color:#f5ecd6;margin-bottom:4px">' + icon(c.icon) + ' ' + c.title + '</div>' +
     '<div style="font-size:12px;color:#b3a077;line-height:1.5">' + c.tip + '</div>' +
     '</div>'
 }
 // Temporarily swaps a button's label ("✓ הועתק" …) and restores it afterwards.
 function flashBtn(btn, text, ms, restoreText) {
   if(!btn) return
-  var orig = restoreText !== undefined ? restoreText : btn.textContent
-  btn.textContent = text
-  setTimeout(function(){ btn.textContent = orig }, ms || 1500)
+  var orig = restoreText !== undefined ? restoreText : btn.innerHTML
+  btn.innerHTML = text
+  setTimeout(function(){ btn.innerHTML = orig }, ms || 1500)
 }
 // Shows a "✓ נשמר" inline confirmation for a moment.
 function flashSaved(id) {
@@ -520,11 +629,11 @@ function showStateLoadError(err) {
   var raw = err.raw || ''
   document.getElementById('app').innerHTML =
     '<div id="state-load-error" style="padding:56px 20px 40px;min-height:100vh;background:#fdeaea">' +
-    '<div style="font-size:22px;font-weight:800;color:#b91c1c;margin-bottom:10px">⚠️ Fieldy לא הצליח לטעון את הנתונים השמורים</div>' +
+    '<div style="font-size:22px;font-weight:800;color:#b91c1c;margin-bottom:10px">' + icon('alert-triangle') + ' Fieldy לא הצליח לטעון את הנתונים השמורים</div>' +
     '<div style="font-size:15px;color:#211d17;line-height:1.7;margin-bottom:14px">' + esc(err.message) + '</div>' +
     '<div style="font-size:14px;color:#6b6255;line-height:1.7;margin-bottom:20px">שום דבר לא נמחק ולא נדרס — הנתונים נשארו במכשיר בדיוק כפי שהיו. כדי לא לאבד אותם, קודם הורד עותק, ואז אפשר לנסות שוב או להתחיל מחדש.</div>' +
-    '<button id="state-error-download" class="btn-primary" style="margin-bottom:10px">⬇️ הורד עותק של הנתונים הגולמיים</button>' +
-    '<button id="state-error-retry" class="btn-secondary" style="width:100%;margin-bottom:10px">🔄 נסה לטעון שוב</button>' +
+    '<button id="state-error-download" class="btn-primary" style="margin-bottom:10px">' + icon('download') + ' הורד עותק של הנתונים הגולמיים</button>' +
+    '<button id="state-error-retry" class="btn-secondary" style="width:100%;margin-bottom:10px">' + icon('refresh') + ' נסה לטעון שוב</button>' +
     '<button id="state-error-reset" class="btn-secondary" style="width:100%;color:#b91c1c;border-color:#b91c1c66">התחל מחדש עם נתונים ריקים (העותק הפגום יישמר בגיבוי במכשיר)</button>' +
     '<div style="font-size:12px;color:#948a7a;margin-top:18px;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px">' + esc(raw.slice(0,600)) + (raw.length > 600 ? '…' : '') + '</div>' +
     '</div>'
@@ -639,7 +748,7 @@ function saveVacationGoal() {
 }
 // ── MOOD / ADHD ASSIST ────────────────────────────
 const MOOD_LIB = {
-  overwhelmed: {label:'מוצף', icon:'🌊', color:'#ef4444', taskLimit:1,
+  overwhelmed: {label:'מוצף', icon:'waves', color:'#ef4444', taskLimit:1,
     actions:[
       'תכתוב (כאן למטה או על דף) את כל מה שרץ לך בראש — לא לפתור, רק לפרוק את זה החוצה.',
       'נשימה אחת: 4 שניות פנימה · 7 עצירה · 8 החוצה. שוב אם צריך.',
@@ -648,7 +757,7 @@ const MOOD_LIB = {
       'קום לדקה, תזיז את הגוף, תשתה מים. הראש נרגע כשהגוף זז.',
       'תשאל את עצמך: מה הדבר האחד שאם ייעשה היום, ישנה הכי הרבה? רק זה.'
     ]},
-  scattered: {label:'מפוזר', icon:'🌀', color:'#f59e0b', taskLimit:2,
+  scattered: {label:'מפוזר', icon:'wind', color:'#f59e0b', taskLimit:2,
     actions:[
       'בחר משימה אחת קטנה ותשים טיימר ל-10 דקות — רק עליה.',
       'סגור טאבים/אפליקציות מיותרות לרגע. פחות גירויים, יותר פוקוס.',
@@ -657,7 +766,7 @@ const MOOD_LIB = {
       'תעבור פיזית למקום אחר (חדר/כיסא) לפני שמתחילים משהו חדש.',
       'תבחר את המשימה הכי קטנה ברשימה, לא הכי חשובה — רק כדי להתחיל לזוז.'
     ]},
-  tired: {label:'עייף', icon:'🔋', color:'#6b46c1', taskLimit:2,
+  tired: {label:'עייף', icon:'battery', color:'#6b46c1', taskLimit:2,
     actions:[
       'שתה מים ותאכל משהו קטן — לפעמים זה פשוט דלק חסר.',
       '5 דקות הליכה או מתיחה לפני שממשיכים.',
@@ -666,14 +775,14 @@ const MOOD_LIB = {
       'תעביר את המשימה הכי קשה למחר בבוקר, ותעשה עכשיו רק דברים קלים.',
       'תבדוק מתי אכלת/שתית לאחרונה — לפעמים העייפות היא פשוט זה.'
     ]},
-  focused: {label:'פוקוס', icon:'🎯', color:'#1a8f7a', taskLimit:null,
+  focused: {label:'פוקוס', icon:'target', color:'#1a8f7a', taskLimit:null,
     actions:[
       'זה הזמן למשימה הכי קשה או החשובה — תנצל את זה עכשיו.',
       'תדחה הפרעות ב-30-45 דקות אם אפשר, ותאריך את הבלוק הזה.',
       'תכבה התראות לא דחופות לחצי שעה, ותשאר בזרימה.',
       'תסיים קודם דבר אחד עד הסוף לפני שקופצים למשהו אחר.'
     ]},
-  motivated: {label:'מוטיבציה גבוהה', icon:'🔥', color:'#e8940c', taskLimit:null,
+  motivated: {label:'מוטיבציה גבוהה', icon:'flame', color:'#e8940c', taskLimit:null,
     actions:[
       'זה הזמן לתקוף את המשימה שדחית הכי הרבה זמן — המוטיבציה הזו לא תמיד תהיה כאן.',
       'לפני שקופצים למשימה חדשה — תסיים קודם דבר אחד שכבר בעבודה. מוטיבציה גבוהה נוטה לפתוח הרבה ולסגור מעט.',
@@ -773,11 +882,11 @@ async function analyzePersonalPatterns(manual) {
   const moods = (state.moods||[]).slice(-80)
   const leadEntries = (state.leadershipLog||[]).slice(-30)
   if(dumps.length < 3 && moods.length < 5 && leadEntries.length < 3) {
-    if(manual) flashBtn(document.getElementById('insight-refresh-btn'), 'עדיין מעט נתונים', 2000, '🔍 נתח עכשיו')
+    if(manual) flashBtn(document.getElementById('insight-refresh-btn'), 'עדיין מעט נתונים', 2000, icon('search') + ' נתח עכשיו')
     return
   }
   const btn = document.getElementById('insight-refresh-btn')
-  if(btn) { btn.textContent='⚙️ מנתח...'; btn.disabled = true }
+  if(btn) { btn.innerHTML=icon('settings') + ' מנתח...'; btn.disabled = true }
   try {
     const dumpLines = dumps.map(d=>`[${d.date}] ${d.text}`).join('\n')
     const moodLines = moods.map(m=>`${m.date} שעה ${m.hour}: ${MOOD_LIB[m.mood]?MOOD_LIB[m.mood].label:m.mood} (${m.source})`).join('\n')
@@ -792,10 +901,10 @@ async function analyzePersonalPatterns(manual) {
     setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length}})
     if(currentScreen==='home') renderHome()
   } catch(e) {
-    if(btn) { btn.textContent='✕ שגיאה'; setTimeout(()=>{btn.textContent='🔍 נתח עכשיו'; btn.disabled=false},2000) }
+    if(btn) { btn.innerHTML=icon('x') + ' שגיאה'; setTimeout(()=>{btn.innerHTML=icon('search') + ' נתח עכשיו'; btn.disabled=false},2000) }
     return
   }
-  if(btn) { btn.textContent='🔍 נתח עכשיו'; btn.disabled = false }
+  if(btn) { btn.innerHTML=icon('search') + ' נתח עכשיו'; btn.disabled = false }
 }
 
 function rerollMoodTip() {
@@ -1028,12 +1137,12 @@ const TAO_TITLES = ['הדרך','הכל חלקי','מחוץ לזמן','חוק א�
   'ספר הטאו ו','ספר הטאו ז','ספר הטאו ח','ספר הטאו ט','סיכום'];
 
 const MEDITATIONS = [
-  {title:'נשימת הטאו',duration:5,icon:'🌊',desc:'נשום עם זרם הטאו',steps:['שאיפה עמוקה 4 שניות','עצירה 4 שניות','נשיפה איטית 6 שניות','השהייה 2 שניות']},
-  {title:'ישיבת זן',duration:7,icon:'🪷',desc:'שב בשקט — כמו הר',steps:['גב ישר, עיניים חצי עצומות','שים לב לנשימה הטבעית','כשמחשבה עולה — חזור לנשימה','אין מטרה — רק להיות']},
-  {title:'סריקת גוף',duration:8,icon:'🌿',desc:'שחרר את המתח',steps:['התחל מהקדקוד','רד לאט מטה','שים לב לכל אזור מתח','שחרר בנשיפה']},
-  {title:'הליכת מוּשין',duration:10,icon:'🏔️',desc:'צעד בנוכחות מלאה',steps:['עמוד ישר, רגליים יציבות','כל צעד — מלא ושלם','שים לב לתחושה בכפות הרגליים','המחשבות — כעננים עוברים']},
-  {title:'ויזואליזציית מים',duration:6,icon:'💧',desc:'היה כמים — גמיש וזורם',steps:['דמיין נהר שקט','אתה הנהר — זורם סביב אבנים','אין התנגדות — רק זרימה','כל מכשול הופך לחלק מהדרך']},
-  {title:'קירוב הריקות',duration:5,icon:'⭕',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
+  {title:'נשימת הטאו',duration:5,icon:'waves',desc:'נשום עם זרם הטאו',steps:['שאיפה עמוקה 4 שניות','עצירה 4 שניות','נשיפה איטית 6 שניות','השהייה 2 שניות']},
+  {title:'ישיבת זן',duration:7,icon:'flower',desc:'שב בשקט — כמו הר',steps:['גב ישר, עיניים חצי עצומות','שים לב לנשימה הטבעית','כשמחשבה עולה — חזור לנשימה','אין מטרה — רק להיות']},
+  {title:'סריקת גוף',duration:8,icon:'leaf',desc:'שחרר את המתח',steps:['התחל מהקדקוד','רד לאט מטה','שים לב לכל אזור מתח','שחרר בנשיפה']},
+  {title:'הליכת מוּשין',duration:10,icon:'mountain',desc:'צעד בנוכחות מלאה',steps:['עמוד ישר, רגליים יציבות','כל צעד — מלא ושלם','שים לב לתחושה בכפות הרגליים','המחשבות — כעננים עוברים']},
+  {title:'ויזואליזציית מים',duration:6,icon:'droplet',desc:'היה כמים — גמיש וזורם',steps:['דמיין נהר שקט','אתה הנהר — זורם סביב אבנים','אין התנגדות — רק זרימה','כל מכשול הופך לחלק מהדרך']},
+  {title:'קירוב הריקות',duration:5,icon:'circle',desc:'חוכמת הריקנות',steps:['שב בנוח ועצום עיניים','דמיין חלל ריק בחזה','כל נשיפה מרחיבה אותו','ריקנות היא מקור הכוח']},
 ];
 
 // ── PERSONAL DEVELOPMENT: SOCIAL SKILLS / SMALL TALK TOOLKIT ─
@@ -1042,14 +1151,14 @@ const MEDITATIONS = [
 // "The Fine Art of Small Talk" (Fine) and "Supercommunicators" (Duhigg).
 // Own wording throughout — not quotes from the books.
 const TALK_TOOLKIT = [
-  {icon:'👂',title:'תתעניין לפני שתהיה מעניין',tip:'שאל שאלה אמיתית אחת על האדם מולך לפני שאתה מספר על עצמך. אנשים נמשכים למי שמתעניין בהם, לא רק למי שמרשים אותם.'},
-  {icon:'🏷️',title:'תזכור ותשתמש בשם',tip:'חזור על השם בתחילת השיחה ותשתמש בו שוב באמצע. זה אחד הדברים הכי אישיים שאפשר לתת למישהו בלי מאמץ.'},
-  {icon:'😊',title:'החיוך המושהה',tip:'במקום חיוך רפלקסיבי ומהיר - תן לעצמך רגע להביט באדם, ואז תחייך לאט. זה נתפס כאמיתי, לא כאוטומטי.'},
-  {icon:'🔑',title:'שאלה פותחת, לא סוגרת',tip:'במקום "איך העבודה?" (עונים "בסדר" וזהו) - שאל "מה הכי מעניין אותך בעבודה שלך כרגע?" שאלה פתוחה מזמינה סיפור.'},
-  {icon:'🚪',title:'יציאה אלגנטית',tip:'הכן משפט סיום מוכן מראש: "היה כיף לדבר איתך - אני חייב לזוז, אבל בוא נתפוס עוד שיחה." לא צריך תירוץ, רק כוונה טובה.'},
-  {icon:'🧭',title:'זהה את סוג השיחה',tip:'לפני שאתה עונה, שאל את עצמך - האדם מולי רוצה פתרון מעשי, הזדהות רגשית, או חיבור חברתי? התאם את התשובה לסוג.'},
-  {icon:'🌊',title:'שאלה עם "קלוריות רגשיות"',tip:'שאלה כמו "מה הכי אתגר אותך השבוע?" נותנת הרבה יותר מקום לשיחה מאשר "מה שלומך" - היא מזמינה תוכן, לא רק נימוס.'},
-  {icon:'🧵',title:'טכניקת ה-Thread',tip:'תפוס מילה או רגש מהתשובה של האדם מולך והמשך איתה, במקום לעבור לשאלה הבאה כמו בראיון עבודה.'}
+  {icon:'headphones',title:'תתעניין לפני שתהיה מעניין',tip:'שאל שאלה אמיתית אחת על האדם מולך לפני שאתה מספר על עצמך. אנשים נמשכים למי שמתעניין בהם, לא רק למי שמרשים אותם.'},
+  {icon:'tag',title:'תזכור ותשתמש בשם',tip:'חזור על השם בתחילת השיחה ותשתמש בו שוב באמצע. זה אחד הדברים הכי אישיים שאפשר לתת למישהו בלי מאמץ.'},
+  {icon:'smile',title:'החיוך המושהה',tip:'במקום חיוך רפלקסיבי ומהיר - תן לעצמך רגע להביט באדם, ואז תחייך לאט. זה נתפס כאמיתי, לא כאוטומטי.'},
+  {icon:'key',title:'שאלה פותחת, לא סוגרת',tip:'במקום "איך העבודה?" (עונים "בסדר" וזהו) - שאל "מה הכי מעניין אותך בעבודה שלך כרגע?" שאלה פתוחה מזמינה סיפור.'},
+  {icon:'log-out',title:'יציאה אלגנטית',tip:'הכן משפט סיום מוכן מראש: "היה כיף לדבר איתך - אני חייב לזוז, אבל בוא נתפוס עוד שיחה." לא צריך תירוץ, רק כוונה טובה.'},
+  {icon:'compass',title:'זהה את סוג השיחה',tip:'לפני שאתה עונה, שאל את עצמך - האדם מולי רוצה פתרון מעשי, הזדהות רגשית, או חיבור חברתי? התאם את התשובה לסוג.'},
+  {icon:'waves',title:'שאלה עם "קלוריות רגשיות"',tip:'שאלה כמו "מה הכי אתגר אותך השבוע?" נותנת הרבה יותר מקום לשיחה מאשר "מה שלומך" - היא מזמינה תוכן, לא רק נימוס.'},
+  {icon:'link-2',title:'טכניקת ה-Thread',tip:'תפוס מילה או רגש מהתשובה של האדם מולך והמשך איתה, במקום לעבור לשאלה הבאה כמו בראיון עבודה.'}
 ];
 const TALK_SCENARIOS = [
   {label:'קולגה בכנס מקצועי', desc:'שיחת חולין עם מישהו חדש בהפסקת קפה בכנס'},
@@ -1070,7 +1179,7 @@ const TALK_SYSTEM_PROMPT = 'את/ה מאמן/ת כישורים חברתיים ו
   'בתחילת השיחה - תיכנס ישר למצב סימולציה בתרחיש שנבחר, בלי הקדמות ארוכות.';
 
 function renderTalkTab() {
-  var toolkitBox = taoPanelHtml(taoLabelHtml('📖 כלים מעשיים לשיחה') + TALK_TOOLKIT.map(function(c){ return toolkitCardHtml(c, false) }).join(''));
+  var toolkitBox = taoPanelHtml(taoLabelHtml(icon('book-open') + ' כלים מעשיים לשיחה') + TALK_TOOLKIT.map(function(c){ return toolkitCardHtml(c, false) }).join(''));
 
   if(!talkScenario) {
     var scenarioBtns = TALK_SCENARIOS.map(function(s,i){
@@ -1080,7 +1189,7 @@ function renderTalkTab() {
         '</button>'
     }).join('');
     return toolkitBox + taoPanelHtml(
-      taoLabelHtml('🎭 בחר תרחיש להתאמן') +
+      taoLabelHtml(icon('smile') + ' בחר תרחיש להתאמן') +
       scenarioBtns +
       '<div style="display:flex;gap:6px;margin-top:6px">' +
       '<input id="talk-custom-input" placeholder="או תאר תרחיש משלך..." style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
@@ -1097,8 +1206,8 @@ function renderTalkTab() {
 
   return toolkitBox + taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-    '<span style="font-size:12px;color:#e8c15c;font-weight:700">🎭 ' + esc(talkScenario.label) + '</span>' +
-    '<button id="talk-restart-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:4px 10px;color:#b3a077;font-size:11px;cursor:pointer">↻ תרחיש חדש</button>' +
+    '<span style="font-size:12px;color:#e8c15c;font-weight:700">' + icon('smile') + ' ' + esc(talkScenario.label) + '</span>' +
+    '<button id="talk-restart-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:4px 10px;color:#b3a077;font-size:11px;cursor:pointer">' + icon('rotate-ccw') + ' תרחיש חדש</button>' +
     '</div>' +
     '<div id="talk-chat-log" style="max-height:340px;overflow-y:auto;margin-bottom:10px">' + bubbles +
     (talkBusy ? '<div style="text-align:center;color:#8a7857;font-size:12px;padding:6px">...כותב</div>' : '') +
@@ -1107,7 +1216,7 @@ function renderTalkTab() {
     '<input id="talk-msg-input" placeholder="תגיב/י..." '+(talkBusy?'disabled':'')+' style="flex:1;background:#120d06;border:1px solid #241b0d;border-radius:8px;padding:8px 10px;color:#f5ecd6;font-size:13px;font-family:inherit"/>' +
     '<button id="talk-send-btn" '+(talkBusy?'disabled':'')+' style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:0 16px;color:#1c1508;font-size:13px;font-weight:700">שלח</button>' +
     '</div>' +
-    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">💬 תן לי משוב עכשיו</button>',
+    '<button id="talk-feedback-btn" '+(talkBusy?'disabled':'')+' style="width:100%;background:#1c1508;border:1px solid rgba(184,134,11,.4);border-radius:8px;padding:8px;color:#e8c15c;font-size:12px;font-weight:600">' + icon('message-circle') + ' תן לי משוב עכשיו</button>',
     'padding:14px 14px 16px');
 }
 
@@ -1118,7 +1227,7 @@ function talkRequest(messages) {
   renderTao()
   callClaude(messages, TALK_SYSTEM_PROMPT)
     .then(function(reply){ talkMessages.push({role:'assistant', content: reply.trim() || '...'}) })
-    .catch(function(e){ talkMessages.push({role:'assistant', content: '✕ שגיאה: ' + e.message}) })
+    .catch(function(e){ talkMessages.push({role:'assistant', content: 'שגיאה: ' + e.message}) })
     .then(function(){ talkBusy = false; renderTao() })
 }
 
@@ -1140,14 +1249,14 @@ function sendTalkMessage(forcedText) {
 // The Infinite Game and Leaders Eat Last (Simon Sinek).
 // Own wording throughout — not quotes from the books.
 const SINEK_TOOLKIT = [
-  {icon:'🎯',title:'מצא את ה-WHY שלך',tip:'כתוב את סיפור המקור שלך - מתי בפעם הראשונה הרגשת שאתה עושה משהו שמשנה מציאות. תחפש דוגמה חוזרת, לא רק את הרגע הדרמטי.'},
-  {icon:'🔵',title:'המעגל הזהב',tip:'בפעם הבאה שאתה מציג משימה או רעיון לצוות - התחל מה"למה" (המטרה), אחר כך "איך" (הדרך), ולבסוף "מה" (הפעולה). לא בכיוון ההפוך.'},
-  {icon:'📜',title:'משפט הלמה',tip:'ניסוח בפורמט: "כדי ש-___ , אני ___". תבנה משפט קצר אחד שמסביר את המטרה שלך כמנהל אזורי - ותחזור אליו כשמשהו מרגיש חסר משמעות.'},
-  {icon:'♾️',title:'הסיבה הצודקת',tip:'הגדר מטרה שהצוות שלך רוצה להשיג גם בעוד 10 שנים - לא רק "לסגור את הפרויקט הזה". זו העוגן שמונע איבוד כיוון.'},
-  {icon:'🥊',title:'יריב ראוי',tip:'קח את המתחרה או המכשול שהכי מציק לך (קבלן איטי, לחץ מלמעלה) ותשאל - מה הוא חושף לי על החוליה החלשה שלי, במקום איך לנצח אותו.'},
-  {icon:'🛡️',title:'מעגל הביטחון',tip:'זהה רגע השבוע שבו מישהו בצוות שלך יכל לבוא אליך עם טעות בלי פחד. אם לא קרה - שאל את עצמך למה.'},
-  {icon:'🍽️',title:'לאכול אחרון',tip:'לפני שאתה דואג לעצמך (זמן, קרדיט, נוחות) - תבדוק שהצוות שלך מסודר. שים לב במיוחד למתי שאתה עושה את זה הפוך.'},
-  {icon:'🔄',title:'גמישות קיומית',tip:'אם דרך הפעולה הנוכחית לא מקדמת את המטרה האמיתית - היה מוכן לשנות אותה, גם אם השקעת בה זמן. השינוי לא כישלון.'}
+  {icon:'target',title:'מצא את ה-WHY שלך',tip:'כתוב את סיפור המקור שלך - מתי בפעם הראשונה הרגשת שאתה עושה משהו שמשנה מציאות. תחפש דוגמה חוזרת, לא רק את הרגע הדרמטי.'},
+  {icon:'circle',title:'המעגל הזהב',tip:'בפעם הבאה שאתה מציג משימה או רעיון לצוות - התחל מה"למה" (המטרה), אחר כך "איך" (הדרך), ולבסוף "מה" (הפעולה). לא בכיוון ההפוך.'},
+  {icon:'file-text',title:'משפט הלמה',tip:'ניסוח בפורמט: "כדי ש-___ , אני ___". תבנה משפט קצר אחד שמסביר את המטרה שלך כמנהל אזורי - ותחזור אליו כשמשהו מרגיש חסר משמעות.'},
+  {icon:'infinity',title:'הסיבה הצודקת',tip:'הגדר מטרה שהצוות שלך רוצה להשיג גם בעוד 10 שנים - לא רק "לסגור את הפרויקט הזה". זו העוגן שמונע איבוד כיוון.'},
+  {icon:'crosshair',title:'יריב ראוי',tip:'קח את המתחרה או המכשול שהכי מציק לך (קבלן איטי, לחץ מלמעלה) ותשאל - מה הוא חושף לי על החוליה החלשה שלי, במקום איך לנצח אותו.'},
+  {icon:'shield',title:'מעגל הביטחון',tip:'זהה רגע השבוע שבו מישהו בצוות שלך יכל לבוא אליך עם טעות בלי פחד. אם לא קרה - שאל את עצמך למה.'},
+  {icon:'coffee',title:'לאכול אחרון',tip:'לפני שאתה דואג לעצמך (זמן, קרדיט, נוחות) - תבדוק שהצוות שלך מסודר. שים לב במיוחד למתי שאתה עושה את זה הפוך.'},
+  {icon:'refresh',title:'גמישות קיומית',tip:'אם דרך הפעולה הנוכחית לא מקדמת את המטרה האמיתית - היה מוכן לשנות אותה, גם אם השקעת בה זמן. השינוי לא כישלון.'}
 ];
 
 // ── PERSONAL DEVELOPMENT: ADHD TOOLKIT ────────────
@@ -1155,14 +1264,14 @@ const SINEK_TOOLKIT = [
 // "Fast Minds" (Surman/Bilkey/Weintraub) and "Self-Regulation & Mindfulness" (Gibbs).
 // Own wording throughout — not quotes from the books.
 const ADHD_TOOLKIT = [
-  {icon:'🏃',title:'תנועה לפני התמדה',tip:'אם קשה להתרכז - אל תילחם בזה, תזוז. כמה דקות של הליכה או תנועה מאתחלות את המוח יותר מכוח רצון.'},
-  {icon:'😴',title:'שינה עקבית',tip:'שעת שינה קבועה משפיעה על יכולת הוויסות שלך יותר מכל טריק אחר. לילה גרוע = יום קשה יותר - זו עובדה על המוח, לא שיפוט על האופי.'},
-  {icon:'🔋',title:'בדיקת מצבר',tip:'לפני שאתה שופט את עצמך על יום קשה - תבדוק: ישנת? אכלת? התחברת עם מישהו? לרוב זו הבעיה, לא המוטיבציה.'},
-  {icon:'✍️',title:'תכתוב, אל תזכור',tip:'אם אפשר לכתוב משהו - תכתוב אותו. הזיכרון לא אמור לשאת הכל לבד; פתק גלוי שווה יותר מכוונה טובה.'},
-  {icon:'📋',title:'שבועי, לא חודשי',tip:'תצוגה חודשית מציפה; תצוגה שבועית נותנת מספיק טווח בלי להעמיס. תבדוק את השבוע הקרוב בערב שלפניו.'},
-  {icon:'🎯',title:'יעד אחד בכל פעם',tip:'לתקן הכל בבת אחת זה מתכון לוותר על הכל. תבחר נקודת כשל אחת ותתמקד רק בה עד שהיא מתייצבת.'},
-  {icon:'🏠',title:'שנה את הסביבה, לא את עצמך',tip:'פתק במקום הנכון או הסרת הסחת דעת משיגים יותר משכנוע עצמי. תבנה סביבה שעובדת בשבילך.'},
-  {icon:'🤝',title:'עבודה לצד מישהו',tip:'לפעמים רק הנוכחות של מישהו אחר - פיזית או בשיחה - מספיקה כדי להתחיל ולהתמיד במשימה.'}
+  {icon:'activity',title:'תנועה לפני התמדה',tip:'אם קשה להתרכז - אל תילחם בזה, תזוז. כמה דקות של הליכה או תנועה מאתחלות את המוח יותר מכוח רצון.'},
+  {icon:'moon',title:'שינה עקבית',tip:'שעת שינה קבועה משפיעה על יכולת הוויסות שלך יותר מכל טריק אחר. לילה גרוע = יום קשה יותר - זו עובדה על המוח, לא שיפוט על האופי.'},
+  {icon:'battery',title:'בדיקת מצבר',tip:'לפני שאתה שופט את עצמך על יום קשה - תבדוק: ישנת? אכלת? התחברת עם מישהו? לרוב זו הבעיה, לא המוטיבציה.'},
+  {icon:'edit-3',title:'תכתוב, אל תזכור',tip:'אם אפשר לכתוב משהו - תכתוב אותו. הזיכרון לא אמור לשאת הכל לבד; פתק גלוי שווה יותר מכוונה טובה.'},
+  {icon:'clipboard',title:'שבועי, לא חודשי',tip:'תצוגה חודשית מציפה; תצוגה שבועית נותנת מספיק טווח בלי להעמיס. תבדוק את השבוע הקרוב בערב שלפניו.'},
+  {icon:'target',title:'יעד אחד בכל פעם',tip:'לתקן הכל בבת אחת זה מתכון לוותר על הכל. תבחר נקודת כשל אחת ותתמקד רק בה עד שהיא מתייצבת.'},
+  {icon:'home',title:'שנה את הסביבה, לא את עצמך',tip:'פתק במקום הנכון או הסרת הסחת דעת משיגים יותר משכנוע עצמי. תבנה סביבה שעובדת בשבילך.'},
+  {icon:'users',title:'עבודה לצד מישהו',tip:'לפעמים רק הנוכחות של מישהו אחר - פיזית או בשיחה - מספיקה כדי להתחיל ולהתמיד במשימה.'}
 ];
 
 // ── PERSONAL DEVELOPMENT: WEEKLY LEADERSHIP FOCUS ──
@@ -1273,7 +1382,7 @@ function renderTaoChapter(el, idx) {
   var medHtml = MEDITATIONS.map(function(m, i) {
     return '<div id="med-btn-' + i + '" style="background:#1c1508;border:1px solid #241b0d;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
-      '<div style="font-size:15px;font-weight:600;color:#f5ecd6">' + m.icon + ' ' + m.title + '</div>' +
+      '<div style="font-size:15px;font-weight:600;color:#f5ecd6">' + icon(m.icon) + ' ' + m.title + '</div>' +
       '<div style="font-size:12px;color:#b3a077;margin-top:3px">' + m.desc + '</div>' +
       '</div>' +
       '<div style="font-size:13px;color:#cf9d2e;flex-shrink:0">' + m.duration + ' דק</div>' +
@@ -1283,8 +1392,8 @@ function renderTaoChapter(el, idx) {
   var qod = getQuoteOfTheDay();
   var quoteHtml = qod ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">💭 ציטוט</span>' +
-    '<button id="quote-reroll-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:3px 9px;color:#b3a077;font-size:11px;cursor:pointer">🔀 אחר</button>' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">' + icon('quote') + ' ציטוט</span>' +
+    '<button id="quote-reroll-btn" style="background:#1c1508;border:1px solid #241b0d;border-radius:8px;padding:3px 9px;color:#b3a077;font-size:11px;cursor:pointer">' + icon('shuffle') + ' אחר</button>' +
     '</div>' +
     '<div style="font-size:16px;line-height:1.6;color:#f5ecd6;font-style:italic;text-align:center">"' + esc(qod.text) + '"</div>' +
     '<div style="display:flex;gap:6px;margin-top:12px">' +
@@ -1299,42 +1408,42 @@ function renderTaoChapter(el, idx) {
   else if(wf && wf.relatedAdhd !== undefined) { relatedCard = ADHD_TOOLKIT[wf.relatedAdhd]; relatedTab = 'adhd' }
   var weekHtml = wf ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">📚 מוקד השבוע: ' + wf.theme + '</span>' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:1.5px;font-weight:600">' + icon('book') + ' מוקד השבוע: ' + wf.theme + '</span>' +
     '<span style="font-size:10px;color:#8a7857">' + wf.book + '</span>' +
     '</div>' +
     '<div style="font-size:13px;line-height:1.6;color:#d8c9a3">' + wf.text + '</div>' +
     (relatedCard ? (
       '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:#120d06;border:1px solid #3a2c10;border-radius:10px;padding:10px 12px;margin-top:12px">' +
-      '<div style="font-size:10px;color:#8a7857;margin-bottom:2px">🔗 כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
-      '<div style="font-size:13px;color:#f5ecd6;font-weight:600">' + relatedCard.icon + ' ' + relatedCard.title + '</div>' +
+      '<div style="font-size:10px;color:#8a7857;margin-bottom:2px">' + icon('link') + ' כלי קשור ב-' + (relatedTab==='lead'?'כלים מהספרים':'ADHD') + '</div>' +
+      '<div style="font-size:13px;color:#f5ecd6;font-weight:600">' + icon(relatedCard.icon) + ' ' + relatedCard.title + '</div>' +
       '</button>'
     ) : '')
   ) : '';
 
   var todayLead = getTodayLeadershipEntry() || {}
   var leadHtml = taoPanelHtml(
-    taoLabelHtml('🎯 פיתוח מנהיגות יומי') +
+    taoLabelHtml(icon('target') + ' פיתוח מנהיגות יומי') +
     leadField('lead-why','מה ה\'למה\' שהוביל אותי היום?', todayLead.why) +
     leadField('lead-safety','איפה יצרתי ביטחון/אמון לצוות שלי? איפה לא?', todayLead.safetyWin) +
     leadField('lead-habit','פעולה קטנה אחת שהתאימה למנהיג שאני רוצה להיות', todayLead.habitWin) +
     leadField('lead-improve','איפה לא הצלחתי / מה הייתי עושה אחרת?', todayLead.improve) +
     '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">' +
     '<button id="lead-save-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;padding:8px 16px;color:#1c1508;font-size:13px;font-weight:700">שמור</button>' +
-    '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">✓ נשמר</span>' +
+    '<span id="lead-saved" style="display:none;font-size:13px;color:#e8c15c;font-weight:600">' + icon('check') + ' נשמר</span>' +
     '</div>');
 
   var sinekHtml = taoPanelHtml(
-    taoLabelHtml('📖 כלים מעשיים מהספרים') +
+    taoLabelHtml(icon('book-open') + ' כלים מעשיים מהספרים') +
     SINEK_TOOLKIT.map(function(c,i){ return toolkitCardHtml(c, wf && wf.relatedSinek === i) }).join(''));
 
   var adhdHtml =
-    taoLabelHtml('🧠 כלים להיום') +
+    taoLabelHtml(icon('brain') + ' כלים להיום') +
     ADHD_TOOLKIT.map(function(c,i){ return toolkitCardHtml(c, wf && wf.relatedAdhd === i) }).join('');
 
   var subnavHtml =
     '<div style="display:flex;gap:6px;margin-bottom:18px;background:#120d06;border-radius:12px;padding:4px">' +
     ['tao','lead','adhd','talk'].map(function(m){
-      var labels = {tao:'☯️ טאו', lead:'🎯 מנהיגות', adhd:'🧠 ADHD', talk:'🗣️ שיחה'}
+      var labels = {tao:icon('yin-yang') + ' טאו', lead:icon('target') + ' מנהיגות', adhd:icon('brain') + ' ADHD', talk:icon('message-circle') + ' שיחה'}
       var active = m===taoMode
       return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 2px;border-radius:9px;font-size:12px;font-weight:600;' +
         (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1c1508' : 'background:transparent;color:#b3a077') + '">' + labels[m] + '</button>'
@@ -1356,25 +1465,25 @@ function renderTaoChapter(el, idx) {
       '<div style="font-size:16px;line-height:2.2;color:#f5ecd6;text-align:center;font-weight:300;letter-spacing:0.5px">' + verseHtml + '</div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
-      '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">← הקודם</button>' +
+      '<button id="tao-prev" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">' + icon('arrow-left') + ' הקודם</button>' +
       '<span style="color:#b3a077;font-size:12px">' + (idx + 1) + ' / 80</span>' +
-      '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא →</button>' +
+      '<button id="tao-next" style="background:#1c1508;border:1px solid #241b0d;border-radius:10px;padding:10px 16px;color:#b3a077;font-size:14px;cursor:pointer">הבא ' + icon('arrow-right') + '</button>' +
       '</div>' +
-      taoLabelHtml('🪷 מדיטציה ומיינדפולנס') +
+      taoLabelHtml(icon('flower') + ' מדיטציה ומיינדפולנס') +
       medHtml;
   }
 
   var threadHtml = (wf && taoMode!=='lead') ? (
     '<button class="tao-subnav-btn" data-mode="lead" style="width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;background:#120d06;border:1px solid #241b0d;border-radius:10px;padding:8px 12px;margin-bottom:14px">' +
-    '<span style="font-size:11px;color:#8a7857">📚 מוקד השבוע</span>' +
-    '<span style="font-size:12px;color:#e8c15c;font-weight:600">' + wf.theme + ' ←</span>' +
+    '<span style="font-size:11px;color:#8a7857">' + icon('book') + ' מוקד השבוע</span>' +
+    '<span style="font-size:12px;color:#e8c15c;font-weight:600">' + wf.theme + ' ' + icon('arrow-left') + '</span>' +
     '</button>'
   ) : '';
 
   el.innerHTML =
     '<div style="background:linear-gradient(180deg,#0d0a05,#120d06);min-height:100%;padding:48px 16px 16px">' +
     '<div style="text-align:center;margin-bottom:14px">' +
-    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">☯️ טאו · מנהיגות · ADHD</span>' +
+    '<span style="font-size:11px;color:#e8c15c;letter-spacing:2px;font-weight:600">' + icon('yin-yang') + ' טאו · מנהיגות · ADHD</span>' +
     '</div>' +
     subnavHtml +
     threadHtml +
@@ -1463,7 +1572,7 @@ function startMeditation(idx) {
 
   const mins = med.duration.toString();
   openModal(
-    '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + med.icon + ' ' + med.title + '</div>' +
+    '<div style="font-size:13px;color:#cf9d2e;font-weight:600;margin-bottom:4px">' + icon(med.icon) + ' ' + med.title + '</div>' +
     '<div style="font-size:12px;color:#b3a077;margin-bottom:20px">' + med.desc + '</div>' +
     '<div class="med-circle" id="med-circle">' +
     '<canvas id="med-canvas" width="180" height="180" style="position:absolute;inset:0;border-radius:50%"></canvas>' +
@@ -1582,7 +1691,7 @@ function rankRightNow(mood) {
   const bias = MOOD_RANK_BIAS[mood] || {}
   const ctxBias = c => (c && typeof bias[c] === 'number') ? bias[c] : 0
   if(state.focus && (!state.focusDate || state.focusDate === today)) {
-    items.push({kind:'focus', score:100, icon:'🎯', title:state.focus, sub:'הכי חשוב היום', color:'var(--gold)', go:null})
+    items.push({kind:'focus', score:100, icon:'target', title:state.focus, sub:'הכי חשוב היום', color:'var(--gold)', go:null})
   }
   const addBucket = (bucket, base) => (state.tasks[bucket]||[]).forEach(t => {
     if(t.done) return
@@ -1593,20 +1702,21 @@ function rankRightNow(mood) {
       const mins = (new Date(today + 'T' + t.time) - nowMs) / 60000
       if(mins >= 0 && mins <= 120) score += 30
     }
-    const sub = [t.site ? '📍 ' + t.site : null, t.time ? '⏰ ' + t.time + (overdue ? ' · עבר הזמן' : '') : null, t.context && CONTEXT_LABEL[t.context]].filter(Boolean).join(' · ')
+    // sub is HTML (icons + escaped data); title stays raw and is escaped at render time
+    const sub = [t.site ? icon('map-pin') + ' ' + esc(t.site) : null, t.time ? icon('clock') + ' ' + esc(t.time) + (overdue ? ' · עבר הזמן' : '') : null, t.context && CONTEXT_LABEL[t.context]].filter(Boolean).join(' · ')
     items.push({kind:'task', id:t.id, bucket, score, icon:null, title:t.text, sub, color: overdue ? '#ef4444' : (PRIORITY_HEX[t.color]||PRIORITY_HEX.orange), go:'openTaskFromRightNow(' + jsArg(t.id) + ')'})
   })
   addBucket('now', 70); addBucket('today', 45); addBucket('later', 10)
   state.sites.forEach(s => {
     const d = daysStuck(s)
     if(!s.stuckSince || d < STUCK_ALERT_DAYS || s.status === 'resolved') return
-    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'🚧', title:s.name, sub:'תקוע ' + d + ' ימים' + (s.issue ? ' · ' + s.issue : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
+    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'alert-triangle', title:s.name, sub:'תקוע ' + d + ' ימים' + (s.issue ? ' · ' + esc(s.issue) : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
   })
   getEventsForDate(today).forEach(e => {
     if(!e.time) return
     const mins = (new Date(today + 'T' + e.time) - nowMs) / 60000
     if(mins < -30) return
-    items.push({kind:'event', score: mins <= 180 ? 90 : 50, icon:'📅', title:e.title, sub:e.time + (e.site ? ' · 📍 ' + e.site : ''), color:'var(--gold)', go: e.site ? 'openSiteFromRightNow(' + jsArg(e.site) + ')' : "navigateTo('calendar')"})
+    items.push({kind:'event', score: mins <= 180 ? 90 : 50, icon:'calendar', title:e.title, sub:esc(e.time) + (e.site ? ' · ' + icon('map-pin') + ' ' + esc(e.site) : ''), color:'var(--gold)', go: e.site ? 'openSiteFromRightNow(' + jsArg(e.site) + ')' : "navigateTo('calendar')"})
   })
   return items.sort((a,b) => b.score - a.score)
 }
@@ -1622,7 +1732,7 @@ function moodLimitBarHtml(mood, hidden, style) {
   const def = MOOD_LIB[mood], note = (MOOD_RANK_BIAS[mood] && MOOD_RANK_BIAS[mood].note) || ''
   if(!def || (!hidden && !rightNowExpanded)) return ''
   return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:${def.color}12;border:1px solid ${def.color}44;border-radius:10px;padding:8px 12px;font-size:12px;color:#6b6255;${style||''}">
-      <span>${def.icon} ${esc(note)}</span>
+      <span>${icon(def.icon)} ${esc(note)}</span>
       <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:12px;white-space:nowrap">${rightNowExpanded ? 'הסתר שוב' : 'הצג הכל (' + hidden + ')'}</button>
     </div>`
 }
@@ -1633,10 +1743,10 @@ function rightNowHtml(mood) {
   const cap = (limit && !rightNowExpanded) ? limit : 6
   const shown = all.slice(0, cap), hidden = all.length - shown.length
   const row = (it, big) => `<div class="rn-item" ${it.go ? `onclick="${it.go}"` : ''} style="${it.go?'cursor:pointer;':''}background:#ffffff;border:1px solid var(--line);border-right:3px solid ${it.color};border-radius:12px;padding:${big?'14px 16px':'10px 14px'};margin-bottom:8px">
-      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:#211d17;line-height:1.4">${it.icon ? it.icon + ' ' : ''}${esc(it.title)}</div>
-      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:#948a7a;margin-top:4px">${esc(it.sub)}</div>` : ''}
+      <div style="font-size:${big?'16px':'14px'};font-weight:${big?'700':'600'};color:#211d17;line-height:1.4">${it.icon ? icon(it.icon) + ' ' : ''}${esc(it.title)}</div>
+      ${it.sub ? `<div style="font-size:${big?'13px':'12px'};color:#948a7a;margin-top:4px">${it.sub}</div>` : ''}
     </div>`
-  return `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🎯 עכשיו</div>
+  return `<div style="font-size:14px;color:#6b6255;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
     ${row(shown[0], true)}
     ${shown.slice(1).map(it => row(it, false)).join('')}
     ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:12px;color:#948a7a;margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
@@ -1644,9 +1754,9 @@ function rightNowHtml(mood) {
 
 // ── HOME ─────────────────────────────────────────
 // "Done today?" toggle button for one of the personal day-logs.
-function personalToggleHtml(key, onclick, icon, doneLabel, todoLabel) {
+function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
   const on = !!(state.personal[key]||{})[getToday()]
-  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${on?'#1a8f7a':'var(--line)'};background:${on?'#1a8f7a18':'#ffffff'};color:${on?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">${icon} ${on?doneLabel:todoLabel}</button>`
+  return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${on?'#1a8f7a':'var(--line)'};background:${on?'#1a8f7a18':'#ffffff'};color:${on?'#1a8f7a':'#6b6255'};font-size:14px;font-weight:600">${icon(iconName)} ${on?doneLabel:todoLabel}</button>`
 }
 function renderHome() {
   const el = document.getElementById('screen-home')
@@ -1665,14 +1775,14 @@ function renderHome() {
     <div style="background:#fdf9ee;padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · 🔥 ${state.streak} ימים`:''}</div>
-          <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ☀️</div>
+          <div style="font-size:14px;color:#948a7a;margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${state.streak} ימים`:''}</div>
+          <div style="font-size:26px;font-weight:800;color:#211d17;letter-spacing:-0.01em">בוקר טוב, אורי ${icon('sun')}</div>
           <div style="font-size:14px;color:#948a7a;margin-top:2px">Region II · Cagayan Valley</div>
         </div>
-        <button onclick="navigateTo('settings')" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">☯️</button>
+        <button onclick="navigateTo('settings')" aria-label="הגדרות" style="background:#f0e7cf;border-radius:10px;padding:8px 10px;color:#6b6255;font-size:16px">${icon('settings')}</button>
       </div>
       ${!serverConfigured() ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:#fdf1da;border:1px solid #f5c877;border-radius:10px;cursor:pointer;margin-bottom:10px">
-        <div style="font-size:14px;color:var(--gold);font-weight:700">⚠️ נדרש חיבור לשרת</div>
+        <div style="font-size:14px;color:var(--gold);font-weight:700">${icon('alert-triangle')} נדרש חיבור לשרת</div>
         <div style="font-size:14px;color:#948a7a;margin-top:2px">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
       </div>` : ''}
       ${total > 0 ? `<div>
@@ -1685,28 +1795,28 @@ function renderHome() {
     <div style="padding:16px">
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px">💭 ציטוט</span>
-          <button onclick="rerollQuote()" style="background:#ffffff;border:1px solid #f0d9a3;border-radius:8px;padding:3px 9px;color:#6b6255;font-size:11px">🔀 אחר</button>
+          <span style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
+          <button onclick="rerollQuote()" style="background:#ffffff;border:1px solid #f0d9a3;border-radius:8px;padding:3px 9px;color:#6b6255;font-size:11px">${icon('shuffle')} אחר</button>
         </div>
         <div style="font-size:15px;line-height:1.6;color:#211d17;font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', '🖌️', nowCount, 'עכשיו', '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', '🪷', openSites, 'אתרים', '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', '👥', pendingPeople, 'ממתין', '#dfd3f5')}
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, 'עכשיו', '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, 'אתרים', '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, 'ממתין', '#dfd3f5')}
       </div>
       <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:14px;font-weight:700">💰 ליקוידציה שוטפת</div>
+            <div style="font-size:14px;font-weight:700">${icon('wallet')} ליקוידציה שוטפת</div>
             <div style="font-size:12px;color:#948a7a;margin-top:2px">חודש ${currentMonthKey()} · ${pettyCashThisMonth().length} הוצאות</div>
           </div>
           <div style="font-size:18px;font-weight:800;color:#211d17">₱${pettyCashMonthTotal().toLocaleString()}</div>
         </div>
       </div>
-      ${total===0&&!state.focus?emptyHtml('📋', 'הדבק הודעות מוואטסאפ כדי להתחיל', 'margin-top:20px'):''}
+      ${total===0&&!state.focus?emptyHtml(icon('clipboard'), 'הדבק הודעות מוואטסאפ כדי להתחיל', 'margin-top:20px'):''}
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
@@ -1715,7 +1825,7 @@ function renderHome() {
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
             return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:12px;border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'#ffffff'};text-align:center">
-              <div style="font-size:16px">${d.icon}</div>
+              <div style="font-size:18px;line-height:1">${icon(d.icon)}</div>
               <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'#6b6255'};margin-top:2px;line-height:1.2">${d.label}</div>
             </button>`
           }).join('')}
@@ -1723,39 +1833,39 @@ function renderHome() {
       </div>
       ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px">${moodDef.icon} ${moodDef.label} · המלצות עכשיו</div>
-          <button onclick="rerollMoodTip()" style="background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:8px;padding:4px 10px;color:${moodDef.color};font-size:12px;font-weight:600">🔄 טיפ אחר</button>
+          <div style="font-size:12px;color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${moodDef.label} · המלצות עכשיו</div>
+          <button onclick="rerollMoodTip()" style="background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:8px;padding:4px 10px;color:${moodDef.color};font-size:12px;font-weight:600">${icon('refresh')} טיפ אחר</button>
         </div>
         ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:14px;color:#211d17;margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
         <textarea id="brain-dump-input" placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..." style="width:100%;min-height:70px;background:#ffffff;border:1px solid ${moodDef.color}44;border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:8px;padding:8px 16px;color:#ffffff;font-size:13px;font-weight:600">שמור ופנה מקום</button>
-          <span id="brain-dump-saved" style="display:none;font-size:13px;color:${moodDef.color};font-weight:600">✓ נשמר</span>
+          <span id="brain-dump-saved" style="display:none;font-size:13px;color:${moodDef.color};font-weight:600">${icon('check')} נשמר</span>
         </div>
       </div>` : ''}
       ${moodPatterns.length ? creamPanelHtml(`
-        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">📊 דפוס שחוזר</div>
-        ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${MOOD_LIB[p.mood].icon} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('bar-chart-2')} דפוס שחוזר</div>
+        ${moodPatterns.map(p=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
       `) : ''}
       ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:#eef2f7;border:1px solid #cdd9e8;border-radius:14px;padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">🧠 מה שאני לומד עליך</div>
-          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">🔍 נתח עכשיו</button>`:''}
+          <div style="font-size:12px;color:#3d5a80;font-weight:700;letter-spacing:1px">${icon('brain')} מה שאני לומד עליך</div>
+          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:#ffffff;border:1px solid #cdd9e8;border-radius:8px;padding:4px 10px;color:#3d5a80;font-size:12px;font-weight:600">${icon('search')} נתח עכשיו</button>`:''}
         </div>
         ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:14px;color:#211d17;line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
         <div style="font-size:12px;color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
         `<div style="font-size:14px;color:#6b6255;line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
       </div>` : ''}
       ${latestInsights.items && latestInsights.items.length ? creamPanelHtml(`
-        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">💡 שמתי לב</div>
-        ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${esc(it.icon)} ${esc(it.text)}</div>`).join('')}
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('lightbulb')} שמתי לב</div>
+        ${latestInsights.items.map(it=>`<div style="font-size:14px;color:#211d17;margin-bottom:4px">${iconFor(it.icon)} ${esc(it.text)}</div>`).join('')}
       `) : ''}
 
       <div class="card" style="margin-top:16px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:10px">🌱 מחוץ לעבודה</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">${icon('leaf')} מחוץ לעבודה</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
-          ${personalToggleHtml('gymLog', 'toggleGymToday()', '🏋️', 'התאמנתי היום ✓', 'סמן אימון')}
-          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', '🧘', 'עשיתי היום ✓', 'סמן מדיטציה')}
+          ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), 'התאמנתי היום ' + icon('check'), 'סמן אימון')}
+          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), 'עשיתי היום ' + icon('check'), 'סמן מדיטציה')}
         </div>
         <label class="form-label">יעד לחופשה הבאה</label>
         <div style="display:flex;gap:8px">
@@ -1765,7 +1875,7 @@ function renderHome() {
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧠 שאל את Fieldy</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('brain')} שאל את Fieldy</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
         ${serverConfigured()?`
         <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
@@ -1788,8 +1898,8 @@ function renderInput() {
       <textarea id="input-text" placeholder="Claveria well — Gio to assess&#10;החלפת משאבה בדולרס&#10;Dave needs to sign waiver — Upi 3" style="width:100%;min-height:200px;background:#ffffff;border:1px solid #b0a68f;border-radius:12px;padding:14px;color:#211d17;font-size:15px;resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
       ${voiceRowHtml('input-text')}
       <div id="input-error" style="color:#ef4444;font-size:14px;margin-bottom:8px;display:none"></div>
-      ${!serverConfigured()?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">⚠️ אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
-      <button id="input-btn" class="btn-primary" onclick="doAnalyze()">⚡ ארגן את היום</button>
+      ${!serverConfigured()?`<div style="color:#f59e0b;font-size:14px;margin-bottom:8px">${icon('alert-triangle')} אין חיבור לשרת — הגדר בהגדרות כדי לארגן את היום</div>`:''}
+      <button id="input-btn" class="btn-primary" onclick="doAnalyze()">${icon('zap')} ארגן את היום</button>
     </div>
   `
 }
@@ -1799,7 +1909,7 @@ async function doAnalyze() {
   const btn = document.getElementById('input-btn')
   const err = document.getElementById('input-error')
   if(!text || !serverConfigured()) return
-  btn.textContent = '⚙️ מסדר...'
+  btn.innerHTML = icon('settings') + ' מסדר...'
   btn.style.background = '#ffffff'
   btn.style.color = '#7a6f5c'
   err.style.display = 'none'
@@ -1839,7 +1949,7 @@ async function doAnalyze() {
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
       toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:#211d17;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:999;backdrop-filter:blur(8px)';
-      toast.textContent = '📅 ' + (p.events||[]).length + ' אירועים נוספו ללוח';
+      toast.innerHTML = icon('calendar') + ' ' + (p.events||[]).length + ' אירועים נוספו ללוח';
       document.body.appendChild(toast);
       setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
     }
@@ -1848,7 +1958,7 @@ async function doAnalyze() {
   } catch(e) {
     err.textContent = 'שגיאה: ' + e.message
     err.style.display = 'block'
-    btn.textContent = '⚡ ארגן את היום'
+    btn.innerHTML = icon('zap') + ' ארגן את היום'
     btn.style.background = 'linear-gradient(135deg,var(--gold),var(--gold2))'
     btn.style.color = '#fff'
   }
@@ -1857,7 +1967,7 @@ async function doAnalyze() {
 // ── TASKS ────────────────────────────────────────
 let taskBucket = 'now'
 let taskContextFilter = 'all'
-const CONTEXT_LABEL = {phone:'📞 טלפון',office:'💻 משרד',site:'📍 באתר'}
+const CONTEXT_LABEL = {phone:icon('phone') + ' טלפון',office:icon('monitor') + ' משרד',site:icon('map-pin') + ' באתר'}
 
 function renderTasks() {
   const el = document.getElementById('screen-tasks')
@@ -1878,7 +1988,7 @@ function renderTasks() {
     }
   }
   const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
-  const CTX = [['all','הכל'],['phone','📞'],['office','💻'],['site','📍']]
+  const CTX = [['all','הכל'],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
     <div class="screen-header">
@@ -1889,7 +1999,7 @@ function renderTasks() {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
           <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:10px;border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'#ffffff'};color:${taskBucket===b?BCOLS[b]:'#6b6255'};cursor:pointer">
-            <div style="font-size:16px">${['🎋','🌿','🕊️'][i]}</div>
+            <div style="font-size:16px">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
             <div style="font-size:14px;font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
             ${counts[b]>0?`<div style="font-size:14px;font-weight:700">${counts[b]}</div>`:''}
           </button>`).join('')}
@@ -1900,7 +2010,7 @@ function renderTasks() {
     </div>
     <div style="padding:12px 16px">
       ${mood && moodLimit(mood) ? moodLimitBarHtml(mood, hiddenByMood, 'margin-bottom:10px') : ''}
-      ${tasks.length===0?emptyHtml('🎋', taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
+      ${tasks.length===0?emptyHtml(icon('zap'), taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
   `
@@ -1915,22 +2025,22 @@ function taskCard(t) {
   return `
     <div style="background:#ffffff;border:1px solid var(--line);border-right:3px solid ${t.done?'#e3d9bd':(overdue?'#ef4444':c)};border-radius:12px;padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?'✓':''}</div>
+        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:14px;color:#ffffff">${t.done?icon('check'):''}</div>
         <div style="flex:1">
           <div style="font-size:16px;font-weight:500;color:#211d17;text-decoration:${t.done?'line-through':'none'};line-height:1.4">${esc(t.text)}</div>
           ${t.note?`<div style="font-size:12px;color:#948a7a;margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
           ${t.photo?`<img src="${esc(t.photo)}" onclick="viewPhoto(${jsArg(t.photo)})" style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;margin-top:8px;cursor:pointer"/>`:''}
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-            ${t.site?`<span class="tag">📍 ${esc(t.site)}</span>`:''}
-            ${t.assignee?`<span class="tag">👤 ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
+            ${t.site?`<span class="tag">${icon('map-pin')} ${esc(t.site)}</span>`:''}
+            ${t.assignee?`<span class="tag">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
             ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag">${CONTEXT_LABEL[t.context]}</span>`:''}
-            ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">⏰ ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
+            ${t.time?`<span class="tag" style="${overdue?'background:#fde3e3;color:#c0392b':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-          ${!t.done?iconBtnHtml('showAddTask('+jsArg(t.id)+')', '✎', 'padding:6px 9px'):''}
+          ${!t.done?iconBtnHtml('showAddTask('+jsArg(t.id)+')', icon('edit'), 'padding:6px 9px', 'edit'):''}
           ${!t.done?actionBtnHtml(t.text, t.assignee, 'padding:6px 9px'):''}
-          ${t.done?iconBtnHtml('deleteTask('+jsArg(t.id)+')', '🗑', 'font-size:15px'):''}
+          ${t.done?iconBtnHtml('deleteTask('+jsArg(t.id)+')', icon('trash'), 'font-size:15px', 'delete'):''}
         </div>
       </div>
     </div>`
@@ -2007,8 +2117,8 @@ function renderPhotoPreview(previewId) {
   const prev = document.getElementById(previewId); if(!prev) return
   prev.innerHTML = pendingPhoto
     ? '<div style="position:relative"><img src="'+esc(pendingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>'+
-      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:14px">✕ הסר</button></div>'
-    : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>'
+      '<button onclick="event.stopPropagation();removePendingPhoto(\''+previewId+'\')" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:14px">' + icon('x') + ' הסר</button></div>'
+    : '<div style="text-align:center;color:#948a7a;font-size:14px">' + icon('camera') + ' הוסף תמונה</div>'
 }
 function photoInputHtml(inputId, previewId, existingPhoto) {
   pendingPhoto = existingPhoto || null
@@ -2016,7 +2126,7 @@ function photoInputHtml(inputId, previewId, existingPhoto) {
     '<label class="form-label">תמונה (רשות)</label>'+
     '<input type="file" accept="image/*" id="'+inputId+'" onchange="handlePhotoPick(this,\''+previewId+'\')" style="display:none"/>'+
     '<div id="'+previewId+'" onclick="document.getElementById(\''+inputId+'\').click()" style="border:1.5px dashed var(--line);border-radius:10px;padding:14px;cursor:pointer;background:#ffffff">'+
-    (existingPhoto ? '<img src="'+esc(existingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>' : '<div style="text-align:center;color:#948a7a;font-size:14px">📷 הוסף תמונה</div>')+
+    (existingPhoto ? '<img src="'+esc(existingPhoto)+'" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;display:block"/>' : '<div style="text-align:center;color:#948a7a;font-size:14px">' + icon('camera') + ' הוסף תמונה</div>')+
     '</div></div>'
 }
 function viewPhoto(src) {
@@ -2032,7 +2142,7 @@ function showAddTask(id) {
   const t = id ? [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(x=>x.id===id) : null
   const bucketOf = id ? (state.tasks.now.some(x=>x.id===id)?'now':state.tasks.today.some(x=>x.id===id)?'today':'later') : 'now'
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?'✎ עריכת משימה':'+ משימה חדשה'}</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${t?icon('edit') + ' עריכת משימה':'+ משימה חדשה'}</div>
         <textarea id="add-task-text" placeholder="מה צריך לעשות?" class="form-input" style="min-height:80px;resize:none">${t?esc(t.text):''}</textarea>
         ${voiceRowHtml('add-task-text')}
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
@@ -2052,7 +2162,7 @@ function showAddTask(id) {
         <div style="margin-bottom:14px">
           <label class="form-label">הקשר — איפה אפשר לבצע?</label>
           <select id="add-task-context" class="form-select">
-            ${optionsHtml([['','לא ידוע'],['phone','📞 טלפון'],['office','💻 משרד'],['site','📍 באתר']], (t&&t.context)||'')}
+            ${optionsHtml([['','לא ידוע'],['phone',icon('phone') + ' טלפון'],['office',icon('monitor') + ' משרד'],['site',icon('map-pin') + ' באתר']], (t&&t.context)||'')}
           </select>
         </div>
         <div style="margin-bottom:14px">
@@ -2109,7 +2219,7 @@ function showPettyCashModal() {
   const entries = pettyCashThisMonth().slice().sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') })
   const total = pettyCashMonthTotal()
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">💰 ליקוידציה שוטפת</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('wallet')} ליקוידציה שוטפת</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">חודש ${currentMonthKey()} · סה"כ עד כה: <b style="color:#211d17">₱${total.toLocaleString()}</b></div>
         <label class="form-label">תאריך</label><input id="pc-date" type="date" class="form-input" value="${getToday()}"/>
         <label class="form-label">ספק / חנות</label><input id="pc-vendor" class="form-input" placeholder="למשל: Shell Gas Station"/>
@@ -2126,13 +2236,13 @@ function showPettyCashModal() {
               </div>
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-size:14px;font-weight:700;color:#211d17">₱${(parseFloat(e.amount)||0).toLocaleString()}</span>
-                <button onclick="deletePettyCashEntry(${jsArg(e.id)})" style="background:none;color:#c0392b;font-size:16px">🗑</button>
+                <button onclick="deletePettyCashEntry(${jsArg(e.id)})" style="background:none;color:#c0392b;font-size:16px">${icon('trash')}</button>
               </div>
             </div>`
           }).join('')}
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
-          <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">📋 העתק סיכום</button>
+          <button id="pc-copy-btn" onclick="copyPettyCashSummary()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">${icon('clipboard')} העתק סיכום</button>
           <button onclick="closeModal()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">סגור</button>
         </div>`, {modalStyle:'max-height:82vh;overflow-y:auto'})
 }
@@ -2157,29 +2267,29 @@ function copyPettyCashSummary() {
   const text = 'ליקוידציה - '+currentMonthKey()+'\n'+lines.join('\n')+'\n\nסה"כ: ₱'+total.toLocaleString()
   navigator.clipboard.writeText(text).then(function(){
     const btn = document.getElementById('pc-copy-btn')
-    flashBtn(btn, '✓ הועתק')
+    flashBtn(btn, icon('check') + ' הועתק')
   })
 }
 
 // General solar-pump-inverter troubleshooting knowledge — generic domain
 // knowledge, not tied to a specific proprietary manual.
 const SPIS_FAULTS = [
-  {icon:'🔒',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
-  {icon:'🔥',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
-  {icon:'⚡',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
-  {icon:'🌊',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
-  {icon:'🏜️',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
-  {icon:'📶',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
+  {icon:'lock',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
+  {icon:'flame',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
+  {icon:'zap',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
+  {icon:'waves',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
+  {icon:'alert-circle',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
+  {icon:'wifi',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
 ];
 function showSpisModal() {
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">🔧 אבחון תקלות SPIS</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
         ${SPIS_FAULTS.map(function(f){
           return `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px">
-            <div style="font-size:14px;font-weight:700;color:#211d17;margin-bottom:4px">${f.icon} ${f.title}</div>
+            <div style="font-size:14px;font-weight:700;color:#211d17;margin-bottom:4px">${icon(f.icon)} ${f.title}</div>
             <div style="font-size:13px;color:#7a6f5c;margin-bottom:8px;line-height:1.5">${f.cause}</div>
-            ${f.checks.map(function(c){ return `<div style="font-size:13px;color:#211d17;margin-bottom:3px">✓ ${c}</div>` }).join('')}
+            ${f.checks.map(function(c){ return `<div style="font-size:13px;color:#211d17;margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
           </div>`
         }).join('')}
         <div style="font-size:12px;color:#948a7a;margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
@@ -2195,7 +2305,7 @@ function renderSites() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div style="font-size:18px;font-weight:700">אתרים</div>
         <div style="display:flex;gap:8px">
-          <button onclick="showSpisModal()" style="background:#f0e7cf;border-radius:10px;padding:8px 12px;color:#6b6255;font-size:14px;font-weight:600">🔧 אבחון</button>
+          <button onclick="showSpisModal()" style="background:#f0e7cf;border-radius:10px;padding:8px 12px;color:#6b6255;font-size:14px;font-weight:600">${icon('tool')} אבחון</button>
           ${addBtnHtml('showAddSite()')}
         </div>
       </div>
@@ -2206,7 +2316,7 @@ function renderSites() {
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${sites.length===0?emptyHtml('🪷', 'אין אתרים'):''}
+      ${sites.length===0?emptyHtml(icon('flower'), 'אין אתרים'):''}
       ${sites.map(s=>siteCard(s)).join('')}
     </div>`
 }
@@ -2229,8 +2339,8 @@ function siteCard(s) {
   return `
     <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="font-size:15px;font-weight:700;color:#211d17">📍 ${esc(s.name)}</div>
-        ${s.stuckSince?`<span style="background:#b84600;color:#fff;font-size:11px;font-weight:700;border-radius:100px;padding:3px 9px;flex-shrink:0">🚧 תקוע ${stuckDays} ימים</span>`:''}
+        <div style="font-size:15px;font-weight:700;color:#211d17">${icon('map-pin')} ${esc(s.name)}</div>
+        ${s.stuckSince?`<span style="background:#b84600;color:#fff;font-size:11px;font-weight:700;border-radius:100px;padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
       </div>
       ${s.province?`<div style="font-size:14px;color:#6b6255;margin-top:2px">${esc(s.province)}</div>`:''}
       ${s.issue?`<div style="font-size:14px;color:#7a6f5c;margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
@@ -2238,18 +2348,18 @@ function siteCard(s) {
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${esc(String(s.contractor).toUpperCase())}</span>`:''}
         <span class="tag tag-status-${esc(s.status)}">${STATUS_LABEL[s.status]||esc(s.status)}</span>
-        ${s.year?`<span class="tag">📅 ${esc(s.year)}</span>`:''}
-        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:100px;padding:4px 10px;font-size:12px;color:#6b6255;cursor:pointer">📋 REMO ${esc(s.remo)}</button>
-        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">↗ Remo</a>`:''}
-        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🗺️ Maps</a>`:''}
-        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">🔗 Monday.com</a>`:''}
+        ${s.year?`<span class="tag">${icon('calendar')} ${esc(s.year)}</span>`:''}
+        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:100px;padding:4px 10px;font-size:12px;color:#6b6255;cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
+        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} Remo</a>`:''}
+        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>`:''}
+        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('link')} Monday.com</a>`:''}
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
           <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:8px;background:${s.status===st?STATUS_HEX[st]+'33':'#f0e7cf'};color:${s.status===st?STATUS_HEX[st]:'#7a6f5c'};font-size:14px;font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="toggleSiteStuck(${jsArg(s.name)})" style="background:${s.stuckSince?'#b8460022':'#f0e7cf'};border:1px solid ${s.stuckSince?'#b84600':'transparent'};border-radius:8px;padding:7px 9px;color:${s.stuckSince?'#b84600':'#6b6255'};font-size:14px">🚧</button>
-        ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', '✎')}
+        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" style="background:${s.stuckSince?'#b8460022':'#f0e7cf'};border:1px solid ${s.stuckSince?'#b84600':'transparent'};border-radius:8px;padding:7px 9px;color:${s.stuckSince?'#b84600':'#6b6255'};font-size:14px">${icon('alert-triangle')}</button>
+        ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', icon('edit'), '', 'edit')}
         ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
       </div>
     </div>`
@@ -2300,24 +2410,24 @@ function showStatusChangeModal(name, status) {
   window.__scStatus = status
   const site = state.sites.find(s=>s.name===name)
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">📍 ${esc(name)}</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${icon('map-pin')} ${esc(name)}</div>
         <div style="font-size:13px;color:#948a7a;margin-bottom:14px">משנה סטטוס ל: <b style="color:#211d17">${STATUS_LABEL[status]}</b></div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button onclick="toggleStatusFlag('monday')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeMondayDone?'#1a8f7a':'var(--line)'};background:${statusChangeMondayDone?'#1a8f7a18':'#ffffff'};color:${statusChangeMondayDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">📝 עדכנת ב-Monday?${statusChangeMondayDone?' ✓':''}</button>
-          <button onclick="toggleStatusFlag('email')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeEmailDone?'#1a8f7a':'var(--line)'};background:${statusChangeEmailDone?'#1a8f7a18':'#ffffff'};color:${statusChangeEmailDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">📧 שלחת מייל?${statusChangeEmailDone?' ✓':''}</button>
+          <button onclick="toggleStatusFlag('monday')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeMondayDone?'#1a8f7a':'var(--line)'};background:${statusChangeMondayDone?'#1a8f7a18':'#ffffff'};color:${statusChangeMondayDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">${icon('edit-3')} עדכנת ב-Monday?${statusChangeMondayDone?' ' + icon('check'):''}</button>
+          <button onclick="toggleStatusFlag('email')" style="flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid ${statusChangeEmailDone?'#1a8f7a':'var(--line)'};background:${statusChangeEmailDone?'#1a8f7a18':'#ffffff'};color:${statusChangeEmailDone?'#1a8f7a':'#6b6255'};font-size:13px;font-weight:600">${icon('mail')} שלחת מייל?${statusChangeEmailDone?' ' + icon('check'):''}</button>
         </div>
         ${(!statusChangeMondayDone || !statusChangeEmailDone) ? `
         <label class="form-label">תאר את הבעיה / העדכון</label>
         <textarea id="sc-desc" placeholder="למשל: הקבלן החליף את המשאבה, האתר פעיל שוב" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;resize:none;outline:none;line-height:1.5;direction:rtl;margin-bottom:10px">${site&&site.issue?esc(site.issue):''}</textarea>
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">✍️ נסח למונדיי</button>`:''}
-          ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">✍️ נסח למייל</button>`:''}
+          ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">${icon('edit-3')} נסח למונדיי</button>`:''}
+          ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:13px;font-weight:600">${icon('edit-3')} נסח למייל</button>`:''}
         </div>
         <div id="sc-draft-result"></div>
         ` : ''}
         <div style="display:flex;gap:8px;margin-top:6px">
           <button onclick="closeModal()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">ביטול</button>
-          <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:700">✓ אשר שינוי סטטוס</button>
+          <button onclick="confirmStatusChange()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:700">${icon('check')} אשר שינוי סטטוס</button>
         </div>`, {modalStyle:'max-height:85vh;overflow-y:auto'})
 }
 function draftStatusMessage(kind) {
@@ -2335,10 +2445,10 @@ function draftStatusMessage(kind) {
     window.__scDraftText = text
     resultEl.innerHTML = `<div style="background:#fdf9ee;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px">
       <div style="font-size:13px;color:#211d17;line-height:1.6;white-space:pre-line;direction:ltr;text-align:left">${esc(text)}</div>
-      <button id="sc-copy-btn" onclick="copyToClipboard(window.__scDraftText,'sc-copy-btn')" style="width:100%;margin-top:8px;background:#f0e7cf;border-radius:8px;padding:8px;color:#6b6255;font-size:13px;font-weight:600">📋 העתק</button>
+      <button id="sc-copy-btn" onclick="copyToClipboard(window.__scDraftText,'sc-copy-btn')" style="width:100%;margin-top:8px;background:#f0e7cf;border-radius:8px;padding:8px;color:#6b6255;font-size:13px;font-weight:600">${icon('clipboard')} העתק</button>
     </div>`
   }).catch(function(e){
-    resultEl.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:6px 0">✕ שגיאה: ' + esc(e.message) + '</div>'
+    resultEl.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:6px 0">' + icon('x') + ' שגיאה: ' + esc(e.message) + '</div>'
   })
 }
 function confirmStatusChange() {
@@ -2352,7 +2462,7 @@ function showAddSite(name) {
   editingSiteName = name || null
   const s = name ? state.sites.find(x=>x.name===name) : null
   openModal(`
-        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?'✎ עריכת אתר':'+ אתר חדש'}</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
         <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
         ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
@@ -2386,7 +2496,7 @@ function showAddSite(name) {
           <button class="btn-primary" style="flex:1" onclick="doAddSite()">${s?'שמור':'הוסף'}</button>
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
-        ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:10px;padding:10px;color:#ef4444;font-size:14px">🗑 מחק אתר</button>`:''}`)
+        ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:10px;padding:10px;color:#ef4444;font-size:14px">${icon('trash')} מחק אתר</button>`:''}`)
 }
 
 function doAddSite() {
@@ -2431,8 +2541,8 @@ function renderPeople() {
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${state.people.length===0?emptyHtml('🌿', 'אנשים יתווספו מהודעות'):''}
-      ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">⏳ ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
+      ${state.people.length===0?emptyHtml(icon('leaf'), 'אנשים יתווספו מהודעות'):''}
+      ${withP.length>0?`<div style="font-size:14px;color:#f59e0b;font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('hourglass')} ממתין תשובה</div>${withP.map(p=>personCard(p)).join('')}`:''}
       ${withoutP.length>0?`${withP.length>0?`<div style="font-size:14px;color:#7a6f5c;font-weight:700;margin:12px 0 8px">אנשי קשר</div>`:''}${withoutP.map(p=>personCard(p)).join('')}`:''}
     </div>`
 }
@@ -2451,12 +2561,12 @@ function personCard(p) {
         </div>
         <div style="display:flex;gap:6px">
           ${actionBtnHtml(p.pending||p.name, p.name, 'font-size:16px')}
-          ${iconBtnHtml('deletePerson('+jsArg(p.name)+')', '🗑', 'font-size:15px')}
-          ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">✓</button>`:''}
+          ${iconBtnHtml('deletePerson('+jsArg(p.name)+')', icon('trash'), 'font-size:15px', 'delete')}
+          ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" data-act="clear" aria-label="clear" style="background:#4ade8022;border:1px solid #4ade8044;border-radius:8px;padding:7px 9px;color:#4ade80;font-size:14px;font-weight:700">${icon('check')}</button>`:''}
         </div>
       </div>
       ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:8px;border:1px solid #f59e0b22">
-        <div style="font-size:14px;color:#f59e0b;font-weight:700;margin-bottom:3px">⏳ ממתין</div>
+        <div style="font-size:14px;color:#f59e0b;font-weight:700;margin-bottom:3px">${icon('hourglass')} ממתין</div>
         <div style="font-size:14px;color:#7a6f5c;line-height:1.5">${esc(p.pending)}</div>
       </div>`:''}
     </div>`
@@ -2509,22 +2619,22 @@ function renderAction() {
       ${backHeaderHtml('צור תוכן')}
       ${actionCtx?.text?`<div class="card" style="border-right:3px solid var(--gold);margin-bottom:20px">
         <div style="font-size:14px;color:#211d17;line-height:1.5">${esc(actionCtx.text)}</div>
-        ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">👤 ${esc(actionCtx.assignee)}</div>`:''}
+        ${actionCtx.assignee?`<div style="font-size:14px;color:#6b6255;margin-top:4px">${icon('user')} ${esc(actionCtx.assignee)}</div>`:''}
       </div>`:''}
       <div id="action-buttons">
-        ${[['whatsapp','💬','הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email','📧','מייל','ASC / 11-16 / NIA'],['monday','📋','עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
+        ${[['whatsapp',icon('message-circle'),'הודעת WhatsApp',"לג'יו / קנת' / קבלן"],['email',icon('mail'),'מייל','ASC / 11-16 / NIA'],['monday',icon('clipboard'),'עדכון Monday','סטטוס + פעולה הבאה']].map(([t,i,l,s])=>`
           <div class="card" onclick="doAction('${t}')" style="cursor:pointer;margin-bottom:10px">
             <div style="font-size:16px;font-weight:600">${i} ${l}</div>
             <div style="font-size:14px;color:#6b6255;margin-top:3px">${s}</div>
           </div>`).join('')}
       </div>
       <div id="action-loading" style="display:none;text-align:center;padding:40px 0;color:#6b6255">
-        <div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-size:14px">כותב...</div>
+        <div style="font-size:32px;margin-bottom:10px">${icon('edit-3')}</div><div style="font-size:14px">כותב...</div>
       </div>
       <div id="action-result-container" style="display:none">
         <div id="action-result" class="action-result"></div>
-        <button id="action-copy-btn" class="btn-primary" onclick="copyResult()" style="margin-bottom:10px">📜 העתק</button>
-        <button class="btn-secondary" style="width:100%" onclick="renderAction()">← צור משהו אחר</button>
+        <button id="action-copy-btn" class="btn-primary" onclick="copyResult()" style="margin-bottom:10px">${icon('file-text')} העתק</button>
+        <button class="btn-secondary" style="width:100%" onclick="renderAction()">${icon('arrow-left')} צור משהו אחר</button>
       </div>
     </div>`
 }
@@ -2553,15 +2663,15 @@ function copyResult() {
   const text = document.getElementById('action-result').textContent
   navigator.clipboard.writeText(text).then(()=>{
     const btn = document.getElementById('action-copy-btn')
-    btn.textContent='✓ הועתק!'
+    btn.innerHTML=icon('check') + ' הועתק!'
     btn.style.background='#a8711a'
-    setTimeout(()=>{btn.textContent='📋 העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
+    setTimeout(()=>{btn.innerHTML=icon('clipboard') + ' העתק';btn.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'},2000)
   })
 }
 
 function copyToClipboard(text, btnId) {
   if(!text) return
-  navigator.clipboard.writeText(text).then(()=>{ flashBtn(document.getElementById(btnId), '✓ הועתק') })
+  navigator.clipboard.writeText(text).then(()=>{ flashBtn(document.getElementById(btnId), icon('check') + ' הועתק') })
 }
 
 // ── SETTINGS ─────────────────────────────────────
@@ -2571,7 +2681,7 @@ function renderSettings() {
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml('הגדרות', '24px')}
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🎨 ערכת צבע</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('palette')} ערכת צבע</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
         <div style="display:flex;gap:8px">
           ${Object.keys(THEMES).map(name=>`
@@ -2582,16 +2692,16 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">📦 גיבוי / העברה לטלפון חדש</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('package')} גיבוי / העברה לטלפון חדש</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".</div>
         <div style="display:flex;gap:8px">
-          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">⬇️ הורד גיבוי</button>
-          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">⬆️ טען מקובץ</button>
+          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:#f0e7cf;border-radius:10px;padding:10px;color:#6b6255;font-size:14px;font-weight:600">${icon('download')} הורד גיבוי</button>
+          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:10px;color:#fff;font-size:14px;font-weight:600">${icon('upload')} טען מקובץ</button>
         </div>
         <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">☁️ שרת (Cloudflare)</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
         <div style="font-size:12px;color:#948a7a;margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
         <label class="form-label">כתובת השרת</label>
@@ -2604,22 +2714,22 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔔 התראות לטלפון</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('bell')} התראות לטלפון</div>
         <div style="font-size:12px;color:#948a7a;margin-bottom:10px">תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.</div>
         <div id="push-card-body">${pushCardBodyHtml()}</div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧹 ניקוי כפילויות בלוח</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('trash-2')} ניקוי כפילויות בלוח</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
         <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">נקה כפילויות</button>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🗑 נקה נתוני יום</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('trash')} נקה נתוני יום</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
         <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:10px;border:1px solid #ef444444;background:transparent;color:#ef4444;font-size:14px">נקה הכל</button>
       </div>
       <div class="card">
-        <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔄 רענון האפליקציה</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${icon('refresh')} רענון האפליקציה</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:4px">גרסה: ${APP_VERSION}</div>
         <div style="font-size:14px;color:#6b6255;margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
         <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:14px">רענן עכשיו</button>
@@ -2637,12 +2747,12 @@ function dedupeEvents() {
   const kept = state.events.filter(e => !taskTexts.has(norm(e.title)))
   const removed = before - kept.length
   setState({events:kept})
-  flashBtn(btn, removed>0 ? `נוקו ${removed} כפילויות ✓` : 'לא נמצאו כפילויות', 2500, 'נקה כפילויות')
+  flashBtn(btn, removed>0 ? `נוקו ${removed} כפילויות ${icon('check')}` : 'לא נמצאו כפילויות', 2500, 'נקה כפילויות')
 }
 
 async function forceRefreshApp() {
   const btn = document.getElementById('refresh-app-btn')
-  if (btn) { btn.textContent = '⏳ מרענן...' }
+  if (btn) { btn.innerHTML = icon('hourglass') + ' מרענן...' }
   try {
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations()
@@ -2667,7 +2777,7 @@ function exportBackup() {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
-  flashBtn(document.getElementById('export-backup-btn'), '✓ ירד')
+  flashBtn(document.getElementById('export-backup-btn'), icon('check') + ' ירד')
 }
 function importBackup(file) {
   if(!file) return
@@ -2688,7 +2798,7 @@ function importBackup(file) {
     if(!confirm('זה יחליף את כל הנתונים הנוכחיים באפליקציה בנתונים מהקובץ. להמשיך?')) return
     state = applyStateDefaults(imported)
     save()
-    alert('✓ הנתונים נטענו בהצלחה')
+    alert('הנתונים נטענו בהצלחה ✓')
     refreshBadges()
     renderCurrentScreen()
   }
@@ -2710,9 +2820,9 @@ async function saveServerConfig() {
   try {
     await loadStateFromServer()
     checkChronology(); refreshBadges()
-    if(btn) { btn.textContent = '✓ מחובר וסונכרן!'; btn.style.background = '#1a8f7a' }
+    if(btn) { btn.innerHTML = icon('check') + ' מחובר וסונכרן!'; btn.style.background = '#1a8f7a' }
   } catch(e) {
-    if(btn) { btn.textContent = '✕ נכשל, נשמר מקומית'; btn.style.background = '#c0392b' }
+    if(btn) { btn.innerHTML = icon('x') + ' נכשל, נשמר מקומית'; btn.style.background = '#c0392b' }
   }
   setTimeout(()=>renderSettings(), 1800)
 }
@@ -2725,9 +2835,9 @@ async function testServerConfig() {
   btn.textContent = 'בודק...'
   try {
     const r = await fetch(url + '/api/state', {headers:{'Authorization':'Bearer '+pass}})
-    btn.textContent = r.ok ? '✓ מחובר!' : '✕ נכשל ('+r.status+')'
+    btn.innerHTML = r.ok ? icon('check') + ' מחובר!' : icon('x') + ' נכשל ('+r.status+')'
   } catch(e) {
-    btn.textContent = '✕ אין תגובה'
+    btn.innerHTML = icon('x') + ' אין תגובה'
   }
   setTimeout(()=>{ btn.textContent = 'בדוק חיבור' }, 2200)
 }
@@ -2774,11 +2884,11 @@ async function askFieldy() {
       const wps = pts.slice(0,-1).join('|')
       let url = 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving'
       if(wps) url += '&waypoints=' + wps
-      mapsWrap.innerHTML = '<a href="'+url+'" target="_blank" style="display:inline-block;margin-top:10px;background:#1a73e8;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">📍 פתח מסלול בגוגל מפות ('+mentioned.length+' תחנות)</a>'
+      mapsWrap.innerHTML = '<a href="'+url+'" target="_blank" style="display:inline-block;margin-top:10px;background:#1a73e8;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">' + icon('map-pin') + ' פתח מסלול בגוגל מפות ('+mentioned.length+' תחנות)</a>'
     }
   } catch(e) {
     answerEl.style.color = '#c0392b'
-    answerEl.textContent = '✕ שגיאה: ' + e.message
+    answerEl.innerHTML = icon('x') + ' שגיאה: ' + esc(e.message)
     answerEl.style.display = 'block'
   }
   btn.textContent = 'שאל'
@@ -2834,34 +2944,34 @@ function notifyPrefs() { return Object.assign({}, NOTIFY_DEFAULTS, state.notifyP
 function pushStatus() {
   if(!pushSupported()) return {text:'הדפדפן הזה לא תומך בהתראות Push. באייפון: קודם "הוסף למסך הבית", ואז לפתוח משם.', ok:false, canEnable:false}
   if(!serverConfigured()) return {text:'דורש חיבור לשרת (בכרטיס למעלה) — השרת הוא מה ששולח את ההתראות.', ok:false, canEnable:false}
-  if(Notification.permission === 'denied') return {text:'ההרשאה נחסמה בדפדפן. לפתוח: הגדרות האתר בכרום ← התראות ← אפשר.', ok:false, canEnable:false}
+  if(Notification.permission === 'denied') return {text:'ההרשאה נחסמה בדפדפן. לפתוח: הגדרות האתר בכרום ' + icon('arrow-left') + ' התראות ' + icon('arrow-left') + ' אפשר.', ok:false, canEnable:false}
   if(pushSub === undefined) return {text:'בודק…', ok:false, canEnable:false}
-  if(pushSub) return {text:'✓ פעיל במכשיר הזה — תזכורות יגיעו גם כשהאפליקציה סגורה.', ok:true, canEnable:false}
+  if(pushSub) return {text:icon('check') + ' פעיל במכשיר הזה — תזכורות יגיעו גם כשהאפליקציה סגורה.', ok:true, canEnable:false}
   return {text:'לא פעיל במכשיר הזה.', ok:false, canEnable:true}
 }
 function pushCardBodyHtml() {
   const st = pushStatus(), prefs = notifyPrefs()
   const toggle = (id, label, on) => `<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:#211d17;margin-bottom:8px;cursor:pointer"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="saveNotifyPrefs()" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0"/> ${label}</label>`
   const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin:-4px 26px 10px 0;font-size:13px;color:#6b6255">בשעה <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
-  return `<div id="push-status" style="font-size:14px;color:${st.ok?'#1a8f7a':'#6b6255'};margin-bottom:12px;line-height:1.6">${esc(st.text)}</div>
+  return `<div id="push-status" style="font-size:14px;color:${st.ok?'#1a8f7a':'#6b6255'};margin-bottom:12px;line-height:1.6">${st.text}</div>
     <ol style="font-size:13px;color:#948a7a;margin:0 18px 12px 0;padding:0;line-height:1.7">
       <li>לחץ "הפעל התראות" ואשר את ההרשאה בחלון של הדפדפן.</li>
       <li>לחץ "שלח בדיקה" — אמורה להגיע התראה תוך כמה שניות.</li>
       <li>בחר למטה אילו תזכורות לקבל.</li>
     </ol>
     <div style="display:flex;gap:8px;margin-bottom:14px">
-      ${pushSub ? `<button id="push-disable-btn" onclick="disablePush()" class="btn-secondary" style="flex:1">בטל במכשיר הזה</button>` : `<button id="push-enable-btn" onclick="enablePush()" class="btn-primary" style="flex:1;padding:12px" ${st.canEnable?'':'disabled'}>🔔 הפעל התראות</button>`}
+      ${pushSub ? `<button id="push-disable-btn" onclick="disablePush()" class="btn-secondary" style="flex:1">בטל במכשיר הזה</button>` : `<button id="push-enable-btn" onclick="enablePush()" class="btn-primary" style="flex:1;padding:12px" ${st.canEnable?'':'disabled'}>${icon('bell')} הפעל התראות</button>`}
       <button id="push-test-btn" onclick="sendTestPush()" style="background:#f0e7cf;border-radius:10px;padding:0 14px;color:#6b6255;font-size:14px" ${pushSub?'':'disabled'}>שלח בדיקה</button>
     </div>
     <div style="font-size:12px;color:#948a7a;margin-bottom:8px;letter-spacing:.5px;font-weight:700">אילו תזכורות</div>
-    ${toggle('pref-events','📅 אירועים בלוח, לפי ההתראה שנבחרה בכל אירוע', prefs.events)}
-    ${toggle('pref-stuck','🚧 אתרים שתקועים מעל 5 ימים — פעם ביום בבוקר', prefs.stuckSites)}
+    ${toggle('pref-events',icon('calendar') + ' אירועים בלוח, לפי ההתראה שנבחרה בכל אירוע', prefs.events)}
+    ${toggle('pref-stuck',icon('alert-triangle') + ' אתרים שתקועים מעל 5 ימים — פעם ביום בבוקר', prefs.stuckSites)}
     ${timeRow('pref-stuck-time', prefs.stuckTime)}
-    ${toggle('pref-lead','🎯 רפלקציית מנהיגות בערב — רק אם עוד לא כתבת היום', prefs.leadership)}
+    ${toggle('pref-lead',icon('target') + ' רפלקציית מנהיגות בערב — רק אם עוד לא כתבת היום', prefs.leadership)}
     ${timeRow('pref-lead-time', prefs.leadershipTime)}
     <div id="push-msg" style="font-size:13px;color:#948a7a;margin-top:6px;min-height:18px"></div>`
 }
-function pushMsg(text, isErr) { const el = document.getElementById('push-msg'); if(el) { el.textContent = text; el.style.color = isErr ? '#c0392b' : '#1a8f7a' } }
+function pushMsg(html, isErr) { const el = document.getElementById('push-msg'); if(el) { el.innerHTML = html; el.style.color = isErr ? '#c0392b' : '#1a8f7a' } }
 async function refreshPushCard() {
   try { pushSub = await getPushSubscription() } catch(e) { pushSub = null }
   localStorage.setItem('fieldy_push_on', pushSub ? '1' : '0')
@@ -2878,7 +2988,7 @@ function writeNotifyPrefs(prefs) {
 function saveNotifyPrefs() {
   const val = (id, fallback) => { const el = document.getElementById(id); return el ? (el.type === 'checkbox' ? el.checked : (el.value || fallback)) : fallback }
   writeNotifyPrefs({events: val('pref-events', true), stuckSites: val('pref-stuck', true), leadership: val('pref-lead', true), stuckTime: val('pref-stuck-time', '08:00'), leadershipTime: val('pref-lead-time', '20:00')})
-  pushMsg('✓ נשמר — נכנס לתוקף בסבב הבא של השרת (עד 5 דקות)')
+  pushMsg(icon('check') + ' נשמר — נכנס לתוקף בסבב הבא של השרת (עד 5 דקות)')
 }
 async function enablePush() {
   const btn = document.getElementById('push-enable-btn')
@@ -2891,10 +3001,10 @@ async function enablePush() {
     await serverJson('POST', '/api/push/subscribe', {subscription: sub.toJSON ? sub.toJSON() : sub, device: deviceLabel()})
     if(!state.notifyPrefs) writeNotifyPrefs(NOTIFY_DEFAULTS)   // make sure the server knows this device's timezone
     await refreshPushCard()
-    pushMsg('✓ ההתראות הופעלו. לחץ "שלח בדיקה" כדי לוודא שהן מגיעות.')
+    pushMsg(icon('check') + ' ההתראות הופעלו. לחץ "שלח בדיקה" כדי לוודא שהן מגיעות.')
   } catch(e) {
     await refreshPushCard()
-    pushMsg('✕ ' + e.message, true)
+    pushMsg(icon('x') + ' ' + esc(e.message), true)
   }
 }
 async function disablePush() {
@@ -2903,7 +3013,7 @@ async function disablePush() {
     if(sub) { const endpoint = sub.endpoint; await sub.unsubscribe(); await serverJson('POST', '/api/push/unsubscribe', {endpoint}) }
     await refreshPushCard()
     pushMsg('ההתראות בוטלו במכשיר הזה.')
-  } catch(e) { await refreshPushCard(); pushMsg('✕ ' + e.message, true) }
+  } catch(e) { await refreshPushCard(); pushMsg(icon('x') + ' ' + esc(e.message), true) }
 }
 async function sendTestPush() {
   const btn = document.getElementById('push-test-btn')
@@ -2911,10 +3021,10 @@ async function sendTestPush() {
   try {
     const r = await serverJson('POST', '/api/push/test', {endpoint: pushSub ? pushSub.endpoint : null})
     const mine = (r.results || [])[0]
-    if(r.sent >= 1) pushMsg('✓ נשלחה — אמורה להופיע תוך כמה שניות.')
-    else pushMsg('✕ השרת לא הצליח לשלוח' + (mine ? ' (סטטוס ' + mine.status + ')' : ' — המכשיר הזה לא רשום בשרת, נסה לבטל ולהפעיל מחדש'), true)
+    if(r.sent >= 1) pushMsg(icon('check') + ' נשלחה — אמורה להופיע תוך כמה שניות.')
+    else pushMsg(icon('x') + ' השרת לא הצליח לשלוח' + (mine ? ' (סטטוס ' + mine.status + ')' : ' — המכשיר הזה לא רשום בשרת, נסה לבטל ולהפעיל מחדש'), true)
   } catch(e) {
-    pushMsg(/VAPID/.test(e.message) ? '✕ בשרת עדיין לא הוגדרו מפתחות VAPID (ראה הוראות הפריסה).' : '✕ ' + e.message, true)
+    pushMsg(/VAPID/.test(e.message) ? icon('x') + ' בשרת עדיין לא הוגדרו מפתחות VAPID (ראה הוראות הפריסה).' : icon('x') + ' ' + esc(e.message), true)
   }
   if(btn) { btn.textContent = 'שלח בדיקה'; btn.disabled = false }
 }
@@ -2962,8 +3072,8 @@ function voiceLangLabel() { const l = VOICE_LANGS.find(x => x[0] === voiceLang);
 function voiceRowHtml(targetId) {
   if(!SpeechRec) return ''
   return '<div class="voice-row" id="voice-row-' + esc(targetId) + '">' +
-    '<button type="button" class="voice-btn" id="voice-btn-' + esc(targetId) + '" onclick="toggleVoice(' + jsArg(targetId) + ')">🎤 הקלט</button>' +
-    '<button type="button" class="voice-lang" id="voice-lang-' + esc(targetId) + '" onclick="cycleVoiceLang(' + jsArg(targetId) + ')" title="שפת זיהוי">🌐 ' + voiceLangLabel() + '</button>' +
+    '<button type="button" class="voice-btn" id="voice-btn-' + esc(targetId) + '" onclick="toggleVoice(' + jsArg(targetId) + ')">' + icon('mic') + ' הקלט</button>' +
+    '<button type="button" class="voice-lang" id="voice-lang-' + esc(targetId) + '" onclick="cycleVoiceLang(' + jsArg(targetId) + ')" title="שפת זיהוי">' + icon('globe') + ' ' + voiceLangLabel() + '</button>' +
     '<span class="voice-status" id="voice-status-' + esc(targetId) + '"></span>' +
     '</div>'
 }
@@ -2971,12 +3081,12 @@ function cycleVoiceLang(targetId) {
   const i = VOICE_LANGS.findIndex(x => x[0] === voiceLang)
   voiceLang = VOICE_LANGS[(i + 1) % VOICE_LANGS.length][0]
   localStorage.setItem('fieldy_voice_lang', voiceLang)
-  const b = document.getElementById('voice-lang-' + targetId); if(b) b.textContent = '🌐 ' + voiceLangLabel()
+  const b = document.getElementById('voice-lang-' + targetId); if(b) b.innerHTML = icon('globe') + ' ' + voiceLangLabel()
   if(_voice) stopVoiceInput()
 }
 function setVoiceUi(targetId, recording, status) {
   const b = document.getElementById('voice-btn-' + targetId)
-  if(b) { b.classList.toggle('recording', recording); b.textContent = recording ? '⏹ עצור' : '🎤 הקלט' }
+  if(b) { b.classList.toggle('recording', recording); b.innerHTML = recording ? icon('square') + ' עצור' : icon('mic') + ' הקלט' }
   const s = document.getElementById('voice-status-' + targetId); if(s) s.textContent = status || ''
 }
 function stopVoiceInput() {
@@ -3169,7 +3279,7 @@ function renderMonthCal(){
     '<div class="cal-grid">'+days+'</div>'+
     '<div style="padding:10px 18px 0">'+
     (monthEvs.length?
-      '<div style="font-size:14px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">📅 אירועי החודש</div>'+
+      '<div style="font-size:14px;color:var(--t3);font-weight:700;letter-spacing:1.5px;margin-bottom:10px">' + icon('calendar') + ' אירועי החודש</div>'+
       monthEvs.map(function(e){
         var dayNum = parseInt((e.date||'').split('-')[2]||'0');
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
@@ -3179,13 +3289,13 @@ function renderMonthCal(){
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
           '<div style="flex:1">'+
           '<div style="font-size:14px;color:var(--gold);font-weight:700;margin-bottom:2px">'+dateLabel+(e.time?' · '+esc(e.time):'')+'</div>'+
-          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+esc(e.site)+'</span>':'')+'</div>'+
+          '<div style="font-size:14px;color:var(--t1);font-weight:600">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
           (e.note?'<div style="font-size:14px;color:var(--t2);margin-top:2px">'+esc(e.note)+'</div>':'')+
           '</div>'+
-          '<button id="del-ev-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">✕</button>'+
+          '<button id="del-ev-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:14px;padding:2px 6px;cursor:pointer">' + icon('x') + '</button>'+
           '</div></div>';
       }).join(''):
-      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">🌿</div><div style="font-size:14px;margin-top:6px">אין אירועים החודש</div></div>')+
+      '<div style="text-align:center;padding:20px 0;color:var(--t4)"><div style="font-size:28px">' + icon('leaf') + '</div><div style="font-size:14px;margin-top:6px">אין אירועים החודש</div></div>')+
     '</div>';
 }
 
@@ -3252,12 +3362,12 @@ function renderEvCard(e){
   return '<div class="ev-card" style="border-right-color:'+col+'" id="evc-'+esc(e.id)+'">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
     '<div style="flex:1">'+
-    (e.time?'<div class="ev-time">⏰ '+esc(e.time)+'</div>':'')+
-    '<div class="ev-title">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">🔗 '+esc(e.site)+'</span>':'')+'</div>'+
+    (e.time?'<div class="ev-time">' + icon('clock') + ' '+esc(e.time)+'</div>':'')+
+    '<div class="ev-title">'+esc(e.title)+(e.site?' <span style="color:var(--gold);font-size:14px">' + icon('link') + ' '+esc(e.site)+'</span>':'')+'</div>'+
     (e.note?'<div class="ev-note">'+esc(e.note)+'</div>':'')+
-    (e.recurring?'<div class="rec-badge">🔄 '+(RECUR_HE[e.recurring]||esc(e.recurring))+'</div>':'')+
+    (e.recurring?'<div class="rec-badge">' + icon('refresh') + ' '+(RECUR_HE[e.recurring]||esc(e.recurring))+'</div>':'')+
     '</div>'+
-    '<button id="del-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:16px;padding:4px;cursor:pointer">✕</button>'+
+    '<button id="del-'+esc(e.id)+'" style="background:none;border:none;color:var(--t4);font-size:16px;padding:4px;cursor:pointer">' + icon('x') + '</button>'+
     '</div></div>';
 }
 
@@ -3268,10 +3378,10 @@ function showDayEvents(dk){
   openModal(
     '<div class="modal-handle"></div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
-    '<div style="font-size:16px;font-weight:700;color:var(--t1)">📅 '+label+'</div>'+
+    '<div style="font-size:16px;font-weight:700;color:var(--t1)">' + icon('calendar') + ' '+label+'</div>'+
     '<button class="btn-add" id="add-ev-day">+ הוסף</button>'+
     '</div>'+
-    (evs.length?evs.map(renderEvCard).join(''):emptyHtml('🌿', 'אין אירועים', 'padding:20px 0')));
+    (evs.length?evs.map(renderEvCard).join(''):emptyHtml(icon('leaf'), 'אין אירועים', 'padding:20px 0')));
 
   document.getElementById('add-ev-day').onclick=function(){closeModal();showAddEvent(dk);};
   // Bind delete buttons + card-tap navigation
@@ -3389,7 +3499,7 @@ function scheduleNotification(ev){
   if(delay>0&&delay<7*24*60*60*1000){
     setTimeout(function(){
       if(Notification.permission==='granted'){
-        new Notification('Fieldy 📅 '+ev.title,{
+        new Notification('Fieldy · '+ev.title,{
           body:ev.notify==='0'?'עכשיו':'בעוד '+ev.notify+' דקות',
           icon:'/Fieldy/icon-192-1.png',tag:ev.id
         });
@@ -3593,7 +3703,7 @@ function toggleMusicMute() {
   }
   var btn = document.getElementById('music-toggle-btn');
   if(btn) {
-    btn.textContent = musicMuted ? '🔇 מוסיקה' : '🎵 מוסיקה';
+    btn.innerHTML = musicMuted ? icon('volume-x') + ' מוסיקה' : icon('music') + ' מוסיקה';
     btn.style.color = musicMuted ? 'var(--t4)' : 'var(--sprout)';
   }
 }
@@ -3603,10 +3713,10 @@ function toggleVoiceMute() {
   if(window.speechSynthesis.speaking || window._voiceEnabled !== false) {
     window._voiceEnabled = false;
     window.speechSynthesis.cancel();
-    if(btn) { btn.textContent = '🔇 הדרכה'; btn.style.color = 'var(--t4)'; }
+    if(btn) { btn.innerHTML = icon('volume-x') + ' הדרכה'; btn.style.color = 'var(--t4)'; }
   } else {
     window._voiceEnabled = true;
-    if(btn) { btn.textContent = '🎤 הדרכה'; btn.style.color = 'var(--sprout)'; }
+    if(btn) { btn.innerHTML = icon('mic') + ' הדרכה'; btn.style.color = 'var(--sprout)'; }
   }
 }
 
@@ -3654,12 +3764,12 @@ function startMeditationWithVoice(idx){
       });
       var ctrl = document.createElement('div');
       ctrl.style.cssText = 'margin-top:10px';
-      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:14px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ← נגישות ← המרת טקסט לדיבור.</div>' : '';
+      var lowVoiceNote = enVoices.length<=1 ? '<div style="font-size:14px;color:var(--t3);margin-bottom:6px;line-height:1.5">המכשיר שלך מזהה קול הדרכה אחד בלבד — הגוון ישתנה מעט לפי הבחירה, אך לקולות שונים לגמרי צריך להתקין קולות TTS נוספים ב-הגדרות Android ' + icon('arrow-left') + ' נגישות ' + icon('arrow-left') + ' המרת טקסט לדיבור.</div>' : '';
       ctrl.innerHTML = lowVoiceNote +
         '<select id="voice-select" style="width:100%;background:rgba(13,10,5,.9);border:1px solid rgba(184,134,11,.3);border-radius:10px;padding:9px 12px;color:var(--t1);font-size:14px;font-family:inherit;margin-bottom:7px">'+voiceOpts+'</select>'+
         '<div style="display:flex;gap:7px">'+
-        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎵 מוסיקה</button>'+
-        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">🎤 הדרכה</button>'+
+        '<button id="music-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">' + icon('music') + ' מוסיקה</button>'+
+        '<button id="voice-mute-btn" style="flex:1;padding:8px;border-radius:9px;background:rgba(28,21,8,.8);border:1px solid rgba(184,134,11,.3);color:var(--sprout);font-size:14px;cursor:pointer;font-family:inherit">' + icon('mic') + ' הדרכה</button>'+
         '</div>';
       modal.appendChild(ctrl);
       var vs=document.getElementById('voice-select');
