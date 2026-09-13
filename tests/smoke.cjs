@@ -946,6 +946,130 @@ async function main() {
   })
 
   // ═══ 4b. No browser-side API key ═══════════════════════════════════════════
+  section('Phase 5 — one assistant (shared context, daily briefing, task triage)')
+  {
+    const MOCK5 = 'http://127.0.0.1:1/mock5'
+    const calls = []
+    await context.route(MOCK5 + '/**', route => {
+      const req = route.request(); const p = req.url().slice(MOCK5.length)
+      const reply = (obj, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Methods': 'GET,PUT,POST,OPTIONS' }, body: JSON.stringify(obj) })
+      if (req.method() === 'OPTIONS') return reply({})
+      if (p === '/api/claude') { let body = null; try { body = req.postDataJSON() } catch (e) {} calls.push(body); return setTimeout(() => reply({ content: [{ type: 'text', text: 'תדריך לדוגמה: קודם Claveria Well, אחר כך NIA.' }] }), 300) }
+      if (p === '/api/state' && req.method() === 'GET') return reply({ data: null, updated_at: null })
+      if (p === '/api/state') return reply({ ok: true })
+      if (p === '/api/insights') return reply({ items: [] })
+      if (p === '/api/log') return reply({ ok: true })
+      return reply({ error: 'not found' }, 404)
+    })
+    const today = todayPlus(0)
+    const seed5 = seededState(); seed5.moods = seed5.moods.slice().reverse()   // today's mood last, so getCurrentMood() sees it active from boot
+    await page.goto(BASE, { waitUntil: 'load' })
+    await page.evaluate(([s, m]) => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_server_url', m); localStorage.setItem('fieldy_passcode', 'pw') }, [seed5, MOCK5])
+    resetLogs(); await page.goto(BASE + '?p5=1', { waitUntil: 'load' })
+    await check('assistantContext() carries today\'s mood, focus, stuck sites and the weekly leadership theme', async () => {
+      const r = await page.evaluate(() => ({ ctx: assistantContext(), theme: getWeeklyFocus().theme, focus: state.focus }))
+      assert(/מוצף/.test(r.ctx), 'mood missing: ' + r.ctx)
+      assert(r.ctx.indexOf(r.focus) !== -1, 'focus missing')
+      assert(/Claveria Well \(7 ימים, Lock Rotor A08\)/.test(r.ctx), 'stuck site missing: ' + r.ctx)
+      assert(r.ctx.indexOf(r.theme) !== -1, 'weekly theme missing')
+      assert(/פחות להתפרץ בפגישה/.test(r.ctx), 'today\'s leadership "improve" missing')
+      assert(!/Nambaran/.test(r.ctx), 'a non-stuck site leaked into the stuck list')
+    })
+    await check('the daily briefing is generated once at boot, with the shared context, and cached in state for today', async () => {
+      await page.waitForFunction(t => state.briefing && state.briefing.date === t && state.briefing.text, today, { timeout: 5000 })
+      const brief = calls.filter(c => c && /תדריך/.test(c.messages[0].content))
+      assert(brief.length === 1, 'expected exactly one briefing call, got ' + brief.length + ' (all: ' + calls.length + ')')
+      assert(/Claveria Well/.test(brief[0].system) && /מוצף/.test(brief[0].system), 'briefing system prompt lacks the shared context: ' + brief[0].system)
+      assert(/Claveria Well — תקוע 7 ימים/.test(brief[0].messages[0].content), 'facts not in the prompt: ' + brief[0].messages[0].content)
+      const r = await page.evaluate(() => ({ text: state.briefing.text, saved: JSON.parse(localStorage.getItem('fieldy_v2')).briefing }))
+      assert(/Claveria/.test(r.text) && r.saved && r.saved.date === today, JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('home shows the briefing panel: focus, priority sites (stuck first), weekly theme, and the cached AI text', async () => {
+      await page.evaluate(() => navigateTo('home'))
+      const r = await page.evaluate(() => { const el = document.getElementById('daily-briefing'); return { has: !!el, txt: el ? el.textContent : '', ai: (document.getElementById('briefing-text') || {}).textContent || '', firstSite: el ? (el.querySelector('span[style*="font-weight:600"]') || {}).textContent : '', theme: getWeeklyFocus().theme, focus: state.focus, refresh: !!document.getElementById('briefing-refresh-btn') } })
+      assert(r.has, 'no #daily-briefing on home')
+      assert(r.txt.indexOf(r.focus) !== -1 && /תקוע 7 ימים/.test(r.txt) && r.txt.indexOf(r.theme) !== -1, 'panel facts incomplete: ' + r.txt)
+      assert(r.firstSite === 'Claveria Well', 'stuck site should come first, got: ' + r.firstSite)
+      assert(/תדריך לדוגמה/.test(r.ai) && r.refresh, 'cached AI text / refresh button missing')
+    })
+    await check('a reload the same day does NOT call the AI again — the cached briefing is shown', async () => {
+      const before = calls.length
+      await page.goto(BASE + '?p5=2', { waitUntil: 'load' }); await page.waitForTimeout(900)
+      await page.evaluate(() => navigateTo('home')); await page.waitForTimeout(100)
+      const r = await page.evaluate(() => ({ ai: (document.getElementById('briefing-text') || {}).textContent || '', skel: document.querySelectorAll('#daily-briefing .skel-line').length }))
+      assert(calls.length === before, 'briefing was re-fetched on reload (' + (calls.length - before) + ' extra calls)')
+      assert(/תדריך לדוגמה/.test(r.ai) && r.skel === 0, 'cached briefing not shown: ' + JSON.stringify(r))
+    })
+    await check('"רענן" regenerates on demand (one call), showing a skeleton meanwhile', async () => {
+      const before = calls.length
+      await page.click('#briefing-refresh-btn'); await page.waitForTimeout(60)
+      const during = await page.evaluate(() => document.querySelectorAll('#daily-briefing .skel-line').length)
+      await page.waitForFunction(() => document.getElementById('briefing-text'), null, { timeout: 5000 })
+      assert(during >= 2, 'no skeleton while regenerating')
+      assert(calls.length === before + 1, 'expected one extra call, got ' + (calls.length - before))
+    })
+    await check('Ask Fieldy, the action drafter and the pattern analyser all send the same shared context as their system prompt', async () => {
+      const before = calls.length
+      await page.fill('#ask-fieldy-input', 'מה קודם?'); await page.evaluate(() => askFieldy())
+      await page.waitForFunction(() => /Claveria/.test(document.getElementById('ask-fieldy-answer').textContent), null, { timeout: 5000 })
+      await page.evaluate(() => { navigateTo('action'); actionCtx = { text: 'x', assignee: '' }; renderAction(); doAction('email') })
+      await page.waitForFunction(() => document.getElementById('action-result-container').style.display === 'block', null, { timeout: 5000 })
+      await page.evaluate(() => analyzePersonalPatterns(true))
+      await page.waitForFunction(n => window.__p5 = null || true, null, { timeout: 100 }).catch(() => {})
+      await page.waitForTimeout(700)
+      const recent = calls.slice(before)
+      assert(recent.length === 3, 'expected 3 calls, got ' + recent.length)
+      recent.forEach((c, i) => assert(c.system && /Claveria Well \(7 ימים/.test(c.system) && /מוצף/.test(c.system) && c.system.indexOf('מוקד המנהיגות השבועי') !== -1, 'call ' + i + ' lacks shared context: ' + (c.system || '').slice(0, 200)))
+      assert(/אתרים פתוחים/.test(recent[0].messages[0].content), 'Ask Fieldy lost its site/task listing')
+      assert(/professional email/.test(recent[1].messages[0].content), 'action prompt changed')
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('triage: two open tasks for the same site in different buckets → one "batch" suggestion; nothing for the seeded state itself', async () => {
+      await page.evaluate(() => { taskContextFilter = 'all'; navigateTo('tasks') })
+      assert((await page.evaluate(() => document.querySelectorAll('.triage-card').length)) === 0, 'seeded state should not produce a suggestion')
+      await page.evaluate(() => setState({ tasks: { ...state.tasks, later: [...state.tasks.later, { id: 'l9', text: 'לצלם את לוח הבקרה בקלוריה', site: 'Claveria Well', assignee: 'uri', color: 'green', time: '', date: '', context: 'site', note: null, done: false }] } }))
+      const r = await page.evaluate(() => { const c = document.querySelector('.triage-card'); return { n: document.querySelectorAll('.triage-card').length, key: c && c.dataset.key, txt: c ? c.textContent : '' } })
+      assert(r.n === 1 && r.key === 'site:Claveria Well', JSON.stringify(r))
+      assert(/2 משימות ב-Claveria Well/.test(r.txt) && /עכשיו \/ אחר כך/.test(r.txt) && /קבץ לעכשיו/.test(r.txt), r.txt)
+    })
+    await check('"קבץ" moves them side by side into the most urgent bucket, offers undo, and the suggestion disappears', async () => {
+      await page.click('.triage-card .triage-batch'); await page.waitForTimeout(100)
+      const r = await page.evaluate(() => ({ now: state.tasks.now.map(t => t.id), later: state.tasks.later.map(t => t.id), cards: document.querySelectorAll('.triage-card').length, undo: !!document.getElementById('undo-toast'), bucket: taskBucket }))
+      assert(r.now.join(',') === 'n1,l9,n2', 'batched order wrong: ' + r.now.join(','))
+      assert(r.later.indexOf('l9') === -1 && r.cards === 0 && r.undo && r.bucket === 'now', JSON.stringify(r))
+      await page.evaluate(() => undoLast()); await page.waitForTimeout(50)
+      const u = await page.evaluate(() => ({ now: state.tasks.now.map(t => t.id), later: state.tasks.later.map(t => t.id), cards: document.querySelectorAll('.triage-card').length }))
+      assert(u.now.join(',') === 'n1,n2' && u.later.indexOf('l9') !== -1 && u.cards === 1, 'undo did not restore: ' + JSON.stringify(u))
+    })
+    await check('"לא עכשיו" hides that suggestion, survives a reload, and comes back only when the group changes', async () => {
+      await page.click('.triage-card .triage-dismiss'); await page.waitForTimeout(50)
+      let r = await page.evaluate(() => ({ cards: document.querySelectorAll('.triage-card').length, d: state.triageDismissed }))
+      assert(r.cards === 0 && r.d && r.d['site:Claveria Well'] === 'l9,n1', JSON.stringify(r))
+      await page.goto(BASE + '?p5=3', { waitUntil: 'load' }); await page.waitForTimeout(300)
+      await page.evaluate(() => { taskContextFilter = 'all'; navigateTo('tasks') })
+      assert((await page.evaluate(() => document.querySelectorAll('.triage-card').length)) === 0, 'dismissal did not persist')
+      await page.evaluate(() => setState({ tasks: { ...state.tasks, today: [...state.tasks.today, { id: 'd9', text: 'להביא חלקים לקלוריה', site: 'Claveria Well', assignee: 'uri', color: 'orange', time: '', date: '', context: 'site', note: null, done: false }] } }))
+      r = await page.evaluate(() => ({ cards: document.querySelectorAll('.triage-card').length, txt: (document.querySelector('.triage-card') || {}).textContent || '' }))
+      assert(r.cards === 1 && /3 משימות ב-Claveria Well/.test(r.txt), 'a changed group should re-suggest: ' + JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('validateState() accepts the new sections and rejects wrong shapes', async () => {
+      const r = await page.evaluate(() => { const base = JSON.parse(localStorage.getItem('fieldy_v2')); return { ok: validateState(base).length, badBrief: validateState({ ...base, briefing: 'x' }).length, badDismiss: validateState({ ...base, triageDismissed: [] }).length, missing: validateState((() => { const c = { ...base }; delete c.briefing; delete c.triageDismissed; return c })()).length } })
+      assert(r.ok === 0 && r.badBrief === 1 && r.badDismiss === 1 && r.missing === 0, JSON.stringify(r))
+    })
+    await context.unroute(MOCK5 + '/**')
+    await check('without a server the briefing panel still shows the local facts, with no AI text and no call', async () => {
+      await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, seededState())
+      const before = calls.length
+      resetLogs(); await page.goto(BASE + '?p5=4', { waitUntil: 'load' }); await page.waitForTimeout(300)
+      const r = await page.evaluate(() => { const el = document.getElementById('daily-briefing'); return { has: !!el, ai: !!document.getElementById('briefing-text'), refresh: !!document.getElementById('briefing-refresh-btn'), hint: el && /חבר שרת/.test(el.textContent), facts: el && /Claveria Well/.test(el.textContent) } })
+      assert(r.has && !r.ai && !r.refresh && r.hint && r.facts, JSON.stringify(r))
+      assert(calls.length === before, 'AI was called without a server')
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+  }
+
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {
     await page.goto(BASE, { waitUntil: 'load' })
