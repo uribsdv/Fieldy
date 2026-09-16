@@ -467,7 +467,6 @@ const ICONS = {
   'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
   'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'clipboard': '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
-  'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
   'calendar': '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
   'trash': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
   'trash-2': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
@@ -705,7 +704,7 @@ function validateState(s) {
   ;['moods','brainDumps','quotes','leadershipLog','pettyCash'].forEach(function(k){
     if(s[k] != null && !Array.isArray(s[k])) problems.push(k + ' קיים אך אינו רשימה')
   })
-  ;['personal','personalInsights','notifyPrefs','briefing','triageDismissed'].forEach(function(k){
+  ;['personal','personalInsights','notifyPrefs'].forEach(function(k){
     if(s[k] != null && !isObj(s[k])) problems.push(k + ' קיים אך אינו אובייקט')
   })
   if(s.focus != null && typeof s.focus !== 'string') problems.push('focus אינו טקסט')
@@ -726,8 +725,6 @@ function applyStateDefaults(s) {
   if(!s.quotes || !s.quotes.length) s.quotes = [{text:"Who's living your life?", addedAt: Date.now()}]
   if(!s.pettyCash) s.pettyCash = []
   if(!s.leadershipLog) s.leadershipLog = []
-  if(!s.briefing) s.briefing = {date:null, text:'', generatedAt:null}
-  if(!s.triageDismissed) s.triageDismissed = {}
   return s
 }
 // Reads the saved state from localStorage. Returns the parsed object, or
@@ -1020,7 +1017,7 @@ async function analyzePersonalPatterns(manual) {
       'יומן מצבי-רוח:\n' + (moodLines||'(אין)') + '\n\n' +
       'יומן פיתוח מנהיגות יומי:\n' + (leadLines||'(אין)') + '\n\n' +
       'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, מה שנשמע כמו דברים שעוזרים לו או מכבידים עליו, ובנוסף — דפוסים ביומן המנהיגות: אילו נושאי "לשיפור" חוזרים על עצמם (אזורי צמיחה אמיתיים), והאם רואים התקדמות/נסיגה לאורך זמן בהשוואה לתקופה הקודמת. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), עד 6 משפטים קצרים, קונקרטי ולא כללי, כולל לפחות משפט אחד על התקדמות המנהיגות אם יש מספיק רשומות. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
-    const result = await callClaude([{role:'user', content: prompt}], withContext(null))
+    const result = await callClaude([{role:'user', content: prompt}])
     setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length}})
     if(currentScreen==='home') renderHome()
   } catch(e) {
@@ -1355,7 +1352,7 @@ function renderTalkTab() {
 function talkRequest(messages) {
   talkBusy = true
   renderTao()
-  callClaude(messages, withContext(TALK_SYSTEM_PROMPT))
+  callClaude(messages, TALK_SYSTEM_PROMPT)
     .then(function(reply){ talkMessages.push({role:'assistant', content: reply.trim() || '...'}) })
     .catch(function(e){ talkMessages.push({role:'assistant', content: 'שגיאה: ' + e.message}) })
     .then(function(){ talkBusy = false; renderTao() })
@@ -1908,158 +1905,6 @@ function rightNowHtml(mood) {
     ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
 }
 
-// ── ONE ASSISTANT (Phase 5) ──────────────────────
-// Every AI feature used to build its own little world: Ask Fieldy knew the
-// sites, the status-change drafter knew one site, the insights analyser knew
-// the moods — and none of them knew what the others did. assistantContext()
-// is the one shared picture of "Uri right now" (today's mood, focus, stuck
-// sites, this week's leadership theme) that every call gets, so answers are
-// personal instead of generic. withContext() glues it onto a system prompt.
-function priorityStuckSites() {
-  return state.sites.filter(s => s.stuckSince && s.status !== 'resolved')
-    .sort((a,b) => daysStuck(b) - daysStuck(a)).slice(0, 5)
-}
-function assistantContext() {
-  const today = getToday(), cur = getCurrentMood(), wf = getWeeklyFocus(), stuck = priorityStuckSites(), lead = getTodayLeadershipEntry()
-  const lines = ['הקשר על אורי כרגע (נלקח אוטומטית מהאפליקציה שלו). תתחשב בו כשזה רלוונטי לבקשה, ואל תצטט אותו בחזרה ואל תזכיר אותו כשהוא לא רלוונטי:', 'תאריך היום: ' + today]
-  if(cur && MOOD_LIB[cur.mood]) lines.push('מצב רוח שסימן היום: ' + MOOD_LIB[cur.mood].label + (MOOD_LIB[cur.mood].taskLimit ? ' — עדיף לו תשובה קצרה עם צעד אחד ברור' : ''))
-  if(state.focus && (!state.focusDate || state.focusDate === today)) lines.push('המוקד שלו להיום: ' + state.focus)
-  if(stuck.length) lines.push('אתרים תקועים: ' + stuck.map(s => s.name + ' (' + daysStuck(s) + ' ימים' + (s.issue ? ', ' + s.issue : '') + ')').join('; '))
-  lines.push('מוקד המנהיגות השבועי שלו: "' + wf.theme + '" (' + wf.book + ') — ' + wf.text)
-  if(lead && lead.improve) lines.push('מה שכתב היום שהוא רוצה לשפר כמנהיג: ' + lead.improve)
-  return lines.join('\n')
-}
-function withContext(system) { return (system ? system + '\n\n' : '') + assistantContext() }
-
-// Daily briefing: the facts are computed locally every render (so the panel
-// is useful even offline); the short AI narrative is generated ONCE per day
-// and cached in state.briefing — never re-fetched on every load.
-let briefingBusy = false, briefingError = '', briefingAutoTriedDate = null
-function briefingFacts() {
-  const today = getToday(), sites = [], seen = {}
-  const add = (name, why, stuck) => { if(!name || seen[name]) return; seen[name] = 1; sites.push({name, why, stuck}) }
-  priorityStuckSites().forEach(s => add(s.name, 'תקוע ' + daysStuck(s) + ' ימים' + (s.issue ? ' · ' + s.issue : ''), true))
-  getEventsForDate(today).forEach(e => { if(e.site) add(e.site, (e.time ? e.time + ' · ' : '') + e.title, false) })
-  ;['now','today'].forEach(b => (state.tasks[b]||[]).forEach(t => { if(!t.done) add(t.site, t.text, false) }))
-  const focus = (state.focus && (!state.focusDate || state.focusDate === today)) ? state.focus : ''
-  return {focus, sites: sites.slice(0, 4), lead: getWeeklyFocus(), mood: getCurrentMood()}
-}
-function briefingHasContent(f) { return !!(f.focus || f.sites.length || state.tasks.now.some(t=>!t.done) || state.tasks.today.some(t=>!t.done)) }
-async function generateDailyBriefing() {
-  const today = getToday(), f = briefingFacts()
-  briefingBusy = true; briefingError = ''
-  if(currentScreen === 'home') renderHome()
-  try {
-    const facts = 'המוקד של היום: ' + (f.focus || '(לא הוגדר)') +
-      '\nאתרים לתשומת לב היום:\n' + (f.sites.map(s => '- ' + s.name + ' — ' + s.why).join('\n') || '(אין)') +
-      '\nמשימות דחופות פתוחות: ' + (state.tasks.now.filter(t=>!t.done).map(t=>t.text).join(' | ') || '(אין)') +
-      '\nמשימות להיום: ' + (state.tasks.today.filter(t=>!t.done).slice(0,8).map(t=>t.text).join(' | ') || '(אין)')
-    const prompt = 'זה תדריך הבוקר של אורי. כתוב בעברית, ישירות אליו, 3-4 משפטים קצרים בלבד ובלי שום פתיח: (1) הדבר האחד הכי חשוב היום, (2) לאילו אתרים לתת עדיפות ולמה — רק מתוך הרשימה למטה ובשמות המדויקים, (3) הצעה אחת קונקרטית איך ליישם היום, בעבודה בפועל, את מוקד המנהיגות השבועי שלו. בלי רשימות, בלי אימוג\'י, בלי "בוקר טוב".\n\n' + facts
-    const text = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
-    state.briefing = {date: today, text, generatedAt: Date.now()}
-    save()   // direct save, not setState: a finished briefing must not re-render whatever screen Uri is on now
-  } catch(e) {
-    briefingError = e.message || 'שגיאה'
-  }
-  briefingBusy = false
-  if(currentScreen === 'home') renderHome()
-}
-// Idempotent: called at boot and on every home render; only ever spends one
-// API call per day, and never retries a failure on its own.
-function ensureDailyBriefing() {
-  const today = getToday()
-  if(!serverConfigured() || briefingBusy) return
-  if(state.briefing && state.briefing.date === today && state.briefing.text) return
-  if(briefingAutoTriedDate === today) return
-  if(!briefingHasContent(briefingFacts())) return
-  briefingAutoTriedDate = today
-  generateDailyBriefing()
-}
-function refreshBriefing() { if(briefingBusy) return; haptic('light'); generateDailyBriefing() }
-function dailyBriefingHtml() {
-  const f = briefingFacts(), today = getToday()
-  if(!briefingHasContent(f)) return ''
-  const cached = (state.briefing && state.briefing.date === today && state.briefing.text) ? state.briefing.text : ''
-  const stale = !cached && state.briefing && state.briefing.text && state.briefing.date && state.briefing.date !== today
-  return `<div id="daily-briefing" class="card" style="border:1px solid var(--accent-line);border-right:3px solid var(--gold);margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span class="panel-label" style="margin:0">${icon('sun')} תדריך הבוקר</span>
-        ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? 'כותב…' : (cached ? 'רענן' : 'צור תדריך')}</button>` : ''}
-      </div>
-      ${f.focus ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${iconBadge('target', 'var(--gold)')}<div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);line-height:1.4">${esc(f.focus)}</div></div>` : ''}
-      ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
-      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
-      ${briefingBusy ? skeletonHtml(3, 'מכין את התדריך של היום…') :
-        cached ? `<div id="briefing-text" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>` :
-        briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} לא הצלחתי להכין תדריך: ${esc(briefingError)}</div>` :
-        (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.</div>` : '')}
-      ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">התדריך האחרון היה מ-${esc(state.briefing.date)}</div>` : ''}
-    </div>`
-}
-
-// Light task triage: open tasks that share a site (or an explicit future date)
-// but are scattered across buckets get one suggestion — "batch them?" — which
-// moves them next to each other in the most urgent of their buckets. Purely
-// rule-based, no AI call; a dismissed suggestion stays dismissed until that
-// group of tasks changes.
-const BUCKET_LABEL = {now:'עכשיו', today:'היום', later:'אחר כך'}
-function triageSuggestions() {
-  const today = getToday(), open = [], groups = {}
-  ;['now','today','later'].forEach(b => (state.tasks[b]||[]).forEach((t,i) => { if(!t.done) open.push({t, b, i}) }))
-  open.forEach(o => {
-    if(o.t.site) (groups['site:' + o.t.site] = groups['site:' + o.t.site] || []).push(o)
-    if(o.t.date && o.t.date !== today) (groups['date:' + o.t.date] = groups['date:' + o.t.date] || []).push(o)
-  })
-  const dismissed = state.triageDismissed || {}
-  return Object.keys(groups).map(key => {
-    const items = groups[key]
-    if(items.length < 2) return null
-    const signature = items.map(o => o.t.id).sort().join(',')
-    if(dismissed[key] === signature) return null
-    const buckets = [...new Set(items.map(o => o.b))]
-    // already side by side in one bucket → nothing to suggest
-    if(buckets.length === 1) { const idx = items.map(o => o.i).sort((a,b)=>a-b); if(idx[idx.length-1] - idx[0] === idx.length - 1) return null }
-    const target = ['now','today','later'].find(b => buckets.includes(b))
-    const what = key.startsWith('site:') ? 'ב-' + key.slice(5) : 'לתאריך ' + key.slice(5)
-    return {key, signature, items, target, label: items.length + ' משימות ' + what + (buckets.length > 1 ? ' מפוזרות בין ' + buckets.map(b => BUCKET_LABEL[b]).join(' / ') : ' לא רצופות')}
-  }).filter(Boolean).slice(0, 2)
-}
-function batchTasks(key) {
-  const sug = triageSuggestions().find(s => s.key === key)
-  if(!sug) return
-  const ids = new Set(sug.items.map(o => o.t.id))
-  const ordered = sug.items.map(o => o.t)   // now → today → later, each in list order
-  const prev = state.tasks
-  const stripped = {now: prev.now.filter(t=>!ids.has(t.id)), today: prev.today.filter(t=>!ids.has(t.id)), later: prev.later.filter(t=>!ids.has(t.id))}
-  const firstInTarget = sug.items.find(o => o.b === sug.target)
-  const at = firstInTarget ? prev[sug.target].slice(0, firstInTarget.i).filter(t=>!ids.has(t.id)).length : stripped[sug.target].length
-  stripped[sug.target] = stripped[sug.target].slice(0, at).concat(ordered, stripped[sug.target].slice(at))
-  haptic('light')
-  taskBucket = sug.target
-  setState({tasks: stripped})
-  offerUndo('המשימות קובצו ל"' + BUCKET_LABEL[sug.target] + '"', function(){ setState({tasks: prev}) })
-}
-function dismissTriage(key) {
-  const sug = triageSuggestions().find(s => s.key === key)
-  if(!sug) return
-  setState({triageDismissed: {...(state.triageDismissed||{}), [key]: sug.signature}})
-}
-function triageHtml() {
-  const sugs = triageSuggestions()
-  if(!sugs.length) return ''
-  return sugs.map(s => `<div class="triage-card card" data-key="${esc(s.key)}" style="border:1px solid var(--blue-line);border-right:3px solid var(--blue);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      ${iconBadge('layers', 'var(--blue)')}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:var(--fs-md);font-weight:600;color:var(--t1);line-height:1.4">${esc(s.label)}</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${s.items.map(o => esc(o.t.text)).join(' · ')}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button class="triage-batch" onclick="batchTasks(${jsArg(s.key)})" style="background:var(--blue);color:#fff;border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--fs-sm);font-weight:700">${icon('layers')} קבץ ל${BUCKET_LABEL[s.target]}</button>
-        <button class="triage-dismiss" onclick="dismissTriage(${jsArg(s.key)})" style="background:var(--surface-2);color:var(--t2);border-radius:var(--radius-sm);padding:5px 10px;font-size:var(--fs-sm)">לא עכשיו</button>
-      </div>
-    </div>`).join('')
-}
-
 // ── HOME ─────────────────────────────────────────
 // "Done today?" toggle button for one of the personal day-logs.
 function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
@@ -2079,7 +1924,6 @@ function renderHome() {
   const pct = total ? Math.round((done/total)*100) : 0
   const moodPatterns = getMoodPatterns()
 
-  ensureDailyBriefing()
   el.innerHTML = `
     <div style="background:var(--surface-3);padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
@@ -2102,7 +1946,6 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      ${dailyBriefingHtml()}
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
@@ -2324,7 +2167,6 @@ function renderTasks() {
     </div>
     <div style="padding:12px 16px">
       ${mood && moodLimit(mood) ? moodLimitBarHtml(mood, hiddenByMood, 'margin-bottom:10px') : ''}
-      ${taskContextFilter==='all' ? triageHtml() : ''}
       ${tasks.length===0?emptyHtml(icon('zap'), taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
@@ -2733,9 +2575,22 @@ function parseLatLon(str) {
   const s = String(str).trim()
   const dec = s.match(/^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/)
   if(dec) { const lat = +dec[1], lon = +dec[2]; return (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) ? {lat, lon} : null }
-  const dms = /(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*([NSEW])/gi
-  const parts = []; let d
-  while((d = dms.exec(s))) parts.push({v: (+d[1]) + (+d[2]) / 60 + ((+d[3]) || 0) / 3600, h: d[4].toUpperCase()})
+  function collect(re, hemFirst) {
+    re.lastIndex = 0
+    const parts = []; let d
+    while((d = re.exec(s))) {
+      const hem = hemFirst ? d[1] : d[4]
+      const deg = hemFirst ? d[2] : d[1]
+      const min = hemFirst ? d[3] : d[2]
+      const sec = hemFirst ? d[4] : d[3]
+      parts.push({v: (+deg) + (+min) / 60 + ((+sec) || 0) / 3600, h: hem.toUpperCase()})
+    }
+    return parts
+  }
+  // Try "hemisphere after the numbers" (16°58'34.49"N) first, then fall back
+  // to "hemisphere before the numbers" (N 16°58'34.49") — Uri's actual format.
+  let parts = collect(/(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*([NSEW])/gi, false)
+  if(parts.length < 2) parts = collect(/([NSEW])\s*(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*/gi, true)
   if(parts.length < 2) return null
   let lat = null, lon = null
   parts.forEach(pt => { if(pt.h === 'N' || pt.h === 'S') lat = pt.h === 'S' ? -pt.v : pt.v; else lon = pt.h === 'W' ? -pt.v : pt.v })
@@ -2920,7 +2775,7 @@ function draftStatusMessage(kind) {
     ? 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח עדכון קצר וברור לתא הערות (update) בפריט Monday.com על אתר עבודה. כתוב באנגלית מקצועית, 2-4 משפטים, ישר לעניין, כולל שם האתר, הסטטוס החדש, ומה קרה בפועל. בלי פתיח מיותר, רק את טקסט העדכון עצמו.'
     : 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח מייל עדכון קצר ומקצועי (באנגלית) על שינוי סטטוס באתר עבודה, מוכן לשליחה. כלול שורת נושא (Subject) ואז גוף מייל קצר - 3-5 משפטים, טון ענייני ומקצועי. פורמט: שורה ראשונה "Subject: ..." ואז שורה ריקה ואז גוף המייל.'
   const userMsg = 'אתר: ' + name + (site&&site.province?(' ('+site.province+')'):'') + '\nסטטוס חדש: ' + STATUS_LABEL[status] + (site&&site.contractor?('\nקבלן: '+site.contractor):'') + '\nתיאור: ' + (desc || 'אין תיאור נוסף')
-  callClaude([{role:'user', content: userMsg}], withContext(sys)).then(function(reply){
+  callClaude([{role:'user', content: userMsg}], sys).then(function(reply){
     const text = reply.trim()
     window.__scDraftText = text
     resultEl.innerHTML = `<div style="background:var(--surface-3);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px;margin-bottom:10px">
@@ -3130,7 +2985,7 @@ async function doAction(type) {
     monday:`Write a Monday.com task update in English for: ${actionCtx?.text}. Format: Status / Issue / Next Action / Owner.`
   }
   try {
-    const result = await callClaude([{role:'user',content:prompts[type]}], withContext(null))
+    const result = await callClaude([{role:'user',content:prompts[type]}])
     document.getElementById('action-loading').style.display='none'
     document.getElementById('action-result').textContent=result
     document.getElementById('action-result-container').style.display='block'
@@ -3352,13 +3207,15 @@ async function askFieldy() {
     const taskLines = [...state.tasks.now,...state.tasks.today].filter(t=>!t.done).slice(0,25)
       .map(t=>'- ['+(t.color||'')+'] '+t.text+(t.site?(' (אתר: '+t.site+')'):'')).join('\n')
     const peopleLines = state.people.map(p=>'- '+p.name+' ('+(p.role||'')+(p.company?', '+p.company:'')+')'+(p.pending?(' — ממתין: '+p.pending):'')).join('\n')
-    const context = 'אתרים פתוחים:\n'+(siteLines||'(אין)') +
+    const curMood = getCurrentMood()
+    const context = 'תאריך היום: '+getToday()+(curMood&&MOOD_LIB[curMood.mood]?('\nמצב רוח נוכחי: '+MOOD_LIB[curMood.mood].label):'') +
+      '\n\nאתרים פתוחים:\n'+(siteLines||'(אין)') +
       '\n\nמשימות פתוחות:\n'+(taskLines||'(אין)') +
       '\n\nאנשי קשר:\n'+(peopleLines||'(אין)')
     const prompt = 'אתה עוזר תכנון שטח לאורי, מנהל אזורי (Region II, Cagayan Valley, פיליפינים, מתקיני SPIS). להלן המצב הנוכחי שלו:\n\n' + context +
       '\n\nהשאלה של אורי: ' + question +
       '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
-    const answer = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
+    const answer = (await callClaude([{role:'user', content: prompt}])).trim()
     answerEl.style.color = 'var(--t1)'
     answerEl.textContent = answer || 'לא התקבלה תשובה.'
     answerEl.style.display = 'block'
@@ -4358,7 +4215,6 @@ if(serverConfigured()) {
     refreshBadges()
     renderCurrentScreen()
   }).catch(function(e){ console.warn('boot: could not use server data, continuing with local data:', e && e.message ? e.message : e) })
-    .then(function(){ ensureDailyBriefing() })
   fetchInsights()
 }
 setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
