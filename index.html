@@ -2800,8 +2800,9 @@ function showAddSite(name) {
   const s = name ? state.sites.find(x=>x.name===name) : null
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
-        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}" ${s?'':'onblur="autofillFromDirectory()"'}/>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}" ${s?'':'oninput="clearTimeout(window.__dirAutofillT);window.__dirAutofillT=setTimeout(autofillFromDirectory,500)" onblur="autofillFromDirectory()"'}/>
         <div id="directory-match-hint" style="display:none;font-size:var(--fs-sm);color:var(--green);margin:-6px 0 10px"></div>
+        ${s&&(state.siteDirectory||[]).length?`<button onclick="matchSiteToDirectory(${jsArg(s.name)})" style="width:100%;background:var(--surface-2);border-radius:var(--radius-md);padding:9px;margin-bottom:12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('search')} התאם לספריית Monday</button>`:''}
         ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
         <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?esc(s.issue):''}"/>
@@ -3187,6 +3188,75 @@ function importSiteDirectory(file) {
     alert('נטענו ' + imported.length + ' אתרים לספרייה ✓ (סה"כ בספרייה: ' + Object.values(byKey).length + ')')
   }
   reader.readAsText(file)
+}
+function matchSiteToDirectory(siteName) {
+  const matches = findInSiteDirectory(siteName)
+  if(!matches.length) { alert('לא נמצאה התאמה בספריית Monday לשם הזה.'); return }
+  if(matches.length === 1) { showDirectoryDiffModal(siteName, matches[0]); return }
+  showDirectoryPickerModal(siteName, matches)
+}
+function showDirectoryPickerModal(siteName, matches) {
+  window.__dirPickerSite = siteName
+  window.__dirPickerMatches = matches
+  openModal(`
+    <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${icon('alert-triangle')} כמה אתרים דומים</div>
+    <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:14px">"${esc(siteName)}" תואם ${matches.length} רשומות שונות בספרייה — הן כנראה אתרים שונים בפועל (קואורדינטות שונות). בחר את הנכונה:</div>
+    ${matches.map(function(m, i){
+      return `<button onclick="showDirectoryDiffModal(${jsArg(siteName)}, window.__dirPickerMatches[${i}])" style="width:100%;text-align:right;background:var(--surface-2);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px;border:1px solid var(--line)">
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${esc(m.province||'')}${m.municipality?(', '+esc(m.municipality)):''} · שנה: ${esc(m.year||'-')} · ${esc(m.contractor||'-')}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px;direction:ltr;text-align:left">${esc(m.location||'—')}</div>
+      </button>`
+    }).join('')}
+    <button class="btn-secondary" style="width:100%;margin-top:6px" onclick="showAddSite(${jsArg(siteName)})">ביטול</button>
+  `)
+}
+function showDirectoryDiffModal(siteName, match) {
+  const site = state.sites.find(x => x.name === siteName)
+  if(!site) return
+  const fields = [
+    ['province', 'מחוז'],
+    ['location', 'מיקום / קואורדינטות'],
+    ['contractor', 'קבלן'],
+    ['remo', 'מספר Remo'],
+    ['year', 'שנת חוזה'],
+  ]
+  const rows = fields.map(function(f){
+    const key = f[0], label = f[1]
+    const current = site[key] || ''
+    const proposed = key === 'year' ? String(match.year || '') : (match[key] || '')
+    if(!proposed || String(proposed) === String(current)) return ''
+    const differs = current && String(current) !== String(proposed)
+    return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer">
+      <input type="checkbox" class="dir-diff-check" data-field="${key}" data-value="${esc(proposed)}" ${differs ? '' : 'checked'} style="width:18px;height:18px;accent-color:var(--gold);margin-top:2px;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:var(--fs-sm);color:var(--t2)">${label}</div>
+        ${differs ? `<div style="font-size:var(--fs-base);color:var(--red);text-decoration:line-through">${esc(current)}</div>` : ''}
+        <div style="font-size:var(--fs-base);color:var(--t1);font-weight:600">${esc(String(proposed))}</div>
+      </div>
+    </label>`
+  }).join('')
+  window.__dirDiffSite = siteName
+  openModal(`
+    <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${icon('search')} התאמה מהספרייה</div>
+    <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:4px">${esc(match.name)}</div>
+    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:14px">שנה בספרייה: ${esc(match.year||'-')} · סמן מה לעדכן. שדות שכבר שונים מסומנים באדום — בטל סימון אם אתה לא רוצה לדרוס אותם.</div>
+    ${rows || `<div style="text-align:center;color:var(--t3);font-size:var(--fs-base);padding:16px 0">אין הבדלים — האתר כבר תואם את הספרייה.</div>`}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-primary" style="flex:1" onclick="applyDirectoryDiff()">עדכן אתר</button>
+      <button class="btn-secondary" onclick="showAddSite(${jsArg(siteName)})">ביטול</button>
+    </div>
+  `)
+}
+function applyDirectoryDiff() {
+  const siteName = window.__dirDiffSite
+  const checks = document.querySelectorAll('.dir-diff-check:checked')
+  const patch = {}
+  checks.forEach(function(c){ patch[c.getAttribute('data-field')] = c.getAttribute('data-value') })
+  if(Object.keys(patch).length) {
+    setState({sites: state.sites.map(function(x){ return x.name === siteName ? Object.assign({}, x, patch) : x })})
+  }
+  showAddSite(siteName)
 }
 function findInSiteDirectory(name) {
   if(!name || !(state.siteDirectory || []).length) return []
