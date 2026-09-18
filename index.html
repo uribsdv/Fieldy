@@ -2942,9 +2942,85 @@ function confirmStatusChange() {
 }
 
 let editingSiteName = null
+var siteCasePhotos = []
+function siteCasePhotosHtml() {
+  return siteCasePhotos.map(function(p, i){
+    return `<div style="position:relative;display:inline-block;margin-left:8px;margin-bottom:8px">
+      <img src="${p}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--radius-md)"/>
+      <button onclick="removeSiteCasePhoto(${i})" style="position:absolute;top:-6px;left:-6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;line-height:1">${icon('x')}</button>
+    </div>`
+  }).join('')
+}
+function addSiteCasePhoto(input) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    siteCasePhotos.push(dataUrl)
+    const el = document.getElementById('site-case-photos')
+    if(el) el.innerHTML = siteCasePhotosHtml()
+  })
+}
+function removeSiteCasePhoto(i) {
+  siteCasePhotos.splice(i, 1)
+  const el = document.getElementById('site-case-photos')
+  if(el) el.innerHTML = siteCasePhotosHtml()
+}
+function siteSuggestionKey(s) { return (s.issue||'') + '|' + (s.caseDetail||'') + '|' + ((s.casePhotos||[]).length) }
+function renderSiteSuggestionBox(s) {
+  if(!s.issue && !s.caseDetail) return ''
+  const key = siteSuggestionKey(s)
+  if(s.aiSuggestion && s.aiSuggestionFor === key) {
+    return `<div class="card" style="background:var(--surface-2);padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:var(--fs-md);font-weight:700;color:var(--gold)">${icon('search')} הצעת Fieldy</span>
+        <button onclick="suggestSiteFix(${jsArg(s.name)}, true)" style="background:none;color:var(--t3);font-size:var(--fs-sm)">${icon('refresh')} רענן</button>
+      </div>
+      <div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(s.aiSuggestion)}</div>
+    </div>`
+  }
+  return `<div id="site-suggestion-box" class="card" style="background:var(--surface-2);padding:12px 14px;margin-bottom:14px;text-align:center">
+    <div style="font-size:var(--fs-md);color:var(--t3)">...טוען הצעה</div>
+  </div>`
+}
+async function suggestSiteFix(siteName, force) {
+  const s = state.sites.find(x=>x.name===siteName)
+  if(!s || (!s.issue && !s.caseDetail)) return
+  const key = siteSuggestionKey(s)
+  if(!force && s.aiSuggestion && s.aiSuggestionFor === key) return
+  const box = document.getElementById('site-suggestion-box')
+  if(box) box.innerHTML = `<div style="font-size:var(--fs-md);color:var(--t3)">...טוען הצעה</div>`
+  const sys = 'אתה עוזר טכני לאורי, מנהל אזורי SPIS בפיליפינים, לאבחון תקלות בשטח במערכות השקיה סולאריות. ' +
+    'התבסס קודם כל על מדריכי היצרן האמיתיים הבאים (VASCO Solar/Nastec, Caprari, Rovatti, SAER, ופאנלים סולאריים):\n\n' +
+    buildSpisKnowledgeContext() +
+    '\n\nאם התיאור לא מתאים לשום דבר ברשימה - השתמש בידע הנדסי כללי ותציין זאת. תן תשובה קצרה וממוקדת בעברית (3-5 שורות): הערכה של מה כנראה קורה, ומה לבדוק/לנסות קודם. אל תמציא קוד שגיאה שלא נאמר.'
+  const content = []
+  const text = 'אתר: ' + s.name + (s.province?(' ('+s.province+')'):'') + '\nבעיה: ' + (s.issue||'-') + (s.caseDetail?('\nתיאור מקרה: '+s.caseDetail):'')
+  content.push({type:'text', text})
+  ;(s.casePhotos||[]).forEach(function(p){
+    const parts = p.split(',')
+    const mediaType = (parts[0].match(/data:(.*?);/) || [,'image/jpeg'])[1]
+    content.push({type:'image', source:{type:'base64', media_type: mediaType, data: parts[1]}})
+  })
+  try {
+    const reply = await callClaude([{role:'user', content}], sys)
+    const trimmed = reply.trim()
+    setState({sites: state.sites.map(function(x){ return x.name===siteName ? Object.assign({}, x, {aiSuggestion: trimmed, aiSuggestionFor: key}) : x })})
+    const boxNow = document.getElementById('site-suggestion-box')
+    if(boxNow) {
+      boxNow.style.textAlign = 'left'
+      boxNow.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:var(--fs-md);font-weight:700;color:var(--gold)">${icon('search')} הצעת Fieldy</span>
+        <button onclick="suggestSiteFix(${jsArg(siteName)}, true)" style="background:none;color:var(--t3);font-size:var(--fs-sm)">${icon('refresh')} רענן</button>
+      </div>
+      <div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(trimmed)}</div>`
+    }
+  } catch(e) {
+    if(box) box.innerHTML = `<div style="font-size:var(--fs-md);color:var(--red)">✕ ${esc(e.message)}</div>`
+  }
+}
 function showAddSite(name) {
   editingSiteName = name || null
   const s = name ? state.sites.find(x=>x.name===name) : null
+  siteCasePhotos = (s && s.casePhotos) ? s.casePhotos.slice() : []
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
         <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}" ${s?'':'oninput="clearTimeout(window.__dirAutofillT);window.__dirAutofillT=setTimeout(autofillFromDirectory,500)" onblur="autofillFromDirectory()"'}/>
@@ -2954,6 +3030,12 @@ function showAddSite(name) {
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
         <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?esc(s.issue):''}"/>
         ${voiceRowHtml('add-site-issue')}
+        <label class="form-label">תיאור מקרה מפורט (רשות)</label>
+        <textarea id="add-site-case" placeholder="מה בדיוק קרה, מה כבר ניסית, מה אתה רואה בשטח..." style="width:100%;min-height:70px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px">${s?esc(s.caseDetail||''):''}</textarea>
+        <div id="site-case-photos">${siteCasePhotosHtml()}</div>
+        ${siteCasePhotos.length < 3 ? `<button onclick="document.getElementById('site-case-photo-input').click()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-md);font-weight:600;margin-bottom:12px">${icon('camera')} הוסף תמונה למקרה</button>` : ''}
+        <input id="site-case-photo-input" type="file" accept="image/*" style="display:none" onchange="addSiteCasePhoto(this)"/>
+        ${s ? renderSiteSuggestionBox(s) : ''}
         <label class="form-label">מיקום / קואורדינטות</label>
         <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?esc(s.location):''}"/>
         <div style="font-size:var(--fs-sm);color:var(--t3);margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
@@ -2983,6 +3065,10 @@ function showAddSite(name) {
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
         ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:var(--radius-md);padding:10px;color:var(--red);font-size:var(--fs-base)">${icon('trash')} מחק אתר</button>`:''}`)
+  if(s && (s.issue || s.caseDetail)) {
+    const key = siteSuggestionKey(s)
+    if(!(s.aiSuggestion && s.aiSuggestionFor === key)) suggestSiteFix(s.name)
+  }
 }
 
 function doAddSite() {
@@ -2992,6 +3078,8 @@ function doAddSite() {
     name,
     province:document.getElementById('add-site-province').value,
     issue:document.getElementById('add-site-issue').value,
+    caseDetail:document.getElementById('add-site-case').value.trim(),
+    casePhotos:siteCasePhotos.slice(),
     location:document.getElementById('add-site-location').value.trim(),
     mondayLink:document.getElementById('add-site-monday').value.trim(),
     remo:document.getElementById('add-site-remo').value.trim(),
@@ -3001,7 +3089,12 @@ function doAddSite() {
     photo:pendingPhoto
   }
   if(editingSiteName) {
-    site.id = (state.sites.find(x=>x.name===editingSiteName)||{}).id || Date.now()
+    const prev = state.sites.find(x=>x.name===editingSiteName) || {}
+    site.id = prev.id || Date.now()
+    if(prev.aiSuggestion && siteSuggestionKey(prev) === siteSuggestionKey(site)) {
+      site.aiSuggestion = prev.aiSuggestion
+      site.aiSuggestionFor = prev.aiSuggestionFor
+    }
     setState({sites:state.sites.map(x=>x.name===editingSiteName?site:x)})
     editingSiteName = null
   } else {
