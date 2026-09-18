@@ -2509,34 +2509,181 @@ function copyPettyCashSummary() {
   })
 }
 
-// General solar-pump-inverter troubleshooting knowledge — generic domain
-// knowledge, not tied to a specific proprietary manual.
-const SPIS_FAULTS = [
-  {icon:'lock',color:'var(--red)',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
-  {icon:'flame',color:'var(--orange)',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
-  {icon:'zap',color:'var(--amber)',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
-  {icon:'waves',color:'var(--blue)',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
-  {icon:'alert-circle',color:'var(--stuck)',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
-  {icon:'wifi',color:'var(--purple)',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
+// Real fault/alarm data paraphrased (own wording) from the official manuals:
+// - Nastec VASCO Solar VAriable Speed COntroller operating manual (ch. 7,
+//   "Protections and alarms", and ch. 10 "Trouble-shooting chart")
+// - Caprari submersible pump/motor use and maintenance instructions
+//   ("Troubleshooting" chapter, common to the Caprari submersible range)
+const VASCO_FAULTS = [
+  {icon:'alert-triangle',color:'var(--red)',title:'OVERCURRENT MOT.',cause:'זרם המנוע גבוה מהערך המוגדר. לרוב כי ירידת המתח שגורם לה האינוורטר מעלה את הזרם הנכנס מעבר לנקוב.',checks:['לוודא שפרמטר "זרם מנוע נקוב" מוגדר כ-10% מעל הערך שבתווית המנוע (כמומלץ ביצרן)','לבדוק מול יצרן המנוע אם הוא מסוגל לספוג את הזרם הזה','לבדוק סיבות נוספות לעומס יתר (ראה גם OVERLOAD INV. למטה)']},
+  {icon:'zap',color:'var(--amber)',title:'UNDER VOLTAGE / OVER VOLTAGE',cause:'מתח האספקה נמוך או גבוה מדי.',checks:['לבדוק את מקור המתח (רשת/פאנלים) ואת הסיבה לחריגה','לבדוק כבילה וחיבורים לרפיון או קורוזיה']},
+  {icon:'flame',color:'var(--orange)',title:'OVER TEMP. INV.',cause:'התחממות יתר של האינוורטר.',checks:['לוודא שטמפ׳ הסביבה מתחת ל-40°C','לבדוק שהמאוורר העזר תקין ושיש מספיק אוורור סביב היחידה','אפשר להוריד את תדר ה-PWM (בתפריט הפרמטרים המתקדמים) כדי להפחית חום']},
+  {icon:'alert-circle',color:'var(--stuck)',title:'NO WATER (DRY RUN COSPHI)',cause:'ה-cosphi של המשאבה נמוך מהסף שהוגדר - סימן שהיא "יבשה" ורצה בלי מים.',checks:['לבדוק שהמשאבה משוחררת (primed) ויש מים במקור','לבדוק שערך ה-cosphi המוגדר נכון (בערך 60% מה-cosphi הנקוב בתווית המנוע)','המערכת תנסה להפעיל מחדש לבד אחרי 10, 20, 40, 80, 160 דקות — זה תקין, לא תקוע']},
+  {icon:'droplet',color:'var(--blue)',title:'PRESS/FLOW/TEMP SENS. FAULT',cause:'תקלה באחד החיישנים (לחץ / ספיקה / טמפרטורה).',checks:['לבדוק את החיישן הרלוונטי','לבדוק את חיווט החיישן לרפיון או נזק']},
+  {icon:'wind',color:'var(--purple)',title:'OVER PRESSURE / UNDER PRESSURE',cause:'הלחץ הנמדד חרג מהטווח המוגדר במערכת.',checks:['לבדוק את הסיבה לחריגה (למשל: צנרת שבורה, שסתום פתוח)','לבדוק שערכי הלחץ המקסימלי/מינימלי מוגדרים נכון']},
+  {icon:'battery',color:'var(--red)',title:'OVERLOAD INV.',cause:'הזרם שהעומס דורש חורג מיכולת האינוורטר (יכול לספוג 101% לעד 10 דק׳, 110% לעד דקה).',checks:['להאריך את זמן ה-ramp-up (עליית מהירות הדרגתית)','לוודא שזרם העומס נמוך ב-10% לפחות מהזרם הנקוב של VASCO','לבדוק ירידת מתח לאורך כבל האספקה למנוע']},
 ];
+const VASCO_TROUBLESHOOTING = [
+  {title:'המסך לא נדלק', checks:['לבדוק את הכבל השטוח בין לוח התצוגה ללוח הבקרה','לבדוק נתיכים','לוודא שכבלי המתח מחוברים כראוי']},
+  {title:'תנודות תדר/לחץ במצב לחץ קבוע', checks:['לבדוק את מיכל הלחץ ואת לחץ הטעינה המקדימה שלו','לכוון את פרמטרי Ki/Kp (תפריט Installer)']},
+  {title:'המשאבה נדלקת ונכבית שוב ושוב', checks:['לבדוק את הגדרת "תדר עצירה מינימלי" (f min Q=0)','להגדיל את זמן ההשהיה לפני עצירה (stop delay)']},
+]
+const CAPRARI_FAULTS = [
+  {icon:'x',color:'var(--red)',title:'המנוע לא מתחיל',checks:['לוודא שהמנוע מקבל מתח בפועל','לוודא שהמפסק במצב הפעלה (ON)','לבדוק שאין מערכת הגנה אוטומטית שחוסמת הפעלה']},
+  {icon:'zap',color:'var(--amber)',title:'נתיכים נשרפים בהפעלה',checks:['לוודא שהנתיכים מהסוג והדירוג הנכון','לבדוק בידוד חשמלי (עם אוהם-מטר)','לבדוק כבל שבור','לוודא שמתח הרשת תואם לתווית המנוע']},
+  {icon:'alert-triangle',color:'var(--orange)',title:'ממסר העומס נופל אחרי שניות',cause:'בד"כ חוסר איזון בין הפאזות או נעילה מכנית.',checks:['לוודא שכל הפאזות מקבלות מתח מלא ושהחיבורים הדוקים','לבדוק חוסר איזון זרם בין הפאזות','לבדוק אם הרוטור נתקע - לנסות לשחרר ידנית אחרי ניתוק חשמל','לוודא שמתח הרשת תואם למנוע']},
+  {icon:'clock',color:'var(--orange)',title:'ממסר העומס נופל אחרי כמה דקות',checks:['לבדוק שהגדרת הממסר נכונה','לבדוק אם מתח הרשת נמוך מדי','לבדוק חוסר איזון בין הפאזות וטמפ׳ גבוהה בלוח החשמל','לבדוק שכיוון הסיבוב נכון (לא הפוך)']},
+  {icon:'activity',color:'var(--blue)',title:'צריכת חשמל מוגזמת',checks:['לבדוק אם מהירות הסיבוב גבוהה מדי','לבדוק חיכוך מכני שמונע סיבוב חופשי','לבדוק יישור (alignment) ומצב אטם הציר (packing gland)','לבדוק אם הספיקה גבוהה מדי - אפשר לצמצם עם שסתום']},
+]
+// Real fault/causes/remedies paraphrased (own wording) from official manuals:
+// Rovatti A. & Figli Pompe "Troubleshooting" chapter (PTO-driven centrifugal
+// pumps), and SAER Elettropompe FS98/PMK/IR "Inconveniences, Causes and
+// Remedies" chapter (submersible electropumps).
+const ROVATTI_FAULTS = [
+  {icon:'lock',color:'var(--red)',title:'המשאבה חסומה',checks:['חלקים נעולים מחלודה אחרי תקופה ארוכה של אי-שימוש - למלא שמן נגד חלודה, להמתין כמה דקות, לנסות להזיז את הציר ביד','גוף זר בתוך המשאבה - לפרק את תומך היניקה או המשאבה','שבר בחלק פנימי - לפרק ולהחליף חלקים']},
+  {icon:'droplet',color:'var(--blue)',title:'המשאבה לא נפרמת (no prime)',checks:['גוף המשאבה לא מלא לגמרי - למלא מים','אוויר בצנרת היניקה - לבדוק אטמים וחיבורים','גובה יניקה גבוה מדי - להקטין','מהירות סיבוב נמוכה מדי - להגביר','קוטר צנרת יניקה קטן מדי - להחליף','כיוון סיבוב הפוך (במנוע חשמלי) - להפוך','מפרפרות/לוחית שחיקה בלויות - להחליף']},
+  {icon:'wind',color:'var(--amber)',title:'לחץ ו/או ספיקה לא מספיקים',checks:['רשת יניקה סתומה - לשטוף ולנקות','צנרת יניקה שקועה/מעוכה - להחליף','מהירות סיבוב נמוכה מדי - להגביר','גובה יניקה גבוה מדי - להקטין','מפרפרת סתומה בגוף זר - לפרק ולנקות','אוויר בצנרת היניקה - לבדוק אטמים','מפרפרות/לוחית שחיקה בלויות - להחליף']},
+  {icon:'volume-2',color:'var(--purple)',title:'המשאבה רועשת ורוטטת',checks:['פעולה בקוויטציה - לאתר סיבה ולהקטין את גובה היניקה במידת הצורך','חלקים לא מאוזנים, מיסבים/גלגלי שיניים בלויים - לפרק ולבדוק','המשאבה או הצנרת לא מקובעות היטב - לקבע']},
+]
+const SAER_FAULTS = [
+  {icon:'x',color:'var(--red)',title:'המשאבה לא מתחילה בכלל',checks:['אין מתח בכבל המנוע - לבדוק את המכשיר/הקו החשמלי','נתיכים שרופים - להחליף באותו ערך','כבל מנוע קרוע - לתקן או להחליף','מנוע תקול - להחליף']},
+  {icon:'alert-circle',color:'var(--orange)',title:'ממסר תרמי נופל, הצריכה תקינה',checks:['הממסר לא מכויל נכון - לכייל מחדש','ממסר פגום - להחליף']},
+  {icon:'activity',color:'var(--amber)',title:'ממסר תרמי נופל, הצריכה לא מאוזנת',checks:['מתח לא זהה בין הפאזות, או חיבורי כבלים רפויים','המשאבה או המנוע תקועים - לפרק ולנקות','חול רב מדי במים','חיווט המנוע שגוי או כיוון סיבוב הפוך - לתקן חיבור']},
+  {icon:'droplet',color:'var(--blue)',title:'דליפות בצנרת / חלקים פנימיים בלויים',checks:['לבדוק דליפות בצנרת ההזרמה - לתקן/להחליף','לבדוק שחיקת חלקים פנימיים - להחליף','אוויר או גז במים - לבדוק את מקור המים']},
+  {icon:'wind',color:'var(--purple)',title:'רעידות / רעש גבוה',checks:['מפרפרות סתומות - לפרק ולנקות','מפלס המים בבור נמוך מהרגיל, או המשאבה פועלת בעומק (head) נמוך מדי - להוריד את עומק ההתקנה או לבדוק את ה-NPSH של המערכת','חלקים מכניים בלויים - לפרק ולשפץ']},
+]
+const PANEL_FAULTS = [
+  {icon:'sun',color:'var(--amber)',title:'ירידה בייצור חשמל',checks:['לבדוק לכלוך/אבק/עלים שמכסים את הפאנלים - לנקות','לבדוק הצללה חדשה (צמחייה שגדלה, מבנה חדש)','לבדוק חיבורי מחברים (connectors) לקורוזיה או רפיון']},
+  {icon:'alert-triangle',color:'var(--red)',title:'נקודה חמה / Hot Spot',cause:'תא סולארי חלקי או מוצל גורם להתחממות מקומית שיכולה לפגוע בפאנל.',checks:['לבדוק חזותית כתמים כהים/שרופים על הפאנל','לבדוק שדיודות המעקף (bypass diodes) תקינות','להחליף פאנל אם הנזק משמעותי']},
+  {icon:'x',color:'var(--stuck)',title:'סדק / שבר בפאנל',checks:['לבדוק חזותית אחרי רוח חזקה/ברד/פגיעה מכנית','פאנל סדוק בדרך כלל ממשיך לעבוד בירידה הדרגתית - לתעד ולתכנן החלפה']},
+  {icon:'zap',color:'var(--orange)',title:'קופסת חיבורים (junction box) לא תקינה',checks:['לבדוק סימני התחממות/התכה בקופסה','לבדוק חיבורי כבלים בקופסה לרפיון או קורוזיה']},
+]
+const SPIS_MANUFACTURERS = [
+  {id:'vasco', label:'VASCO Solar', icon:'zap'},
+  {id:'caprari', label:'Caprari', icon:'droplet'},
+  {id:'rovatti', label:'Rovatti', icon:'droplet'},
+  {id:'saer', label:'SAER', icon:'droplet'},
+  {id:'panel', label:'פאנלים', icon:'sun'},
+  {id:'diagnose', label:'אבחן בעיה (AI)', icon:'search'},
+]
+var spisManufacturer = 'vasco'
+function setSpisManufacturer(id) { spisManufacturer = id; showSpisModal() }
 function showSpisModal() {
+  function faultCard(f) {
+    return `<div class="card" style="border:1px solid var(--line);border-right:3px solid ${f.color};padding:12px 14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        ${iconBadge(f.icon, f.color)}
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);direction:ltr;text-align:right">${f.title}</div>
+      </div>
+      ${f.cause?`<div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>`:''}
+      ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
+    </div>`
+  }
+  var tabsHtml = `<div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto">
+    ${SPIS_MANUFACTURERS.map(function(m){
+      var active = m.id === spisManufacturer
+      return `<button onclick="setSpisManufacturer('${m.id}')" style="flex-shrink:0;padding:8px 12px;border-radius:var(--radius-md);font-size:var(--fs-md);font-weight:600;background:${active?'var(--gold)':'var(--surface-2)'};color:${active?'#fff':'var(--t2)'}">${m.label}</button>`
+    }).join('')}
+  </div>`
+  var contentHtml = ''
+  if(spisManufacturer === 'vasco') {
+    contentHtml = `<div style="font-size:var(--fs-base);font-weight:700;color:var(--gold);margin-bottom:8px">${icon('zap')} אזעקות</div>` +
+      VASCO_FAULTS.map(faultCard).join('') +
+      `<div style="font-size:var(--fs-base);font-weight:700;color:var(--gold);margin:14px 0 8px">${icon('search')} בדיקות נוספות</div>` +
+      VASCO_TROUBLESHOOTING.map(function(f){ return faultCard({icon:'search',color:'var(--t3)',title:f.title,checks:f.checks}) }).join('')
+  } else if(spisManufacturer === 'caprari') {
+    contentHtml = CAPRARI_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'rovatti') {
+    contentHtml = ROVATTI_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'saer') {
+    contentHtml = SAER_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'panel') {
+    contentHtml = PANEL_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'diagnose') {
+    contentHtml = renderSpisDiagnoseForm()
+  }
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
-        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
-        ${SPIS_FAULTS.map(function(f){
-          return `<div class="card" style="border:1px solid var(--line);border-right:3px solid ${f.color};padding:12px 14px;margin-bottom:10px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-              ${iconBadge(f.icon, f.color)}
-              <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${f.title}</div>
-            </div>
-            <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>
-            ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
-          </div>`
-        }).join('')}
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
+        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">מתוך מדריכי היצרן הרשמיים</div>
+        ${tabsHtml}
+        ${contentHtml}
+        ${spisManufacturer!=='diagnose' ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה/הודעה מדויקת ופנה ליצרן או לתמיכה הטכנית.</div>` : ''}
         <button onclick="closeModal()" style="width:100%;margin-top:14px;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">סגור</button>`, {modalStyle:'max-height:80vh;overflow-y:auto'})
 }
 
+// ── AI-POWERED FAULT DIAGNOSIS ────────────────────
+var diagnosePhotos = []
+var diagnoseResult = null
+var diagnoseBusy = false
+function buildSpisKnowledgeContext() {
+  function lines(arr, label) {
+    return label + ':\n' + arr.map(function(f){
+      return '- ' + f.title + (f.cause?(' | סיבה: '+f.cause):'') + ' | בדיקות: ' + f.checks.join('; ')
+    }).join('\n')
+  }
+  return [
+    lines(VASCO_FAULTS, 'VASCO Solar - אזעקות'),
+    lines(VASCO_TROUBLESHOOTING.map(function(f){return {title:f.title, checks:f.checks}}), 'VASCO Solar - בדיקות נוספות'),
+    lines(CAPRARI_FAULTS, 'Caprari - משאבה/מנוע'),
+    lines(ROVATTI_FAULTS, 'Rovatti - משאבה'),
+    lines(SAER_FAULTS, 'SAER - משאבה'),
+    lines(PANEL_FAULTS, 'פאנלים סולאריים'),
+  ].join('\n\n')
+}
+function renderSpisDiagnoseForm() {
+  var photosHtml = diagnosePhotos.map(function(p, i){
+    return `<div style="position:relative;display:inline-block;margin-left:8px;margin-bottom:8px">
+      <img src="${p}" style="width:70px;height:70px;object-fit:cover;border-radius:var(--radius-md)"/>
+      <button onclick="removeDiagnosePhoto(${i})" style="position:absolute;top:-6px;left:-6px;background:var(--red);color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1">${icon('x')}</button>
+    </div>`
+  }).join('')
+  return `
+    <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:12px;line-height:1.5">תאר את התקלה שאתה רואה בשטח, ואפשר לצרף עד 3 תמונות (מסך תקלה, רכיב פגום וכו׳). Fieldy יאבחן בהתבסס על מדריכי היצרן שכבר טענו, ובידע כללי נוסף לפי הצורך.</div>
+    <textarea id="diagnose-desc" placeholder="למשל: המסך של VASCO מציג קוד שגיאה, המשאבה לא עולה בלחץ..." style="width:100%;min-height:80px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px"></textarea>
+    <div style="margin-bottom:10px">${photosHtml}</div>
+    ${diagnosePhotos.length < 3 ? `<button onclick="document.getElementById('diagnose-photo-input').click()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:9px 14px;color:var(--t2);font-size:var(--fs-base);font-weight:600;margin-bottom:12px">${icon('camera')} הוסף תמונה</button>` : ''}
+    <input id="diagnose-photo-input" type="file" accept="image/*" style="display:none" onchange="addDiagnosePhoto(this)"/>
+    <button onclick="runSpisDiagnosis()" ${diagnoseBusy?'disabled':''} style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:11px;color:#fff;font-size:var(--fs-base);font-weight:700;margin-bottom:12px">${diagnoseBusy?'...מאבחן':(icon('search')+' אבחן')}</button>
+    <div id="diagnose-result">${diagnoseResult ? `<div class="card" style="background:var(--surface-2);padding:14px;line-height:1.6;font-size:var(--fs-base);white-space:pre-line">${diagnoseResult}</div>` : ''}</div>
+  `
+}
+function addDiagnosePhoto(input) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    diagnosePhotos.push(dataUrl)
+    showSpisModal()
+  })
+}
+function removeDiagnosePhoto(i) {
+  diagnosePhotos.splice(i, 1)
+  showSpisModal()
+}
+async function runSpisDiagnosis() {
+  const desc = (document.getElementById('diagnose-desc') || {}).value || ''
+  if(!desc.trim() && !diagnosePhotos.length) { alert('תאר את התקלה או צרף תמונה'); return }
+  diagnoseBusy = true
+  diagnoseResult = null
+  showSpisModal()
+  const sys = 'אתה עוזר טכני לאורי, מנהל אזורי SPIS בפיליפינים, לאבחון תקלות בשטח במערכות השקיה סולאריות. ' +
+    'התבסס קודם כל על הידע האמיתי הבא ממדריכי היצרן (VASCO Solar/Nastec, Caprari, Rovatti, SAER, ופאנלים סולאריים) - זה המקור העיקרי והאמין ביותר שלך:\n\n' +
+    buildSpisKnowledgeContext() +
+    '\n\nאם התיאור או התמונה לא מתאימים לשום דבר ברשימה - השתמש בידע הנדסי כללי שלך על מערכות שאיבה סולאריות, אבל ציין בבירור שזו הערכה כללית ולא מתוך מדריך ספציפי. אם יש תמונה - תסתכל עליה בעיון (קודי שגיאה על מסך, סימני שריפה/חלודה, מצב חיווט וכו׳). תן תשובה מסודרת וממוקדת בעברית: מה כנראה הבעיה, ומה לבדוק/לנסות קודם. אל תמציא קוד שגיאה שלא ראית בפועל.'
+  const content = []
+  if(desc.trim()) content.push({type:'text', text: desc.trim()})
+  diagnosePhotos.forEach(function(p){
+    const parts = p.split(',')
+    const mediaType = (parts[0].match(/data:(.*?);/) || [,'image/jpeg'])[1]
+    content.push({type:'image', source:{type:'base64', media_type: mediaType, data: parts[1]}})
+  })
+  try {
+    const reply = await callClaude([{role:'user', content}], sys)
+    diagnoseResult = reply.trim()
+  } catch(e) {
+    diagnoseResult = '✕ שגיאה: ' + e.message
+  }
+  diagnoseBusy = false
+  showSpisModal()
+}
 function renderSites() {
   const el = document.getElementById('screen-sites')
   const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
