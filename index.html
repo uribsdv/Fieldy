@@ -701,7 +701,7 @@ function validateState(s) {
   })
   // Optional sections may be missing (older backups — applyStateDefaults
   // fills them in), but if they are present they must have the right type.
-  ;['moods','brainDumps','quotes','leadershipLog','pettyCash'].forEach(function(k){
+  ;['moods','brainDumps','quotes','leadershipLog','pettyCash','siteDirectory'].forEach(function(k){
     if(s[k] != null && !Array.isArray(s[k])) problems.push(k + ' קיים אך אינו רשימה')
   })
   ;['personal','personalInsights','notifyPrefs'].forEach(function(k){
@@ -725,6 +725,7 @@ function applyStateDefaults(s) {
   if(!s.quotes || !s.quotes.length) s.quotes = [{text:"Who's living your life?", addedAt: Date.now()}]
   if(!s.pettyCash) s.pettyCash = []
   if(!s.leadershipLog) s.leadershipLog = []
+  if(!s.siteDirectory) s.siteDirectory = []
   return s
 }
 // Reads the saved state from localStorage. Returns the parsed object, or
@@ -2799,7 +2800,8 @@ function showAddSite(name) {
   const s = name ? state.sites.find(x=>x.name===name) : null
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
-        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}" ${s?'':'onblur="autofillFromDirectory()"'}/>
+        <div id="directory-match-hint" style="display:none;font-size:var(--fs-sm);color:var(--green);margin:-6px 0 10px"></div>
         ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
         <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?esc(s.issue):''}"/>
@@ -2823,7 +2825,7 @@ function showAddSite(name) {
           <div><label class="form-label">מספר מכשיר ב-Remo</label>
             <input id="add-site-remo" class="form-input" placeholder="למשל 1234 - למציאה בחיפוש ב-Remo" value="${s?esc(s.remo):''}" style="direction:ltr"/></div>
           <div><label class="form-label">שנת חוזה</label>
-            <select id="add-site-year" class="form-select">
+            <select id="add-site-year" class="form-select" ${s?'':'onchange="autofillFromDirectory()"'}>
               ${optionsHtml([['','—'],['2024','2024'],['2025','2025'],['2026','2026']], (s&&s.year)||'')}
             </select></div>
         </div>
@@ -3044,6 +3046,12 @@ function renderSettings() {
         <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('clipboard')} ספריית אתרים (Monday)</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${(state.siteDirectory||[]).length ? ('טעונים כרגע ' + (state.siteDirectory||[]).length + ' אתרים מ-Monday.') : 'טען רשימת אתרים מ-Monday פעם אחת — Fieldy ישתמש בה למילוי אוטומטי כשמוסיפים אתר, ולענות על שאלות גם על אתרים שלא הוספת עדיין ידנית.'}</div>
+        <button onclick="document.getElementById('import-directory-file').click()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען קובץ ספרייה</button>
+        <input id="import-directory-file" type="file" accept="application/json" style="display:none" onchange="importSiteDirectory(this.files[0])"/>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
         <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
         <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
@@ -3148,6 +3156,78 @@ function importBackup(file) {
   reader.readAsText(file)
 }
 
+// ── SITE DIRECTORY (from Monday.com export) ───────
+// A reference table of known sites (name, province, coordinates, contractor,
+// REMO id) imported once from an exported spreadsheet, used to auto-fill new
+// site entries and to give Ask Fieldy answers about sites Uri hasn't
+// manually added to Fieldy yet. This merges additively — it never touches
+// state.sites (the sites Uri is actually tracking day to day).
+function importSiteDirectory(file) {
+  if(!file) return
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    var imported
+    try { imported = JSON.parse(e.target.result) }
+    catch(err) {
+      alert('הקובץ לא נטען — זה לא JSON תקין (' + err.message + ').')
+      return
+    }
+    if(!Array.isArray(imported) || !imported.every(function(x){ return x && typeof x.name === 'string' })) {
+      alert('הקובץ לא נטען — צריך להיות רשימה של אתרים, כל אחד עם לפחות שדה name.')
+      return
+    }
+    // Key by name+year+siteNumber, not name alone — sites with the same name
+    // in different contract years are different physical sites with
+    // different coordinates, not the same site updated.
+    const keyOf = function(s){ return [s.name, s.year||'', s.siteNumber||''].join('|') }
+    const byKey = {}
+    ;(state.siteDirectory || []).forEach(function(s){ byKey[keyOf(s)] = s })
+    imported.forEach(function(s){ byKey[keyOf(s)] = s })
+    setState({siteDirectory: Object.values(byKey)})
+    alert('נטענו ' + imported.length + ' אתרים לספרייה ✓ (סה"כ בספרייה: ' + Object.values(byKey).length + ')')
+  }
+  reader.readAsText(file)
+}
+function findInSiteDirectory(name) {
+  if(!name || !(state.siteDirectory || []).length) return []
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9א-ת]/g, '')
+  const target = norm(name)
+  if(!target) return []
+  return state.siteDirectory.filter(function(s){
+    const n = norm(s.name)
+    return n === target || n.includes(target) || target.includes(n)
+  })
+}
+function autofillFromDirectory() {
+  if(editingSiteName) return
+  const nameEl = document.getElementById('add-site-name')
+  const hint = document.getElementById('directory-match-hint')
+  if(!nameEl) return
+  let matches = findInSiteDirectory(nameEl.value.trim())
+  if(!matches.length) { if(hint) hint.style.display = 'none'; return }
+  // Same name can be genuinely different sites in different contract years
+  // (different coordinates) — never guess between them. If the year field
+  // already narrows it to one, use that; otherwise ask instead of autofilling.
+  const yearEl = document.getElementById('add-site-year')
+  if(matches.length > 1 && yearEl && yearEl.value) {
+    const narrowed = matches.filter(function(m){ return String(m.year) === String(yearEl.value) })
+    if(narrowed.length) matches = narrowed
+  }
+  if(matches.length > 1) {
+    if(hint) { hint.style.display = 'block'; hint.innerHTML = icon('alert-triangle') + ' ' + matches.length + ' אתרים בשם דומה נמצאו בשנים שונות (מיקומים שונים!) — בחר שנת חוזה כדי לצמצם, לא מילאתי אוטומטית' }
+    return
+  }
+  const match = matches[0]
+  const setIfEmpty = function(id, val){ const el = document.getElementById(id); if(el && !el.value && val) el.value = val }
+  setIfEmpty('add-site-province', match.province)
+  setIfEmpty('add-site-location', match.location)
+  setIfEmpty('add-site-remo', match.remo)
+  const contractorEl = document.getElementById('add-site-contractor')
+  if(contractorEl && !contractorEl.value && (match.contractor === 'asc' || match.contractor === '11-16')) contractorEl.value = match.contractor
+  if(yearEl && !yearEl.value && match.year) yearEl.value = String(match.year)
+  if(hint) { hint.style.display = 'block'; hint.innerHTML = icon('check') + ' נמצא ב-Monday — פרטים מולאו אוטומטית' }
+}
+
 async function saveServerConfig() {
   serverUrl = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
   serverPasscode = document.getElementById('settings-server-passcode').value.trim()
@@ -3207,11 +3287,26 @@ async function askFieldy() {
     const taskLines = [...state.tasks.now,...state.tasks.today].filter(t=>!t.done).slice(0,25)
       .map(t=>'- ['+(t.color||'')+'] '+t.text+(t.site?(' (אתר: '+t.site+')'):'')).join('\n')
     const peopleLines = state.people.map(p=>'- '+p.name+' ('+(p.role||'')+(p.company?', '+p.company:'')+')'+(p.pending?(' — ממתין: '+p.pending):'')).join('\n')
+    const dirEntries = (state.siteDirectory || [])
+    let dirMatches = []
+    if(dirEntries.length) {
+      const qWords = question.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+      dirMatches = dirEntries.filter(function(s){
+        const hay = (s.name + ' ' + (s.province||'') + ' ' + (s.municipality||'')).toLowerCase()
+        return qWords.some(function(w){ return hay.includes(w) })
+      })
+      if(!dirMatches.length) dirMatches = dirEntries.slice(0, 80)
+      dirMatches = dirMatches.slice(0, 150)
+    }
+    const dirLines = dirMatches.map(function(s){
+      return '- ' + s.name + (s.province?' ('+s.province+(s.municipality?', '+s.municipality:'')+')':'') + (s.contractor?' | קבלן: '+s.contractor:'') + (s.remo?' | REMO: '+s.remo:'') + (s.year?' | שנה: '+s.year:'')
+    }).join('\n')
     const curMood = getCurrentMood()
     const context = 'תאריך היום: '+getToday()+(curMood&&MOOD_LIB[curMood.mood]?('\nמצב רוח נוכחי: '+MOOD_LIB[curMood.mood].label):'') +
       '\n\nאתרים פתוחים:\n'+(siteLines||'(אין)') +
       '\n\nמשימות פתוחות:\n'+(taskLines||'(אין)') +
-      '\n\nאנשי קשר:\n'+(peopleLines||'(אין)')
+      '\n\nאנשי קשר:\n'+(peopleLines||'(אין)') +
+      (dirLines ? ('\n\nספריית אתרים מ-Monday (רפרנס בלבד, לא בהכרח פעילים כרגע — יכול להיות רשימה חלקית):\n'+dirLines) : '')
     const prompt = 'אתה עוזר תכנון שטח לאורי, מנהל אזורי (Region II, Cagayan Valley, פיליפינים, מתקיני SPIS). להלן המצב הנוכחי שלו:\n\n' + context +
       '\n\nהשאלה של אורי: ' + question +
       '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
