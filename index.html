@@ -467,7 +467,6 @@ const ICONS = {
   'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
   'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'clipboard': '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
-  'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
   'calendar': '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
   'trash': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
   'trash-2': '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
@@ -702,10 +701,10 @@ function validateState(s) {
   })
   // Optional sections may be missing (older backups — applyStateDefaults
   // fills them in), but if they are present they must have the right type.
-  ;['moods','brainDumps','quotes','leadershipLog','pettyCash'].forEach(function(k){
+  ;['moods','brainDumps','quotes','leadershipLog','pettyCash','siteDirectory'].forEach(function(k){
     if(s[k] != null && !Array.isArray(s[k])) problems.push(k + ' קיים אך אינו רשימה')
   })
-  ;['personal','personalInsights','notifyPrefs','briefing','triageDismissed'].forEach(function(k){
+  ;['personal','personalInsights','notifyPrefs'].forEach(function(k){
     if(s[k] != null && !isObj(s[k])) problems.push(k + ' קיים אך אינו אובייקט')
   })
   if(s.focus != null && typeof s.focus !== 'string') problems.push('focus אינו טקסט')
@@ -726,8 +725,7 @@ function applyStateDefaults(s) {
   if(!s.quotes || !s.quotes.length) s.quotes = [{text:"Who's living your life?", addedAt: Date.now()}]
   if(!s.pettyCash) s.pettyCash = []
   if(!s.leadershipLog) s.leadershipLog = []
-  if(!s.briefing) s.briefing = {date:null, text:'', generatedAt:null}
-  if(!s.triageDismissed) s.triageDismissed = {}
+  if(!s.siteDirectory) s.siteDirectory = []
   return s
 }
 // Reads the saved state from localStorage. Returns the parsed object, or
@@ -1020,7 +1018,7 @@ async function analyzePersonalPatterns(manual) {
       'יומן מצבי-רוח:\n' + (moodLines||'(אין)') + '\n\n' +
       'יומן פיתוח מנהיגות יומי:\n' + (leadLines||'(אין)') + '\n\n' +
       'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, מה שנשמע כמו דברים שעוזרים לו או מכבידים עליו, ובנוסף — דפוסים ביומן המנהיגות: אילו נושאי "לשיפור" חוזרים על עצמם (אזורי צמיחה אמיתיים), והאם רואים התקדמות/נסיגה לאורך זמן בהשוואה לתקופה הקודמת. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), עד 6 משפטים קצרים, קונקרטי ולא כללי, כולל לפחות משפט אחד על התקדמות המנהיגות אם יש מספיק רשומות. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
-    const result = await callClaude([{role:'user', content: prompt}], withContext(null))
+    const result = await callClaude([{role:'user', content: prompt}])
     setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length}})
     if(currentScreen==='home') renderHome()
   } catch(e) {
@@ -1355,7 +1353,7 @@ function renderTalkTab() {
 function talkRequest(messages) {
   talkBusy = true
   renderTao()
-  callClaude(messages, withContext(TALK_SYSTEM_PROMPT))
+  callClaude(messages, TALK_SYSTEM_PROMPT)
     .then(function(reply){ talkMessages.push({role:'assistant', content: reply.trim() || '...'}) })
     .catch(function(e){ talkMessages.push({role:'assistant', content: 'שגיאה: ' + e.message}) })
     .then(function(){ talkBusy = false; renderTao() })
@@ -1908,158 +1906,6 @@ function rightNowHtml(mood) {
     ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
 }
 
-// ── ONE ASSISTANT (Phase 5) ──────────────────────
-// Every AI feature used to build its own little world: Ask Fieldy knew the
-// sites, the status-change drafter knew one site, the insights analyser knew
-// the moods — and none of them knew what the others did. assistantContext()
-// is the one shared picture of "Uri right now" (today's mood, focus, stuck
-// sites, this week's leadership theme) that every call gets, so answers are
-// personal instead of generic. withContext() glues it onto a system prompt.
-function priorityStuckSites() {
-  return state.sites.filter(s => s.stuckSince && s.status !== 'resolved')
-    .sort((a,b) => daysStuck(b) - daysStuck(a)).slice(0, 5)
-}
-function assistantContext() {
-  const today = getToday(), cur = getCurrentMood(), wf = getWeeklyFocus(), stuck = priorityStuckSites(), lead = getTodayLeadershipEntry()
-  const lines = ['הקשר על אורי כרגע (נלקח אוטומטית מהאפליקציה שלו). תתחשב בו כשזה רלוונטי לבקשה, ואל תצטט אותו בחזרה ואל תזכיר אותו כשהוא לא רלוונטי:', 'תאריך היום: ' + today]
-  if(cur && MOOD_LIB[cur.mood]) lines.push('מצב רוח שסימן היום: ' + MOOD_LIB[cur.mood].label + (MOOD_LIB[cur.mood].taskLimit ? ' — עדיף לו תשובה קצרה עם צעד אחד ברור' : ''))
-  if(state.focus && (!state.focusDate || state.focusDate === today)) lines.push('המוקד שלו להיום: ' + state.focus)
-  if(stuck.length) lines.push('אתרים תקועים: ' + stuck.map(s => s.name + ' (' + daysStuck(s) + ' ימים' + (s.issue ? ', ' + s.issue : '') + ')').join('; '))
-  lines.push('מוקד המנהיגות השבועי שלו: "' + wf.theme + '" (' + wf.book + ') — ' + wf.text)
-  if(lead && lead.improve) lines.push('מה שכתב היום שהוא רוצה לשפר כמנהיג: ' + lead.improve)
-  return lines.join('\n')
-}
-function withContext(system) { return (system ? system + '\n\n' : '') + assistantContext() }
-
-// Daily briefing: the facts are computed locally every render (so the panel
-// is useful even offline); the short AI narrative is generated ONCE per day
-// and cached in state.briefing — never re-fetched on every load.
-let briefingBusy = false, briefingError = '', briefingAutoTriedDate = null
-function briefingFacts() {
-  const today = getToday(), sites = [], seen = {}
-  const add = (name, why, stuck) => { if(!name || seen[name]) return; seen[name] = 1; sites.push({name, why, stuck}) }
-  priorityStuckSites().forEach(s => add(s.name, 'תקוע ' + daysStuck(s) + ' ימים' + (s.issue ? ' · ' + s.issue : ''), true))
-  getEventsForDate(today).forEach(e => { if(e.site) add(e.site, (e.time ? e.time + ' · ' : '') + e.title, false) })
-  ;['now','today'].forEach(b => (state.tasks[b]||[]).forEach(t => { if(!t.done) add(t.site, t.text, false) }))
-  const focus = (state.focus && (!state.focusDate || state.focusDate === today)) ? state.focus : ''
-  return {focus, sites: sites.slice(0, 4), lead: getWeeklyFocus(), mood: getCurrentMood()}
-}
-function briefingHasContent(f) { return !!(f.focus || f.sites.length || state.tasks.now.some(t=>!t.done) || state.tasks.today.some(t=>!t.done)) }
-async function generateDailyBriefing() {
-  const today = getToday(), f = briefingFacts()
-  briefingBusy = true; briefingError = ''
-  if(currentScreen === 'home') renderHome()
-  try {
-    const facts = 'המוקד של היום: ' + (f.focus || '(לא הוגדר)') +
-      '\nאתרים לתשומת לב היום:\n' + (f.sites.map(s => '- ' + s.name + ' — ' + s.why).join('\n') || '(אין)') +
-      '\nמשימות דחופות פתוחות: ' + (state.tasks.now.filter(t=>!t.done).map(t=>t.text).join(' | ') || '(אין)') +
-      '\nמשימות להיום: ' + (state.tasks.today.filter(t=>!t.done).slice(0,8).map(t=>t.text).join(' | ') || '(אין)')
-    const prompt = 'זה תדריך הבוקר של אורי. כתוב בעברית, ישירות אליו, 3-4 משפטים קצרים בלבד ובלי שום פתיח: (1) הדבר האחד הכי חשוב היום, (2) לאילו אתרים לתת עדיפות ולמה — רק מתוך הרשימה למטה ובשמות המדויקים, (3) הצעה אחת קונקרטית איך ליישם היום, בעבודה בפועל, את מוקד המנהיגות השבועי שלו. בלי רשימות, בלי אימוג\'י, בלי "בוקר טוב".\n\n' + facts
-    const text = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
-    state.briefing = {date: today, text, generatedAt: Date.now()}
-    save()   // direct save, not setState: a finished briefing must not re-render whatever screen Uri is on now
-  } catch(e) {
-    briefingError = e.message || 'שגיאה'
-  }
-  briefingBusy = false
-  if(currentScreen === 'home') renderHome()
-}
-// Idempotent: called at boot and on every home render; only ever spends one
-// API call per day, and never retries a failure on its own.
-function ensureDailyBriefing() {
-  const today = getToday()
-  if(!serverConfigured() || briefingBusy) return
-  if(state.briefing && state.briefing.date === today && state.briefing.text) return
-  if(briefingAutoTriedDate === today) return
-  if(!briefingHasContent(briefingFacts())) return
-  briefingAutoTriedDate = today
-  generateDailyBriefing()
-}
-function refreshBriefing() { if(briefingBusy) return; haptic('light'); generateDailyBriefing() }
-function dailyBriefingHtml() {
-  const f = briefingFacts(), today = getToday()
-  if(!briefingHasContent(f)) return ''
-  const cached = (state.briefing && state.briefing.date === today && state.briefing.text) ? state.briefing.text : ''
-  const stale = !cached && state.briefing && state.briefing.text && state.briefing.date && state.briefing.date !== today
-  return `<div id="daily-briefing" class="card" style="border:1px solid var(--accent-line);border-right:3px solid var(--gold);margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span class="panel-label" style="margin:0">${icon('sun')} תדריך הבוקר</span>
-        ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? 'כותב…' : (cached ? 'רענן' : 'צור תדריך')}</button>` : ''}
-      </div>
-      ${f.focus ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${iconBadge('target', 'var(--gold)')}<div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);line-height:1.4">${esc(f.focus)}</div></div>` : ''}
-      ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
-      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
-      ${briefingBusy ? skeletonHtml(3, 'מכין את התדריך של היום…') :
-        cached ? `<div id="briefing-text" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>` :
-        briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} לא הצלחתי להכין תדריך: ${esc(briefingError)}</div>` :
-        (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.</div>` : '')}
-      ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">התדריך האחרון היה מ-${esc(state.briefing.date)}</div>` : ''}
-    </div>`
-}
-
-// Light task triage: open tasks that share a site (or an explicit future date)
-// but are scattered across buckets get one suggestion — "batch them?" — which
-// moves them next to each other in the most urgent of their buckets. Purely
-// rule-based, no AI call; a dismissed suggestion stays dismissed until that
-// group of tasks changes.
-const BUCKET_LABEL = {now:'עכשיו', today:'היום', later:'אחר כך'}
-function triageSuggestions() {
-  const today = getToday(), open = [], groups = {}
-  ;['now','today','later'].forEach(b => (state.tasks[b]||[]).forEach((t,i) => { if(!t.done) open.push({t, b, i}) }))
-  open.forEach(o => {
-    if(o.t.site) (groups['site:' + o.t.site] = groups['site:' + o.t.site] || []).push(o)
-    if(o.t.date && o.t.date !== today) (groups['date:' + o.t.date] = groups['date:' + o.t.date] || []).push(o)
-  })
-  const dismissed = state.triageDismissed || {}
-  return Object.keys(groups).map(key => {
-    const items = groups[key]
-    if(items.length < 2) return null
-    const signature = items.map(o => o.t.id).sort().join(',')
-    if(dismissed[key] === signature) return null
-    const buckets = [...new Set(items.map(o => o.b))]
-    // already side by side in one bucket → nothing to suggest
-    if(buckets.length === 1) { const idx = items.map(o => o.i).sort((a,b)=>a-b); if(idx[idx.length-1] - idx[0] === idx.length - 1) return null }
-    const target = ['now','today','later'].find(b => buckets.includes(b))
-    const what = key.startsWith('site:') ? 'ב-' + key.slice(5) : 'לתאריך ' + key.slice(5)
-    return {key, signature, items, target, label: items.length + ' משימות ' + what + (buckets.length > 1 ? ' מפוזרות בין ' + buckets.map(b => BUCKET_LABEL[b]).join(' / ') : ' לא רצופות')}
-  }).filter(Boolean).slice(0, 2)
-}
-function batchTasks(key) {
-  const sug = triageSuggestions().find(s => s.key === key)
-  if(!sug) return
-  const ids = new Set(sug.items.map(o => o.t.id))
-  const ordered = sug.items.map(o => o.t)   // now → today → later, each in list order
-  const prev = state.tasks
-  const stripped = {now: prev.now.filter(t=>!ids.has(t.id)), today: prev.today.filter(t=>!ids.has(t.id)), later: prev.later.filter(t=>!ids.has(t.id))}
-  const firstInTarget = sug.items.find(o => o.b === sug.target)
-  const at = firstInTarget ? prev[sug.target].slice(0, firstInTarget.i).filter(t=>!ids.has(t.id)).length : stripped[sug.target].length
-  stripped[sug.target] = stripped[sug.target].slice(0, at).concat(ordered, stripped[sug.target].slice(at))
-  haptic('light')
-  taskBucket = sug.target
-  setState({tasks: stripped})
-  offerUndo('המשימות קובצו ל"' + BUCKET_LABEL[sug.target] + '"', function(){ setState({tasks: prev}) })
-}
-function dismissTriage(key) {
-  const sug = triageSuggestions().find(s => s.key === key)
-  if(!sug) return
-  setState({triageDismissed: {...(state.triageDismissed||{}), [key]: sug.signature}})
-}
-function triageHtml() {
-  const sugs = triageSuggestions()
-  if(!sugs.length) return ''
-  return sugs.map(s => `<div class="triage-card card" data-key="${esc(s.key)}" style="border:1px solid var(--blue-line);border-right:3px solid var(--blue);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      ${iconBadge('layers', 'var(--blue)')}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:var(--fs-md);font-weight:600;color:var(--t1);line-height:1.4">${esc(s.label)}</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${s.items.map(o => esc(o.t.text)).join(' · ')}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button class="triage-batch" onclick="batchTasks(${jsArg(s.key)})" style="background:var(--blue);color:#fff;border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--fs-sm);font-weight:700">${icon('layers')} קבץ ל${BUCKET_LABEL[s.target]}</button>
-        <button class="triage-dismiss" onclick="dismissTriage(${jsArg(s.key)})" style="background:var(--surface-2);color:var(--t2);border-radius:var(--radius-sm);padding:5px 10px;font-size:var(--fs-sm)">לא עכשיו</button>
-      </div>
-    </div>`).join('')
-}
-
 // ── HOME ─────────────────────────────────────────
 // "Done today?" toggle button for one of the personal day-logs.
 function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
@@ -2079,7 +1925,6 @@ function renderHome() {
   const pct = total ? Math.round((done/total)*100) : 0
   const moodPatterns = getMoodPatterns()
 
-  ensureDailyBriefing()
   el.innerHTML = `
     <div style="background:var(--surface-3);padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
@@ -2102,7 +1947,6 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      ${dailyBriefingHtml()}
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
@@ -2324,7 +2168,6 @@ function renderTasks() {
     </div>
     <div style="padding:12px 16px">
       ${mood && moodLimit(mood) ? moodLimitBarHtml(mood, hiddenByMood, 'margin-bottom:10px') : ''}
-      ${taskContextFilter==='all' ? triageHtml() : ''}
       ${tasks.length===0?emptyHtml(icon('zap'), taskContextFilter==='all'?'ריק — כל הכבוד!':'אין משימות בהקשר הזה'):''}
       ${tasks.map(t=>taskCard(t)).join('')}
     </div>
@@ -2666,34 +2509,181 @@ function copyPettyCashSummary() {
   })
 }
 
-// General solar-pump-inverter troubleshooting knowledge — generic domain
-// knowledge, not tied to a specific proprietary manual.
-const SPIS_FAULTS = [
-  {icon:'lock',color:'var(--red)',title:'Locked Rotor (מנוע נעול)',cause:'המנוע לא מסתובב - בדרך כלל חסימה מכנית במשאבה או כשל בליבת המנוע.',checks:['לבדוק חסימה פיזית במשאבה או בצנרת','לבדוק התנגדות סלילים במנוע (מד אוהם)','לאתחל את האינוורטר ולנסות הפעלה חוזרת אחרי כמה דקות']},
-  {icon:'flame',color:'var(--orange)',title:'IGBT Trip (תקלת טרנזיסטור הספק)',cause:'התחממות יתר של טרנזיסטור ההספק באינוורטר - לרוב מאוורור לא תקין או עומס חשמלי חריג.',checks:['לבדוק אוורור וניקיון פתחי האוורור באינוורטר','לבדוק שהזרם בפועל לא חורג מהספק המשאבה','לתת לאינוורטר להתקרר כ-10-15 דקות לפני הפעלה חוזרת']},
-  {icon:'zap',color:'var(--amber)',title:'חריגת מתח (Over/Under Voltage)',cause:'מתח ה-DC מהפאנלים הסולאריים נמוך או גבוה מהטווח התפעולי - עננות, כיוון פאנלים, או כבילה.',checks:['לבדוק מתח בפועל ביציאת הפאנלים','לבדוק חיבורים וכבילה לרפיון או קורוזיה','לבדוק כיוון והצללה של הפאנלים בשעות שונות']},
-  {icon:'waves',color:'var(--blue)',title:'חריגת זרם (Overcurrent)',cause:'המשאבה "מבקשת" יותר ממה שהמערכת מתוכננת אליו - עומק שאיבה גבוה מהמתוכנן או סתימה.',checks:['לבדוק סתימות בצנרת או בפילטר','לבדוק עומק שאיבה בפועל מול המפרט המקורי','לבדוק מצב שסתומים ואל-חזרים']},
-  {icon:'alert-circle',color:'var(--stuck)',title:'הגנת ריצה יבשה (Dry Run)',cause:'אין מספיק מים במקור (בור/נהר) והמערכת מפסיקה כהגנה על המשאבה.',checks:['לבדוק מפלס מים בפועל במקור','לבדוק שהחיישן/פלוט לא תקוע, מכוסה בוץ, או מזוהם','לבדוק שהצנרת השקועה במים ולא נחשפה']},
-  {icon:'wifi',color:'var(--purple)',title:'תקלת תקשורת/תצוגה',cause:'כשל בתקשורת בין לוח הבקרה לאינוורטר - לעיתים חיבור רפוי או כבל פגום.',checks:['לבדוק כבל תקשורת (RS485/RJ45) שלא רפוי או קרוע','לאתחל את המערכת - כיבוי מלא והדלקה מחדש','אם חוזר - לתעד קוד שגיאה מדויק לפני פנייה ליצרן']}
+// Real fault/alarm data paraphrased (own wording) from the official manuals:
+// - Nastec VASCO Solar VAriable Speed COntroller operating manual (ch. 7,
+//   "Protections and alarms", and ch. 10 "Trouble-shooting chart")
+// - Caprari submersible pump/motor use and maintenance instructions
+//   ("Troubleshooting" chapter, common to the Caprari submersible range)
+const VASCO_FAULTS = [
+  {icon:'alert-triangle',color:'var(--red)',title:'OVERCURRENT MOT.',cause:'זרם המנוע גבוה מהערך המוגדר. לרוב כי ירידת המתח שגורם לה האינוורטר מעלה את הזרם הנכנס מעבר לנקוב.',checks:['לוודא שפרמטר "זרם מנוע נקוב" מוגדר כ-10% מעל הערך שבתווית המנוע (כמומלץ ביצרן)','לבדוק מול יצרן המנוע אם הוא מסוגל לספוג את הזרם הזה','לבדוק סיבות נוספות לעומס יתר (ראה גם OVERLOAD INV. למטה)']},
+  {icon:'zap',color:'var(--amber)',title:'UNDER VOLTAGE / OVER VOLTAGE',cause:'מתח האספקה נמוך או גבוה מדי.',checks:['לבדוק את מקור המתח (רשת/פאנלים) ואת הסיבה לחריגה','לבדוק כבילה וחיבורים לרפיון או קורוזיה']},
+  {icon:'flame',color:'var(--orange)',title:'OVER TEMP. INV.',cause:'התחממות יתר של האינוורטר.',checks:['לוודא שטמפ׳ הסביבה מתחת ל-40°C','לבדוק שהמאוורר העזר תקין ושיש מספיק אוורור סביב היחידה','אפשר להוריד את תדר ה-PWM (בתפריט הפרמטרים המתקדמים) כדי להפחית חום']},
+  {icon:'alert-circle',color:'var(--stuck)',title:'NO WATER (DRY RUN COSPHI)',cause:'ה-cosphi של המשאבה נמוך מהסף שהוגדר - סימן שהיא "יבשה" ורצה בלי מים.',checks:['לבדוק שהמשאבה משוחררת (primed) ויש מים במקור','לבדוק שערך ה-cosphi המוגדר נכון (בערך 60% מה-cosphi הנקוב בתווית המנוע)','המערכת תנסה להפעיל מחדש לבד אחרי 10, 20, 40, 80, 160 דקות — זה תקין, לא תקוע']},
+  {icon:'droplet',color:'var(--blue)',title:'PRESS/FLOW/TEMP SENS. FAULT',cause:'תקלה באחד החיישנים (לחץ / ספיקה / טמפרטורה).',checks:['לבדוק את החיישן הרלוונטי','לבדוק את חיווט החיישן לרפיון או נזק']},
+  {icon:'wind',color:'var(--purple)',title:'OVER PRESSURE / UNDER PRESSURE',cause:'הלחץ הנמדד חרג מהטווח המוגדר במערכת.',checks:['לבדוק את הסיבה לחריגה (למשל: צנרת שבורה, שסתום פתוח)','לבדוק שערכי הלחץ המקסימלי/מינימלי מוגדרים נכון']},
+  {icon:'battery',color:'var(--red)',title:'OVERLOAD INV.',cause:'הזרם שהעומס דורש חורג מיכולת האינוורטר (יכול לספוג 101% לעד 10 דק׳, 110% לעד דקה).',checks:['להאריך את זמן ה-ramp-up (עליית מהירות הדרגתית)','לוודא שזרם העומס נמוך ב-10% לפחות מהזרם הנקוב של VASCO','לבדוק ירידת מתח לאורך כבל האספקה למנוע']},
 ];
+const VASCO_TROUBLESHOOTING = [
+  {title:'המסך לא נדלק', checks:['לבדוק את הכבל השטוח בין לוח התצוגה ללוח הבקרה','לבדוק נתיכים','לוודא שכבלי המתח מחוברים כראוי']},
+  {title:'תנודות תדר/לחץ במצב לחץ קבוע', checks:['לבדוק את מיכל הלחץ ואת לחץ הטעינה המקדימה שלו','לכוון את פרמטרי Ki/Kp (תפריט Installer)']},
+  {title:'המשאבה נדלקת ונכבית שוב ושוב', checks:['לבדוק את הגדרת "תדר עצירה מינימלי" (f min Q=0)','להגדיל את זמן ההשהיה לפני עצירה (stop delay)']},
+]
+const CAPRARI_FAULTS = [
+  {icon:'x',color:'var(--red)',title:'המנוע לא מתחיל',checks:['לוודא שהמנוע מקבל מתח בפועל','לוודא שהמפסק במצב הפעלה (ON)','לבדוק שאין מערכת הגנה אוטומטית שחוסמת הפעלה']},
+  {icon:'zap',color:'var(--amber)',title:'נתיכים נשרפים בהפעלה',checks:['לוודא שהנתיכים מהסוג והדירוג הנכון','לבדוק בידוד חשמלי (עם אוהם-מטר)','לבדוק כבל שבור','לוודא שמתח הרשת תואם לתווית המנוע']},
+  {icon:'alert-triangle',color:'var(--orange)',title:'ממסר העומס נופל אחרי שניות',cause:'בד"כ חוסר איזון בין הפאזות או נעילה מכנית.',checks:['לוודא שכל הפאזות מקבלות מתח מלא ושהחיבורים הדוקים','לבדוק חוסר איזון זרם בין הפאזות','לבדוק אם הרוטור נתקע - לנסות לשחרר ידנית אחרי ניתוק חשמל','לוודא שמתח הרשת תואם למנוע']},
+  {icon:'clock',color:'var(--orange)',title:'ממסר העומס נופל אחרי כמה דקות',checks:['לבדוק שהגדרת הממסר נכונה','לבדוק אם מתח הרשת נמוך מדי','לבדוק חוסר איזון בין הפאזות וטמפ׳ גבוהה בלוח החשמל','לבדוק שכיוון הסיבוב נכון (לא הפוך)']},
+  {icon:'activity',color:'var(--blue)',title:'צריכת חשמל מוגזמת',checks:['לבדוק אם מהירות הסיבוב גבוהה מדי','לבדוק חיכוך מכני שמונע סיבוב חופשי','לבדוק יישור (alignment) ומצב אטם הציר (packing gland)','לבדוק אם הספיקה גבוהה מדי - אפשר לצמצם עם שסתום']},
+]
+// Real fault/causes/remedies paraphrased (own wording) from official manuals:
+// Rovatti A. & Figli Pompe "Troubleshooting" chapter (PTO-driven centrifugal
+// pumps), and SAER Elettropompe FS98/PMK/IR "Inconveniences, Causes and
+// Remedies" chapter (submersible electropumps).
+const ROVATTI_FAULTS = [
+  {icon:'lock',color:'var(--red)',title:'המשאבה חסומה',checks:['חלקים נעולים מחלודה אחרי תקופה ארוכה של אי-שימוש - למלא שמן נגד חלודה, להמתין כמה דקות, לנסות להזיז את הציר ביד','גוף זר בתוך המשאבה - לפרק את תומך היניקה או המשאבה','שבר בחלק פנימי - לפרק ולהחליף חלקים']},
+  {icon:'droplet',color:'var(--blue)',title:'המשאבה לא נפרמת (no prime)',checks:['גוף המשאבה לא מלא לגמרי - למלא מים','אוויר בצנרת היניקה - לבדוק אטמים וחיבורים','גובה יניקה גבוה מדי - להקטין','מהירות סיבוב נמוכה מדי - להגביר','קוטר צנרת יניקה קטן מדי - להחליף','כיוון סיבוב הפוך (במנוע חשמלי) - להפוך','מפרפרות/לוחית שחיקה בלויות - להחליף']},
+  {icon:'wind',color:'var(--amber)',title:'לחץ ו/או ספיקה לא מספיקים',checks:['רשת יניקה סתומה - לשטוף ולנקות','צנרת יניקה שקועה/מעוכה - להחליף','מהירות סיבוב נמוכה מדי - להגביר','גובה יניקה גבוה מדי - להקטין','מפרפרת סתומה בגוף זר - לפרק ולנקות','אוויר בצנרת היניקה - לבדוק אטמים','מפרפרות/לוחית שחיקה בלויות - להחליף']},
+  {icon:'volume-2',color:'var(--purple)',title:'המשאבה רועשת ורוטטת',checks:['פעולה בקוויטציה - לאתר סיבה ולהקטין את גובה היניקה במידת הצורך','חלקים לא מאוזנים, מיסבים/גלגלי שיניים בלויים - לפרק ולבדוק','המשאבה או הצנרת לא מקובעות היטב - לקבע']},
+]
+const SAER_FAULTS = [
+  {icon:'x',color:'var(--red)',title:'המשאבה לא מתחילה בכלל',checks:['אין מתח בכבל המנוע - לבדוק את המכשיר/הקו החשמלי','נתיכים שרופים - להחליף באותו ערך','כבל מנוע קרוע - לתקן או להחליף','מנוע תקול - להחליף']},
+  {icon:'alert-circle',color:'var(--orange)',title:'ממסר תרמי נופל, הצריכה תקינה',checks:['הממסר לא מכויל נכון - לכייל מחדש','ממסר פגום - להחליף']},
+  {icon:'activity',color:'var(--amber)',title:'ממסר תרמי נופל, הצריכה לא מאוזנת',checks:['מתח לא זהה בין הפאזות, או חיבורי כבלים רפויים','המשאבה או המנוע תקועים - לפרק ולנקות','חול רב מדי במים','חיווט המנוע שגוי או כיוון סיבוב הפוך - לתקן חיבור']},
+  {icon:'droplet',color:'var(--blue)',title:'דליפות בצנרת / חלקים פנימיים בלויים',checks:['לבדוק דליפות בצנרת ההזרמה - לתקן/להחליף','לבדוק שחיקת חלקים פנימיים - להחליף','אוויר או גז במים - לבדוק את מקור המים']},
+  {icon:'wind',color:'var(--purple)',title:'רעידות / רעש גבוה',checks:['מפרפרות סתומות - לפרק ולנקות','מפלס המים בבור נמוך מהרגיל, או המשאבה פועלת בעומק (head) נמוך מדי - להוריד את עומק ההתקנה או לבדוק את ה-NPSH של המערכת','חלקים מכניים בלויים - לפרק ולשפץ']},
+]
+const PANEL_FAULTS = [
+  {icon:'sun',color:'var(--amber)',title:'ירידה בייצור חשמל',checks:['לבדוק לכלוך/אבק/עלים שמכסים את הפאנלים - לנקות','לבדוק הצללה חדשה (צמחייה שגדלה, מבנה חדש)','לבדוק חיבורי מחברים (connectors) לקורוזיה או רפיון']},
+  {icon:'alert-triangle',color:'var(--red)',title:'נקודה חמה / Hot Spot',cause:'תא סולארי חלקי או מוצל גורם להתחממות מקומית שיכולה לפגוע בפאנל.',checks:['לבדוק חזותית כתמים כהים/שרופים על הפאנל','לבדוק שדיודות המעקף (bypass diodes) תקינות','להחליף פאנל אם הנזק משמעותי']},
+  {icon:'x',color:'var(--stuck)',title:'סדק / שבר בפאנל',checks:['לבדוק חזותית אחרי רוח חזקה/ברד/פגיעה מכנית','פאנל סדוק בדרך כלל ממשיך לעבוד בירידה הדרגתית - לתעד ולתכנן החלפה']},
+  {icon:'zap',color:'var(--orange)',title:'קופסת חיבורים (junction box) לא תקינה',checks:['לבדוק סימני התחממות/התכה בקופסה','לבדוק חיבורי כבלים בקופסה לרפיון או קורוזיה']},
+]
+const SPIS_MANUFACTURERS = [
+  {id:'vasco', label:'VASCO Solar', icon:'zap'},
+  {id:'caprari', label:'Caprari', icon:'droplet'},
+  {id:'rovatti', label:'Rovatti', icon:'droplet'},
+  {id:'saer', label:'SAER', icon:'droplet'},
+  {id:'panel', label:'פאנלים', icon:'sun'},
+  {id:'diagnose', label:'אבחן בעיה (AI)', icon:'search'},
+]
+var spisManufacturer = 'vasco'
+function setSpisManufacturer(id) { spisManufacturer = id; showSpisModal() }
 function showSpisModal() {
+  function faultCard(f) {
+    return `<div class="card" style="border:1px solid var(--line);border-right:3px solid ${f.color};padding:12px 14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        ${iconBadge(f.icon, f.color)}
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);direction:ltr;text-align:right">${f.title}</div>
+      </div>
+      ${f.cause?`<div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>`:''}
+      ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
+    </div>`
+  }
+  var tabsHtml = `<div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto">
+    ${SPIS_MANUFACTURERS.map(function(m){
+      var active = m.id === spisManufacturer
+      return `<button onclick="setSpisManufacturer('${m.id}')" style="flex-shrink:0;padding:8px 12px;border-radius:var(--radius-md);font-size:var(--fs-md);font-weight:600;background:${active?'var(--gold)':'var(--surface-2)'};color:${active?'#fff':'var(--t2)'}">${m.label}</button>`
+    }).join('')}
+  </div>`
+  var contentHtml = ''
+  if(spisManufacturer === 'vasco') {
+    contentHtml = `<div style="font-size:var(--fs-base);font-weight:700;color:var(--gold);margin-bottom:8px">${icon('zap')} אזעקות</div>` +
+      VASCO_FAULTS.map(faultCard).join('') +
+      `<div style="font-size:var(--fs-base);font-weight:700;color:var(--gold);margin:14px 0 8px">${icon('search')} בדיקות נוספות</div>` +
+      VASCO_TROUBLESHOOTING.map(function(f){ return faultCard({icon:'search',color:'var(--t3)',title:f.title,checks:f.checks}) }).join('')
+  } else if(spisManufacturer === 'caprari') {
+    contentHtml = CAPRARI_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'rovatti') {
+    contentHtml = ROVATTI_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'saer') {
+    contentHtml = SAER_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'panel') {
+    contentHtml = PANEL_FAULTS.map(faultCard).join('')
+  } else if(spisManufacturer === 'diagnose') {
+    contentHtml = renderSpisDiagnoseForm()
+  }
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:4px">${icon('tool')} אבחון תקלות SPIS</div>
-        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">רפרנס מהיר לתקלות נפוצות באינוורטר משאבה סולארית</div>
-        ${SPIS_FAULTS.map(function(f){
-          return `<div class="card" style="border:1px solid var(--line);border-right:3px solid ${f.color};padding:12px 14px;margin-bottom:10px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-              ${iconBadge(f.icon, f.color)}
-              <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${f.title}</div>
-            </div>
-            <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:8px;line-height:1.5">${f.cause}</div>
-            ${f.checks.map(function(c){ return `<div style="font-size:var(--fs-md);color:var(--t1);margin-bottom:3px">${icon('check')} ${c}</div>` }).join('')}
-          </div>`
-        }).join('')}
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה מדויק ופנה ליצרן/לתמיכה הטכנית.</div>
+        <div style="font-size:var(--fs-md);color:var(--t3);margin-bottom:14px">מתוך מדריכי היצרן הרשמיים</div>
+        ${tabsHtml}
+        ${contentHtml}
+        ${spisManufacturer!=='diagnose' ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:6px;line-height:1.5">אם התקלה חוזרת אחרי הבדיקות האלה - תעד קוד שגיאה/הודעה מדויקת ופנה ליצרן או לתמיכה הטכנית.</div>` : ''}
         <button onclick="closeModal()" style="width:100%;margin-top:14px;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">סגור</button>`, {modalStyle:'max-height:80vh;overflow-y:auto'})
 }
 
+// ── AI-POWERED FAULT DIAGNOSIS ────────────────────
+var diagnosePhotos = []
+var diagnoseResult = null
+var diagnoseBusy = false
+function buildSpisKnowledgeContext() {
+  function lines(arr, label) {
+    return label + ':\n' + arr.map(function(f){
+      return '- ' + f.title + (f.cause?(' | סיבה: '+f.cause):'') + ' | בדיקות: ' + f.checks.join('; ')
+    }).join('\n')
+  }
+  return [
+    lines(VASCO_FAULTS, 'VASCO Solar - אזעקות'),
+    lines(VASCO_TROUBLESHOOTING.map(function(f){return {title:f.title, checks:f.checks}}), 'VASCO Solar - בדיקות נוספות'),
+    lines(CAPRARI_FAULTS, 'Caprari - משאבה/מנוע'),
+    lines(ROVATTI_FAULTS, 'Rovatti - משאבה'),
+    lines(SAER_FAULTS, 'SAER - משאבה'),
+    lines(PANEL_FAULTS, 'פאנלים סולאריים'),
+  ].join('\n\n')
+}
+function renderSpisDiagnoseForm() {
+  var photosHtml = diagnosePhotos.map(function(p, i){
+    return `<div style="position:relative;display:inline-block;margin-left:8px;margin-bottom:8px">
+      <img src="${p}" style="width:70px;height:70px;object-fit:cover;border-radius:var(--radius-md)"/>
+      <button onclick="removeDiagnosePhoto(${i})" style="position:absolute;top:-6px;left:-6px;background:var(--red);color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1">${icon('x')}</button>
+    </div>`
+  }).join('')
+  return `
+    <div style="font-size:var(--fs-md);color:var(--t2);margin-bottom:12px;line-height:1.5">תאר את התקלה שאתה רואה בשטח, ואפשר לצרף עד 3 תמונות (מסך תקלה, רכיב פגום וכו׳). Fieldy יאבחן בהתבסס על מדריכי היצרן שכבר טענו, ובידע כללי נוסף לפי הצורך.</div>
+    <textarea id="diagnose-desc" placeholder="למשל: המסך של VASCO מציג קוד שגיאה, המשאבה לא עולה בלחץ..." style="width:100%;min-height:80px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px"></textarea>
+    <div style="margin-bottom:10px">${photosHtml}</div>
+    ${diagnosePhotos.length < 3 ? `<button onclick="document.getElementById('diagnose-photo-input').click()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:9px 14px;color:var(--t2);font-size:var(--fs-base);font-weight:600;margin-bottom:12px">${icon('camera')} הוסף תמונה</button>` : ''}
+    <input id="diagnose-photo-input" type="file" accept="image/*" style="display:none" onchange="addDiagnosePhoto(this)"/>
+    <button onclick="runSpisDiagnosis()" ${diagnoseBusy?'disabled':''} style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:11px;color:#fff;font-size:var(--fs-base);font-weight:700;margin-bottom:12px">${diagnoseBusy?'...מאבחן':(icon('search')+' אבחן')}</button>
+    <div id="diagnose-result">${diagnoseResult ? `<div class="card" style="background:var(--surface-2);padding:14px;line-height:1.6;font-size:var(--fs-base);white-space:pre-line">${diagnoseResult}</div>` : ''}</div>
+  `
+}
+function addDiagnosePhoto(input) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    diagnosePhotos.push(dataUrl)
+    showSpisModal()
+  })
+}
+function removeDiagnosePhoto(i) {
+  diagnosePhotos.splice(i, 1)
+  showSpisModal()
+}
+async function runSpisDiagnosis() {
+  const desc = (document.getElementById('diagnose-desc') || {}).value || ''
+  if(!desc.trim() && !diagnosePhotos.length) { alert('תאר את התקלה או צרף תמונה'); return }
+  diagnoseBusy = true
+  diagnoseResult = null
+  showSpisModal()
+  const sys = 'אתה עוזר טכני לאורי, מנהל אזורי SPIS בפיליפינים, לאבחון תקלות בשטח במערכות השקיה סולאריות. ' +
+    'התבסס קודם כל על הידע האמיתי הבא ממדריכי היצרן (VASCO Solar/Nastec, Caprari, Rovatti, SAER, ופאנלים סולאריים) - זה המקור העיקרי והאמין ביותר שלך:\n\n' +
+    buildSpisKnowledgeContext() +
+    '\n\nאם התיאור או התמונה לא מתאימים לשום דבר ברשימה - השתמש בידע הנדסי כללי שלך על מערכות שאיבה סולאריות, אבל ציין בבירור שזו הערכה כללית ולא מתוך מדריך ספציפי. אם יש תמונה - תסתכל עליה בעיון (קודי שגיאה על מסך, סימני שריפה/חלודה, מצב חיווט וכו׳). תן תשובה מסודרת וממוקדת בעברית: מה כנראה הבעיה, ומה לבדוק/לנסות קודם. אל תמציא קוד שגיאה שלא ראית בפועל.'
+  const content = []
+  if(desc.trim()) content.push({type:'text', text: desc.trim()})
+  diagnosePhotos.forEach(function(p){
+    const parts = p.split(',')
+    const mediaType = (parts[0].match(/data:(.*?);/) || [,'image/jpeg'])[1]
+    content.push({type:'image', source:{type:'base64', media_type: mediaType, data: parts[1]}})
+  })
+  try {
+    const reply = await callClaude([{role:'user', content}], sys)
+    diagnoseResult = reply.trim()
+  } catch(e) {
+    diagnoseResult = '✕ שגיאה: ' + e.message
+  }
+  diagnoseBusy = false
+  showSpisModal()
+}
 function renderSites() {
   const el = document.getElementById('screen-sites')
   const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
@@ -2733,9 +2723,22 @@ function parseLatLon(str) {
   const s = String(str).trim()
   const dec = s.match(/^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/)
   if(dec) { const lat = +dec[1], lon = +dec[2]; return (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) ? {lat, lon} : null }
-  const dms = /(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*([NSEW])/gi
-  const parts = []; let d
-  while((d = dms.exec(s))) parts.push({v: (+d[1]) + (+d[2]) / 60 + ((+d[3]) || 0) / 3600, h: d[4].toUpperCase()})
+  function collect(re, hemFirst) {
+    re.lastIndex = 0
+    const parts = []; let d
+    while((d = re.exec(s))) {
+      const hem = hemFirst ? d[1] : d[4]
+      const deg = hemFirst ? d[2] : d[1]
+      const min = hemFirst ? d[3] : d[2]
+      const sec = hemFirst ? d[4] : d[3]
+      parts.push({v: (+deg) + (+min) / 60 + ((+sec) || 0) / 3600, h: hem.toUpperCase()})
+    }
+    return parts
+  }
+  // Try "hemisphere after the numbers" (16°58'34.49"N) first, then fall back
+  // to "hemisphere before the numbers" (N 16°58'34.49") — Uri's actual format.
+  let parts = collect(/(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*([NSEW])/gi, false)
+  if(parts.length < 2) parts = collect(/([NSEW])\s*(\d{1,3})[°\s]+(\d{1,2})['′\s]+(\d{1,2}(?:\.\d+)?)?["″\s]*/gi, true)
   if(parts.length < 2) return null
   let lat = null, lon = null
   parts.forEach(pt => { if(pt.h === 'N' || pt.h === 'S') lat = pt.h === 'S' ? -pt.v : pt.v; else lon = pt.h === 'W' ? -pt.v : pt.v })
@@ -2920,7 +2923,7 @@ function draftStatusMessage(kind) {
     ? 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח עדכון קצר וברור לתא הערות (update) בפריט Monday.com על אתר עבודה. כתוב באנגלית מקצועית, 2-4 משפטים, ישר לעניין, כולל שם האתר, הסטטוס החדש, ומה קרה בפועל. בלי פתיח מיותר, רק את טקסט העדכון עצמו.'
     : 'אתה עוזר לאורי, מנהל אזורי SPIS בפיליפינים, לנסח מייל עדכון קצר ומקצועי (באנגלית) על שינוי סטטוס באתר עבודה, מוכן לשליחה. כלול שורת נושא (Subject) ואז גוף מייל קצר - 3-5 משפטים, טון ענייני ומקצועי. פורמט: שורה ראשונה "Subject: ..." ואז שורה ריקה ואז גוף המייל.'
   const userMsg = 'אתר: ' + name + (site&&site.province?(' ('+site.province+')'):'') + '\nסטטוס חדש: ' + STATUS_LABEL[status] + (site&&site.contractor?('\nקבלן: '+site.contractor):'') + '\nתיאור: ' + (desc || 'אין תיאור נוסף')
-  callClaude([{role:'user', content: userMsg}], withContext(sys)).then(function(reply){
+  callClaude([{role:'user', content: userMsg}], sys).then(function(reply){
     const text = reply.trim()
     window.__scDraftText = text
     resultEl.innerHTML = `<div style="background:var(--surface-3);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px;margin-bottom:10px">
@@ -2939,16 +2942,100 @@ function confirmStatusChange() {
 }
 
 let editingSiteName = null
+var siteCasePhotos = []
+function siteCasePhotosHtml() {
+  return siteCasePhotos.map(function(p, i){
+    return `<div style="position:relative;display:inline-block;margin-left:8px;margin-bottom:8px">
+      <img src="${p}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--radius-md)"/>
+      <button onclick="removeSiteCasePhoto(${i})" style="position:absolute;top:-6px;left:-6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;line-height:1">${icon('x')}</button>
+    </div>`
+  }).join('')
+}
+function addSiteCasePhoto(input) {
+  const f = input.files && input.files[0]; if(!f) return
+  readImageAsThumbnail(f, function(dataUrl) {
+    siteCasePhotos.push(dataUrl)
+    const el = document.getElementById('site-case-photos')
+    if(el) el.innerHTML = siteCasePhotosHtml()
+  })
+}
+function removeSiteCasePhoto(i) {
+  siteCasePhotos.splice(i, 1)
+  const el = document.getElementById('site-case-photos')
+  if(el) el.innerHTML = siteCasePhotosHtml()
+}
+function siteSuggestionKey(s) { return (s.issue||'') + '|' + (s.caseDetail||'') + '|' + ((s.casePhotos||[]).length) }
+function renderSiteSuggestionBox(s) {
+  if(!s.issue && !s.caseDetail) return ''
+  const key = siteSuggestionKey(s)
+  if(s.aiSuggestion && s.aiSuggestionFor === key) {
+    return `<div class="card" style="background:var(--surface-2);padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:var(--fs-md);font-weight:700;color:var(--gold)">${icon('search')} הצעת Fieldy</span>
+        <button onclick="suggestSiteFix(${jsArg(s.name)}, true)" style="background:none;color:var(--t3);font-size:var(--fs-sm)">${icon('refresh')} רענן</button>
+      </div>
+      <div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(s.aiSuggestion)}</div>
+    </div>`
+  }
+  return `<div id="site-suggestion-box" class="card" style="background:var(--surface-2);padding:12px 14px;margin-bottom:14px;text-align:center">
+    <div style="font-size:var(--fs-md);color:var(--t3)">...טוען הצעה</div>
+  </div>`
+}
+async function suggestSiteFix(siteName, force) {
+  const s = state.sites.find(x=>x.name===siteName)
+  if(!s || (!s.issue && !s.caseDetail)) return
+  const key = siteSuggestionKey(s)
+  if(!force && s.aiSuggestion && s.aiSuggestionFor === key) return
+  const box = document.getElementById('site-suggestion-box')
+  if(box) box.innerHTML = `<div style="font-size:var(--fs-md);color:var(--t3)">...טוען הצעה</div>`
+  const sys = 'אתה עוזר טכני לאורי, מנהל אזורי SPIS בפיליפינים, לאבחון תקלות בשטח במערכות השקיה סולאריות. ' +
+    'התבסס קודם כל על מדריכי היצרן האמיתיים הבאים (VASCO Solar/Nastec, Caprari, Rovatti, SAER, ופאנלים סולאריים):\n\n' +
+    buildSpisKnowledgeContext() +
+    '\n\nאם התיאור לא מתאים לשום דבר ברשימה - השתמש בידע הנדסי כללי ותציין זאת. תן תשובה קצרה וממוקדת בעברית (3-5 שורות): הערכה של מה כנראה קורה, ומה לבדוק/לנסות קודם. אל תמציא קוד שגיאה שלא נאמר.'
+  const content = []
+  const text = 'אתר: ' + s.name + (s.province?(' ('+s.province+')'):'') + '\nבעיה: ' + (s.issue||'-') + (s.caseDetail?('\nתיאור מקרה: '+s.caseDetail):'')
+  content.push({type:'text', text})
+  ;(s.casePhotos||[]).forEach(function(p){
+    const parts = p.split(',')
+    const mediaType = (parts[0].match(/data:(.*?);/) || [,'image/jpeg'])[1]
+    content.push({type:'image', source:{type:'base64', media_type: mediaType, data: parts[1]}})
+  })
+  try {
+    const reply = await callClaude([{role:'user', content}], sys)
+    const trimmed = reply.trim()
+    setState({sites: state.sites.map(function(x){ return x.name===siteName ? Object.assign({}, x, {aiSuggestion: trimmed, aiSuggestionFor: key}) : x })})
+    const boxNow = document.getElementById('site-suggestion-box')
+    if(boxNow) {
+      boxNow.style.textAlign = 'left'
+      boxNow.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:var(--fs-md);font-weight:700;color:var(--gold)">${icon('search')} הצעת Fieldy</span>
+        <button onclick="suggestSiteFix(${jsArg(siteName)}, true)" style="background:none;color:var(--t3);font-size:var(--fs-sm)">${icon('refresh')} רענן</button>
+      </div>
+      <div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(trimmed)}</div>`
+    }
+  } catch(e) {
+    if(box) box.innerHTML = `<div style="font-size:var(--fs-md);color:var(--red)">✕ ${esc(e.message)}</div>`
+  }
+}
 function showAddSite(name) {
   editingSiteName = name || null
   const s = name ? state.sites.find(x=>x.name===name) : null
+  siteCasePhotos = (s && s.casePhotos) ? s.casePhotos.slice() : []
   openModal(`
         <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:14px">${s?icon('edit') + ' עריכת אתר':'+ אתר חדש'}</div>
-        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}"/>
+        <label class="form-label">שם אתר</label><input id="add-site-name" class="form-input" placeholder="Nambaran Deep Well" value="${s?esc(s.name):''}" ${s?'':'oninput="clearTimeout(window.__dirAutofillT);window.__dirAutofillT=setTimeout(autofillFromDirectory,500)" onblur="autofillFromDirectory()"'}/>
+        <div id="directory-match-hint" style="display:none;font-size:var(--fs-sm);color:var(--green);margin:-6px 0 10px"></div>
+        ${s&&(state.siteDirectory||[]).length?`<button onclick="matchSiteToDirectory(${jsArg(s.name)})" style="width:100%;background:var(--surface-2);border-radius:var(--radius-md);padding:9px;margin-bottom:12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('search')} התאם לספריית Monday</button>`:''}
         ${voiceRowHtml('add-site-name')}
         <label class="form-label">מחוז</label><input id="add-site-province" class="form-input" placeholder="Nueva Vizcaya" value="${s?esc(s.province):''}"/>
         <label class="form-label">בעיה</label><input id="add-site-issue" class="form-input" placeholder="Lock Rotor A08" value="${s?esc(s.issue):''}"/>
         ${voiceRowHtml('add-site-issue')}
+        <label class="form-label">תיאור מקרה מפורט (רשות)</label>
+        <textarea id="add-site-case" placeholder="מה בדיוק קרה, מה כבר ניסית, מה אתה רואה בשטח..." style="width:100%;min-height:70px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px">${s?esc(s.caseDetail||''):''}</textarea>
+        <div id="site-case-photos">${siteCasePhotosHtml()}</div>
+        ${siteCasePhotos.length < 3 ? `<button onclick="document.getElementById('site-case-photo-input').click()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-md);font-weight:600;margin-bottom:12px">${icon('camera')} הוסף תמונה למקרה</button>` : ''}
+        <input id="site-case-photo-input" type="file" accept="image/*" style="display:none" onchange="addSiteCasePhoto(this)"/>
+        ${s ? renderSiteSuggestionBox(s) : ''}
         <label class="form-label">מיקום / קואורדינטות</label>
         <input id="add-site-location" class="form-input" placeholder="16.9754, 121.8107 או שם מקום" value="${s?esc(s.location):''}"/>
         <div style="font-size:var(--fs-sm);color:var(--t3);margin:-6px 0 12px">קישור לגוגל מפות נוצר אוטומטית מזה</div>
@@ -2968,7 +3055,7 @@ function showAddSite(name) {
           <div><label class="form-label">מספר מכשיר ב-Remo</label>
             <input id="add-site-remo" class="form-input" placeholder="למשל 1234 - למציאה בחיפוש ב-Remo" value="${s?esc(s.remo):''}" style="direction:ltr"/></div>
           <div><label class="form-label">שנת חוזה</label>
-            <select id="add-site-year" class="form-select">
+            <select id="add-site-year" class="form-select" ${s?'':'onchange="autofillFromDirectory()"'}>
               ${optionsHtml([['','—'],['2024','2024'],['2025','2025'],['2026','2026']], (s&&s.year)||'')}
             </select></div>
         </div>
@@ -2978,6 +3065,10 @@ function showAddSite(name) {
           <button class="btn-secondary" onclick="closeModal()">ביטול</button>
         </div>
         ${s?`<button id="delete-site-btn" onclick="closeModal();deleteSite(${jsArg(s.name)})" style="width:100%;margin-top:12px;background:none;border:1px solid #ef444444;border-radius:var(--radius-md);padding:10px;color:var(--red);font-size:var(--fs-base)">${icon('trash')} מחק אתר</button>`:''}`)
+  if(s && (s.issue || s.caseDetail)) {
+    const key = siteSuggestionKey(s)
+    if(!(s.aiSuggestion && s.aiSuggestionFor === key)) suggestSiteFix(s.name)
+  }
 }
 
 function doAddSite() {
@@ -2987,6 +3078,8 @@ function doAddSite() {
     name,
     province:document.getElementById('add-site-province').value,
     issue:document.getElementById('add-site-issue').value,
+    caseDetail:document.getElementById('add-site-case').value.trim(),
+    casePhotos:siteCasePhotos.slice(),
     location:document.getElementById('add-site-location').value.trim(),
     mondayLink:document.getElementById('add-site-monday').value.trim(),
     remo:document.getElementById('add-site-remo').value.trim(),
@@ -2996,7 +3089,12 @@ function doAddSite() {
     photo:pendingPhoto
   }
   if(editingSiteName) {
-    site.id = (state.sites.find(x=>x.name===editingSiteName)||{}).id || Date.now()
+    const prev = state.sites.find(x=>x.name===editingSiteName) || {}
+    site.id = prev.id || Date.now()
+    if(prev.aiSuggestion && siteSuggestionKey(prev) === siteSuggestionKey(site)) {
+      site.aiSuggestion = prev.aiSuggestion
+      site.aiSuggestionFor = prev.aiSuggestionFor
+    }
     setState({sites:state.sites.map(x=>x.name===editingSiteName?site:x)})
     editingSiteName = null
   } else {
@@ -3130,7 +3228,7 @@ async function doAction(type) {
     monday:`Write a Monday.com task update in English for: ${actionCtx?.text}. Format: Status / Issue / Next Action / Owner.`
   }
   try {
-    const result = await callClaude([{role:'user',content:prompts[type]}], withContext(null))
+    const result = await callClaude([{role:'user',content:prompts[type]}])
     document.getElementById('action-loading').style.display='none'
     document.getElementById('action-result').textContent=result
     document.getElementById('action-result-container').style.display='block'
@@ -3187,6 +3285,12 @@ function renderSettings() {
           <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען מקובץ</button>
         </div>
         <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('clipboard')} ספריית אתרים (Monday)</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${(state.siteDirectory||[]).length ? ('טעונים כרגע ' + (state.siteDirectory||[]).length + ' אתרים מ-Monday.') : 'טען רשימת אתרים מ-Monday פעם אחת — Fieldy ישתמש בה למילוי אוטומטי כשמוסיפים אתר, ולענות על שאלות גם על אתרים שלא הוספת עדיין ידנית.'}</div>
+        <button onclick="document.getElementById('import-directory-file').click()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען קובץ ספרייה</button>
+        <input id="import-directory-file" type="file" accept="application/json" style="display:none" onchange="importSiteDirectory(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
@@ -3293,6 +3397,147 @@ function importBackup(file) {
   reader.readAsText(file)
 }
 
+// ── SITE DIRECTORY (from Monday.com export) ───────
+// A reference table of known sites (name, province, coordinates, contractor,
+// REMO id) imported once from an exported spreadsheet, used to auto-fill new
+// site entries and to give Ask Fieldy answers about sites Uri hasn't
+// manually added to Fieldy yet. This merges additively — it never touches
+// state.sites (the sites Uri is actually tracking day to day).
+function importSiteDirectory(file) {
+  if(!file) return
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    var imported
+    try { imported = JSON.parse(e.target.result) }
+    catch(err) {
+      alert('הקובץ לא נטען — זה לא JSON תקין (' + err.message + ').')
+      return
+    }
+    if(!Array.isArray(imported) || !imported.every(function(x){ return x && typeof x.name === 'string' })) {
+      alert('הקובץ לא נטען — צריך להיות רשימה של אתרים, כל אחד עם לפחות שדה name.')
+      return
+    }
+    // Key by name+year+siteNumber, not name alone — sites with the same name
+    // in different contract years are different physical sites with
+    // different coordinates, not the same site updated.
+    const keyOf = function(s){ return [s.name, s.year||'', s.siteNumber||''].join('|') }
+    const byKey = {}
+    ;(state.siteDirectory || []).forEach(function(s){ byKey[keyOf(s)] = s })
+    imported.forEach(function(s){ byKey[keyOf(s)] = s })
+    setState({siteDirectory: Object.values(byKey)})
+    alert('נטענו ' + imported.length + ' אתרים לספרייה ✓ (סה"כ בספרייה: ' + Object.values(byKey).length + ')')
+  }
+  reader.readAsText(file)
+}
+function matchSiteToDirectory(siteName) {
+  const matches = findInSiteDirectory(siteName)
+  if(!matches.length) { alert('לא נמצאה התאמה בספריית Monday לשם הזה.'); return }
+  if(matches.length === 1) { showDirectoryDiffModal(siteName, matches[0]); return }
+  showDirectoryPickerModal(siteName, matches)
+}
+function showDirectoryPickerModal(siteName, matches) {
+  window.__dirPickerSite = siteName
+  window.__dirPickerMatches = matches
+  openModal(`
+    <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${icon('alert-triangle')} כמה אתרים דומים</div>
+    <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:14px">"${esc(siteName)}" תואם ${matches.length} רשומות שונות בספרייה — הן כנראה אתרים שונים בפועל (קואורדינטות שונות). בחר את הנכונה:</div>
+    ${matches.map(function(m, i){
+      return `<button onclick="showDirectoryDiffModal(${jsArg(siteName)}, window.__dirPickerMatches[${i}])" style="width:100%;text-align:right;background:var(--surface-2);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:8px;border:1px solid var(--line)">
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${esc(m.province||'')}${m.municipality?(', '+esc(m.municipality)):''} · שנה: ${esc(m.year||'-')} · ${esc(m.contractor||'-')}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px;direction:ltr;text-align:left">${esc(m.location||'—')}</div>
+      </button>`
+    }).join('')}
+    <button class="btn-secondary" style="width:100%;margin-top:6px" onclick="showAddSite(${jsArg(siteName)})">ביטול</button>
+  `)
+}
+function showDirectoryDiffModal(siteName, match) {
+  const site = state.sites.find(x => x.name === siteName)
+  if(!site) return
+  const fields = [
+    ['province', 'מחוז'],
+    ['location', 'מיקום / קואורדינטות'],
+    ['contractor', 'קבלן'],
+    ['remo', 'מספר Remo'],
+    ['year', 'שנת חוזה'],
+  ]
+  const rows = fields.map(function(f){
+    const key = f[0], label = f[1]
+    const current = site[key] || ''
+    const proposed = key === 'year' ? String(match.year || '') : (match[key] || '')
+    if(!proposed || String(proposed) === String(current)) return ''
+    const differs = current && String(current) !== String(proposed)
+    return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer">
+      <input type="checkbox" class="dir-diff-check" data-field="${key}" data-value="${esc(proposed)}" ${differs ? '' : 'checked'} style="width:18px;height:18px;accent-color:var(--gold);margin-top:2px;flex-shrink:0"/>
+      <div style="flex:1">
+        <div style="font-size:var(--fs-sm);color:var(--t2)">${label}</div>
+        ${differs ? `<div style="font-size:var(--fs-base);color:var(--red);text-decoration:line-through">${esc(current)}</div>` : ''}
+        <div style="font-size:var(--fs-base);color:var(--t1);font-weight:600">${esc(String(proposed))}</div>
+      </div>
+    </label>`
+  }).join('')
+  window.__dirDiffSite = siteName
+  openModal(`
+    <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${icon('search')} התאמה מהספרייה</div>
+    <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:4px">${esc(match.name)}</div>
+    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:14px">שנה בספרייה: ${esc(match.year||'-')} · סמן מה לעדכן. שדות שכבר שונים מסומנים באדום — בטל סימון אם אתה לא רוצה לדרוס אותם.</div>
+    ${rows || `<div style="text-align:center;color:var(--t3);font-size:var(--fs-base);padding:16px 0">אין הבדלים — האתר כבר תואם את הספרייה.</div>`}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn-primary" style="flex:1" onclick="applyDirectoryDiff()">עדכן אתר</button>
+      <button class="btn-secondary" onclick="showAddSite(${jsArg(siteName)})">ביטול</button>
+    </div>
+  `)
+}
+function applyDirectoryDiff() {
+  const siteName = window.__dirDiffSite
+  const checks = document.querySelectorAll('.dir-diff-check:checked')
+  const patch = {}
+  checks.forEach(function(c){ patch[c.getAttribute('data-field')] = c.getAttribute('data-value') })
+  if(Object.keys(patch).length) {
+    setState({sites: state.sites.map(function(x){ return x.name === siteName ? Object.assign({}, x, patch) : x })})
+  }
+  showAddSite(siteName)
+}
+function findInSiteDirectory(name) {
+  if(!name || !(state.siteDirectory || []).length) return []
+  const norm = s => String(s).toLowerCase().replace(/[^a-z0-9א-ת]/g, '')
+  const target = norm(name)
+  if(!target) return []
+  return state.siteDirectory.filter(function(s){
+    const n = norm(s.name)
+    return n === target || n.includes(target) || target.includes(n)
+  })
+}
+function autofillFromDirectory() {
+  if(editingSiteName) return
+  const nameEl = document.getElementById('add-site-name')
+  const hint = document.getElementById('directory-match-hint')
+  if(!nameEl) return
+  let matches = findInSiteDirectory(nameEl.value.trim())
+  if(!matches.length) { if(hint) hint.style.display = 'none'; return }
+  // Same name can be genuinely different sites in different contract years
+  // (different coordinates) — never guess between them. If the year field
+  // already narrows it to one, use that; otherwise ask instead of autofilling.
+  const yearEl = document.getElementById('add-site-year')
+  if(matches.length > 1 && yearEl && yearEl.value) {
+    const narrowed = matches.filter(function(m){ return String(m.year) === String(yearEl.value) })
+    if(narrowed.length) matches = narrowed
+  }
+  if(matches.length > 1) {
+    if(hint) { hint.style.display = 'block'; hint.innerHTML = icon('alert-triangle') + ' ' + matches.length + ' אתרים בשם דומה נמצאו בשנים שונות (מיקומים שונים!) — בחר שנת חוזה כדי לצמצם, לא מילאתי אוטומטית' }
+    return
+  }
+  const match = matches[0]
+  const setIfEmpty = function(id, val){ const el = document.getElementById(id); if(el && !el.value && val) el.value = val }
+  setIfEmpty('add-site-province', match.province)
+  setIfEmpty('add-site-location', match.location)
+  setIfEmpty('add-site-remo', match.remo)
+  const contractorEl = document.getElementById('add-site-contractor')
+  if(contractorEl && !contractorEl.value && (match.contractor === 'asc' || match.contractor === '11-16')) contractorEl.value = match.contractor
+  if(yearEl && !yearEl.value && match.year) yearEl.value = String(match.year)
+  if(hint) { hint.style.display = 'block'; hint.innerHTML = icon('check') + ' נמצא ב-Monday — פרטים מולאו אוטומטית' }
+}
+
 async function saveServerConfig() {
   serverUrl = document.getElementById('settings-server-url').value.trim().replace(/\/+$/, '')
   serverPasscode = document.getElementById('settings-server-passcode').value.trim()
@@ -3352,13 +3597,30 @@ async function askFieldy() {
     const taskLines = [...state.tasks.now,...state.tasks.today].filter(t=>!t.done).slice(0,25)
       .map(t=>'- ['+(t.color||'')+'] '+t.text+(t.site?(' (אתר: '+t.site+')'):'')).join('\n')
     const peopleLines = state.people.map(p=>'- '+p.name+' ('+(p.role||'')+(p.company?', '+p.company:'')+')'+(p.pending?(' — ממתין: '+p.pending):'')).join('\n')
-    const context = 'אתרים פתוחים:\n'+(siteLines||'(אין)') +
+    const dirEntries = (state.siteDirectory || [])
+    let dirMatches = []
+    if(dirEntries.length) {
+      const qWords = question.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+      dirMatches = dirEntries.filter(function(s){
+        const hay = (s.name + ' ' + (s.province||'') + ' ' + (s.municipality||'')).toLowerCase()
+        return qWords.some(function(w){ return hay.includes(w) })
+      })
+      if(!dirMatches.length) dirMatches = dirEntries.slice(0, 80)
+      dirMatches = dirMatches.slice(0, 150)
+    }
+    const dirLines = dirMatches.map(function(s){
+      return '- ' + s.name + (s.province?' ('+s.province+(s.municipality?', '+s.municipality:'')+')':'') + (s.contractor?' | קבלן: '+s.contractor:'') + (s.remo?' | REMO: '+s.remo:'') + (s.year?' | שנה: '+s.year:'')
+    }).join('\n')
+    const curMood = getCurrentMood()
+    const context = 'תאריך היום: '+getToday()+(curMood&&MOOD_LIB[curMood.mood]?('\nמצב רוח נוכחי: '+MOOD_LIB[curMood.mood].label):'') +
+      '\n\nאתרים פתוחים:\n'+(siteLines||'(אין)') +
       '\n\nמשימות פתוחות:\n'+(taskLines||'(אין)') +
-      '\n\nאנשי קשר:\n'+(peopleLines||'(אין)')
+      '\n\nאנשי קשר:\n'+(peopleLines||'(אין)') +
+      (dirLines ? ('\n\nספריית אתרים מ-Monday (רפרנס בלבד, לא בהכרח פעילים כרגע — יכול להיות רשימה חלקית):\n'+dirLines) : '')
     const prompt = 'אתה עוזר תכנון שטח לאורי, מנהל אזורי (Region II, Cagayan Valley, פיליפינים, מתקיני SPIS). להלן המצב הנוכחי שלו:\n\n' + context +
       '\n\nהשאלה של אורי: ' + question +
       '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
-    const answer = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
+    const answer = (await callClaude([{role:'user', content: prompt}])).trim()
     answerEl.style.color = 'var(--t1)'
     answerEl.textContent = answer || 'לא התקבלה תשובה.'
     answerEl.style.display = 'block'
@@ -4358,7 +4620,6 @@ if(serverConfigured()) {
     refreshBadges()
     renderCurrentScreen()
   }).catch(function(e){ console.warn('boot: could not use server data, continuing with local data:', e && e.message ? e.message : e) })
-    .then(function(){ ensureDailyBriefing() })
   fetchInsights()
 }
 setInterval(function(){ if(checkChronology()) { refreshBadges(); renderCurrentScreen(); } }, 60000)
