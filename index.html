@@ -1920,12 +1920,23 @@ function priorityStuckSites() {
   return state.sites.filter(s => s.stuckSince && s.status !== 'resolved')
     .sort((a,b) => daysStuck(b) - daysStuck(a)).slice(0, 5)
 }
+// Exact-name lookup only (no fuzzy/keyword search — that stays local to Ask
+// Fieldy's own directory search) — a cheap fallback so a stuck site missing
+// contractor/REMO/year on its own record can still show it if the Monday
+// directory has it, without re-typing that info by hand.
+function directoryEntryFor(name) {
+  return (state.siteDirectory || []).find(function(d){ return d.name === name })
+}
 function assistantContext() {
   const today = getToday(), cur = getCurrentMood(), wf = getWeeklyFocus(), stuck = priorityStuckSites(), lead = getTodayLeadershipEntry()
   const lines = ['הקשר על אורי כרגע (נלקח אוטומטית מהאפליקציה שלו). תתחשב בו כשזה רלוונטי לבקשה, ואל תצטט אותו בחזרה ואל תזכיר אותו כשהוא לא רלוונטי:', 'תאריך היום: ' + today]
   if(cur && MOOD_LIB[cur.mood]) lines.push('מצב רוח שסימן היום: ' + MOOD_LIB[cur.mood].label + (MOOD_LIB[cur.mood].taskLimit ? ' — עדיף לו תשובה קצרה עם צעד אחד ברור' : ''))
   if(state.focus && (!state.focusDate || state.focusDate === today)) lines.push('המוקד שלו להיום: ' + state.focus)
-  if(stuck.length) lines.push('אתרים תקועים: ' + stuck.map(s => s.name + ' (' + daysStuck(s) + ' ימים' + (s.issue ? ', ' + s.issue : '') + ')').join('; '))
+  if(stuck.length) lines.push('אתרים תקועים: ' + stuck.map(function(s){
+    const dir = !s.contractor || !s.remo || !s.year ? directoryEntryFor(s.name) : null
+    const extra = [!s.contractor && dir && dir.contractor && 'קבלן: '+dir.contractor, !s.remo && dir && dir.remo && 'REMO: '+dir.remo, !s.year && dir && dir.year && 'שנה: '+dir.year].filter(Boolean).join(', ')
+    return s.name + ' (' + daysStuck(s) + ' ימים' + (s.issue ? ', ' + s.issue : '') + (extra ? ', ' + extra : '') + ')'
+  }).join('; '))
   lines.push('מוקד המנהיגות השבועי שלו: "' + wf.theme + '" (' + wf.book + ') — ' + wf.text)
   if(lead && lead.improve) lines.push('מה שכתב היום שהוא רוצה לשפר כמנהיג: ' + lead.improve)
   return lines.join('\n')
@@ -3755,7 +3766,12 @@ async function askFieldy() {
     const taskLines = [...state.tasks.now,...state.tasks.today].filter(t=>!t.done).slice(0,25)
       .map(t=>'- ['+(t.color||'')+'] '+t.text+(t.site?(' (אתר: '+t.site+')'):'')).join('\n')
     const peopleLines = state.people.map(p=>'- '+p.name+' ('+(p.role||'')+(p.company?', '+p.company:'')+')'+(p.pending?(' — ממתין: '+p.pending):'')).join('\n')
-<<<<<<< ours
+    // Site-directory search stays local to Ask Fieldy (open-ended "what's near
+    // X" questions) rather than folding into assistantContext() — every AI
+    // call getting a keyword-matched slice of a few hundred Monday entries
+    // would add real prompt weight for no benefit outside this one feature.
+    // Date/mood are NOT rebuilt here: withContext() below already supplies
+    // them (plus focus/stuck sites/leadership theme) to every AI call.
     const dirEntries = (state.siteDirectory || [])
     let dirMatches = []
     if(dirEntries.length) {
@@ -3770,12 +3786,7 @@ async function askFieldy() {
     const dirLines = dirMatches.map(function(s){
       return '- ' + s.name + (s.province?' ('+s.province+(s.municipality?', '+s.municipality:'')+')':'') + (s.contractor?' | קבלן: '+s.contractor:'') + (s.remo?' | REMO: '+s.remo:'') + (s.year?' | שנה: '+s.year:'')
     }).join('\n')
-    const curMood = getCurrentMood()
-    const context = 'תאריך היום: '+getToday()+(curMood&&MOOD_LIB[curMood.mood]?('\nמצב רוח נוכחי: '+MOOD_LIB[curMood.mood].label):'') +
-      '\n\nאתרים פתוחים:\n'+(siteLines||'(אין)') +
-=======
     const context = 'אתרים פתוחים:\n'+(siteLines||'(אין)') +
->>>>>>> theirs
       '\n\nמשימות פתוחות:\n'+(taskLines||'(אין)') +
       '\n\nאנשי קשר:\n'+(peopleLines||'(אין)') +
       (dirLines ? ('\n\nספריית אתרים מ-Monday (רפרנס בלבד, לא בהכרח פעילים כרגע — יכול להיות רשימה חלקית):\n'+dirLines) : '')
