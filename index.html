@@ -2353,13 +2353,6 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
-      </div>
-      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">${tr('home_add_whatsapp')}</button>
-      ${dailyBriefingHtml()}
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ${tr('home_quote_label')}</span>
@@ -2367,6 +2360,13 @@ function renderHome() {
         </div>
         <div style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
+      </div>
+      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">${tr('home_add_whatsapp')}</button>
+      ${dailyBriefingHtml()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
         <div style="display:flex;justify-content:space-between;align-items:center">
