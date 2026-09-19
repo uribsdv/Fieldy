@@ -1404,6 +1404,81 @@ async function main() {
     await context.unroute(MOCKL + '/**')
   }
 
+  section('Quick calm — the 60-second breathing break')
+  await check('offered only when the mood is overwhelmed or scattered', async () => {
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, seededState())
+    await page.goto(BASE + '?qc=1', { waitUntil: 'load' })
+    const seen = {}
+    for (const m of ['overwhelmed', 'scattered', 'tired', 'focused', 'motivated']) {
+      seen[m] = await page.evaluate(mood => {
+        logMood(mood, 'manual')
+        return [...document.querySelectorAll('button')].some(b => /ויסות מהיר|Quick calm/.test(b.textContent))
+      }, m)
+      await page.waitForTimeout(80)
+    }
+    assert(seen.overwhelmed, 'no quick-calm button when overwhelmed')
+    assert(seen.scattered, 'no quick-calm button when scattered')
+    assert(!seen.tired && !seen.focused && !seen.motivated,
+      'the button showed up for a mood that should not get it: ' + JSON.stringify(seen))
+  })
+  await check('it runs the 4-4-6-2 cycle and the ring follows the breath', async () => {
+    await page.evaluate(() => { logMood('overwhelmed', 'manual'); startQuickCalm() })
+    await page.waitForTimeout(1200)
+    const first = await page.evaluate(() => ({
+      phase: document.getElementById('qc-phase').textContent,
+      count: +document.getElementById('qc-count').textContent,
+      scale: document.getElementById('qc-ring').style.transform
+    }))
+    assert(/שאיפה|Breathe in/.test(first.phase), 'did not start on the inhale: ' + first.phase)
+    assert(first.count < 60 && first.count > 55, 'countdown not running: ' + first.count)
+    assert(/1\.14/.test(first.scale), 'ring did not expand on the inhale: ' + first.scale)
+    // the phase table itself is the contract — 4 in, 4 hold, 6 out, 2 rest = 16s
+    const secs = await page.evaluate(() => QC_PHASES.map(p => p.secs))
+    assert(JSON.stringify(secs) === '[4,4,6,2]', 'breathing pattern changed: ' + JSON.stringify(secs))
+    await page.waitForTimeout(3600)
+    const held = await page.evaluate(() => document.getElementById('qc-phase').textContent)
+    assert(/עצירה|Hold/.test(held), 'did not move on to the hold: ' + held)
+  })
+  await check('finishing closes it, keeps the timer clean and never counts as a meditation', async () => {
+    await page.evaluate(() => { qcLeft = 2 })
+    await page.waitForTimeout(2600)
+    const done = await page.evaluate(() => document.getElementById('qc-phase') && document.getElementById('qc-phase').textContent)
+    assert(done && /עכשיו משימה אחת|one task/.test(done), 'no closing line: ' + done)
+    await page.waitForTimeout(1900)
+    const after = await page.evaluate(() => ({
+      cleared: document.getElementById('modal-container').innerHTML === '',
+      timer: qcInterval,
+      med: Object.keys(state.personal.meditationLog || {}).length
+    }))
+    assert(after.cleared, 'the modal did not close by itself')
+    assert(after.timer === null, 'the interval is still running after it finished')
+    assert(after.med === 0, 'a 60-second break was logged as a meditation')
+  })
+  await check('leaving early stops the timer and logs no completion', async () => {
+    await page.evaluate(() => { logEvent.__n = (state.logs || []).length; startQuickCalm() })
+    await page.waitForTimeout(500)
+    await page.evaluate(() => stopQuickCalm(false))
+    const r = await page.evaluate(() => ({
+      timer: qcInterval,
+      cleared: document.getElementById('modal-container').innerHTML === '',
+      completed: JSON.stringify(state).indexOf('quick_calm_completed') >= 0
+    }))
+    assert(r.timer === null, 'the interval kept running after leaving early')
+    assert(r.cleared, 'the modal stayed open after leaving early')
+    assert(!r.completed, 'leaving early was recorded as a completion')
+    const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+  })
+  await check('the break is fully translated in English mode', async () => {
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_ui_lang', 'en') }, seededState())
+    await page.goto(BASE + '?qc=2', { waitUntil: 'load' })
+    await page.evaluate(() => { logMood('overwhelmed', 'manual'); startQuickCalm() })
+    await page.waitForTimeout(1200)
+    const txt = await page.evaluate(() => document.getElementById('modal-container').textContent)
+    assert(!/[\u0590-\u05FF]/.test(txt), 'Hebrew left in the English quick-calm screen: ' + txt.trim())
+    assert(/Breathe in/.test(txt), 'the phase label is not in English: ' + txt.trim())
+    await page.evaluate(() => stopQuickCalm(false))
+  })
+
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {
     await page.goto(BASE, { waitUntil: 'load' })

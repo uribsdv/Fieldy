@@ -123,6 +123,22 @@ textarea,select,input{font-family:inherit}
 .med-timer{font-size:48px;font-weight:200;color:var(--t1);text-align:center;letter-spacing:4px}
 .med-circle{width:180px;height:180px;border-radius:50%;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
 .breath-text{font-size:var(--fs-2xl);color:var(--tao-gold);text-align:center;margin-top:var(--space-4);font-weight:300;letter-spacing:1px}
+/* Quick calm — the 60-second breathing break offered from the home screen when
+   the mood is overwhelmed/scattered. Deliberately NOT the Tao meditation: it
+   lives on the cream surface, has no narration, no music and no steps to read.
+   The ring scales with the breath so the body can follow it without reading. */
+.qc-ring{width:150px;height:150px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;
+  border:2px solid var(--gold-deep);background:radial-gradient(circle,rgba(196,146,42,0.10),transparent);
+  transition:transform var(--dur-slow) var(--ease-out)}
+.qc-ring[data-phase="0"]{transform:scale(1.14)}
+.qc-ring[data-phase="1"]{transform:scale(1.14)}
+.qc-ring[data-phase="2"]{transform:scale(0.86)}
+.qc-ring[data-phase="3"]{transform:scale(0.86)}
+.qc-ring.qc-slow{transition-duration:3.6s;transition-timing-function:linear}
+.qc-count{font-size:40px;font-weight:200;color:var(--t1);letter-spacing:2px}
+.qc-phase{font-size:var(--fs-2xl);color:var(--gold);text-align:center;margin-top:var(--space-4);font-weight:400;letter-spacing:1px;min-height:26px}
+.qc-left{font-size:var(--fs-sm);color:var(--t3);text-align:center;margin-top:var(--space-2)}
+@media (prefers-reduced-motion:reduce){.qc-ring,.qc-ring.qc-slow{transition:none!important;transform:none!important}}
 .brush{position:absolute;opacity:0.06;font-size:120px;pointer-events:none;user-select:none;color:var(--gold-deep)}
 @keyframes ripple{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
 .success-ring{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid var(--gold-deep);pointer-events:none;z-index:999;animation:ripple 0.7s ease-out forwards}
@@ -1228,6 +1244,17 @@ const TRANSLATIONS = {
   home_braindump_placeholder: {he:'מה רץ לך בראש? תכתוב כאן ותשחרר...', en:"What's on your mind? Write it here and let go..."},
   home_braindump_save: {he:'שמור ופנה מקום', en:'Save and clear space'},
   home_braindump_saved: {he:'נשמר', en:'Saved'},
+  // Quick calm (60s breathing break, overwhelmed/scattered only)
+  qc_button: {he:'ויסות מהיר · 60 שניות', en:'Quick calm · 60 seconds'},
+  qc_title: {he:'ויסות מהיר', en:'Quick calm'},
+  qc_ready: {he:'התיישב בנוח…', en:'Settle in…'},
+  qc_inhale: {he:'שאיפה', en:'Breathe in'},
+  qc_hold: {he:'עצירה', en:'Hold'},
+  qc_exhale: {he:'נשיפה', en:'Breathe out'},
+  qc_rest: {he:'השהייה', en:'Rest'},
+  qc_hint: {he:'רק לעקוב אחרי העיגול. אין מה לעשות נכון.', en:'Just follow the circle. There is no doing it wrong.'},
+  qc_stop: {he:'מספיק להפעם', en:'Enough for now'},
+  qc_done: {he:'זהו. עכשיו משימה אחת.', en:'That\'s it. Now one task.'},
   home_gym_done: {he:'התאמנתי היום', en:'Worked out today'},
   home_gym_todo: {he:'סמן אימון', en:'Mark workout'},
   home_meditation_done: {he:'עשיתי היום', en:'Did it today'},
@@ -1907,6 +1934,7 @@ function startMeditation(idx) {
 
   // Stop any existing timer first
   if(medInterval) { clearInterval(medInterval); medInterval = null; }
+  if(qcInterval) { clearInterval(qcInterval); qcInterval = null; }   // never both breathing timers at once
 
   playTibetanBowl();
 
@@ -1983,6 +2011,78 @@ function stopMeditation(completed) {
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
   try { stopVoice(); } catch(e) { console.log('stopVoice err:', e); }
   if(completed) { playFx('done'); showRipple(); haptic('success'); logEvent('meditation_completed', {}); }
+}
+
+// ── QUICK CALM (60s) ──────────────────────────────
+// A regulation break small enough to actually take: one minute, 4-4-6-2, no
+// narration and no setup. Offered only when the logged mood is overwhelmed or
+// scattered, because that is when "just pick one task" does not work yet —
+// the body has to come down first. It reuses the meditation bowl and the
+// haptics, but deliberately NOT startMeditation(): that one is a dark-screen
+// practice with music, a script and a log entry. This is a breath, not a sit,
+// so it never touches meditationLog.
+let qcInterval = null, qcLeft = 0
+const QUICK_CALM_MOODS = ['overwhelmed', 'scattered']
+const QC_PHASES = [
+  {key:'qc_inhale',  secs:4, scale:1.14},
+  {key:'qc_hold',    secs:4, scale:1.14},
+  {key:'qc_exhale',  secs:6, scale:0.86},
+  {key:'qc_rest',    secs:2, scale:0.86}
+]
+function startQuickCalm() {
+  if(medInterval) { clearInterval(medInterval); medInterval = null }   // never two timers at once
+  if(qcInterval) { clearInterval(qcInterval); qcInterval = null }
+  qcLeft = 60
+  playTibetanBowl()
+  haptic('light')
+  logEvent('quick_calm_started', {mood: (getCurrentMood()||{}).mood || null})
+  openModal(
+    '<div style="font-size:var(--fs-md);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:18px">' +
+      icon('wind') + ' ' + tr('qc_title') + '</div>' +
+    '<div class="qc-ring" id="qc-ring"><div class="qc-count" id="qc-count">60</div></div>' +
+    '<div class="qc-phase" id="qc-phase">' + tr('qc_ready') + '</div>' +
+    '<div class="qc-left" id="qc-hint">' + tr('qc_hint') + '</div>' +
+    '<button onclick="stopQuickCalm(false)" style="width:100%;margin-top:20px;padding:13px;border-radius:var(--radius-lg);border:1px solid var(--t4);background:transparent;color:var(--t2);font-size:var(--fs-base)">' +
+      tr('qc_stop') + '</button>',
+    {closeOnOverlay:false, modalStyle:'text-align:center'})
+
+  let phase = -1, inPhase = 0
+  const advance = () => {
+    phase = (phase + 1) % QC_PHASES.length
+    inPhase = 0
+    const def = QC_PHASES[phase]
+    const ring = document.getElementById('qc-ring'), label = document.getElementById('qc-phase')
+    if(ring) { ring.style.transitionDuration = def.secs + 's'; ring.style.transform = 'scale(' + def.scale + ')' }
+    if(label) label.textContent = tr(def.key)
+    haptic('light')
+  }
+  setTimeout(advance, 900)   // a beat to settle before the first inhale
+
+  qcInterval = setInterval(() => {
+    qcLeft--
+    const c = document.getElementById('qc-count')
+    if(c) c.textContent = qcLeft
+    if(qcLeft <= 0) { stopQuickCalm(true); return }
+    if(phase >= 0 && ++inPhase >= QC_PHASES[phase].secs) advance()
+  }, 1000)
+}
+function stopQuickCalm(completed) {
+  if(qcInterval) { clearInterval(qcInterval); qcInterval = null }
+  if(!completed) { document.getElementById('modal-container').innerHTML = ''; return }
+  // Finished: the same ripple+bowl+haptic the meditation ends on, then a beat
+  // to land on the closing line before the modal gets out of the way by itself.
+  playFx('done'); showRipple(); haptic('success')
+  logEvent('quick_calm_completed', {})
+  const ring = document.getElementById('qc-ring'), phase = document.getElementById('qc-phase'),
+        count = document.getElementById('qc-count'), hint = document.getElementById('qc-hint')
+  if(ring) { ring.style.transitionDuration = '600ms'; ring.style.transform = 'scale(1)' }
+  if(count) count.innerHTML = '<span style="color:var(--green)">' + icon('check') + '</span>'
+  if(phase) phase.textContent = tr('qc_done')
+  if(hint) hint.textContent = ''
+  setTimeout(function(){
+    const m = document.getElementById('modal-container')
+    if(m && m.querySelector('#qc-ring')) m.innerHTML = ''   // only if Uri hasn't opened something else meanwhile
+  }, 1600)
 }
 
 function renderCurrentScreen() {
@@ -2538,6 +2638,7 @@ function renderHome() {
           <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
           <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
         </div>
+        ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
         ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
         <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
