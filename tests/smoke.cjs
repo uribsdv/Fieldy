@@ -1143,6 +1143,67 @@ async function main() {
     })
   }
 
+  section('Interface language toggle (Settings) — Hebrew/English, RTL/LTR')
+  {
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, seededState())
+    resetLogs(); await page.goto(BASE + '?lang=1', { waitUntil: 'load' }); await page.waitForTimeout(300)
+    await check('defaults to Hebrew/RTL; nav labels and Home text are Hebrew', async () => {
+      const r = await page.evaluate(() => ({ dir: document.documentElement.getAttribute('dir'), lang: document.documentElement.getAttribute('lang'), navHome: document.querySelector('[data-i18n="nav_home"]').textContent, greeting: document.getElementById('screen-home').textContent }))
+      assert(r.dir === 'rtl' && r.lang === 'he' && r.navHome === 'בית' && /בוקר טוב/.test(r.greeting), JSON.stringify(r))
+    })
+    await check('Settings screen offers a language toggle, defaulting to עברית selected', async () => {
+      await page.evaluate(() => navigateTo('settings'))
+      const t = await page.textContent('#screen-settings')
+      assert(/שפת ממשק/.test(t) && /עברית/.test(t) && /English/.test(t), 'no language toggle found: ' + t.slice(0, 200))
+    })
+    await check('switching to English flips dir/lang, updates the nav bar, and re-renders the current screen\'s text', async () => {
+      await page.click('#screen-settings >> text=English')
+      await page.waitForTimeout(80)
+      const r = await page.evaluate(() => ({
+        dir: document.documentElement.getAttribute('dir'), lang: document.documentElement.getAttribute('lang'),
+        bodyClass: document.body.classList.contains('lang-en'),
+        navHome: document.querySelector('[data-i18n="nav_home"]').textContent, navTasks: document.querySelector('[data-i18n="nav_tasks"]').textContent,
+        settingsText: document.getElementById('screen-settings').textContent,
+        stored: localStorage.getItem('fieldy_ui_lang')
+      }))
+      assert(r.dir === 'ltr' && r.lang === 'en' && r.bodyClass, 'dir/lang/body class not switched: ' + JSON.stringify(r))
+      assert(r.navHome === 'Home' && r.navTasks === 'Tasks', 'nav bar not translated: ' + JSON.stringify(r))
+      assert(/Interface language/.test(r.settingsText) && /Color theme/.test(r.settingsText), 'settings screen not translated: ' + r.settingsText.slice(0, 200))
+      assert(r.stored === 'en', 'language preference not persisted')
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('Home screen — greeting, stat tiles, mood picker and the task-review/briefing accordion are all in English', async () => {
+      await page.evaluate(() => navigateTo('home'))
+      const t = await page.textContent('#screen-home')
+      assert(/Good morning, Uri/.test(t), 'greeting not translated: ' + t.slice(0, 200))
+      assert(/How do you feel right now/.test(t), 'mood prompt not translated')
+      assert(/Overwhelmed/.test(t) && /Highly motivated/.test(t), 'mood labels not translated: ' + t)
+      await page.click('#task-review-toggle-btn')
+      const reviewText = await page.textContent('#daily-briefing')
+      assert(/today's task review/i.test(reviewText), 'review heading not translated: ' + reviewText.slice(0, 300))
+      assert(/I'm done reviewing/.test(reviewText), 'finish-review button not translated: ' + reviewText.slice(0, 300))
+      await page.click('#task-review-toggle-btn')
+    })
+    await check('user-entered content (task text, quotes) stays exactly as typed regardless of interface language', async () => {
+      const r = await page.evaluate(() => ({ taskText: state.tasks.now.find(t => t.id === 'n1').text }))
+      assert(r.taskText === 'להתקשר לדייב על באר קלוריה', 'user task text should never be machine-translated: ' + r.taskText)
+    })
+    await check('the language choice survives a reload', async () => {
+      resetLogs(); await page.goto(BASE + '?lang=2', { waitUntil: 'load' }); await page.waitForTimeout(300)
+      const r = await page.evaluate(() => ({ dir: document.documentElement.getAttribute('dir'), navHome: document.querySelector('[data-i18n="nav_home"]').textContent }))
+      assert(r.dir === 'ltr' && r.navHome === 'Home', 'language did not persist across reload: ' + JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('switching back to עברית restores Hebrew/RTL everywhere', async () => {
+      await page.evaluate(() => navigateTo('settings'))
+      await page.click('#screen-settings >> text=עברית')
+      await page.waitForTimeout(80)
+      const r = await page.evaluate(() => ({ dir: document.documentElement.getAttribute('dir'), navHome: document.querySelector('[data-i18n="nav_home"]').textContent, bodyClass: document.body.classList.contains('lang-en') }))
+      assert(r.dir === 'rtl' && r.navHome === 'בית' && !r.bodyClass, JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+  }
+
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {
     await page.goto(BASE, { waitUntil: 'load' })

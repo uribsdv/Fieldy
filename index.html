@@ -43,6 +43,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:var(--ink);color:var(--t1);direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:var(--fs-lg)}
+/* English UI mode: swap font order (Latin-first) and let dir=ltr (set on <html>) flip layout; only the interface, never Tao/meditation content or AI output, is ever in English. */
+body.lang-en{font-family:'IBM Plex Sans','IBM Plex Sans Hebrew',system-ui,sans-serif;direction:ltr}
 .font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
@@ -352,24 +354,24 @@ button:active{opacity:.85}
   <nav id="nav">
     <button class="nav-btn active" data-screen="home">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
-      <span class="nav-label">בית</span>
+      <span class="nav-label" data-i18n="nav_home">בית</span>
     </button>
     <button class="nav-btn" data-screen="tasks">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
-      <span class="nav-label">משימות</span>
+      <span class="nav-label" data-i18n="nav_tasks">משימות</span>
       <span class="nav-badge hidden" id="badge-tasks">0</span>
     </button>
     <button class="nav-btn" data-screen="sites">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span>
-      <span class="nav-label">אתרים</span>
+      <span class="nav-label" data-i18n="nav_sites">אתרים</span>
       <span class="nav-badge hidden" id="badge-sites">0</span>
     </button>
     <button class="nav-btn" data-screen="people">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8"/><circle cx="17" cy="7" r="2.6"/><path d="M15.5 14.3c2.6.4 4.4 2.3 4.9 5.2"/></svg></span>
-      <span class="nav-label">אנשים</span>
+      <span class="nav-label" data-i18n="nav_people">אנשים</span>
       <span class="nav-badge hidden" id="badge-people">0</span>
     </button>
-      <button class="nav-btn" data-screen="calendar"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/></svg></span><span class="nav-label">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/></svg></span><span class="nav-label">טאו</span></button>
+      <button class="nav-btn" data-screen="calendar"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/></svg></span><span class="nav-label" data-i18n="nav_calendar">לוח</span></button><button class="nav-btn" data-screen="tao"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/></svg></span><span class="nav-label" data-i18n="nav_tao">טאו</span></button>
   </nav>
 </div>
 <div id="modal-container"></div>
@@ -589,7 +591,7 @@ function emptyHtml(iconName, text, style) {
 }
 // Screen title row with an accent "+ הוסף" button (tasks / sites / people headers).
 function addBtnHtml(onclick) {
-  return '<button onclick="' + onclick + '" style="background:var(--bamboo);border-radius:var(--radius-md);padding:8px 14px;color:#fff;font-size:var(--fs-base);font-weight:600">+ הוסף</button>'
+  return '<button onclick="' + onclick + '" style="background:var(--bamboo);border-radius:var(--radius-md);padding:8px 14px;color:#fff;font-size:var(--fs-base);font-weight:600">+ ' + tr('btn_add') + '</button>'
 }
 // Back-arrow header used by the input / action / settings screens.
 function backHeaderHtml(title, marginBottom) {
@@ -1124,6 +1126,144 @@ async function loadStateFromServer() {
     // local data becomes the seed (the one-time migration).
     syncStateToServer()
   }
+}
+
+// ── I18N ──────────────────────────────────────────
+// One central dictionary for every interface string (nav, screen headers,
+// buttons, labels, empty states, common modal actions) — never a translated
+// literal scattered inline in a render function. Long-form CONTENT is
+// deliberately excluded and always stays Hebrew, by explicit decision: the
+// Tao screen's verses/leadership themes/meditation scripts, mood-tip
+// coaching lines, quotes of the day, and anything AI-generated (the daily
+// briefing narrative, Ask Fieldy's answers, drafted messages) — none of
+// that is translated even in English mode.
+const TRANSLATIONS = {
+  nav_home: {he:'בית', en:'Home'}, nav_tasks: {he:'משימות', en:'Tasks'}, nav_sites: {he:'אתרים', en:'Sites'}, nav_people: {he:'אנשים', en:'People'}, nav_calendar: {he:'לוח', en:'Calendar'}, nav_tao: {he:'טאו', en:'Tao'},
+
+  settings_title: {he:'הגדרות', en:'Settings'},
+  settings_lang: {he:'שפת ממשק', en:'Interface language'},
+  settings_lang_hint: {he:'מחליף את כל טקסטי הממשק לאנגלית (LTR). תוכן הטאו, המדיטציות ומה שנוצר על ידי AI תמיד נשארים בעברית.', en:'Switches all interface text to English (LTR). Tao content, meditations, and anything AI-generated always stay in Hebrew.'},
+  settings_theme: {he:'ערכת צבע', en:'Color theme'},
+  settings_theme_hint: {he:'שינוי מהגון צבע האפליקציה', en:'Changes the app\'s accent color'},
+
+  btn_add: {he:'הוסף', en:'Add'}, btn_save: {he:'שמור', en:'Save'}, btn_cancel: {he:'ביטול', en:'Cancel'}, btn_delete: {he:'מחק', en:'Delete'}, btn_edit: {he:'עריכה', en:'Edit'}, btn_close: {he:'סגור', en:'Close'}, btn_confirm: {he:'אישור', en:'Confirm'}, btn_undo: {he:'בטל', en:'Undo'}, btn_back: {he:'חזרה', en:'Back'}, btn_all: {he:'הכל', en:'All'},
+
+  home_add_whatsapp: {he:'+ הוסף הודעות מוואטסאפ', en:'+ Add WhatsApp messages'},
+  home_progress: {he:'התקדמות היום', en:"Today's progress"},
+  home_server_needed_title: {he:'נדרש חיבור לשרת', en:'Server connection needed'},
+  home_server_needed_body: {he:'תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות', en:'AI features and sync run through the server — tap for settings'},
+  home_stat_now: {he:'עכשיו', en:'Now'}, home_stat_sites: {he:'אתרים', en:'Sites'}, home_stat_pending: {he:'ממתין', en:'Pending'},
+  home_petty_cash: {he:'ליקוידציה שוטפת', en:'Petty cash'},
+  home_mood_prompt: {he:'איך אתה מרגיש עכשיו?', en:'How do you feel right now?'},
+  home_learning: {he:'מה שאני לומד עליך', en:'What I\'m learning about you'},
+  home_learning_analyze: {he:'נתח עכשיו', en:'Analyze now'},
+  home_outside_work: {he:'מחוץ לעבודה', en:'Outside work'},
+  home_vacation_goal: {he:'יעד לחופשה הבאה', en:'Next vacation goal'},
+  home_ask_fieldy: {he:'שאל את Fieldy', en:'Ask Fieldy'},
+  home_ask_fieldy_hint_on: {he:'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.', en:'Ask anything — work planning, site priorities, or something from your history.'},
+  home_ask_fieldy_hint_off: {he:'דורש חיבור לשרת בהגדרות.', en:'Requires a server connection in Settings.'},
+  home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
+  home_briefing_title: {he:'תדריך הבוקר', en:"Morning briefing"},
+  home_briefing_refresh: {he:'רענן', en:'Refresh'},
+  home_briefing_generate: {he:'צור תדריך', en:'Generate briefing'},
+  home_briefing_writing: {he:'כותב…', en:'Writing…'},
+  home_briefing_no_server: {he:'חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.', en:'Connect a server in Settings to also get a short AI briefing every morning.'},
+  home_review_open: {he:'סקור משימות', en:'Review tasks'},
+  home_review_done: {he:'נסקר היום', en:'Reviewed today'},
+  home_review_close: {he:'סגור', en:'Close'},
+  home_review_title: {he:'סקירת המשימות של היום', en:"Today's task review"},
+  home_review_hint: {he:'סמן אילו עדיין רלוונטיות היום — מה שתבטל סימון עליו יעבור ל"אחר כך".', en:'Mark which ones are still relevant today — whatever you uncheck moves to "Later".'},
+  home_review_quick_add: {he:'משהו חדש להוסיף?', en:'Something new to add?'},
+  home_review_finish: {he:'סיימתי לסקור', en:"I'm done reviewing"},
+  home_review_empty: {he:'אין משימות פתוחות ל"עכשיו"/"היום" לסקור.', en:'No open "Now"/"Today" tasks to review.'},
+  home_review_suggestion: {he:'נקודת התחלה מוצעת', en:'Suggested starting point'},
+  home_review_suggestion_empty: {he:'אין יותר משימות פתוחות — נקי!', en:'No open tasks left — all clear!'},
+  home_focus_add: {he:'הדבר הכי חשוב היום — הוסף', en:"Today's most important thing — add"},
+  home_focus_placeholder: {he:'למשל: פגישה עם NIA ב-14:00', en:'e.g. Meeting with NIA at 2pm'},
+
+  settings_theme_hint: {he:'שינוי מהיר לגוון המבטא באפליקציה', en:"Quick change to the app's accent color"},
+  settings_feedback_title: {he:'משוב לפעולות', en:'Action feedback'},
+  settings_feedback_hint: {he:'צליל קצר ורטט עדין כשמסיימים משימה, שומרים רפלקציה או מסיימים מדיטציה. כל פעולה מאשרת את עצמה גם בלי זה — אפשר לכבות לפגישות ולשטח.', en:'A short sound and a gentle vibration when you complete a task, save a reflection, or finish a meditation. Every action confirms itself visually either way — turn this off for meetings or the field.'},
+  settings_sound_label: {he:'צלילי פעולה', en:'Action sounds'},
+  settings_haptics_label: {he:'רטט', en:'Vibration'},
+  settings_backup_title: {he:'גיבוי / העברה לטלפון חדש', en:'Backup / move to a new phone'},
+  settings_backup_hint: {he:'מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".', en:'Downloads a file with all your data (sites, tasks, Tao, leadership, everything). On the new phone: open the app from the link, go to Settings, and tap "Load from file".'},
+  settings_backup_download: {he:'הורד גיבוי', en:'Download backup'},
+  settings_backup_upload: {he:'טען מקובץ', en:'Load from file'},
+  settings_directory_title: {he:'ספריית אתרים (Monday)', en:'Site directory (Monday)'},
+  settings_directory_loaded: {he:'טעונים כרגע {n} אתרים מ-Monday.', en:'{n} sites currently loaded from Monday.'},
+  settings_directory_hint: {he:'טען רשימת אתרים מ-Monday פעם אחת — Fieldy ישתמש בה למילוי אוטומטי כשמוסיפים אתר, ולענות על שאלות גם על אתרים שלא הוספת עדיין ידנית.', en:"Load a list of sites from Monday once — Fieldy will use it to autofill when you add a site, and to answer questions about sites you haven't manually added yet."},
+  settings_directory_upload: {he:'טען קובץ ספרייה', en:'Load directory file'},
+  settings_server_title: {he:'שרת (Cloudflare)', en:'Server (Cloudflare)'},
+  settings_server_connected: {he:'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.', en:'Connected — data syncs to the server, and AI features work through it.'},
+  settings_server_not_connected: {he:'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.', en:'Not connected — data stays only on this device, and AI features (organize the day, Ask Fieldy, drafting) are inactive.'},
+  settings_server_key_note: {he:'מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.', en:'The Anthropic key is kept server-side only (a Cloudflare secret), never on the phone.'},
+  settings_server_url_label: {he:'כתובת השרת', en:'Server address'},
+  settings_server_passcode_label: {he:'סיסמת השרת (APP_PASSCODE)', en:'Server password (APP_PASSCODE)'},
+  settings_server_save: {he:'שמור והתחבר', en:'Save and connect'},
+  settings_server_test: {he:'בדוק חיבור', en:'Test connection'},
+  settings_push_title: {he:'התראות לטלפון', en:'Phone notifications'},
+  settings_push_hint: {he:'תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.', en:'Real reminders from the server — even when the app is closed.'},
+  settings_dedupe_title: {he:'ניקוי כפילויות בלוח', en:'Clean up calendar duplicates'},
+  settings_dedupe_hint: {he:'מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).', en:'Deletes calendar events that are actually old duplicates of existing tasks (a fixed bug).'},
+  settings_dedupe_btn: {he:'נקה כפילויות', en:'Clean up duplicates'},
+  settings_clear_title: {he:'נקה נתוני יום', en:'Clear daily data'},
+  settings_clear_hint: {he:'מחיקת כל המשימות, אתרים ואנשים.', en:'Deletes all tasks, sites and people.'},
+  settings_clear_btn: {he:'נקה הכל', en:'Clear everything'},
+  settings_refresh_title: {he:'רענון האפליקציה', en:'Refresh the app'},
+  settings_version: {he:'גרסה: {v}', en:'Version: {v}'},
+  settings_refresh_hint: {he:'אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.', en:"If a new update doesn't show after a GitHub change, tap here — this clears the cache and reloads."},
+  settings_refresh_btn: {he:'רענן עכשיו', en:'Refresh now'},
+
+  mood_overwhelmed: {he:'מוצף', en:'Overwhelmed'}, mood_scattered: {he:'מפוזר', en:'Scattered'}, mood_tired: {he:'עייף', en:'Tired'}, mood_focused: {he:'פוקוס', en:'Focused'}, mood_motivated: {he:'מוטיבציה גבוהה', en:'Highly motivated'},
+  home_greeting: {he:'בוקר טוב, אורי', en:'Good morning, Uri'},
+  home_streak_days: {he:'{n} ימים', en:'{n} days'},
+  home_quote_label: {he:'ציטוט', en:'Quote'},
+  home_quote_other: {he:'אחר', en:'Other'},
+  home_petty_cash_month: {he:'חודש {m} · {n} הוצאות', en:'Month {m} · {n} expenses'},
+  home_empty_start: {he:'הדבק הודעות מוואטסאפ כדי להתחיל', en:'Paste WhatsApp messages to get started'},
+  home_mood_tip_label: {he:'המלצות עכשיו', en:'Suggestions right now'},
+  home_mood_tip_other: {he:'טיפ אחר', en:'Another tip'},
+  home_braindump_placeholder: {he:'מה רץ לך בראש? תכתוב כאן ותשחרר...', en:"What's on your mind? Write it here and let go..."},
+  home_braindump_save: {he:'שמור ופנה מקום', en:'Save and clear space'},
+  home_braindump_saved: {he:'נשמר', en:'Saved'},
+  home_gym_done: {he:'התאמנתי היום', en:'Worked out today'},
+  home_gym_todo: {he:'סמן אימון', en:'Mark workout'},
+  home_meditation_done: {he:'עשיתי היום', en:'Did it today'},
+  home_meditation_todo: {he:'סמן מדיטציה', en:'Mark meditation'},
+
+  home_briefing_writing_status: {he:'מכין את התדריך של היום…', en:"Preparing today's briefing…"},
+  home_briefing_error_prefix: {he:'לא הצלחתי להכין תדריך:', en:'Could not prepare a briefing:'},
+  home_briefing_stale_prefix: {he:'התדריך האחרון היה מ-{d}', en:'The last briefing was from {d}'},
+
+  task_bucket_today: {he:'היום', en:'Today'}, task_bucket_later: {he:'אחר כך', en:'Later'},
+
+  empty_default: {he:'אין פריטים', en:'No items'},
+}
+// Named tr() (not t()) on purpose — `t` is already used everywhere in this
+// file as the loop variable for "task" (map(t=>...), function taskCard(t),
+// etc.); a global t() would silently shadow-collide with those.
+let uiLang = localStorage.getItem('fieldy_ui_lang') || 'he'
+function tr(key) {
+  const e = TRANSLATIONS[key]
+  if(!e) { console.warn('tr(): missing key', key); return key }
+  return e[uiLang] || e.he
+}
+// Updates the one static (non re-rendered) part of the page — the nav bar —
+// plus <html dir/lang> and the body's language class. Every dynamic screen
+// picks up the new language on its own via renderCurrentScreen().
+function applyUiLangDom() {
+  document.documentElement.setAttribute('dir', uiLang === 'en' ? 'ltr' : 'rtl')
+  document.documentElement.setAttribute('lang', uiLang)
+  document.body.classList.toggle('lang-en', uiLang === 'en')
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = tr(el.dataset.i18n) })
+}
+function setUiLang(lang) {
+  if(lang !== 'he' && lang !== 'en') return
+  uiLang = lang
+  localStorage.setItem('fieldy_ui_lang', lang)
+  applyUiLangDom()
+  renderCurrentScreen()
 }
 
 // ── THEME ─────────────────────────────────────────
@@ -1895,24 +2035,24 @@ function taskReviewHtml() {
   const today = getToday(), reviewedToday = state.taskReviewedDate === today
   const items = [...state.tasks.now, ...state.tasks.today].filter(function(t){ return !t.done })
   return `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-    <div class="panel-label" style="margin-bottom:6px">${icon('clipboard')} סקירת המשימות של היום</div>
-    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:6px">סמן אילו עדיין רלוונטיות היום — מה שתבטל סימון עליו יעבור ל"אחר כך".</div>
-    ${items.length ? items.map(reviewChecklistRowHtml).join('') : `<div class="muted" style="font-size:var(--fs-sm);padding:6px 0">אין משימות פתוחות ל"עכשיו"/"היום" לסקור.</div>`}
+    <div class="panel-label" style="margin-bottom:6px">${icon('clipboard')} ${tr('home_review_title')}</div>
+    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:6px">${tr('home_review_hint')}</div>
+    ${items.length ? items.map(reviewChecklistRowHtml).join('') : `<div class="muted" style="font-size:var(--fs-sm);padding:6px 0">${tr('home_review_empty')}</div>`}
     <div style="display:flex;gap:8px;margin:10px 0">
-      <input id="review-quick-add" class="form-input" placeholder="משהו חדש להוסיף?" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();reviewQuickAdd()}"/>
+      <input id="review-quick-add" class="form-input" placeholder="${tr('home_review_quick_add')}" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();reviewQuickAdd()}"/>
       <button onclick="reviewQuickAdd()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-weight:700">${icon('plus')}</button>
     </div>
-    <button id="finish-review-btn" class="btn-primary" onclick="finishTaskReview()">${icon('check')} סיימתי לסקור</button>
+    <button id="finish-review-btn" class="btn-primary" onclick="finishTaskReview()">${icon('check')} ${tr('home_review_finish')}</button>
     ${taskReviewSuggestion ? `<div style="margin-top:10px;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">
       <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleReviewSuggestion()">
-        <span style="font-weight:700;color:var(--gold);font-size:var(--fs-base)">${icon('target')} נקודת התחלה מוצעת</span>
+        <span style="font-weight:700;color:var(--gold);font-size:var(--fs-base)">${icon('target')} ${tr('home_review_suggestion')}</span>
         <span style="color:var(--gold);display:flex;transition:transform .15s;transform:rotate(${reviewSuggestionOpen?'180deg':'0deg'})">${icon('chevron-down')}</span>
       </div>
       ${reviewSuggestionOpen ? `<div style="margin-top:8px;${taskReviewSuggestion.go?'cursor:pointer':''}" ${taskReviewSuggestion.go?('onclick="'+taskReviewSuggestion.go+'"'):''}>
         <div style="font-weight:700;color:var(--t1)">${esc(taskReviewSuggestion.title)}</div>
         ${taskReviewSuggestion.sub ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${taskReviewSuggestion.sub}</div>` : ''}
-      </div>` : `<div class="muted" style="font-size:var(--fs-sm);margin-top:4px">אין יותר משימות פתוחות — נקי!</div>`}
-    </div>` : reviewedToday ? `<div class="muted" style="font-size:var(--fs-sm);margin-top:8px">${icon('check')} נסקר היום.</div>` : ''}
+      </div>` : `<div class="muted" style="font-size:var(--fs-sm);margin-top:4px">${tr('home_review_suggestion_empty')}</div>`}
+    </div>` : reviewedToday ? `<div class="muted" style="font-size:var(--fs-sm);margin-top:8px">${icon('check')} ${tr('home_review_done')}.</div>` : ''}
   </div>`
 }
 function moodLimit(mood) { return (mood && MOOD_LIB[mood] && MOOD_LIB[mood].taskLimit) || null }
@@ -2080,30 +2220,30 @@ function dailyBriefingHtml() {
   const reviewedToday = state.taskReviewedDate === today
   return `<div id="daily-briefing" class="card" style="border:1px solid var(--accent-line);border-right:3px solid var(--gold);margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:6px">
-        <span class="panel-label" style="margin:0">${icon('sun')} תדריך הבוקר</span>
+        <span class="panel-label" style="margin:0">${icon('sun')} ${tr('home_briefing_title')}</span>
         <div style="display:flex;gap:6px;flex-shrink:0">
-          <button id="task-review-toggle-btn" onclick="toggleTaskReview()" style="background:${taskReviewOpen?'var(--surface)':(reviewedToday?'var(--surface)':'var(--gold)')};border:1px solid ${reviewedToday||taskReviewOpen?'var(--accent-line)':'transparent'};border-radius:var(--radius-sm);padding:3px 9px;color:${reviewedToday||taskReviewOpen?'var(--t2)':'#fff'};font-size:var(--fs-xs);font-weight:700">${icon('clipboard')} ${taskReviewOpen ? 'סגור' : (reviewedToday ? 'נסקר היום' : 'סקור משימות')}</button>
-          ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? 'כותב…' : (cached ? 'רענן' : 'צור תדריך')}</button>` : ''}
+          <button id="task-review-toggle-btn" onclick="toggleTaskReview()" style="background:${taskReviewOpen?'var(--surface)':(reviewedToday?'var(--surface)':'var(--gold)')};border:1px solid ${reviewedToday||taskReviewOpen?'var(--accent-line)':'transparent'};border-radius:var(--radius-sm);padding:3px 9px;color:${reviewedToday||taskReviewOpen?'var(--t2)':'#fff'};font-size:var(--fs-xs);font-weight:700">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
+          ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? tr('home_briefing_writing') : (cached ? tr('home_briefing_refresh') : tr('home_briefing_generate'))}</button>` : ''}
         </div>
       </div>
       <div style="margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleFocusEdit()">
           ${iconBadge('target', 'var(--gold)')}
-          <div style="flex:1;font-size:var(--fs-base);font-weight:700;color:${f.focus?'var(--t1)':'var(--t3)'};line-height:1.4">${f.focus?esc(f.focus):'הדבר הכי חשוב היום — הוסף'}</div>
+          <div style="flex:1;font-size:var(--fs-base);font-weight:700;color:${f.focus?'var(--t1)':'var(--t3)'};line-height:1.4">${f.focus?esc(f.focus):tr('home_focus_add')}</div>
           <span style="color:var(--gold);display:flex;transition:transform .15s;transform:rotate(${focusEditOpen?'180deg':'0deg'})">${icon('chevron-down')}</span>
         </div>
         ${focusEditOpen ? `<div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
-          <input id="focus-edit-input" class="form-input" style="margin-bottom:0;flex:1" value="${esc(state.focus||'')}" placeholder="למשל: פגישה עם NIA ב-14:00"/>
+          <input id="focus-edit-input" class="form-input" style="margin-bottom:0;flex:1" value="${esc(state.focus||'')}" placeholder="${tr('home_focus_placeholder')}"/>
           <button onclick="saveFocusEdit(event)" style="background:var(--gold);border-radius:var(--radius-md);padding:0 16px;color:#fff;font-weight:700">${icon('check')}</button>
         </div>` : ''}
       </div>
       ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
       <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
-      ${briefingBusy ? skeletonHtml(3, 'מכין את התדריך של היום…') :
+      ${briefingBusy ? skeletonHtml(3, tr('home_briefing_writing_status')) :
         cached ? `<div id="briefing-text" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>` :
-        briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} לא הצלחתי להכין תדריך: ${esc(briefingError)}</div>` :
-        (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.</div>` : '')}
-      ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">התדריך האחרון היה מ-${esc(state.briefing.date)}</div>` : ''}
+        briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} ${tr('home_briefing_error_prefix')} ${esc(briefingError)}</div>` :
+        (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div>` : '')}
+      ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">${tr('home_briefing_stale_prefix').replace('{d}', esc(state.briefing.date))}</div>` : ''}
       ${taskReviewOpen ? taskReviewHtml() : ''}
     </div>`
 }
@@ -2195,35 +2335,35 @@ function renderHome() {
     <div style="background:var(--surface-3);padding:48px 16px 18px;border-bottom:1px solid var(--line)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:4px">${new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${state.streak} ימים`:''}</div>
-          <div style="font-size:var(--fs-4xl);font-weight:800;color:var(--t1);letter-spacing:-0.01em">בוקר טוב, אורי ${icon('sun')}</div>
+          <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:4px">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
+          <div style="font-size:var(--fs-4xl);font-weight:800;color:var(--t1);letter-spacing:-0.01em">${tr('home_greeting')} ${icon('sun')}</div>
           <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">Region II · Cagayan Valley</div>
         </div>
-        <button onclick="navigateTo('settings')" aria-label="הגדרות" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 10px;color:var(--t2);font-size:var(--fs-xl)">${icon('settings')}</button>
+        <button onclick="navigateTo('settings')" aria-label="${tr('settings_title')}" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 10px;color:var(--t2);font-size:var(--fs-xl)">${icon('settings')}</button>
       </div>
       ${!serverConfigured() ? `<div onclick="navigateTo('settings')" style="padding:10px 14px;background:var(--accent-soft);border:1px solid var(--amber-line);border-radius:var(--radius-md);cursor:pointer;margin-bottom:10px">
-        <div style="font-size:var(--fs-base);color:var(--gold);font-weight:700">${icon('alert-triangle')} נדרש חיבור לשרת</div>
-        <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
+        <div style="font-size:var(--fs-base);color:var(--gold);font-weight:700">${icon('alert-triangle')} ${tr('home_server_needed_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">${tr('home_server_needed_body')}</div>
       </div>` : ''}
       ${total > 0 ? `<div>
         <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--t2);margin-bottom:6px">
-          <span>התקדמות היום</span><span style="font-weight:700;color:${done===total?'var(--green)':'var(--t1)'}">${done}/${total}</span>
+          <span>${tr('home_progress')}</span><span style="font-weight:700;color:${done===total?'var(--green)':'var(--t1)'}">${done}/${total}</span>
         </div>
         <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'var(--green)':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
       </div>` : ''}
     </div>
     <div style="padding:16px">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, 'עכשיו', '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, 'אתרים', '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, 'ממתין', '#dfd3f5')}
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
       </div>
-      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">+ הוסף הודעות מוואטסאפ</button>
+      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">${tr('home_add_whatsapp')}</button>
       ${dailyBriefingHtml()}
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ציטוט</span>
-          <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} אחר</button>
+          <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ${tr('home_quote_label')}</span>
+          <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} ${tr('home_quote_other')}</button>
         </div>
         <div style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
@@ -2231,23 +2371,23 @@ function renderHome() {
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:var(--fs-base);font-weight:700">${icon('wallet')} ליקוידציה שוטפת</div>
-            <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">חודש ${currentMonthKey()} · ${pettyCashThisMonth().length} הוצאות</div>
+            <div style="font-size:var(--fs-base);font-weight:700">${icon('wallet')} ${tr('home_petty_cash')}</div>
+            <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${tr('home_petty_cash_month').replace('{m}', currentMonthKey()).replace('{n}', pettyCashThisMonth().length)}</div>
           </div>
           <div style="font-size:var(--fs-2xl);font-weight:800;color:var(--t1)">₱${pettyCashMonthTotal().toLocaleString()}</div>
         </div>
       </div>
-      ${total===0&&!state.focus?emptyHtml(icon('clipboard'), 'הדבק הודעות מוואטסאפ כדי להתחיל', 'margin-top:20px'):''}
+      ${total===0&&!state.focus?emptyHtml(icon('clipboard'), tr('home_empty_start'), 'margin-top:20px'):''}
 
       <div class="card" style="margin-top:16px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${tr('home_mood_prompt')}</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
           ${MOOD_ORDER.map(m=>{
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
             return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
               <div style="display:flex;justify-content:center;margin-bottom:2px">${iconBadge(d.icon, d.color)}</div>
-              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${d.label}</div>
+              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
             </button>`
           }).join('')}
         </div>
@@ -2255,14 +2395,14 @@ function renderHome() {
       </div>
       ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${moodDef.label} · המלצות עכשיו</div>
-          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} טיפ אחר</button>
+          <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
+          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
         </div>
         ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
-        <textarea id="brain-dump-input" placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..." style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
+        <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">שמור ופנה מקום</button>
-          <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} נשמר</span>
+          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>
+          <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} ${tr('home_braindump_saved')}</span>
         </div>
       </div>` : ''}
       ${moodPatterns.length ? creamPanelHtml(`
@@ -2271,12 +2411,12 @@ function renderHome() {
       `) : ''}
       ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleInsightsExpanded()" aria-expanded="${insightsExpanded}">
-          <div style="font-size:var(--fs-sm);color:var(--blue);font-weight:700;letter-spacing:1px">${icon('brain')} מה שאני לומד עליך</div>
+          <div style="font-size:var(--fs-sm);color:var(--blue);font-weight:700;letter-spacing:1px">${icon('brain')} ${tr('home_learning')}</div>
           <span style="color:var(--blue);display:flex;transition:transform .15s;transform:rotate(${insightsExpanded?'180deg':'0deg'})">${icon('chevron-down')}</span>
         </div>
         ${insightsExpanded ? `
         <div style="margin-top:10px">
-          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="event.stopPropagation();analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600;margin-bottom:8px">${icon('search')} נתח עכשיו</button>`:''}
+          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="event.stopPropagation();analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600;margin-bottom:8px">${icon('search')} ${tr('home_learning_analyze')}</button>`:''}
           ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
           <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
           `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
@@ -2288,24 +2428,24 @@ function renderHome() {
       `) : ''}
 
       <div class="card" style="margin-top:16px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} מחוץ לעבודה</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} ${tr('home_outside_work')}</div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
-          ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), 'התאמנתי היום ' + icon('check'), 'סמן אימון')}
-          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), 'עשיתי היום ' + icon('check'), 'סמן מדיטציה')}
+          ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), tr('home_gym_done') + ' ' + icon('check'), tr('home_gym_todo'))}
+          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), tr('home_meditation_done') + ' ' + icon('check'), tr('home_meditation_todo'))}
         </div>
-        <label class="form-label">יעד לחופשה הבאה</label>
+        <label class="form-label">${tr('home_vacation_goal')}</label>
         <div style="display:flex;gap:8px">
           <input id="vacation-goal-input" class="form-input" style="margin-bottom:0" placeholder="לדוגמה: בורקאי, דצמבר" value="${esc(state.personal.vacationGoal)}"/>
-          <button onclick="saveVacationGoal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-size:var(--fs-base)">שמור</button>
+          <button onclick="saveVacationGoal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-size:var(--fs-base)">${tr('btn_save')}</button>
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('brain')} שאל את Fieldy</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.':'דורש חיבור לשרת בהגדרות.'}</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('brain')} ${tr('home_ask_fieldy')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?tr('home_ask_fieldy_hint_on'):tr('home_ask_fieldy_hint_off')}</div>
         ${serverConfigured()?`
         <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
-        <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">שאל</button>
+        <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">${tr('home_ask_fieldy_btn')}</button>
         <div id="ask-fieldy-answer" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
         <div id="ask-fieldy-maps-wrap"></div>
         `:''}
@@ -2417,19 +2557,19 @@ function renderTasks() {
     }
   }
   const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
-  const CTX = [['all','הכל'],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
+  const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:var(--fs-2xl);font-weight:700">משימות</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">${tr('nav_tasks')}</div>
         ${addBtnHtml('showAddTask()')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
           <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
             <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
-            <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${['עכשיו','היום','אחר כך'][i]}</div>
+            <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${[tr('home_stat_now'),tr('task_bucket_today'),tr('task_bucket_later')][i]}</div>
             ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
           </button>`).join('')}
       </div>
@@ -2963,7 +3103,7 @@ function renderSites() {
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:var(--fs-2xl);font-weight:700">אתרים</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">${tr('nav_sites')}</div>
         <div style="display:flex;gap:8px">
           <button onclick="toggleSitesMap()" id="sites-map-toggle" aria-pressed="${sitesMapOn}" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};border-radius:var(--radius-md);padding:8px 12px;color:${sitesMapOn?'var(--gold)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('map')} מפה</button>
           <button onclick="showSpisModal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('tool')} אבחון</button>
@@ -3388,7 +3528,7 @@ function renderPeople() {
   el.innerHTML = `
     <div class="screen-header">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:var(--fs-2xl);font-weight:700">אנשים</div>
+        <div style="font-size:var(--fs-2xl);font-weight:700">${tr('nav_people')}</div>
         ${addBtnHtml('showAddPerson()')}
       </div>
     </div>
@@ -3532,10 +3672,18 @@ function renderSettings() {
   const el = document.getElementById('screen-settings')
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
-      ${backHeaderHtml('הגדרות', '24px')}
+      ${backHeaderHtml(tr('settings_title'), '24px')}
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('palette')} ערכת צבע</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">שינוי מהיר לגוון המבטא באפליקציה</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('globe')} ${tr('settings_lang')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px;line-height:1.6">${tr('settings_lang_hint')}</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="setUiLang('he')" style="flex:1;padding:10px 4px;border-radius:var(--radius-md);border:2px solid ${uiLang==='he'?'var(--gold)':'var(--line)'};background:${uiLang==='he'?'var(--gold)18':'var(--surface)'};color:${uiLang==='he'?'var(--gold)':'var(--t2)'};font-weight:700;cursor:pointer">עברית</button>
+          <button onclick="setUiLang('en')" style="flex:1;padding:10px 4px;border-radius:var(--radius-md);border:2px solid ${uiLang==='en'?'var(--gold)':'var(--line)'};background:${uiLang==='en'?'var(--gold)18':'var(--surface)'};color:${uiLang==='en'?'var(--gold)':'var(--t2)'};font-weight:700;cursor:pointer">English</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('palette')} ${tr('settings_theme')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_theme_hint')}</div>
         <div style="display:flex;gap:8px">
           ${Object.keys(THEMES).map(name=>`
             <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'var(--surface)'};cursor:pointer">
@@ -3545,59 +3693,59 @@ function renderSettings() {
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('volume-2')} משוב לפעולות</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px;line-height:1.6">צליל קצר ורטט עדין כשמסיימים משימה, שומרים רפלקציה או מסיימים מדיטציה. כל פעולה מאשרת את עצמה גם בלי זה — אפשר לכבות לפגישות ולשטח.</div>
-        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-bottom:10px;cursor:pointer"><input type="checkbox" id="pref-sound" ${soundOn()?'checked':''} onchange="setSoundOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('music')} צלילי פעולה</label>
-        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);cursor:pointer"><input type="checkbox" id="pref-haptics" ${localStorage.getItem('fieldy_haptics')!=='0'?'checked':''} onchange="setHapticsOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('activity')} רטט</label>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('volume-2')} ${tr('settings_feedback_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px;line-height:1.6">${tr('settings_feedback_hint')}</div>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-bottom:10px;cursor:pointer"><input type="checkbox" id="pref-sound" ${soundOn()?'checked':''} onchange="setSoundOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('music')} ${tr('settings_sound_label')}</label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);cursor:pointer"><input type="checkbox" id="pref-haptics" ${localStorage.getItem('fieldy_haptics')!=='0'?'checked':''} onchange="setHapticsOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('activity')} ${tr('settings_haptics_label')}</label>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('package')} גיבוי / העברה לטלפון חדש</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מוריד קובץ עם כל הנתונים שלך (אתרים, משימות, טאו, מנהיגות, הכל). בטלפון החדש: פתח את האפליקציה מהקישור, היכנס להגדרות, ולחץ "טען מקובץ".</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('package')} ${tr('settings_backup_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_backup_hint')}</div>
         <div style="display:flex;gap:8px">
-          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('download')} הורד גיבוי</button>
-          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען מקובץ</button>
+          <button id="export-backup-btn" onclick="exportBackup()" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('download')} ${tr('settings_backup_download')}</button>
+          <button onclick="document.getElementById('import-backup-file').click()" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} ${tr('settings_backup_upload')}</button>
         </div>
         <input id="import-backup-file" type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('clipboard')} ספריית אתרים (Monday)</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${(state.siteDirectory||[]).length ? ('טעונים כרגע ' + (state.siteDirectory||[]).length + ' אתרים מ-Monday.') : 'טען רשימת אתרים מ-Monday פעם אחת — Fieldy ישתמש בה למילוי אוטומטי כשמוסיפים אתר, ולענות על שאלות גם על אתרים שלא הוספת עדיין ידנית.'}</div>
-        <button onclick="document.getElementById('import-directory-file').click()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} טען קובץ ספרייה</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('clipboard')} ${tr('settings_directory_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${(state.siteDirectory||[]).length ? tr('settings_directory_loaded').replace('{n}', (state.siteDirectory||[]).length) : tr('settings_directory_hint')}</div>
+        <button onclick="document.getElementById('import-directory-file').click()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:var(--radius-md);padding:10px;color:#fff;font-size:var(--fs-base);font-weight:600">${icon('upload')} ${tr('settings_directory_upload')}</button>
         <input id="import-directory-file" type="file" accept="application/json" style="display:none" onchange="importSiteDirectory(this.files[0])"/>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('cloud')} שרת (Cloudflare)</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?'מחובר — הנתונים מסונכרנים לשרת, ותכונות ה-AI עובדות דרכו.':'לא מחובר — הנתונים נשארים רק במכשיר הזה, ותכונות ה-AI (ארגון היום, שאל את Fieldy, ניסוחים) לא פעילות.'}</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:12px;line-height:1.5">מפתח ה-Anthropic שמור בשרת בלבד (Cloudflare secret) ולא בטלפון.</div>
-        <label class="form-label">כתובת השרת</label>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('cloud')} ${tr('settings_server_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?tr('settings_server_connected'):tr('settings_server_not_connected')}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:12px;line-height:1.5">${tr('settings_server_key_note')}</div>
+        <label class="form-label">${tr('settings_server_url_label')}</label>
         <input id="settings-server-url" value="${esc(serverUrl)}" placeholder="https://fieldy-proxy.xxx.workers.dev" class="form-input" style="direction:ltr"/>
-        <label class="form-label">סיסמת השרת (APP_PASSCODE)</label>
+        <label class="form-label">${tr('settings_server_passcode_label')}</label>
         <input id="settings-server-passcode" type="password" value="${esc(serverPasscode)}" placeholder="הסיסמה שהגדרת ב-Cloudflare" class="form-input" style="direction:ltr;margin-bottom:12px"/>
         <div style="display:flex;gap:8px">
-          <button id="server-save-btn" class="btn-primary" style="flex:1" onclick="saveServerConfig()">שמור והתחבר</button>
-          <button id="server-test-btn" onclick="testServerConfig()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 14px;color:var(--t2);font-size:var(--fs-base)">בדוק חיבור</button>
+          <button id="server-save-btn" class="btn-primary" style="flex:1" onclick="saveServerConfig()">${tr('settings_server_save')}</button>
+          <button id="server-test-btn" onclick="testServerConfig()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 14px;color:var(--t2);font-size:var(--fs-base)">${tr('settings_server_test')}</button>
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('bell')} התראות לטלפון</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:10px">תזכורות אמיתיות מהשרת — גם כשהאפליקציה סגורה.</div>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('bell')} ${tr('settings_push_title')}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:10px">${tr('settings_push_hint')}</div>
         <div id="push-card-body">${pushCardBodyHtml()}</div>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash-2')} ניקוי כפילויות בלוח</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מוחק אירועים בלוח שהם בעצם שכפולים ישנים של משימות קיימות (באג שתוקן).</div>
-        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">נקה כפילויות</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash-2')} ${tr('settings_dedupe_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_dedupe_hint')}</div>
+        <button id="dedupe-btn" onclick="dedupeEvents()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">${tr('settings_dedupe_btn')}</button>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash')} נקה נתוני יום</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">מחיקת כל המשימות, אתרים ואנשים.</div>
-        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid #ef444444;background:transparent;color:var(--red);font-size:var(--fs-base)">נקה הכל</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('trash')} ${tr('settings_clear_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_clear_hint')}</div>
+        <button id="clear-btn" onclick="confirmClear()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid #ef444444;background:transparent;color:var(--red);font-size:var(--fs-base)">${tr('settings_clear_btn')}</button>
       </div>
       <div class="card">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('refresh')} רענון האפליקציה</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:4px">גרסה: ${APP_VERSION}</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">אם עדכון חדש לא נראה אחרי שינוי בגיטהאב, לחץ כאן — זה ינקה קאש ויטען מחדש.</div>
-        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">רענן עכשיו</button>
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('refresh')} ${tr('settings_refresh_title')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:4px">${tr('settings_version').replace('{v}', APP_VERSION)}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_refresh_hint')}</div>
+        <button id="refresh-app-btn" onclick="forceRefreshApp()" style="padding:10px 16px;border-radius:var(--radius-md);border:1px solid var(--border);background:transparent;color:var(--gold);font-size:var(--fs-base)">${tr('settings_refresh_btn')}</button>
       </div>
     </div>`
   refreshPushCard()   // async: fills in whether this device is subscribed
@@ -4069,7 +4217,7 @@ function offerUndo(label, restore, onCommit) {
   haptic('warn')
   const el = document.createElement('div')
   el.id = 'undo-toast'
-  el.innerHTML = '<span>' + esc(label) + '</span><button onclick="undoLast()">בטל</button>'
+  el.innerHTML = '<span>' + esc(label) + '</span><button onclick="undoLast()">' + tr('btn_undo') + '</button>'
   document.body.appendChild(el)
   _undo = {restore, onCommit, timer: setTimeout(commitUndo, UNDO_MS)}
 }
@@ -4888,6 +5036,7 @@ function startMeditationWithVoice(idx){
 
 // ── INIT ─────────────────────────────────────────
 applyTheme(currentTheme)
+applyUiLangDom()
 checkChronology()
 refreshBadges()
 renderHome()
