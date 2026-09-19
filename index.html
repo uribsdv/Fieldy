@@ -714,6 +714,7 @@ function validateState(s) {
   })
   if(s.focus != null && typeof s.focus !== 'string') problems.push('focus אינו טקסט')
   if(s.streak != null && typeof s.streak !== 'number') problems.push('streak אינו מספר')
+  if(s.taskReviewedDate != null && typeof s.taskReviewedDate !== 'string') problems.push('taskReviewedDate אינו טקסט')
   return problems
 }
 // Fills in the optional sections an older saved state / backup may not have.
@@ -1837,6 +1838,83 @@ const PRIORITY_HEX = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
 let rightNowExpanded = false   // "הצג הכל" escape hatch while a mood limit is active
 let insightsExpanded = false   // "מה שאני לומד עליך" starts collapsed — it's the least actionable card on a screen already full of things to act on
 function toggleInsightsExpanded(e) { if(e) e.stopPropagation(); insightsExpanded = !insightsExpanded; if(currentScreen==='home') renderHome() }
+// Daily task review (in the briefing card): checklist of today's open
+// tasks ("still relevant?"), a quick-add, and a suggested next task once
+// finished. All transient UI state — nothing here needs to survive a
+// reload except taskReviewedDate (below), which only tracks whether
+// today's review happened at all.
+let taskReviewOpen = false
+let taskReviewUnchecked = new Set()   // task ids unchecked ("not relevant today") during the open review
+let taskReviewSuggestion = null       // {title, sub, go} once "סיימתי לסקור" runs
+let reviewSuggestionOpen = false
+let focusEditOpen = false             // inline edit for "the most important thing today" in the briefing
+function toggleTaskReview() {
+  taskReviewOpen = !taskReviewOpen
+  if(!taskReviewOpen) { taskReviewSuggestion = null; reviewSuggestionOpen = false; taskReviewUnchecked = new Set() }
+  if(currentScreen==='home') renderHome()
+}
+function toggleReviewTask(id) {
+  if(taskReviewUnchecked.has(id)) taskReviewUnchecked.delete(id); else taskReviewUnchecked.add(id)
+  if(currentScreen==='home') renderHome()
+}
+function reviewQuickAdd() {
+  const input = document.getElementById('review-quick-add')
+  const text = (input && input.value || '').trim()
+  if(!text) return
+  setState({tasks: {...state.tasks, today: [...state.tasks.today, {id:'rq'+Date.now(), text, site:null, assignee:null, color:'orange', time:'', date:'', context:null, note:null, done:false}]}})
+}
+function finishTaskReview() {
+  const removeIds = taskReviewUnchecked, moved = []
+  const strip = function(arr){ return arr.filter(function(t){ if(removeIds.has(t.id)) { moved.push(t); return false } return true }) }
+  const prevTasks = state.tasks
+  setState({tasks: {now: strip(state.tasks.now), today: strip(state.tasks.today), later: [...state.tasks.later, ...moved]}, taskReviewedDate: getToday()})
+  if(moved.length) offerUndo(moved.length + ' משימות עברו ל"אחר כך"', function(){ setState({tasks: prevTasks}) })
+  taskReviewUnchecked = new Set()
+  const mood = getCurrentMood()
+  const nextUp = rankRightNow(mood ? mood.mood : null).find(function(it){ return it.kind === 'task' })
+  taskReviewSuggestion = nextUp ? {title: nextUp.title, sub: nextUp.sub, go: nextUp.go} : null
+  reviewSuggestionOpen = true
+  if(currentScreen==='home') renderHome()
+}
+function toggleReviewSuggestion() { reviewSuggestionOpen = !reviewSuggestionOpen; if(currentScreen==='home') renderHome() }
+function toggleFocusEdit(e) { if(e) e.stopPropagation(); focusEditOpen = !focusEditOpen; if(currentScreen==='home') renderHome() }
+function saveFocusEdit(e) {
+  if(e) e.stopPropagation()
+  const val = ((document.getElementById('focus-edit-input')||{}).value || '').trim()
+  focusEditOpen = false
+  setState({focus: val, focusDate: val ? getToday() : null})
+}
+function reviewChecklistRowHtml(t) {
+  const checked = !taskReviewUnchecked.has(t.id)
+  return '<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer">' +
+    '<input type="checkbox" ' + (checked?'checked':'') + ' onchange="toggleReviewTask(' + jsArg(t.id) + ')" style="width:18px;height:18px;flex-shrink:0"/>' +
+    '<span style="font-size:var(--fs-base);color:' + (checked?'var(--t1)':'var(--t4)') + ';text-decoration:' + (checked?'none':'line-through') + ';flex:1">' + esc(t.text) + '</span>' +
+    '</label>'
+}
+function taskReviewHtml() {
+  const today = getToday(), reviewedToday = state.taskReviewedDate === today
+  const items = [...state.tasks.now, ...state.tasks.today].filter(function(t){ return !t.done })
+  return `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+    <div class="panel-label" style="margin-bottom:6px">${icon('clipboard')} סקירת המשימות של היום</div>
+    <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:6px">סמן אילו עדיין רלוונטיות היום — מה שתבטל סימון עליו יעבור ל"אחר כך".</div>
+    ${items.length ? items.map(reviewChecklistRowHtml).join('') : `<div class="muted" style="font-size:var(--fs-sm);padding:6px 0">אין משימות פתוחות ל"עכשיו"/"היום" לסקור.</div>`}
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <input id="review-quick-add" class="form-input" placeholder="משהו חדש להוסיף?" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();reviewQuickAdd()}"/>
+      <button onclick="reviewQuickAdd()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-weight:700">${icon('plus')}</button>
+    </div>
+    <button id="finish-review-btn" class="btn-primary" onclick="finishTaskReview()">${icon('check')} סיימתי לסקור</button>
+    ${taskReviewSuggestion ? `<div style="margin-top:10px;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleReviewSuggestion()">
+        <span style="font-weight:700;color:var(--gold);font-size:var(--fs-base)">${icon('target')} נקודת התחלה מוצעת</span>
+        <span style="color:var(--gold);display:flex;transition:transform .15s;transform:rotate(${reviewSuggestionOpen?'180deg':'0deg'})">${icon('chevron-down')}</span>
+      </div>
+      ${reviewSuggestionOpen ? `<div style="margin-top:8px;${taskReviewSuggestion.go?'cursor:pointer':''}" ${taskReviewSuggestion.go?('onclick="'+taskReviewSuggestion.go+'"'):''}>
+        <div style="font-weight:700;color:var(--t1)">${esc(taskReviewSuggestion.title)}</div>
+        ${taskReviewSuggestion.sub ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${taskReviewSuggestion.sub}</div>` : ''}
+      </div>` : `<div class="muted" style="font-size:var(--fs-sm);margin-top:4px">אין יותר משימות פתוחות — נקי!</div>`}
+    </div>` : reviewedToday ? `<div class="muted" style="font-size:var(--fs-sm);margin-top:8px">${icon('check')} נסקר היום.</div>` : ''}
+  </div>`
+}
 function moodLimit(mood) { return (mood && MOOD_LIB[mood] && MOOD_LIB[mood].taskLimit) || null }
 function rankRightNow(mood) {
   const items = []
@@ -1999,12 +2077,26 @@ function dailyBriefingHtml() {
   if(!briefingHasContent(f)) return ''
   const cached = (state.briefing && state.briefing.date === today && state.briefing.text) ? state.briefing.text : ''
   const stale = !cached && state.briefing && state.briefing.text && state.briefing.date && state.briefing.date !== today
+  const reviewedToday = state.taskReviewedDate === today
   return `<div id="daily-briefing" class="card" style="border:1px solid var(--accent-line);border-right:3px solid var(--gold);margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:6px">
         <span class="panel-label" style="margin:0">${icon('sun')} תדריך הבוקר</span>
-        ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? 'כותב…' : (cached ? 'רענן' : 'צור תדריך')}</button>` : ''}
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button id="task-review-toggle-btn" onclick="toggleTaskReview()" style="background:${taskReviewOpen?'var(--surface)':(reviewedToday?'var(--surface)':'var(--gold)')};border:1px solid ${reviewedToday||taskReviewOpen?'var(--accent-line)':'transparent'};border-radius:var(--radius-sm);padding:3px 9px;color:${reviewedToday||taskReviewOpen?'var(--t2)':'#fff'};font-size:var(--fs-xs);font-weight:700">${icon('clipboard')} ${taskReviewOpen ? 'סגור' : (reviewedToday ? 'נסקר היום' : 'סקור משימות')}</button>
+          ${serverConfigured() ? `<button id="briefing-refresh-btn" onclick="refreshBriefing()" ${briefingBusy?'disabled':''} style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('refresh')} ${briefingBusy ? 'כותב…' : (cached ? 'רענן' : 'צור תדריך')}</button>` : ''}
+        </div>
       </div>
-      ${f.focus ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">${iconBadge('target', 'var(--gold)')}<div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);line-height:1.4">${esc(f.focus)}</div></div>` : ''}
+      <div style="margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleFocusEdit()">
+          ${iconBadge('target', 'var(--gold)')}
+          <div style="flex:1;font-size:var(--fs-base);font-weight:700;color:${f.focus?'var(--t1)':'var(--t3)'};line-height:1.4">${f.focus?esc(f.focus):'הדבר הכי חשוב היום — הוסף'}</div>
+          <span style="color:var(--gold);display:flex;transition:transform .15s;transform:rotate(${focusEditOpen?'180deg':'0deg'})">${icon('chevron-down')}</span>
+        </div>
+        ${focusEditOpen ? `<div style="display:flex;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
+          <input id="focus-edit-input" class="form-input" style="margin-bottom:0;flex:1" value="${esc(state.focus||'')}" placeholder="למשל: פגישה עם NIA ב-14:00"/>
+          <button onclick="saveFocusEdit(event)" style="background:var(--gold);border-radius:var(--radius-md);padding:0 16px;color:#fff;font-weight:700">${icon('check')}</button>
+        </div>` : ''}
+      </div>
       ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
       <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
       ${briefingBusy ? skeletonHtml(3, 'מכין את התדריך של היום…') :
@@ -2012,6 +2104,7 @@ function dailyBriefingHtml() {
         briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} לא הצלחתי להכין תדריך: ${esc(briefingError)}</div>` :
         (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.</div>` : '')}
       ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">התדריך האחרון היה מ-${esc(state.briefing.date)}</div>` : ''}
+      ${taskReviewOpen ? taskReviewHtml() : ''}
     </div>`
 }
 
@@ -4815,7 +4908,15 @@ if('serviceWorker' in navigator) {
 }
 // A tapped notification opens /Fieldy/#<screen>; land on that screen (also
 // when the app is already open and only the hash changes).
-function goToHashScreen() { var h = (location.hash || '').replace('#', ''); if(h && NAV_SCREENS.includes(h)) navigateTo(h) }
+// "#review-tasks" is a special case (not a nav screen): it's the deep-link a
+// morning task-review notification will open once that notification exists
+// server-side (not part of this change — see chat). Lands on home with the
+// review accordion already open, ready to use.
+function goToHashScreen() {
+  var h = (location.hash || '').replace('#', '')
+  if(h === 'review-tasks') { taskReviewOpen = true; navigateTo('home'); return }
+  if(h && NAV_SCREENS.includes(h)) navigateTo(h)
+}
 goToHashScreen()
 window.addEventListener('hashchange', goToHashScreen)
 </script>

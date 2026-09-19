@@ -1070,6 +1070,79 @@ async function main() {
     })
   }
 
+  section('Daily task review + editable focus (briefing accordion)')
+  {
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, seededState())
+    resetLogs(); await page.goto(BASE + '?rev=1', { waitUntil: 'load' }); await page.waitForTimeout(300)
+    await check('"סקור משימות" opens a checklist of today\'s open now/today tasks, all checked by default', async () => {
+      await page.click('#task-review-toggle-btn')
+      const r = await page.evaluate(() => ({ n: document.querySelectorAll('[id="daily-briefing"] input[type=checkbox]').length, allChecked: [...document.querySelectorAll('[id="daily-briefing"] input[type=checkbox]')].every(c => c.checked) }))
+      assert(r.n === 3, 'expected 3 open now/today tasks, got ' + r.n)
+      assert(r.allChecked, 'all tasks should start checked (relevant)')
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('unchecking a task strikes it through; quick-add appends a task immediately', async () => {
+      const cbs = await page.$$('[id="daily-briefing"] input[type=checkbox]')
+      await cbs[2].click()   // uncheck the last row (d2, "לבדוק גנרטור בסטה קרוז")
+      const struck = await page.evaluate(() => getComputedStyle(document.querySelectorAll('[id="daily-briefing"] input[type=checkbox]')[2].closest('label').querySelector('span')).textDecorationLine)
+      assert(/line-through/.test(struck), 'unchecked row not struck through: ' + struck)
+      await page.fill('#review-quick-add', 'לבדוק לחץ מים')
+      await page.click('#review-quick-add + button')
+      const r = await page.evaluate(() => ({ added: state.tasks.today.some(t => t.text === 'לבדוק לחץ מים'), cleared: document.getElementById('review-quick-add').value }))
+      assert(r.added && r.cleared === '', JSON.stringify(r))
+    })
+    await check('"סיימתי לסקור" moves the unchecked task to "אחר כך" (with undo) and shows a suggested next task', async () => {
+      await page.click('#finish-review-btn')
+      await page.waitForTimeout(80)
+      const r = await page.evaluate(() => ({
+        laterIds: state.tasks.later.map(t => t.id),
+        stillInToday: state.tasks.today.some(t => t.id === 'd2'),
+        reviewedDate: state.taskReviewedDate,
+        undo: !!document.getElementById('undo-toast'),
+        suggestion: (document.querySelector('[id="daily-briefing"] div[style*="accent-soft"]') || {}).textContent || ''
+      }))
+      assert(!r.stillInToday && r.laterIds.includes('d2'), 'd2 should have moved to later: ' + JSON.stringify(r))
+      assert(r.reviewedDate === todayPlus(0), 'taskReviewedDate not set to today: ' + r.reviewedDate)
+      assert(r.undo, 'no undo toast after finishing review')
+      assert(/נקודת התחלה מוצעת/.test(r.suggestion), 'no suggested-start section: ' + r.suggestion)
+      await page.evaluate(() => undoLast())
+      await page.waitForTimeout(60)
+      const u = await page.evaluate(() => ({ laterIds: state.tasks.later.map(t => t.id), todayIds: state.tasks.today.map(t => t.id) }))
+      assert(!u.laterIds.includes('d2') && u.todayIds.includes('d2'), 'undo did not restore d2 to today: ' + JSON.stringify(u))
+    })
+    await check('closing and reopening the review resets its checklist/suggestion state', async () => {
+      await page.click('#task-review-toggle-btn')   // close (still labelled "סגור" — taskReviewOpen was never reset by the undo above)
+      await page.waitForTimeout(60)
+      assert(!(await page.$('#review-quick-add')), 'review body should be gone after closing')
+      await page.click('#task-review-toggle-btn')   // reopen — label is "נסקר היום" now, but the id is stable
+      const r = await page.evaluate(() => ({ allChecked: [...document.querySelectorAll('[id="daily-briefing"] input[type=checkbox]')].every(c => c.checked), suggestion: !!document.querySelector('[id="daily-briefing"] div[style*="accent-soft"]') }))
+      assert(r.allChecked && !r.suggestion, 'reopened review should start fresh: ' + JSON.stringify(r))
+      await page.click('#task-review-toggle-btn')   // close again before the focus-edit check below
+    })
+    await check('the focus line ("הדבר הכי חשוב היום") is an inline-editable accordion, prefilled with state.focus', async () => {
+      await page.evaluate(() => toggleFocusEdit())
+      await page.waitForFunction(() => document.getElementById('focus-edit-input'), null, { timeout: 2000 })
+      const r0 = await page.evaluate(() => ({ input: document.getElementById('focus-edit-input').value, focus: state.focus }))
+      assert(r0.input === r0.focus, 'focus input not prefilled with state.focus: ' + JSON.stringify(r0))
+      await page.fill('#focus-edit-input', 'מוקד חדש להיום')
+      await page.click('#focus-edit-input + button')
+      await page.waitForTimeout(60)
+      const r = await page.evaluate(() => ({ focus: state.focus, focusDate: state.focusDate, editorClosed: !document.getElementById('focus-edit-input') }))
+      assert(r.focus === 'מוקד חדש להיום' && r.focusDate === todayPlus(0) && r.editorClosed, JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('validateState() rejects a wrong-typed taskReviewedDate', async () => {
+      const r = await page.evaluate(() => { const base = JSON.parse(localStorage.getItem('fieldy_v2')); return validateState({ ...base, taskReviewedDate: 123 }).length })
+      assert(r === 1, 'expected exactly one problem, got ' + r)
+    })
+    await check('"#review-tasks" deep-link lands on home with the review already open', async () => {
+      resetLogs(); await page.goto(BASE + '#review-tasks', { waitUntil: 'load' }); await page.waitForTimeout(300)
+      const r = await page.evaluate(() => ({ screen: currentScreen, open: taskReviewOpen, hasBody: !!document.getElementById('review-quick-add') }))
+      assert(r.screen === 'home' && r.open && r.hasBody, JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+  }
+
   section('API key never lives in the browser')
   await check('a legacy fieldy_key left in localStorage is removed at boot', async () => {
     await page.goto(BASE, { waitUntil: 'load' })
