@@ -873,8 +873,9 @@ function togglePersonalLog(key, eventName, payload) {
 function toggleGymToday() { togglePersonalLog('gymLog', 'gym_completed', {date: getToday()}) }
 function toggleMeditationToday() { togglePersonalLog('meditationLog', 'meditation_completed', {source:'manual'}) }
 function saveVacationGoal() {
-  const val = document.getElementById('vacation-goal-input').value.trim()
-  setState({personal:{...state.personal, vacationGoal: val}})
+  const el = document.getElementById('vacation-goal-input')
+  if(!el) return
+  setState({personal:{...state.personal, vacationGoal: el.value.trim()}})
 }
 // ── MOOD / ADHD ASSIST ────────────────────────────
 const MOOD_LIB = {
@@ -1028,7 +1029,7 @@ async function analyzePersonalPatterns(manual) {
       'יומן מצבי-רוח:\n' + (moodLines||'(אין)') + '\n\n' +
       'יומן פיתוח מנהיגות יומי:\n' + (leadLines||'(אין)') + '\n\n' +
       'המשימה שלך: לזהות דפוסים אמיתיים שחוזרים על עצמם — נושאים/טריגרים חוזרים, שעות/ימים שבהם מצב מסוים נפוץ יותר, מה שנשמע כמו דברים שעוזרים לו או מכבידים עליו, ובנוסף — דפוסים ביומן המנהיגות: אילו נושאי "לשיפור" חוזרים על עצמם (אזורי צמיחה אמיתיים), והאם רואים התקדמות/נסיגה לאורך זמן בהשוואה לתקופה הקודמת. אל תמציא דפוסים שאין להם עדות ברורה בטקסט. תכתוב בעברית, ישירות אליו (גוף שני), עד 6 משפטים קצרים, קונקרטי ולא כללי, כולל לפחות משפט אחד על התקדמות המנהיגות אם יש מספיק רשומות. אם אין מספיק חומר לזהות דפוס אמיתי, תגיד את זה בכנות ותבקש עוד זמן/נתונים. אל תאבחן ואל תשתמש בתוויות קליניות — רק תיאור התנהגותי ותצפיות מעשיות.'
-    const result = await callClaude([{role:'user', content: prompt}], withContext(null))
+    const result = await callClaude([{role:'user', content: prompt + aiLangInstruction()}], withContext(null))
     setState({personalInsights: {text: result.trim(), updatedAt: Date.now(), basedOnCount: (state.brainDumps||[]).length + (state.moods||[]).length + (state.leadershipLog||[]).length}})
     if(currentScreen==='home') renderHome()
   } catch(e) {
@@ -1082,7 +1083,7 @@ function getMoodPatterns() {
   state.moods.forEach(function(m) {
     var wd = (m.weekday != null) ? m.weekday : new Date(m.ts).getDay()
     var hr = (m.hour != null) ? m.hour : new Date(m.ts).getHours()
-    var block = hr < 12 ? 'בבוקר' : (hr < 17 ? 'אחה"צ' : 'בערב')
+    var block = hr < 12 ? 'morning' : (hr < 17 ? 'afternoon' : 'evening')
     var key = wd + '|' + block
     if(!blocks[key]) blocks[key] = {}
     blocks[key][m.mood] = (blocks[key][m.mood] || 0) + 1
@@ -1237,6 +1238,58 @@ const TRANSLATIONS = {
   home_briefing_stale_prefix: {he:'התדריך האחרון היה מ-{d}', en:'The last briefing was from {d}'},
 
   task_bucket_today: {he:'היום', en:'Today'}, task_bucket_later: {he:'אחר כך', en:'Later'},
+
+  // Home — the collapsed "read later" drawer
+  home_insights: {he:'תובנות', en:'Insights'},
+  home_insights_count: {he:'{n} פריטים', en:'{n} items'},
+  home_pattern_title: {he:'דפוס שחוזר', en:'Recurring pattern'},
+  home_pattern_line: {he:'בימי {day} {block} אתה נוטה להיות {mood} ({n} פעמים)', en:'On {day} {block} you tend to be {mood} ({n} times)'},
+  home_learning_updated: {he:'עודכן {d}', en:'Updated {d}'},
+  home_learning_empty: {he:'עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.', en:"A bit more data and I'll start spotting your patterns — keep writing and logging your mood."},
+  home_noticed: {he:'שמתי לב', en:'I noticed'},
+  home_briefing_full: {he:'התדריך המלא', en:'Full briefing'},
+  home_ask_fieldy_hint_short: {he:'תכנון, סדר עדיפויות, שאלה מההיסטוריה', en:'Planning, priorities, something from your history'},
+  home_ask_fieldy_placeholder: {he:'לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?', en:"e.g. I'm driving to Cauayan today — what should I do first?"},
+  home_vacation_placeholder: {he:'לדוגמה: בורקאי, דצמבר', en:'e.g. Boracay, December'},
+
+  // Home — "right now" list, mood limits, trend
+  rn_title: {he:'עכשיו', en:'Right now'},
+  rn_more: {he:'+{n} נוספים במשימות ובאתרים', en:'+{n} more in tasks and sites'},
+  rn_focus_sub: {he:'הכי חשוב היום', en:'Most important today'},
+  rn_overdue: {he:'עבר הזמן', en:'overdue'},
+  rn_stuck_days: {he:'תקוע {n} ימים', en:'stuck {n} days'},
+  rn_show_all: {he:'הצג הכל ({n})', en:'Show all ({n})'},
+  rn_hide_again: {he:'הסתר שוב', en:'Hide again'},
+  ctx_phone: {he:'טלפון', en:'Phone'}, ctx_office: {he:'משרד', en:'Office'}, ctx_site: {he:'באתר', en:'On site'},
+  moodnote_overwhelmed: {he:'מצב מוצף: מוצג רק הדבר האחד הכי חשוב. השאר מחכה.', en:'Overwhelmed: showing only the single most important thing. The rest can wait.'},
+  moodnote_scattered: {he:'מצב מפוזר: שני דברים קטנים וברורים, לא יותר.', en:'Scattered: two small, clear things — no more.'},
+  moodnote_tired: {he:'מצב עייף: קודם מה שנסגר בטלפון. השטח מחכה למחר.', en:'Tired: phone-first. The field can wait for tomorrow.'},
+  trend_title: {he:'{n} הימים האחרונים', en:'Last {n} days'},
+  trend_start: {he:'לפני {n} יום', en:'{n} days ago'},
+  trend_today: {he:'היום', en:'Today'},
+  trend_aria: {he:'מצב רוח לפי יום', en:'Mood by day'},
+  day_0: {he:'ראשון', en:'Sundays'}, day_1: {he:'שני', en:'Mondays'}, day_2: {he:'שלישי', en:'Tuesdays'},
+  day_3: {he:'רביעי', en:'Wednesdays'}, day_4: {he:'חמישי', en:'Thursdays'}, day_5: {he:'שישי', en:'Fridays'}, day_6: {he:'שבת', en:'Saturdays'},
+  block_morning: {he:'בבוקר', en:'in the morning'}, block_afternoon: {he:'אחה"צ', en:'in the afternoon'}, block_evening: {he:'בערב', en:'in the evening'},
+
+  // Undo toasts + task triage
+  undo_task_deleted: {he:'המשימה נמחקה', en:'Task deleted'},
+  undo_moved_later: {he:'{n} משימות עברו ל"אחר כך"', en:'{n} tasks moved to "Later"'},
+  undo_batched: {he:'המשימות קובצו ל"{b}"', en:'Tasks grouped into "{b}"'},
+  triage_site: {he:'ב-{x}', en:'at {x}'},
+  triage_date: {he:'לתאריך {x}', en:'for {x}'},
+  triage_label: {he:'{n} משימות {what}{where}', en:'{n} tasks {what}{where}'},
+  triage_scattered: {he:' מפוזרות בין {b}', en:' scattered across {b}'},
+  triage_not_adjacent: {he:' לא רצופות', en:' not next to each other'},
+  triage_batch: {he:'קבץ ל{b}', en:'Group into {b}'},
+  triage_dismiss: {he:'לא עכשיו', en:'Not now'},
+  bucket_now: {he:'עכשיו', en:'Now'},
+
+  // Petty cash charts
+  petty_by_month: {he:'הוצאות לפי חודש', en:'Spending by month'},
+  petty_other: {he:'אחר ({n})', en:'Other ({n})'},
+
+  settings_vacation_hint: {he:'מופיע כתזכורת למה אתה עובד. משתנה לעיתים רחוקות, ולכן הוא כאן ולא במסך הבית.', en:"A reminder of what you're working toward. Rarely changes, so it lives here rather than on the home screen."},
 
   empty_default: {he:'אין פריטים', en:'No items'},
 }
@@ -1968,16 +2021,47 @@ function refreshBadges() {
 // (overwhelmed → exactly one). Scores are plain integers so the order stays
 // explainable: bucket base + priority + time pressure + mood/context bias.
 const MOOD_RANK_BIAS = {
-  overwhelmed: {phone:15, office:0,  site:-20, note:'מצב מוצף: מוצג רק הדבר האחד הכי חשוב. השאר מחכה.'},
-  scattered:   {phone:15, office:5,  site:-10, note:'מצב מפוזר: שני דברים קטנים וברורים, לא יותר.'},
-  tired:       {phone:20, office:0,  site:-25, note:'מצב עייף: קודם מה שנסגר בטלפון. השטח מחכה למחר.'},
+  overwhelmed: {phone:15, office:0,  site:-20, note:'moodnote_overwhelmed'},
+  scattered:   {phone:15, office:5,  site:-10, note:'moodnote_scattered'},
+  tired:       {phone:20, office:0,  site:-25, note:'moodnote_tired'},
   focused:     {phone:-5, office:10, site:10,  note:null},
   motivated:   {phone:0,  office:5,  site:15,  note:null}
 }
 const PRIORITY_HEX = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
 let rightNowExpanded = false   // "הצג הכל" escape hatch while a mood limit is active
-let insightsExpanded = false   // "מה שאני לומד עליך" starts collapsed — it's the least actionable card on a screen already full of things to act on
-function toggleInsightsExpanded(e) { if(e) e.stopPropagation(); insightsExpanded = !insightsExpanded; if(currentScreen==='home') renderHome() }
+// ── ACCORDIONS ────────────────────────────────────
+// One collapse mechanism for every "read it later" panel. The rule the home
+// screen follows: anything that needs DOING stays open; anything that is
+// reading/analysis/reflection collapses to a single line. Everything here
+// starts CLOSED — the screen should open on what to act on, not on what to
+// read. Open/closed lives in localStorage per device (a viewing preference,
+// not data worth syncing), and the body is only built when it's open, so a
+// closed panel costs nothing to render.
+let accordionOpen = (function(){
+  try { return JSON.parse(localStorage.getItem('fieldy_accordions') || '{}') || {} } catch(e) { return {} }
+})()
+function accordionIsOpen(key) { return !!accordionOpen[key] }
+function toggleAccordion(key, e) {
+  if(e) e.stopPropagation()
+  accordionOpen[key] = !accordionOpen[key]
+  try { localStorage.setItem('fieldy_accordions', JSON.stringify(accordionOpen)) } catch(err) {}
+  haptic('light')
+  renderCurrentScreen()
+}
+// head: {icon, color, title, hint} — `hint` is the one-line teaser that says
+// what's inside while it's shut. `body` is a function, called only when open.
+function accordionHtml(key, head, body, style) {
+  const open = accordionIsOpen(key), color = head.color || 'var(--gold)'
+  return `<div class="accordion" data-acc="${esc(key)}"${style ? ' style="' + style + '"' : ''}>
+    <div class="accordion-head" onclick="toggleAccordion(${jsArg(key)})" role="button" tabindex="0" aria-expanded="${open}" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+      ${head.icon ? `<span style="color:${color};display:flex;flex-shrink:0">${icon(head.icon)}</span>` : ''}
+      <span style="font-size:var(--fs-sm);color:${color};font-weight:700;letter-spacing:1px;flex-shrink:0">${head.title}</span>
+      <span class="muted accordion-hint" style="font-size:var(--fs-sm);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${head.hint || ''}</span>
+      <span style="color:${color};display:flex;flex-shrink:0;transition:transform .15s;transform:rotate(${open?'180deg':'0deg'})">${icon('chevron-down')}</span>
+    </div>
+    ${open ? `<div class="accordion-body" style="margin-top:10px">${body()}</div>` : ''}
+  </div>`
+}
 // Daily task review (in the briefing card): checklist of today's open
 // tasks ("still relevant?"), a quick-add, and a suggested next task once
 // finished. All transient UI state — nothing here needs to survive a
@@ -2008,7 +2092,7 @@ function finishTaskReview() {
   const strip = function(arr){ return arr.filter(function(t){ if(removeIds.has(t.id)) { moved.push(t); return false } return true }) }
   const prevTasks = state.tasks
   setState({tasks: {now: strip(state.tasks.now), today: strip(state.tasks.today), later: [...state.tasks.later, ...moved]}, taskReviewedDate: getToday()})
-  if(moved.length) offerUndo(moved.length + ' משימות עברו ל"אחר כך"', function(){ setState({tasks: prevTasks}) })
+  if(moved.length) offerUndo(tr('undo_moved_later').replace('{n}', moved.length), function(){ setState({tasks: prevTasks}) })
   taskReviewUnchecked = new Set()
   const mood = getCurrentMood()
   const nextUp = rankRightNow(mood ? mood.mood : null).find(function(it){ return it.kind === 'task' })
@@ -2062,7 +2146,7 @@ function rankRightNow(mood) {
   const bias = MOOD_RANK_BIAS[mood] || {}
   const ctxBias = c => (c && typeof bias[c] === 'number') ? bias[c] : 0
   if(state.focus && (!state.focusDate || state.focusDate === today)) {
-    items.push({kind:'focus', score:100, icon:'target', title:state.focus, sub:'הכי חשוב היום', color:'var(--gold)', go:null})
+    items.push({kind:'focus', score:100, icon:'target', title:state.focus, sub:tr('rn_focus_sub'), color:'var(--gold)', go:null})
   }
   const addBucket = (bucket, base) => (state.tasks[bucket]||[]).forEach(t => {
     if(t.done) return
@@ -2074,14 +2158,14 @@ function rankRightNow(mood) {
       if(mins >= 0 && mins <= 120) score += 30
     }
     // sub is HTML (icons + escaped data); title stays raw and is escaped at render time
-    const sub = [t.site ? icon('map-pin') + ' ' + esc(t.site) : null, t.time ? icon('clock') + ' ' + esc(t.time) + (overdue ? ' · עבר הזמן' : '') : null, t.context && CONTEXT_LABEL[t.context]].filter(Boolean).join(' · ')
+    const sub = [t.site ? icon('map-pin') + ' ' + esc(t.site) : null, t.time ? icon('clock') + ' ' + esc(t.time) + (overdue ? ' · ' + tr('rn_overdue') : '') : null, t.context && contextLabel(t.context)].filter(Boolean).join(' · ')
     items.push({kind:'task', id:t.id, bucket, score, icon:null, title:t.text, sub, color: overdue ? '#ef4444' : (PRIORITY_HEX[t.color]||PRIORITY_HEX.orange), go:'openTaskFromRightNow(' + jsArg(t.id) + ')'})
   })
   addBucket('now', 70); addBucket('today', 45); addBucket('later', 10)
   state.sites.forEach(s => {
     const d = daysStuck(s)
     if(!s.stuckSince || d < STUCK_ALERT_DAYS || s.status === 'resolved') return
-    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'alert-triangle', title:s.name, sub:'תקוע ' + d + ' ימים' + (s.issue ? ' · ' + esc(s.issue) : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
+    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'alert-triangle', title:s.name, sub:tr('rn_stuck_days').replace('{n}', d) + (s.issue ? ' · ' + esc(s.issue) : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
   })
   getEventsForDate(today).forEach(e => {
     if(!e.time) return
@@ -2103,8 +2187,8 @@ function moodLimitBarHtml(mood, hidden, style) {
   const def = MOOD_LIB[mood], note = (MOOD_RANK_BIAS[mood] && MOOD_RANK_BIAS[mood].note) || ''
   if(!def || (!hidden && !rightNowExpanded)) return ''
   return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:${def.color}12;border:1px solid ${def.color}44;border-radius:var(--radius-md);padding:8px 12px;font-size:var(--fs-sm);color:var(--t2);${style||''}">
-      <span>${icon(def.icon)} ${esc(note)}</span>
-      <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:var(--fs-sm);white-space:nowrap">${rightNowExpanded ? 'הסתר שוב' : 'הצג הכל (' + hidden + ')'}</button>
+      <span>${icon(def.icon)} ${esc(note ? tr(note) : '')}</span>
+      <button class="right-now-toggle" onclick="toggleRightNowExpanded()" style="color:var(--gold);font-weight:700;font-size:var(--fs-sm);white-space:nowrap">${rightNowExpanded ? tr('rn_hide_again') : tr('rn_show_all').replace('{n}', hidden)}</button>
     </div>`
 }
 function rightNowHtml(mood) {
@@ -2127,10 +2211,10 @@ function rightNowHtml(mood) {
       </div>
     </div>`
   }
-  return `<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} עכשיו</div>
+  return `<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} ${tr('rn_title')}</div>
     ${row(shown[0], true)}
     ${shown.slice(1).map(it => row(it, false)).join('')}
-    ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">+${hidden} נוספים במשימות ובאתרים</div>` : '<div style="margin-bottom:8px"></div>')}`
+    ${limit ? moodLimitBarHtml(mood, hidden, 'margin:-2px 0 16px') : (hidden > 0 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:-2px 0 16px">${tr('rn_more').replace('{n}', hidden)}</div>` : '<div style="margin-bottom:8px"></div>')}`
 }
 
 // ── ONE ASSISTANT (Phase 5) ──────────────────────
@@ -2166,6 +2250,18 @@ function assistantContext() {
   return lines.join('\n')
 }
 function withContext(system) { return (system ? system + '\n\n' : '') + assistantContext() }
+// Option ב: content the AI writes for Uri to READ (the daily briefing, Ask
+// Fieldy's answers, the personal-pattern analysis) follows the interface
+// language. Applied per call site rather than inside withContext(), because
+// the drafting prompts (Monday/email/WhatsApp) deliberately ask for English
+// no matter what, and the small-talk coach is a Hebrew practice tool —
+// neither should be swept along. Nothing already written is re-translated:
+// old text keeps the language it was generated in until it next refreshes.
+function aiLangInstruction() {
+  return uiLang === 'en'
+    ? '\n\nIMPORTANT: write your answer in English, even though the data above is in Hebrew.'
+    : ''
+}
 
 // Daily briefing: the facts are computed locally every render (so the panel
 // is useful even offline); the short AI narrative is generated ONCE per day
@@ -2174,11 +2270,17 @@ let briefingBusy = false, briefingError = '', briefingAutoTriedDate = null
 function briefingFacts() {
   const today = getToday(), sites = [], seen = {}
   const add = (name, why, stuck) => { if(!name || seen[name]) return; seen[name] = 1; sites.push({name, why, stuck}) }
-  priorityStuckSites().forEach(s => add(s.name, 'תקוע ' + daysStuck(s) + ' ימים' + (s.issue ? ' · ' + s.issue : ''), true))
+  priorityStuckSites().forEach(s => add(s.name, tr('rn_stuck_days').replace('{n}', daysStuck(s)) + (s.issue ? ' · ' + s.issue : ''), true))
   getEventsForDate(today).forEach(e => { if(e.site) add(e.site, (e.time ? e.time + ' · ' : '') + e.title, false) })
   ;['now','today'].forEach(b => (state.tasks[b]||[]).forEach(t => { if(!t.done) add(t.site, t.text, false) }))
   const focus = (state.focus && (!state.focusDate || state.focusDate === today)) ? state.focus : ''
   return {focus, sites: sites.slice(0, 4), lead: getWeeklyFocus(), mood: getCurrentMood()}
+}
+// First few words of the briefing, shown on the collapsed row so the line
+// says what's inside rather than just "full briefing".
+function briefingTeaser(text) {
+  const one = String(text||'').replace(/\s+/g, ' ').trim()
+  return one.length > 42 ? esc(one.slice(0, 42)) + '…' : esc(one)
 }
 function briefingHasContent(f) { return !!(f.focus || f.sites.length || state.tasks.now.some(t=>!t.done) || state.tasks.today.some(t=>!t.done)) }
 async function generateDailyBriefing() {
@@ -2191,8 +2293,8 @@ async function generateDailyBriefing() {
       '\nמשימות דחופות פתוחות: ' + (state.tasks.now.filter(t=>!t.done).map(t=>t.text).join(' | ') || '(אין)') +
       '\nמשימות להיום: ' + (state.tasks.today.filter(t=>!t.done).slice(0,8).map(t=>t.text).join(' | ') || '(אין)')
     const prompt = 'זה תדריך הבוקר של אורי. כתוב בעברית, ישירות אליו, 3-4 משפטים קצרים בלבד ובלי שום פתיח: (1) הדבר האחד הכי חשוב היום, (2) לאילו אתרים לתת עדיפות ולמה — רק מתוך הרשימה למטה ובשמות המדויקים, (3) הצעה אחת קונקרטית איך ליישם היום, בעבודה בפועל, את מוקד המנהיגות השבועי שלו. בלי רשימות, בלי אימוג\'י, בלי "בוקר טוב".\n\n' + facts
-    const text = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
-    state.briefing = {date: today, text, generatedAt: Date.now()}
+    const text = (await callClaude([{role:'user', content: prompt + aiLangInstruction()}], withContext(null))).trim()
+    state.briefing = {date: today, text, generatedAt: Date.now(), lang: uiLang}
     save()   // direct save, not setState: a finished briefing must not re-render whatever screen Uri is on now
   } catch(e) {
     briefingError = e.message || 'שגיאה'
@@ -2212,6 +2314,42 @@ function ensureDailyBriefing() {
   generateDailyBriefing()
 }
 function refreshBriefing() { if(briefingBusy) return; haptic('light'); generateDailyBriefing() }
+// The one "read later" drawer on the home screen: the 30-day mood trend, the
+// recurring-pattern note, the personal-pattern analysis and the server's
+// "noticed" items used to be four separate boxes competing for attention.
+// They are all reflection, never an action, so they live behind one line.
+function insightsPanelsHtml(moodPatterns) {
+  const trend = moodTrendHtml(30)
+  const learning = (state.personalInsights && state.personalInsights.text) || (state.brainDumps && state.brainDumps.length >= 3)
+  const noticed = latestInsights.items && latestInsights.items.length ? latestInsights.items : []
+  const parts = []
+  if(trend) parts.push(trend)
+  if(moodPatterns.length) parts.push(`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+    <div class="panel-label" style="margin-bottom:6px">${icon('bar-chart-2')} ${tr('home_pattern_title')}</div>
+    ${moodPatterns.map(p=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} ${tr('home_pattern_line').replace('{day}', tr('day_'+p.wd)).replace('{block}', tr('block_'+p.block)).replace('{mood}', tr('mood_'+p.mood)).replace('{n}', p.count)}</div>`).join('')}
+  </div>`)
+  if(learning) parts.push(`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span class="panel-label" style="margin:0;color:var(--blue)">${icon('brain')} ${tr('home_learning')}</span>
+      ${serverConfigured()?`<button id="insight-refresh-btn" onclick="event.stopPropagation();analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600">${icon('search')} ${tr('home_learning_analyze')}</button>`:''}
+    </div>
+    ${state.personalInsights && state.personalInsights.text ? `<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
+    <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:6px">${state.personalInsights.updatedAt?tr('home_learning_updated').replace('{d}', new Date(state.personalInsights.updatedAt).toLocaleDateString(uiLang==='en'?'en-US':'he-IL')):''}</div>` :
+    `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">${tr('home_learning_empty')}</div>`}
+  </div>`)
+  if(noticed.length) parts.push(`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+    <div class="panel-label" style="margin-bottom:6px">${icon('lightbulb')} ${tr('home_noticed')}</div>
+    ${noticed.map(it=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${iconFor(it.icon)} ${esc(it.text)}</div>`).join('')}
+  </div>`)
+  return parts
+}
+function insightsAccordionHtml(moodPatterns) {
+  const parts = insightsPanelsHtml(moodPatterns)
+  if(!parts.length) return ''
+  return creamPanelHtml(accordionHtml('insights',
+    {icon:'lightbulb', title:tr('home_insights'), hint:tr('home_insights_count').replace('{n}', parts.length)},
+    function(){ return parts.join('') }), 'padding:12px 16px;margin-bottom:16px')
+}
 function dailyBriefingHtml() {
   const f = briefingFacts(), today = getToday()
   if(!briefingHasContent(f)) return ''
@@ -2238,9 +2376,11 @@ function dailyBriefingHtml() {
         </div>` : ''}
       </div>
       ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
-      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span data-content="he"><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
       ${briefingBusy ? skeletonHtml(3, tr('home_briefing_writing_status')) :
-        cached ? `<div id="briefing-text" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>` :
+        cached ? accordionHtml('briefing-full', {icon:'file-text', title:tr('home_briefing_full'), hint:briefingTeaser(cached)}, function(){
+          return `<div id="briefing-text" data-content="he" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>`
+        }, 'margin-top:4px') :
         briefingError ? `<div style="font-size:var(--fs-sm);color:var(--red-dark)">${icon('x')} ${tr('home_briefing_error_prefix')} ${esc(briefingError)}</div>` :
         (!serverConfigured() ? `<div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div>` : '')}
       ${stale ? `<div class="muted" style="font-size:var(--fs-xs);margin-top:6px">${tr('home_briefing_stale_prefix').replace('{d}', esc(state.briefing.date))}</div>` : ''}
@@ -2253,7 +2393,8 @@ function dailyBriefingHtml() {
 // moves them next to each other in the most urgent of their buckets. Purely
 // rule-based, no AI call; a dismissed suggestion stays dismissed until that
 // group of tasks changes.
-const BUCKET_LABEL = {now:'עכשיו', today:'היום', later:'אחר כך'}
+const BUCKET_TR = {now:'bucket_now', today:'task_bucket_today', later:'task_bucket_later'}
+function bucketLabel(b) { return tr(BUCKET_TR[b] || b) }
 function triageSuggestions() {
   const today = getToday(), open = [], groups = {}
   ;['now','today','later'].forEach(b => (state.tasks[b]||[]).forEach((t,i) => { if(!t.done) open.push({t, b, i}) }))
@@ -2271,8 +2412,8 @@ function triageSuggestions() {
     // already side by side in one bucket → nothing to suggest
     if(buckets.length === 1) { const idx = items.map(o => o.i).sort((a,b)=>a-b); if(idx[idx.length-1] - idx[0] === idx.length - 1) return null }
     const target = ['now','today','later'].find(b => buckets.includes(b))
-    const what = key.startsWith('site:') ? 'ב-' + key.slice(5) : 'לתאריך ' + key.slice(5)
-    return {key, signature, items, target, label: items.length + ' משימות ' + what + (buckets.length > 1 ? ' מפוזרות בין ' + buckets.map(b => BUCKET_LABEL[b]).join(' / ') : ' לא רצופות')}
+    const what = key.startsWith('site:') ? tr('triage_site').replace('{x}', key.slice(5)) : tr('triage_date').replace('{x}', key.slice(5))
+    return {key, signature, items, target, label: tr('triage_label').replace('{n}', items.length).replace('{what}', what).replace('{where}', buckets.length > 1 ? tr('triage_scattered').replace('{b}', buckets.map(bucketLabel).join(' / ')) : tr('triage_not_adjacent'))}
   }).filter(Boolean).slice(0, 2)
 }
 function batchTasks(key) {
@@ -2288,7 +2429,7 @@ function batchTasks(key) {
   haptic('light')
   taskBucket = sug.target
   setState({tasks: stripped})
-  offerUndo('המשימות קובצו ל"' + BUCKET_LABEL[sug.target] + '"', function(){ setState({tasks: prev}) })
+  offerUndo(tr('undo_batched').replace('{b}', bucketLabel(sug.target)), function(){ setState({tasks: prev}) })
 }
 function dismissTriage(key) {
   const sug = triageSuggestions().find(s => s.key === key)
@@ -2305,8 +2446,8 @@ function triageHtml() {
         <div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${s.items.map(o => esc(o.t.text)).join(' · ')}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-        <button class="triage-batch" onclick="batchTasks(${jsArg(s.key)})" style="background:var(--blue);color:#fff;border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--fs-sm);font-weight:700">${icon('layers')} קבץ ל${BUCKET_LABEL[s.target]}</button>
-        <button class="triage-dismiss" onclick="dismissTriage(${jsArg(s.key)})" style="background:var(--surface-2);color:var(--t2);border-radius:var(--radius-sm);padding:5px 10px;font-size:var(--fs-sm)">לא עכשיו</button>
+        <button class="triage-batch" onclick="batchTasks(${jsArg(s.key)})" style="background:var(--blue);color:#fff;border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--fs-sm);font-weight:700">${icon('layers')} ${tr('triage_batch').replace('{b}', bucketLabel(s.target))}</button>
+        <button class="triage-dismiss" onclick="dismissTriage(${jsArg(s.key)})" style="background:var(--surface-2);color:var(--t2);border-radius:var(--radius-sm);padding:5px 10px;font-size:var(--fs-sm)">${tr('triage_dismiss')}</button>
       </div>
     </div>`).join('')
 }
@@ -2358,7 +2499,7 @@ function renderHome() {
           <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ${tr('home_quote_label')}</span>
           <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} ${tr('home_quote_other')}</button>
         </div>
-        <div style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
+        <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
         ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
@@ -2391,64 +2532,37 @@ function renderHome() {
             </button>`
           }).join('')}
         </div>
-        ${moodTrendHtml(30)}
       </div>
       ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
           <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
         </div>
-        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
+        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
         <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>
           <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} ${tr('home_braindump_saved')}</span>
         </div>
       </div>` : ''}
-      ${moodPatterns.length ? creamPanelHtml(`
-        <div style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('bar-chart-2')} דפוס שחוזר</div>
-        ${moodPatterns.map(p=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
-      `) : ''}
-      ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleInsightsExpanded()" aria-expanded="${insightsExpanded}">
-          <div style="font-size:var(--fs-sm);color:var(--blue);font-weight:700;letter-spacing:1px">${icon('brain')} ${tr('home_learning')}</div>
-          <span style="color:var(--blue);display:flex;transition:transform .15s;transform:rotate(${insightsExpanded?'180deg':'0deg'})">${icon('chevron-down')}</span>
-        </div>
-        ${insightsExpanded ? `
-        <div style="margin-top:10px">
-          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="event.stopPropagation();analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600;margin-bottom:8px">${icon('search')} ${tr('home_learning_analyze')}</button>`:''}
-          ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
-          <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
-          `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
-        </div>` : ''}
-      </div>` : ''}
-      ${latestInsights.items && latestInsights.items.length ? creamPanelHtml(`
-        <div style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('lightbulb')} שמתי לב</div>
-        ${latestInsights.items.map(it=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${iconFor(it.icon)} ${esc(it.text)}</div>`).join('')}
-      `) : ''}
+      ${insightsAccordionHtml(moodPatterns)}
 
       <div class="card" style="margin-top:16px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} ${tr('home_outside_work')}</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="display:flex;gap:8px">
           ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), tr('home_gym_done') + ' ' + icon('check'), tr('home_gym_todo'))}
           ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), tr('home_meditation_done') + ' ' + icon('check'), tr('home_meditation_todo'))}
-        </div>
-        <label class="form-label">${tr('home_vacation_goal')}</label>
-        <div style="display:flex;gap:8px">
-          <input id="vacation-goal-input" class="form-input" style="margin-bottom:0" placeholder="לדוגמה: בורקאי, דצמבר" value="${esc(state.personal.vacationGoal)}"/>
-          <button onclick="saveVacationGoal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-size:var(--fs-base)">${tr('btn_save')}</button>
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('brain')} ${tr('home_ask_fieldy')}</div>
-        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${serverConfigured()?tr('home_ask_fieldy_hint_on'):tr('home_ask_fieldy_hint_off')}</div>
-        ${serverConfigured()?`
-        <input id="ask-fieldy-input" class="form-input" placeholder="לדוגמה: אני נוסע לקאויאן היום, מה כדאי לי לעשות קודם?" style="margin-bottom:10px"/>
-        <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">${tr('home_ask_fieldy_btn')}</button>
-        <div id="ask-fieldy-answer" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
-        <div id="ask-fieldy-maps-wrap"></div>
-        `:''}
+        ${accordionHtml('ask-fieldy', {icon:'brain', color:'var(--t1)', title:tr('home_ask_fieldy'), hint:serverConfigured()?tr('home_ask_fieldy_hint_short'):tr('home_ask_fieldy_hint_off')}, function(){
+          return serverConfigured() ? `
+            <input id="ask-fieldy-input" class="form-input" placeholder="${tr('home_ask_fieldy_placeholder')}" style="margin-bottom:10px"/>
+            <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">${tr('home_ask_fieldy_btn')}</button>
+            <div id="ask-fieldy-answer" data-content="he" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
+            <div id="ask-fieldy-maps-wrap"></div>` : `<div style="font-size:var(--fs-base);color:var(--t2)">${tr('home_ask_fieldy_hint_on')}</div>`
+        })}
       </div>
     </div>
   `
@@ -2536,7 +2650,9 @@ async function doAnalyze() {
 // ── TASKS ────────────────────────────────────────
 let taskBucket = 'now'
 let taskContextFilter = 'all'
-const CONTEXT_LABEL = {phone:icon('phone') + ' טלפון',office:icon('monitor') + ' משרד',site:icon('map-pin') + ' באתר'}
+const CONTEXT_ICON = {phone:'phone', office:'monitor', site:'map-pin'}
+// Resolved per call, not frozen at load: a language switch has to reach these too.
+function contextLabel(c) { return CONTEXT_ICON[c] ? icon(CONTEXT_ICON[c]) + ' ' + tr('ctx_' + c) : '' }
 
 function renderTasks() {
   const el = document.getElementById('screen-tasks')
@@ -2603,7 +2719,7 @@ function taskCard(t) {
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag tag-site">${icon('map-pin')} ${esc(t.site)}</span>`:''}
             ${t.assignee?`<span class="tag tag-person">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
-            ${t.context&&CONTEXT_LABEL[t.context]?`<span class="tag tag-context">${CONTEXT_LABEL[t.context]}</span>`:''}
+            ${t.context&&CONTEXT_ICON[t.context]?`<span class="tag tag-context">${contextLabel(t.context)}</span>`:''}
             ${t.time?`<span class="tag tag-time" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
@@ -2625,7 +2741,7 @@ function deleteTask(id) {
   const task = state.tasks[bucket][idx]
   const strip = arr => arr.filter(t=>t.id!==id)
   setState({tasks:{now:strip(state.tasks.now),today:strip(state.tasks.today),later:strip(state.tasks.later)}})
-  offerUndo('המשימה נמחקה', function(){
+  offerUndo(tr('undo_task_deleted'), function(){
     setState({tasks:{...state.tasks, [bucket]: insertAt(state.tasks[bucket], idx, task)}})
   })
 }
@@ -2799,14 +2915,14 @@ function moodTrendHtml(days) {
     const d = new Date(today); d.setDate(d.getDate() - i)
     const key = dateKey(d), mood = byDay[key], x = ((days - 1 - i) * (w + gap)).toFixed(2)
     if(mood && MOOD_LIB[mood]) { counts[mood] = (counts[mood] || 0) + 1
-      rects += `<rect class="mood-day" x="${x}" y="2" width="${w.toFixed(2)}" height="${H - 4}" rx="3" fill="${MOOD_LIB[mood].color}"><title>${key} · ${MOOD_LIB[mood].label}</title></rect>`
+      rects += `<rect class="mood-day" x="${x}" y="2" width="${w.toFixed(2)}" height="${H - 4}" rx="3" fill="${MOOD_LIB[mood].color}"><title>${key} · ${tr('mood_'+mood)}</title></rect>`
     } else rects += `<rect x="${x}" y="${H / 2 - 1}" width="${w.toFixed(2)}" height="2" rx="1" fill="var(--line)"/>`
   }
-  const legend = MOOD_ORDER.filter(m => counts[m]).map(m => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${MOOD_LIB[m].color}"></span>${icon(MOOD_LIB[m].icon)} ${MOOD_LIB[m].label} · ${counts[m]}</span>`).join('')
-  return `<div id="mood-trend" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
-    <div class="panel-label" style="margin-bottom:6px">${icon('bar-chart-2')} ${days} הימים האחרונים</div>
-    <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;direction:ltr"><span>לפני ${days} יום</span><span>היום</span></div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block;direction:ltr" role="img" aria-label="מצב רוח לפי יום">${rects}</svg>
+  const legend = MOOD_ORDER.filter(m => counts[m]).map(m => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${MOOD_LIB[m].color}"></span>${icon(MOOD_LIB[m].icon)} ${tr('mood_'+m)} · ${counts[m]}</span>`).join('')
+  return `<div id="mood-trend">
+    <div class="panel-label" style="margin-bottom:6px">${icon('bar-chart-2')} ${tr('trend_title').replace('{n}', days)}</div>
+    <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;direction:ltr"><span>${tr('trend_start').replace('{n}', days)}</span><span>${tr('trend_today')}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block;direction:ltr" role="img" aria-label="${tr('trend_aria')}">${rects}</svg>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">${legend}</div>
   </div>`
 }
@@ -2833,7 +2949,7 @@ function pettyCashMonthChartHtml() {
     const m = parseInt(r.mk.slice(5), 10) - 1
     return path + label + `<text x="${(band * i + band / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10" fill="${cur ? 'var(--t1)' : 'var(--t3)'}" font-weight="${cur ? 700 : 400}">${MONTHS_HE[m].slice(0, 4)}</text>`
   }).join('')
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;direction:ltr" role="img" aria-label="הוצאות לפי חודש">${grid}<line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--t4)" stroke-width="1"/>${bars}</svg>
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;direction:ltr" role="img" aria-label="${tr('petty_by_month')}">${grid}<line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="var(--t4)" stroke-width="1"/>${bars}</svg>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;margin-top:8px;font-size:var(--fs-xs);color:var(--t3)">${rows.map(r => `<span>${r.mk} · <b style="color:var(--t2)">${fmtPeso(r.total)}</b></span>`).join('')}</div>`
 }
 // This month's spend by vendor (the closest thing to a category the data has).
@@ -2843,7 +2959,7 @@ function pettyCashVendorHtml() {
   const rows = Object.keys(byV).map(k => ({k, v: byV[k]})).sort((a, b) => b.v - a.v)
   if(!rows.length) return ''
   const top = rows.slice(0, 5), rest = rows.slice(5).reduce((s, r) => s + r.v, 0)
-  if(rest > 0) top.push({k: 'אחר (' + (rows.length - 5) + ')', v: rest})
+  if(rest > 0) top.push({k: tr('petty_other').replace('{n}', rows.length - 5), v: rest})
   const max = Math.max(...top.map(r => r.v))
   return top.map(r => `<div class="cash-vendor" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <span style="width:120px;flex-shrink:0;font-size:var(--fs-sm);color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(r.k)}">${esc(r.k)}</span>
@@ -3699,6 +3815,14 @@ function renderSettings() {
         <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);cursor:pointer"><input type="checkbox" id="pref-haptics" ${localStorage.getItem('fieldy_haptics')!=='0'?'checked':''} onchange="setHapticsOn(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"/> ${icon('activity')} ${tr('settings_haptics_label')}</label>
       </div>
       <div class="card" style="margin-bottom:14px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('leaf')} ${tr('home_vacation_goal')}</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_vacation_hint')}</div>
+        <div style="display:flex;gap:8px">
+          <input id="vacation-goal-input" class="form-input" style="margin-bottom:0" placeholder="${tr('home_vacation_placeholder')}" value="${esc(state.personal.vacationGoal)}"/>
+          <button onclick="saveVacationGoal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-size:var(--fs-base)">${tr('btn_save')}</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('package')} ${tr('settings_backup_title')}</div>
         <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_backup_hint')}</div>
         <div style="display:flex;gap:8px">
@@ -4045,7 +4169,7 @@ async function askFieldy() {
     const prompt = 'אתה עוזר תכנון שטח לאורי, מנהל אזורי (Region II, Cagayan Valley, פיליפינים, מתקיני SPIS). להלן המצב הנוכחי שלו:\n\n' + context +
       '\n\nהשאלה של אורי: ' + question +
       '\n\nענה בעברית, בקצרה ובאופן מעשי (2-5 משפטים, לא יותר). אם השאלה נוגעת לתכנון סיור/מסלול/סדר עדיפויות באזור מסוים, תבסס את התשובה רק על האתרים שברשימה למעלה שרלוונטיים לאזור שהוזכר, ותזכיר את שמות האתרים בדיוק כפי שהם מופיעים למעלה (כדי שאפשר יהיה לזהות אותם). הסבר בקצרה למה סדר כזה הגיוני (למשל דחיפות, קבלן משותף, בעיה פתוחה זמן רב). אם אין מספיק מידע לענות במדויק — תגיד את זה בכנות במקום לנחש.'
-    const answer = (await callClaude([{role:'user', content: prompt}], withContext(null))).trim()
+    const answer = (await callClaude([{role:'user', content: prompt + aiLangInstruction()}], withContext(null))).trim()
     answerEl.style.color = 'var(--t1)'
     answerEl.textContent = answer || 'לא התקבלה תשובה.'
     answerEl.style.display = 'block'

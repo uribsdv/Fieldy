@@ -135,6 +135,12 @@ async function check(name, fn) {
   } catch (e) { record(false, name, e && e.message ? e.message : String(e)) }
 }
 function assert(cond, msg) { if (!cond) throw new Error(msg || 'assertion failed') }
+// Home-screen "read later" panels start collapsed on purpose, so tests that
+// assert on their contents have to open them first (idempotent).
+async function openAcc(page, key) {
+  await page.evaluate(k => { if (!accordionIsOpen(k)) toggleAccordion(k) }, key)
+  await page.waitForTimeout(60)
+}
 
 async function main() {
   const server = await startServer()
@@ -833,6 +839,7 @@ async function main() {
     await check('AI calls show a skeleton placeholder while waiting, then the answer', async () => {
       await page.goto(BASE + '?reload=3', { waitUntil: 'load' }); await page.waitForTimeout(300)
       await page.evaluate(() => navigateTo('home'))
+      await openAcc(page, 'ask-fieldy')
       await page.fill('#ask-fieldy-input', 'מה קודם?')
       await page.evaluate(() => { askFieldy() })
       await page.waitForTimeout(150)
@@ -878,6 +885,7 @@ async function main() {
   })
   await check('mood trend appears once there are 3+ logged days, with one tile per logged day and a legend with counts', async () => {
     await page.evaluate(() => navigateTo('home'))
+    await openAcc(page, 'insights')   // the trend lives inside the collapsed "insights" drawer now
     assert((await page.evaluate(() => document.querySelectorAll('#mood-trend .mood-day').length)) === 6, 'seeded fixture (6 days of moods) should show 6 tiles')
     await page.evaluate(() => setState({ moods: state.moods.slice(0, 1) }))
     assert(!(await page.$('#mood-trend')), 'trend shown with only one mood logged')
@@ -987,6 +995,7 @@ async function main() {
     })
     await check('home shows the briefing panel: focus, priority sites (stuck first), weekly theme, and the cached AI text', async () => {
       await page.evaluate(() => navigateTo('home'))
+      await openAcc(page, 'briefing-full')   // the AI narrative is collapsed by default
       const r = await page.evaluate(() => { const el = document.getElementById('daily-briefing'); return { has: !!el, txt: el ? el.textContent : '', ai: (document.getElementById('briefing-text') || {}).textContent || '', firstSite: el ? (el.querySelector('span[style*="font-weight:600"]') || {}).textContent : '', theme: getWeeklyFocus().theme, focus: state.focus, refresh: !!document.getElementById('briefing-refresh-btn') } })
       assert(r.has, 'no #daily-briefing on home')
       assert(r.txt.indexOf(r.focus) !== -1 && /תקוע 7 ימים/.test(r.txt) && r.txt.indexOf(r.theme) !== -1, 'panel facts incomplete: ' + r.txt)
@@ -997,6 +1006,7 @@ async function main() {
       const before = calls.length
       await page.goto(BASE + '?p5=2', { waitUntil: 'load' }); await page.waitForTimeout(900)
       await page.evaluate(() => navigateTo('home')); await page.waitForTimeout(100)
+      await openAcc(page, 'briefing-full')
       const r = await page.evaluate(() => ({ ai: (document.getElementById('briefing-text') || {}).textContent || '', skel: document.querySelectorAll('#daily-briefing .skel-line').length }))
       assert(calls.length === before, 'briefing was re-fetched on reload (' + (calls.length - before) + ' extra calls)')
       assert(/תדריך לדוגמה/.test(r.ai) && r.skel === 0, 'cached briefing not shown: ' + JSON.stringify(r))
@@ -1011,6 +1021,7 @@ async function main() {
     })
     await check('Ask Fieldy, the action drafter and the pattern analyser all send the same shared context as their system prompt', async () => {
       const before = calls.length
+      await openAcc(page, 'ask-fieldy')
       await page.fill('#ask-fieldy-input', 'מה קודם?'); await page.evaluate(() => askFieldy())
       await page.waitForFunction(() => /Claveria/.test(document.getElementById('ask-fieldy-answer').textContent), null, { timeout: 5000 })
       await page.evaluate(() => { navigateTo('action'); actionCtx = { text: 'x', assignee: '' }; renderAction(); doAction('email') })
@@ -1202,6 +1213,195 @@ async function main() {
       assert(r.dir === 'rtl' && r.navHome === 'בית' && !r.bodyClass, JSON.stringify(r))
       const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
     })
+  }
+
+  section('Home focus pass — reading folds away, doing stays open')
+  {
+    // getMoodPatterns() needs 5+ moods with the same weekday+time-block 3+
+    // times, and the narrative panel only exists once a briefing is cached —
+    // seed both, or those panels have nothing to show and nothing to fold.
+    const patternMoods = () => {
+      const t = Date.now(), out = []
+      for (let k = 0; k < 3; k++) out.push({ ts: t - (7 * k + 1) * 86400e3, date: todayPlus(-(7 * k + 1)), hour: 15, weekday: new Date(t - (7 * k + 1) * 86400e3).getDay(), mood: 'tired', source: 'manual', actions: ['rest'] })
+      for (let k = 0; k < 3; k++) out.push({ ts: t - (2 + k) * 86400e3, date: todayPlus(-(2 + k)), hour: 9, weekday: new Date(t - (2 + k) * 86400e3).getDay(), mood: 'scattered', source: 'manual', actions: ['breathe'] })
+      return out
+    }
+    const focusSeed = () => {
+      const st = seededState()
+      st.moods = patternMoods()
+      st.briefing = { date: todayPlus(0), text: 'תדריך לדוגמה להיום.', generatedAt: Date.now(), lang: 'he' }
+      return st
+    }
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)) }, focusSeed())
+    resetLogs(); await page.goto(BASE + '?focus=1', { waitUntil: 'load' }); await page.waitForTimeout(300)
+    await check('every reading panel starts collapsed; the doing layer stays visible', async () => {
+      const r = await page.evaluate(() => ({
+        // collapsed: bodies simply are not in the DOM
+        trend: !!document.getElementById('mood-trend'),
+        briefingText: !!document.getElementById('briefing-text'),
+        askInput: !!document.getElementById('ask-fieldy-input'),
+        accs: [...document.querySelectorAll('#screen-home .accordion')].map(a => a.dataset.acc),
+        // still open: the things you act on
+        rn: !!document.querySelector('#screen-home .rn-item'),
+        moodPicker: /How do you feel|איך אתה מרגיש/.test(document.getElementById('screen-home').textContent),
+        focusLine: document.getElementById('daily-briefing').textContent.indexOf(state.focus) !== -1,
+        stuck: /Claveria Well/.test(document.getElementById('daily-briefing').textContent),
+        stats: document.querySelectorAll('#screen-home [onclick*="navigateTo"]').length > 0
+      }))
+      assert(!r.trend && !r.briefingText && !r.askInput, 'a reading panel rendered open: ' + JSON.stringify(r))
+      assert(r.accs.includes('insights') && r.accs.includes('briefing-full') && r.accs.includes('ask-fieldy'), 'missing accordions: ' + JSON.stringify(r.accs))
+      assert(r.rn && r.moodPicker && r.focusLine && r.stuck && r.stats, 'the doing layer should stay visible: ' + JSON.stringify(r))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('the four reflection panels live under one "תובנות" drawer, not four boxes', async () => {
+      await page.evaluate(() => { latestInsights = { items: [{ icon: '💡', text: 'שמתי לב שאתה דוחה משימות טלפון.' }] }; renderHome() })
+      await openAcc(page, 'insights')
+      const r = await page.evaluate(() => {
+        const acc = document.querySelector('[data-acc="insights"]')
+        const body = acc.querySelector('.accordion-body')
+        return { hint: acc.querySelector('.accordion-hint').textContent.trim(), trend: !!body.querySelector('#mood-trend'), txt: body.textContent }
+      })
+      assert(r.trend, 'mood trend not inside the insights drawer')
+      assert(/דפוס שחוזר/.test(r.txt), 'recurring-pattern panel not inside the drawer: ' + r.txt.slice(0, 160))
+      assert(/מה שאני לומד עליך/.test(r.txt), '"what I am learning" not inside the drawer')
+      assert(/שמתי לב/.test(r.txt), '"noticed" not inside the drawer')
+      assert(/\d/.test(r.hint), 'collapsed row should hint how much is inside, got: ' + r.hint)
+    })
+    await check('open/closed is remembered per device and survives a reload', async () => {
+      const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fieldy_accordions') || '{}'))
+      assert(stored.insights === true, 'open state not persisted: ' + JSON.stringify(stored))
+      await page.goto(BASE + '?focus=2', { waitUntil: 'load' }); await page.waitForTimeout(300)
+      const r = await page.evaluate(() => ({ open: accordionIsOpen('insights'), body: !!document.querySelector('[data-acc="insights"] .accordion-body') }))
+      assert(r.open && r.body, 'insights drawer did not stay open across a reload: ' + JSON.stringify(r))
+      await page.evaluate(() => toggleAccordion('insights'))
+      await page.waitForTimeout(60)
+      assert(!(await page.evaluate(() => accordionIsOpen('insights'))), 'could not close it again')
+    })
+    await check('the briefing keeps its facts open and folds only the AI narrative', async () => {
+      const closed = await page.evaluate(() => { const el = document.getElementById('daily-briefing'); return { txt: el.textContent, ai: !!document.getElementById('briefing-text'), hasHint: !!el.querySelector('[data-acc="briefing-full"] .accordion-hint') } })
+      assert(!closed.ai, 'narrative should start collapsed')
+      assert(closed.txt.indexOf('Claveria Well') !== -1, 'stuck-site fact disappeared with the narrative')
+      await openAcc(page, 'briefing-full')
+      assert(await page.evaluate(() => !!document.getElementById('briefing-text')), 'narrative did not open')
+    })
+    await check('the vacation goal moved off Home into Settings', async () => {
+      const home = await page.evaluate(() => !!document.querySelector('#screen-home #vacation-goal-input'))
+      await page.evaluate(() => navigateTo('settings'))
+      const set = await page.evaluate(() => !!document.querySelector('#screen-settings #vacation-goal-input'))
+      assert(!home && set, JSON.stringify({ home, set }))
+      await page.fill('#vacation-goal-input', 'Boracay, December')
+      await page.evaluate(() => saveVacationGoal())
+      assert((await page.evaluate(() => state.personal.vacationGoal)) === 'Boracay, December', 'saving from Settings broke')
+      await page.evaluate(() => navigateTo('home'))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+  }
+
+  section('No Hebrew leaks into English mode (home screen)')
+  {
+    // Everything the user/AI authored is seeded in English here, so any Hebrew
+    // left on screen is by definition a hardcoded UI string that was missed.
+    // Deliberate Hebrew content (Tao/leadership text, AI output, quotes, mood
+    // coaching lines) is marked data-content="he" in the markup and skipped.
+    const t0 = todayPlus(0)
+    const engSeed = () => {
+      const s = seededState()
+      s.tasks.now[0] = { ...s.tasks.now[0], text: 'Call Dave about Claveria', note: null }
+      s.tasks.now[1] = { ...s.tasks.now[1], text: 'Approve pump order' }
+      s.tasks.today = s.tasks.today.map((t, i) => ({ ...t, text: ['Update Monday', 'Check generator'][i] }))
+      s.tasks.later = s.tasks.later.map(t => ({ ...t, text: 'Plan Apayao trip' }))
+      s.people = s.people.map(p => ({ ...p, pending: p.pending ? 'waiver signature' : '' }))
+      s.sites = s.sites.map(x => ({ ...x, issue: x.issue ? 'Lock Rotor A08' : '' }))
+      s.focus = 'Meeting with NIA at 14:00'
+      s.quotes = [{ text: "Who's living your life?", addedAt: Date.now() }]
+      s.personalInsights = { text: 'You tend to get overwhelmed in the afternoon.', updatedAt: Date.now() - 86400e3, basedOnCount: 9 }
+      s.briefing = { date: t0, text: 'Sample briefing in English.', generatedAt: Date.now(), lang: 'en' }
+      s.brainDumps = s.brainDumps.map(b => ({ ...b, text: 'note' }))
+      s.pettyCash = s.pettyCash.map(e => ({ ...e, note: '', vendor: e.vendor }))
+      const t = Date.now(); const ms = []
+      for (let k = 0; k < 3; k++) ms.push({ ts: t - (7 * k + 1) * 86400e3, date: todayPlus(-(7 * k + 1)), hour: 15, weekday: new Date(t - (7 * k + 1) * 86400e3).getDay(), mood: 'tired', source: 'manual', actions: ['rest'] })
+      for (let k = 0; k < 3; k++) ms.push({ ts: t - (2 + k) * 86400e3, date: todayPlus(-(2 + k)), hour: 9, weekday: new Date(t - (2 + k) * 86400e3).getDay(), mood: 'scattered', source: 'manual', actions: ['breathe'] })
+      s.moods = ms   // 6 moods, 3 of them same weekday+block → a real recurring pattern
+      return s
+    }
+    await page.evaluate(s => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_ui_lang', 'en') }, engSeed())
+    resetLogs(); await page.goto(BASE + '?heleak=1', { waitUntil: 'load' }); await page.waitForTimeout(350)
+    await check('with every panel open, no untranslated Hebrew is left on Home', async () => {
+      await page.evaluate(() => { latestInsights = { items: [] }; ['insights', 'briefing-full', 'ask-fieldy'].forEach(k => { if (!accordionIsOpen(k)) toggleAccordion(k) }) })
+      await page.waitForTimeout(120)
+      const hits = await page.evaluate(() => {
+        const heb = /[֐-׿]/, out = []
+        const walk = el => {
+          if (el.dataset && el.dataset.content === 'he') return   // Hebrew on purpose
+          for (const n of el.childNodes) {
+            if (n.nodeType === 3) { const t = n.textContent.trim(); if (t && heb.test(t)) out.push(t.slice(0, 60)) }
+            else if (n.nodeType === 1) {
+              for (const a of ['placeholder', 'title', 'aria-label']) { const v = n.getAttribute && n.getAttribute(a); if (v && heb.test(v)) out.push('[' + a + '] ' + v.slice(0, 50)) }
+              walk(n)
+            }
+          }
+        }
+        walk(document.getElementById('screen-home'))
+        return out
+      })
+      assert(hits.length === 0, hits.length + ' Hebrew string(s) still hardcoded: ' + JSON.stringify(hits.slice(0, 8)))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await check('the 30-day trend and the recurring-pattern line use the same translated mood names as the picker', async () => {
+      const r = await page.evaluate(() => {
+        const acc = document.querySelector('[data-acc="insights"] .accordion-body')
+        return { body: acc.textContent, picker: document.getElementById('screen-home').textContent }
+      })
+      assert(/Tired/.test(r.body), 'trend legend still shows the Hebrew mood name: ' + r.body.slice(0, 200))
+      assert(!/עייף|פוקוס|מוצף/.test(r.body), 'Hebrew mood names leaked into the insights drawer')
+      assert(/tend to be Tired/i.test(r.body), 'pattern line not translated: ' + r.body.slice(0, 220))
+    })
+  }
+
+  section('AI writes in the interface language (option ב)')
+  {
+    const MOCKL = 'http://127.0.0.1:1/mockl'
+    const calls = []
+    await context.route(MOCKL + '/**', route => {
+      const req = route.request(); const p = req.url().slice(MOCKL.length)
+      const reply = (obj, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Allow-Methods': 'GET,PUT,POST,OPTIONS' }, body: JSON.stringify(obj) })
+      if (req.method() === 'OPTIONS') return reply({})
+      if (p === '/api/claude') { let b = null; try { b = req.postDataJSON() } catch (e) {} calls.push(b); return reply({ content: [{ type: 'text', text: 'ok' }] }) }
+      if (p === '/api/state' && req.method() === 'GET') return reply({ data: null, updated_at: null })
+      if (p === '/api/state') return reply({ ok: true })
+      if (p === '/api/insights') return reply({ items: [] })
+      if (p === '/api/log') return reply({ ok: true })
+      return reply({ error: 'not found' }, 404)
+    })
+    await check('in English mode the briefing prompt asks for an English answer, and the language is recorded', async () => {
+      await page.evaluate(([s, m]) => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_server_url', m); localStorage.setItem('fieldy_passcode', 'pw'); localStorage.setItem('fieldy_ui_lang', 'en') }, [seededState(), MOCKL])
+      calls.length = 0
+      resetLogs(); await page.goto(BASE + '?lng=1', { waitUntil: 'load' })
+      await page.waitForFunction(() => state.briefing && state.briefing.text, null, { timeout: 5000 })
+      const brief = calls.find(c => c && /briefing|תדריך/.test(c.messages[0].content))
+      assert(brief, 'no briefing call was made')
+      assert(/write your answer in English/i.test(brief.messages[0].content), 'no English instruction in the prompt: ' + brief.messages[0].content.slice(-200))
+      assert((await page.evaluate(() => state.briefing.lang)) === 'en', 'generated language not recorded on the briefing')
+    })
+    await check('in Hebrew mode the instruction is absent — nothing changes for the default user', async () => {
+      await page.evaluate(([s, m]) => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_server_url', m); localStorage.setItem('fieldy_passcode', 'pw'); localStorage.setItem('fieldy_ui_lang', 'he') }, [seededState(), MOCKL])
+      calls.length = 0
+      await page.goto(BASE + '?lng=2', { waitUntil: 'load' })
+      await page.waitForFunction(() => state.briefing && state.briefing.text, null, { timeout: 5000 })
+      const brief = calls.find(c => c && /תדריך/.test(c.messages[0].content))
+      assert(brief && !/write your answer in English/i.test(brief.messages[0].content), 'English instruction leaked into Hebrew mode')
+      assert((await page.evaluate(() => state.briefing.lang)) === 'he', 'language not recorded in Hebrew mode')
+    })
+    await check('switching language does NOT retranslate or re-fetch what is already written', async () => {
+      const before = calls.length
+      await page.evaluate(() => setUiLang('en'))
+      await page.waitForTimeout(400)
+      assert(calls.length === before, 'switching language spent ' + (calls.length - before) + ' API call(s) — it should spend none')
+      assert((await page.evaluate(() => state.briefing.lang)) === 'he', 'existing briefing should keep the language it was written in')
+      await page.evaluate(() => setUiLang('he'))
+      const errs = errorsSince(); assert(!errs.length, errs.join('\n'))
+    })
+    await context.unroute(MOCKL + '/**')
   }
 
   section('API key never lives in the browser')
