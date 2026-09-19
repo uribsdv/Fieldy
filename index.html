@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Fieldy"/>
 <link rel="manifest" href="/Fieldy/manifest.json"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/Fieldy/icon-32.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/Fieldy/icon-180.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/Fieldy/icon-152.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -323,7 +326,7 @@ button:active{opacity:.85}
 #undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
 /* Voice input row under a text field */
 .voice-row{display:flex;align-items:center;gap:var(--space-1-5);margin:-4px 0 var(--space-2-5)}
-.voice-btn{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-3);font-size:var(--fs-base);color:var(--t2);font-weight:600}
+.voice-btn{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-3);font-size:var(--fs-base);color:var(--gold);font-weight:700}
 .voice-btn.recording{background:var(--red-soft);border-color:var(--red);color:var(--red-dark)}
 .voice-lang{background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:var(--space-1-5) var(--space-2-5);font-size:var(--fs-sm);color:var(--t3)}
 .voice-status{font-size:var(--fs-sm);color:var(--t3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -465,6 +468,7 @@ const ICONS = {
   'arrow-right': '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
   'chevron-left': '<polyline points="15 18 9 12 15 6"/>',
   'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
+  'chevron-down': '<polyline points="6 9 12 15 18 9"/>',
   'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'clipboard': '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',
   'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
@@ -1831,6 +1835,8 @@ const MOOD_RANK_BIAS = {
 }
 const PRIORITY_HEX = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
 let rightNowExpanded = false   // "הצג הכל" escape hatch while a mood limit is active
+let insightsExpanded = false   // "מה שאני לומד עליך" starts collapsed — it's the least actionable card on a screen already full of things to act on
+function toggleInsightsExpanded(e) { if(e) e.stopPropagation(); insightsExpanded = !insightsExpanded; if(currentScreen==='home') renderHome() }
 function moodLimit(mood) { return (mood && MOOD_LIB[mood] && MOOD_LIB[mood].taskLimit) || null }
 function rankRightNow(mood) {
   const items = []
@@ -2114,6 +2120,12 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, 'עכשיו', '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, 'אתרים', '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, 'ממתין', '#dfd3f5')}
+      </div>
+      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">+ הוסף הודעות מוואטסאפ</button>
       ${dailyBriefingHtml()}
       ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -2123,12 +2135,6 @@ function renderHome() {
         <div style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, 'עכשיו', '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, 'אתרים', '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, 'ממתין', '#dfd3f5')}
-      </div>
-      <button class="btn-primary" onclick="navigateTo('input')">+ הוסף הודעות מוואטסאפ</button>
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -2171,13 +2177,17 @@ function renderHome() {
         ${moodPatterns.map(p=>`<div style="font-size:var(--fs-base);color:var(--t1);margin-bottom:4px">${icon(MOOD_LIB[p.mood].icon)} בימי ${DAYS_FULL[p.wd]} ${p.block} אתה נוטה להיות ${MOOD_LIB[p.mood].label} (${p.count} פעמים)</div>`).join('')}
       `) : ''}
       ${(state.personalInsights && state.personalInsights.text) || (state.brainDumps&&state.brainDumps.length>=3) ? `<div style="background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleInsightsExpanded()" aria-expanded="${insightsExpanded}">
           <div style="font-size:var(--fs-sm);color:var(--blue);font-weight:700;letter-spacing:1px">${icon('brain')} מה שאני לומד עליך</div>
-          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600">${icon('search')} נתח עכשיו</button>`:''}
+          <span style="color:var(--blue);display:flex;transition:transform .15s;transform:rotate(${insightsExpanded?'180deg':'0deg'})">${icon('chevron-down')}</span>
         </div>
-        ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
-        <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
-        `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
+        ${insightsExpanded ? `
+        <div style="margin-top:10px">
+          ${serverConfigured()?`<button id="insight-refresh-btn" onclick="event.stopPropagation();analyzePersonalPatterns(true)" style="background:var(--surface);border:1px solid var(--blue-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--blue);font-size:var(--fs-sm);font-weight:600;margin-bottom:8px">${icon('search')} נתח עכשיו</button>`:''}
+          ${state.personalInsights && state.personalInsights.text ? `<div style="font-size:var(--fs-base);color:var(--t1);line-height:1.6;white-space:pre-line">${esc(state.personalInsights.text)}</div>
+          <div style="font-size:var(--fs-sm);color:#8a95a3;margin-top:8px">${state.personalInsights.updatedAt?('עודכן '+new Date(state.personalInsights.updatedAt).toLocaleDateString('he-IL')):''}</div>` :
+          `<div style="font-size:var(--fs-base);color:var(--t2);line-height:1.6">עוד קצת נתונים ואני אתחיל לזהות דפוסים אצלך — המשך לכתוב ולסמן מצב-רוח.</div>`}
+        </div>` : ''}
       </div>` : ''}
       ${latestInsights.items && latestInsights.items.length ? creamPanelHtml(`
         <div style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:8px">${icon('lightbulb')} שמתי לב</div>
@@ -2728,7 +2738,7 @@ const PANEL_FAULTS = [
   {icon:'zap',color:'var(--orange)',title:'קופסת חיבורים (junction box) לא תקינה',checks:['לבדוק סימני התחממות/התכה בקופסה','לבדוק חיבורי כבלים בקופסה לרפיון או קורוזיה']},
 ]
 const SPIS_MANUFACTURERS = [
-  {id:'vasco', label:'VASCO Solar', icon:'zap'},
+  {id:'vasco', label:'Inverter', icon:'zap'},
   {id:'caprari', label:'Caprari', icon:'droplet'},
   {id:'rovatti', label:'Rovatti', icon:'droplet'},
   {id:'saer', label:'SAER', icon:'droplet'},
@@ -3201,6 +3211,7 @@ function showAddSite(name) {
         ${voiceRowHtml('add-site-issue')}
         <label class="form-label">תיאור מקרה מפורט (רשות)</label>
         <textarea id="add-site-case" placeholder="מה בדיוק קרה, מה כבר ניסית, מה אתה רואה בשטח..." style="width:100%;min-height:70px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px">${s?esc(s.caseDetail||''):''}</textarea>
+        ${voiceRowHtml('add-site-case')}
         <div id="site-case-photos">${siteCasePhotosHtml()}</div>
         ${siteCasePhotos.length < 3 ? `<button onclick="document.getElementById('site-case-photo-input').click()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-md);font-weight:600;margin-bottom:12px">${icon('camera')} הוסף תמונה למקרה</button>` : ''}
         <input id="site-case-photo-input" type="file" accept="image/*" style="display:none" onchange="addSiteCasePhoto(this)"/>
