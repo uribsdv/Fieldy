@@ -2601,12 +2601,19 @@ function renderHome() {
         </div>
         <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
+      <!-- Stat tiles + the WhatsApp CTA are the three biggest solid-fill blocks on Home, so
+           their saturation reads as "how urgent is this" even for routine counts. Toned down
+           (same hues, lower chroma, still >=4.5:1 white-on-fill) from the original
+           #e8940c/#d67d0a/#1a8f7a/#147263/#6b46c1/#5936a3 — kept quieter than --red/--stuck,
+           which stay untouched because they *should* read as alarms. The CTA below overrides
+           --gold/--gold2 locally rather than changing those tokens, which are also the app's
+           small-text/border accent color in ~90 other places that were never reviewed for this. -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#e8940c,#d67d0a)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#1a8f7a,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#6b46c1,#5936a3)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
+        ${statTileHtml('tasks', 'linear-gradient(150deg,#a46908,#a56108)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,#18826f,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
+        ${statTileHtml('people', 'linear-gradient(150deg,#735bac,#5f4792)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
       </div>
-      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px">${tr('home_add_whatsapp')}</button>
+      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px;background:linear-gradient(135deg,#a0690d,#956d0b)">${tr('home_add_whatsapp')}</button>
       ${dailyBriefingHtml()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
