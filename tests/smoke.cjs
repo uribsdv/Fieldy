@@ -567,10 +567,10 @@ async function main() {
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
   await check('theme switch applies and persists', async () => {
-    await page.evaluate(() => { navigateTo('settings'); applyTheme('teal') })
+    await page.evaluate(() => { navigateTo('settings'); applyTheme('moss') })
     const r = await page.evaluate(() => ({ gold: document.documentElement.style.getPropertyValue('--gold'), stored: localStorage.getItem('fieldy_theme') }))
-    assert(r.gold === '#0f7d6c' && r.stored === 'teal', JSON.stringify(r))
-    await page.evaluate(() => applyTheme('amber'))
+    assert(r.gold === '#2d7a51' && r.stored === 'moss', JSON.stringify(r))
+    await page.evaluate(() => applyTheme('original'))
     const e = errorsSince(); assert(!e.length, e.join('\n'))
   })
   await check('state survives a reload', async () => {
@@ -1403,6 +1403,92 @@ async function main() {
     })
     await context.unroute(MOCKL + '/**')
   }
+
+  section('Themes — a full reskin, not just the accent')
+  await check('every theme declares the same tokens, so none leaks the previous palette', async () => {
+    const r = await page.evaluate(() => {
+      const names = Object.keys(THEMES)
+      const sets = names.map(n => Object.keys(THEMES[n].tokens).sort().join('|'))
+      const missing = {}
+      const all = new Set(); names.forEach(n => Object.keys(THEMES[n].tokens).forEach(k => all.add(k)))
+      names.forEach(n => { const miss = [...all].filter(k => !(k in THEMES[n].tokens)); if (miss.length) missing[n] = miss })
+      return { names, identical: new Set(sets).size === 1, count: all.size, missing }
+    })
+    assert(r.names.length === 3, 'expected three themes, got ' + JSON.stringify(r.names))
+    assert(r.identical, 'themes declare different token sets: ' + JSON.stringify(r.missing))
+    assert(r.count > 25, 'a full theme should carry the whole palette, got ' + r.count + ' tokens')
+  })
+  await check('switching moves surfaces, text and lines — not only the accent', async () => {
+    const read = () => page.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement)
+      const g = k => cs.getPropertyValue(k).trim()
+      return { gold: g('--gold'), ink: g('--ink'), t1: g('--t1'), t2: g('--t2'), line: g('--line'),
+               surface2: g('--surface-2'), tile: g('--tile-a1'), cta: g('--cta1'), rgb: g('--accent-rgb') }
+    })
+    await page.evaluate(() => applyTheme('original')); const a = await read()
+    await page.evaluate(() => applyTheme('aqua')); const b = await read()
+    const moved = Object.keys(a).filter(k => a[k] !== b[k])
+    for (const k of ['gold', 'ink', 't1', 't2', 'line', 'surface2', 'tile', 'cta', 'rgb'])
+      assert(moved.includes(k), k + ' did not change between themes (' + a[k] + ')')
+  })
+  await check('alarm colours stay identical in all three themes', async () => {
+    const seen = {}
+    for (const t of ['original', 'moss', 'aqua']) {
+      seen[t] = await page.evaluate(n => {
+        applyTheme(n)
+        const cs = getComputedStyle(document.documentElement)
+        return [cs.getPropertyValue('--red').trim(), cs.getPropertyValue('--stuck').trim()].join(' ')
+      }, t)
+    }
+    assert(new Set(Object.values(seen)).size === 1, 'an alarm colour moved between themes: ' + JSON.stringify(seen))
+  })
+  await check('the retuned status colours keep their distance from each theme accent', async () => {
+    const hue = hex => {
+      const f = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+      const r = f(parseInt(hex.slice(1, 3), 16)), g = f(parseInt(hex.slice(3, 5), 16)), b = f(parseInt(hex.slice(5, 7), 16))
+      const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+      const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+      const s2 = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+      const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s2
+      const B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s2
+      return (Math.atan2(B, A) * 180 / Math.PI + 360) % 360
+    }
+    const themes = await page.evaluate(() => Object.fromEntries(Object.keys(THEMES).map(n => [n, THEMES[n].tokens])))
+    for (const [name, tok] of Object.entries(themes)) {
+      for (const key of ['--green', '--blue', '--purple']) {
+        const d = Math.abs(hue(tok[key]) - hue(tok['--gold'])) % 360
+        const gap = Math.min(d, 360 - d)
+        assert(gap >= 30, name + ': ' + key + ' (' + tok[key] + ') sits only ' + gap.toFixed(0) + '° from the accent ' + tok['--gold'] + ' — it stops reading as its own signal')
+      }
+    }
+  })
+  await check('the accent-only presets it replaced still land somewhere sane', async () => {
+    const r = await page.evaluate(() => {
+      const out = {}
+      for (const old of ['amber', 'teal', 'rose', 'nonsense']) {
+        localStorage.setItem('fieldy_theme', old); applyTheme(old)
+        out[old] = { now: currentTheme, stored: localStorage.getItem('fieldy_theme') }
+      }
+      return out
+    })
+    for (const [old, v] of Object.entries(r)) {
+      assert(['original', 'moss', 'aqua'].includes(v.now), old + ' resolved to an unknown theme: ' + v.now)
+      assert(v.stored === v.now, old + ' left a stale value in storage: ' + JSON.stringify(v))
+    }
+    assert(r.amber.now === 'original' && r.teal.now === 'aqua', 'aliases changed: ' + JSON.stringify(r))
+  })
+  await check('the chosen theme survives a reload and paints before first render', async () => {
+    await page.evaluate(() => applyTheme('moss'))
+    await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(300)
+    const r = await page.evaluate(() => ({
+      theme: currentTheme,
+      gold: getComputedStyle(document.documentElement).getPropertyValue('--gold').trim(),
+      meta: (document.querySelector('meta[name="theme-color"]') || {}).content
+    }))
+    assert(r.theme === 'moss' && r.gold === '#2d7a51', 'theme did not survive the reload: ' + JSON.stringify(r))
+    assert(r.meta === '#f6faf7', 'the browser chrome colour did not follow the theme: ' + r.meta)
+    await page.evaluate(() => applyTheme('original'))
+  })
 
   section('Quick calm — the 60-second breathing break')
   await check('offered only when the mood is overwhelmed or scattered', async () => {

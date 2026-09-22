@@ -34,6 +34,9 @@
   --fs-2xs:10px;--fs-xs:11px;--fs-sm:12px;--fs-md:13px;--fs-base:14px;--fs-lg:15px;--fs-xl:16px;--fs-2xl:18px;--fs-3xl:22px;--fs-4xl:26px;
   /* surfaces */
   --surface:#ffffff;--surface-2:#f0e7cf;--surface-3:#fdf9ee;--surface-input:#fffdf6;--accent-soft:#fdf1da;--accent-line:#f0d9a3;--gold-deep:#a8711a;--t5:#e3d9bd;
+  /* large-fill colours, themed (see THEMES): stat tiles, the primary CTA, the progress track */
+  --tile-a1:#a46908;--tile-a2:#a56108;--tile-a-label:#fde8c4;--tile-b1:#18826f;--tile-b2:#147263;--tile-b-label:#c8ebe3;--tile-c1:#735bac;--tile-c2:#5f4792;--tile-c-label:#dfd3f5;
+  --cta1:#a0690d;--cta2:#956d0b;--progress-track:#eee3c9;--accent-rgb:184,121,15;
   /* status / meaning colours (fixed across themes — they carry meaning) */
   --red:#ef4444;--red-dark:#c0392b;--red-soft:#fdeaea;--orange:#e8940c;--amber:#f59e0b;--amber-line:#f5c877;--green:#1a8f7a;--green-light:#4ade80;--purple:#6b46c1;--stuck:#b84600;--stuck-soft:#fdece0;--blue:#3d5a80;--blue-soft:#eef2f7;--blue-line:#cdd9e8;
   /* the Tao screen's quiet dark palette */
@@ -90,7 +93,7 @@ textarea,select,input{font-family:inherit}
 /* Checkbox */
 .cb{width:26px;height:26px;border-radius:var(--radius-sm);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
-.progress-bar{background:#eee3c9;border-radius:var(--radius-pill);height:6px;overflow:hidden}
+.progress-bar{background:var(--progress-track);border-radius:var(--radius-pill);height:6px;overflow:hidden}
 .progress-fill{height:100%;border-radius:var(--radius-pill);transition:width 0.4s;background:linear-gradient(90deg,var(--gold),var(--gold2))}
 /* Screens header */
 .screen-header{padding:var(--space-12) var(--space-4) var(--space-3);background:linear-gradient(180deg,var(--surface-3),var(--ink));position:sticky;top:0;z-index:10}
@@ -118,17 +121,17 @@ textarea,select,input{font-family:inherit}
 .tao-screen{background:linear-gradient(180deg,var(--ink) 0%,var(--ink) 100%);min-height:100%}
 .tao-card{background:linear-gradient(135deg,var(--surface-3),var(--surface-3));border:1px solid var(--gold-deep);border-radius:var(--radius-2xl);padding:var(--space-5);position:relative;overflow:hidden}
 .tao-verse{font-size:var(--fs-xl);line-height:2.4;color:var(--t1);text-align:center;font-weight:300;letter-spacing:0.5px}
-.tao-chapter-num{font-size:var(--fs-base);color:#b8790f;font-weight:600;letter-spacing:2px;margin-bottom:var(--space-3);text-align:center}
+.tao-chapter-num{font-size:var(--fs-base);color:var(--gold);font-weight:600;letter-spacing:2px;margin-bottom:var(--space-3);text-align:center}
 .tao-title{font-size:var(--fs-base);color:var(--t2);text-align:center;margin-bottom:var(--space-4);font-style:italic}
 .med-timer{font-size:48px;font-weight:200;color:var(--t1);text-align:center;letter-spacing:4px}
-.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(196,146,42,0.08),transparent)}
+.med-circle{width:180px;height:180px;border-radius:50%;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;background:radial-gradient(circle,rgba(var(--accent-rgb),0.08),transparent)}
 .breath-text{font-size:var(--fs-2xl);color:var(--tao-gold);text-align:center;margin-top:var(--space-4);font-weight:300;letter-spacing:1px}
 /* Quick calm — the 60-second breathing break offered from the home screen when
    the mood is overwhelmed/scattered. Deliberately NOT the Tao meditation: it
    lives on the cream surface, has no narration, no music and no steps to read.
    The ring scales with the breath so the body can follow it without reading. */
 .qc-ring{width:150px;height:150px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative;
-  border:2px solid var(--gold-deep);background:radial-gradient(circle,rgba(196,146,42,0.10),transparent);
+  border:2px solid var(--gold-deep);background:radial-gradient(circle,rgba(var(--accent-rgb),0.10),transparent);
   transition:transform var(--dur-slow) var(--ease-out)}
 .qc-ring[data-phase="0"]{transform:scale(1.14)}
 .qc-ring[data-phase="1"]{transform:scale(1.14)}
@@ -216,7 +219,7 @@ body {
 }
 
 ::-webkit-scrollbar { width: 2px; }
-::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.25); border-radius:var(--radius-pill); }
+::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb),0.25); border-radius:var(--radius-pill); }
 
 /* Signature backdrop: a few soft colour glows (the same accent colours used
    for icon badges elsewhere — gold, teal-green, terracotta, purple) drifting
@@ -293,12 +296,12 @@ body {
 .cal-month-title{font-size:var(--fs-2xl);font-weight:700;color:var(--t1);text-align:center}
 .cal-view-tabs{display:flex;gap:var(--space-1)}
 .cal-view-tab{flex:1;padding:var(--space-2) var(--space-1);border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:var(--fs-base);font-weight:600;cursor:pointer;color:var(--t3);background:transparent;transition:all .2s}
-.cal-view-tab.active{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid rgba(201,162,39,.25)}
+.cal-view-tab.active{background:rgba(var(--accent-rgb),.12);color:var(--gold);border:1px solid rgba(var(--accent-rgb),.25)}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);padding:var(--space-2) var(--space-2) 2px}
 .cal-weekday{font-size:var(--fs-base);color:var(--t3);text-align:center;font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 var(--space-2) var(--space-2);gap:2px}
 .cal-day{aspect-ratio:1;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;border:1px solid transparent}
-.cal-day.today{background:rgba(201,162,39,.14);border-color:var(--gold)}
+.cal-day.today{background:rgba(var(--accent-rgb),.14);border-color:var(--gold)}
 .cal-day.today .cal-dn{color:var(--gold);font-weight:800}
 .cal-day.other-month .cal-dn{color:var(--t4)}
 .cal-dn{font-size:var(--fs-base);font-weight:500;color:var(--t2);line-height:1}
@@ -314,7 +317,7 @@ body {
 .week-dname{font-size:var(--fs-base);color:var(--t3);font-weight:600}
 .week-dnum{font-size:var(--fs-2xl);font-weight:700;color:var(--t2);line-height:1}
 .week-dnum.today{color:var(--sprout)}
-.week-epill{background:rgba(184,134,11,.15);border:1px solid rgba(184,134,11,.25);border-radius:var(--radius-sm);padding:5px var(--space-2-5);margin-bottom:var(--space-1);font-size:var(--fs-base);color:var(--t1);font-weight:500}
+.week-epill{background:rgba(var(--accent-rgb),.15);border:1px solid rgba(var(--accent-rgb),.25);border-radius:var(--radius-sm);padding:5px var(--space-2-5);margin-bottom:var(--space-1);font-size:var(--fs-base);color:var(--t1);font-weight:500}
 /* Component classes shared by the render helpers */
 .panel-label{font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:var(--space-2)}
 .tao-label{font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:700;margin-bottom:var(--space-3)}
@@ -1161,7 +1164,6 @@ const TRANSLATIONS = {
   settings_lang: {he:'שפת ממשק', en:'Interface language'},
   settings_lang_hint: {he:'מחליף את כל טקסטי הממשק לאנגלית (LTR). תוכן הטאו, המדיטציות ומה שנוצר על ידי AI תמיד נשארים בעברית.', en:'Switches all interface text to English (LTR). Tao content, meditations, and anything AI-generated always stay in Hebrew.'},
   settings_theme: {he:'ערכת צבע', en:'Color theme'},
-  settings_theme_hint: {he:'שינוי מהגון צבע האפליקציה', en:'Changes the app\'s accent color'},
 
   btn_add: {he:'הוסף', en:'Add'}, btn_save: {he:'שמור', en:'Save'}, btn_cancel: {he:'ביטול', en:'Cancel'}, btn_delete: {he:'מחק', en:'Delete'}, btn_edit: {he:'עריכה', en:'Edit'}, btn_close: {he:'סגור', en:'Close'}, btn_confirm: {he:'אישור', en:'Confirm'}, btn_undo: {he:'בטל', en:'Undo'}, btn_back: {he:'חזרה', en:'Back'}, btn_all: {he:'הכל', en:'All'},
 
@@ -1198,7 +1200,7 @@ const TRANSLATIONS = {
   home_focus_add: {he:'הדבר הכי חשוב היום — הוסף', en:"Today's most important thing — add"},
   home_focus_placeholder: {he:'למשל: פגישה עם NIA ב-14:00', en:'e.g. Meeting with NIA at 2pm'},
 
-  settings_theme_hint: {he:'שינוי מהיר לגוון המבטא באפליקציה', en:"Quick change to the app's accent color"},
+  settings_theme_hint: {he:'מחליף את כל הצבעים — רקע, טקסט והדגשים. התוכן והפריסה לא משתנים.', en:'Changes every colour — background, text and accents. Content and layout stay the same.'},
   settings_feedback_title: {he:'משוב לפעולות', en:'Action feedback'},
   settings_feedback_hint: {he:'צליל קצר ורטט עדין כשמסיימים משימה, שומרים רפלקציה או מסיימים מדיטציה. כל פעולה מאשרת את עצמה גם בלי זה — אפשר לכבות לפגישות ולשטח.', en:'A short sound and a gentle vibration when you complete a task, save a reflection, or finish a meditation. Every action confirms itself visually either way — turn this off for meetings or the field.'},
   settings_sound_label: {he:'צלילי פעולה', en:'Action sounds'},
@@ -1347,27 +1349,92 @@ function setUiLang(lang) {
 }
 
 // ── THEME ─────────────────────────────────────────
-// Quick accent reskin for novelty (ADHD interest-based nervous system likes
-// occasional visual change). Only the accent — buttons, active nav, progress
-// bar, calendar highlights — switches; status colors (red/orange/green
-// priority) stay fixed everywhere since those carry functional meaning.
-const THEMES = {
-  amber: {label:'ענבר', gold:'#b8790f', gold2:'#c9930f', bamboo2:'#946011'},
-  teal:  {label:'טורקיז', gold:'#0f7d6c', gold2:'#139485', bamboo2:'#0b5c50'},
-  rose:  {label:'ורוד', gold:'#c2185b', gold2:'#d63384', bamboo2:'#9c1449'},
+// Full reskin for novelty (an ADHD interest-based nervous system likes
+// occasional visual change) — surfaces, text, lines and accent all move
+// together, so a theme is a different room rather than a different button.
+// Every theme MUST declare the same token keys: applyTheme() writes them onto
+// the root element, and a key one theme defines but another omits would stay
+// stuck on the previous theme's value. A smoke test enforces that.
+//
+// What does NOT move: --red and --stuck. A real alarm has to be recognisable
+// the instant it appears, and re-learning "which red means late" per theme is
+// exactly the load this app exists to remove. The non-alarm status colours DO
+// get retuned, but only where they would otherwise collide with the theme's
+// own accent and stop reading as a separate signal:
+//   moss  — --green (#1a8f7a "resolved") sat 20° from the moss accent, so two
+//           mid greens meant "done" and "ordinary button" looked alike. Moved
+//           to a teal that also clears 4.5:1 on white, which the original
+//           never did (3.98).
+//   aqua  — --blue (site tags) sat 21° from the ocean accent; nudged to indigo.
+const THEME_TOKENS_BASE = {
+  '--surface':'#ffffff', '--ink3':'#ffffff',
+  '--red':'#ef4444', '--red-dark':'#c0392b', '--red-soft':'#fdeaea',
+  '--stuck':'#b84600', '--stuck-soft':'#fdece0',
+  '--orange':'#e8940c', '--amber':'#f59e0b', '--amber-line':'#f5c877'
 }
-let currentTheme = localStorage.getItem('fieldy_theme') || 'amber'
+const THEMES = {
+  original: {label:'מקורי', labelEn:'Original', tokens:{
+    '--gold':'#b8790f', '--gold2':'#c9930f', '--gold-deep':'#a8711a',
+    '--ink':'#f6efdb', '--surface-2':'#f0e7cf', '--surface-3':'#fdf9ee', '--surface-input':'#fffdf6',
+    '--accent-soft':'#fdf1da', '--accent-line':'#f0d9a3',
+    '--t1':'#211d17', '--t2':'#6b6255', '--t3':'#948a7a', '--t4':'#b0a68f', '--t5':'#e3d9bd',
+    '--line':'rgba(43,38,32,.09)', '--border':'rgba(43,38,32,.14)',
+    '--green':'#1a8f7a', '--green-light':'#4ade80', '--purple':'#6b46c1',
+    '--blue':'#3d5a80', '--blue-soft':'#eef2f7', '--blue-line':'#cdd9e8',
+    '--tile-a1':'#a46908', '--tile-a2':'#a56108', '--tile-a-label':'#fde8c4',
+    '--tile-b1':'#18826f', '--tile-b2':'#147263', '--tile-b-label':'#c8ebe3',
+    '--tile-c1':'#735bac', '--tile-c2':'#5f4792', '--tile-c-label':'#dfd3f5',
+    '--cta1':'#a0690d', '--cta2':'#956d0b', '--progress-track':'#eee3c9', '--accent-rgb':'184,121,15'
+  }},
+  moss: {label:'אזוב', labelEn:'Moss', tokens:{
+    '--gold':'#2d7a51', '--gold2':'#5ec296', '--gold-deep':'#143d2b',
+    '--ink':'#f6faf7', '--surface-2':'#d4efe2', '--surface-3':'#f0fdf7', '--surface-input':'#f7fffb',
+    '--accent-soft':'#e1f9ea', '--accent-line':'#b3ebc8',
+    '--t1':'#10261d', '--t2':'#567366', '--t3':'#7d9188', '--t4':'#94aea2', '--t5':'#c3e2d3',
+    '--line':'rgba(20,61,43,.10)', '--border':'rgba(20,61,43,.16)',
+    '--green':'#008386', '--green-light':'#4ade80', '--purple':'#6b46c1',
+    '--blue':'#3d5a80', '--blue-soft':'#eef2f7', '--blue-line':'#cdd9e8',
+    '--tile-a1':'#a46908', '--tile-a2':'#a56108', '--tile-a-label':'#fde8c4',
+    '--tile-b1':'#2d7a51', '--tile-b2':'#276b47', '--tile-b-label':'#cdeedd',
+    '--tile-c1':'#5c6f9e', '--tile-c2':'#4e6089', '--tile-c-label':'#dbe3f2',
+    '--cta1':'#2d7a51', '--cta2':'#276b47', '--progress-track':'#d4efe2', '--accent-rgb':'45,122,81'
+  }},
+  aqua: {label:'צב-אקווה', labelEn:'Sea turtle', tokens:{
+    '--gold':'#1a7ba8', '--gold2':'#29b6c6', '--gold-deep':'#0d4e72',
+    '--ink':'#f7faf9', '--surface-2':'#d5ebfc', '--surface-3':'#f1fbff', '--surface-input':'#f8feff',
+    '--accent-soft':'#def7ff', '--accent-line':'#abe4ff',
+    '--t1':'#102b3f', '--t2':'#5c7a8e', '--t3':'#7e8e9a', '--t4':'#95aabb', '--t5':'#c4ddf2',
+    '--line':'rgba(26,123,168,.12)', '--border':'rgba(26,123,168,.18)',
+    '--green':'#1a8f7a', '--green-light':'#4ade80', '--purple':'#6b46c1',
+    '--blue':'#4d5580', '--blue-soft':'#eef2f7', '--blue-line':'#cdd9e8',
+    '--tile-a1':'#0d4e72', '--tile-a2':'#0b4160', '--tile-a-label':'#c5e4f7',
+    '--tile-b1':'#18826f', '--tile-b2':'#147263', '--tile-b-label':'#c8ebe3',
+    '--tile-c1':'#6b5bb4', '--tile-c2':'#5a4c99', '--tile-c-label':'#dcd6f3',
+    '--cta1':'#1a7ba8', '--cta2':'#156590', '--progress-track':'#d5ebfc', '--accent-rgb':'26,123,168'
+  }}
+}
+// The accent-only presets this replaced. Nobody should land on a theme that no
+// longer exists and get a half-applied palette, so old values map forward.
+const THEME_ALIASES = {amber:'original', teal:'aqua', rose:'original'}
+let currentTheme = (function(){
+  const saved = localStorage.getItem('fieldy_theme') || 'original'
+  return THEMES[saved] ? saved : (THEME_ALIASES[saved] || 'original')
+})()
 function applyTheme(name) {
-  const t = THEMES[name]; if(!t) return
-  currentTheme = name
-  localStorage.setItem('fieldy_theme', name)
+  const t = THEMES[name] || THEMES[THEME_ALIASES[name]] || THEMES.original
+  currentTheme = THEMES[name] ? name : (THEME_ALIASES[name] || 'original')
+  try { localStorage.setItem('fieldy_theme', currentTheme) } catch(e) {}
   const r = document.documentElement.style
-  r.setProperty('--gold', t.gold)
-  r.setProperty('--gold2', t.gold2)
-  r.setProperty('--cherry', t.gold)
-  r.setProperty('--bamboo', t.gold)
-  r.setProperty('--bamboo2', t.bamboo2)
-  r.setProperty('--sprout', t.gold)
+  Object.keys(THEME_TOKENS_BASE).forEach(k => r.setProperty(k, THEME_TOKENS_BASE[k]))
+  Object.keys(t.tokens).forEach(k => r.setProperty(k, t.tokens[k]))
+  // legacy aliases still referenced in a handful of places
+  r.setProperty('--cherry', t.tokens['--gold'])
+  r.setProperty('--bamboo', t.tokens['--gold'])
+  r.setProperty('--bamboo2', t.tokens['--gold-deep'])
+  r.setProperty('--sprout', t.tokens['--gold'])
+  // the phone's browser/status bar tint, so the chrome above the app matches it
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if(meta) meta.setAttribute('content', t.tokens['--ink'])
   renderCurrentScreen()
 }
 let currentScreen = 'home'
@@ -2590,7 +2657,7 @@ function renderHome() {
         <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--t2);margin-bottom:6px">
           <span>${tr('home_progress')}</span><span style="font-weight:700;color:${done===total?'var(--green)':'var(--t1)'}">${done}/${total}</span>
         </div>
-        <div class="progress-bar" style="background:#eee3c9"><div class="progress-fill" style="width:${pct}%;background:${done===total?'var(--green)':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
+        <div class="progress-bar" style="background:var(--progress-track)"><div class="progress-fill" style="width:${pct}%;background:${done===total?'var(--green)':'linear-gradient(90deg,var(--gold),var(--gold2))'}"></div></div>
       </div>` : ''}
     </div>
     <div style="padding:16px">
@@ -2601,19 +2668,21 @@ function renderHome() {
         </div>
         <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' })()}
-      <!-- Stat tiles + the WhatsApp CTA are the three biggest solid-fill blocks on Home, so
-           their saturation reads as "how urgent is this" even for routine counts. Toned down
-           (same hues, lower chroma, still >=4.5:1 white-on-fill) from the original
-           #e8940c/#d67d0a/#1a8f7a/#147263/#6b46c1/#5936a3 — kept quieter than --red/--stuck,
-           which stay untouched because they *should* read as alarms. The CTA below overrides
-           --gold/--gold2 locally rather than changing those tokens, which are also the app's
-           small-text/border accent color in ~90 other places that were never reviewed for this. -->
+      <!-- Stat tiles + the WhatsApp CTA are the biggest solid-fill blocks on Home, so their
+           saturation reads as "how urgent is this" even for routine counts. They were toned
+           down from #e8940c/#d67d0a/#1a8f7a/#147263/#6b46c1/#5936a3 and now come from theme
+           tokens, so a moss or aqua home does not keep three gold/teal/purple tiles sitting
+           on a green or blue page. Each theme keeps the three tiles >=35° apart in hue —
+           they are wayfinding for three different destinations, not decoration — and >=4.5:1
+           against the white numerals. The CTA uses its own --cta1/--cta2 rather than
+           --gold/--gold2, because those are also the small-text and border accent in ~90
+           other places where a large-fill value would be too heavy. -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-        ${statTileHtml('tasks', 'linear-gradient(150deg,#a46908,#a56108)', icon('message-square'), nowCount, tr('home_stat_now'), '#fde8c4')}
-        ${statTileHtml('sites', 'linear-gradient(150deg,#18826f,#147263)', icon('flower'), openSites, tr('home_stat_sites'), '#c8ebe3')}
-        ${statTileHtml('people', 'linear-gradient(150deg,#735bac,#5f4792)', icon('users'), pendingPeople, tr('home_stat_pending'), '#dfd3f5')}
+        ${statTileHtml('tasks', 'linear-gradient(150deg,var(--tile-a1),var(--tile-a2))', icon('message-square'), nowCount, tr('home_stat_now'), 'var(--tile-a-label)')}
+        ${statTileHtml('sites', 'linear-gradient(150deg,var(--tile-b1),var(--tile-b2))', icon('flower'), openSites, tr('home_stat_sites'), 'var(--tile-b-label)')}
+        ${statTileHtml('people', 'linear-gradient(150deg,var(--tile-c1),var(--tile-c2))', icon('users'), pendingPeople, tr('home_stat_pending'), 'var(--tile-c-label)')}
       </div>
-      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px;background:linear-gradient(135deg,#a0690d,#956d0b)">${tr('home_add_whatsapp')}</button>
+      <button class="btn-primary" onclick="navigateTo('input')" style="margin-bottom:16px;background:linear-gradient(135deg,var(--cta1),var(--cta2))">${tr('home_add_whatsapp')}</button>
       ${dailyBriefingHtml()}
       ${rightNowHtml(curMood ? curMood.mood : null)}
       <div class="card" style="margin-top:12px;cursor:pointer" onclick="showPettyCashModal()">
@@ -2738,7 +2807,7 @@ async function doAnalyze() {
     if(p.moodGuess && MOOD_LIB[p.moodGuess]) logMood(p.moodGuess, 'auto')
     if((p.events||[]).length > 0) {
       var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(184,134,11,0.95);color:var(--t1);padding:10px 18px;border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:600;z-index:999;backdrop-filter:blur(8px)';
+      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(var(--accent-rgb),0.95);color:var(--surface);padding:10px 18px;border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:600;z-index:999;backdrop-filter:blur(8px)';
       toast.innerHTML = icon('calendar') + ' ' + (p.events||[]).length + ' אירועים נוספו ללוח';
       document.body.appendChild(toast);
       setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
@@ -3909,11 +3978,12 @@ function renderSettings() {
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('palette')} ${tr('settings_theme')}</div>
         <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">${tr('settings_theme_hint')}</div>
         <div style="display:flex;gap:8px">
-          ${Object.keys(THEMES).map(name=>`
-            <button onclick="applyTheme('${name}')" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:2px solid ${currentTheme===name?THEMES[name].gold:'var(--line)'};background:${currentTheme===name?THEMES[name].gold+'18':'var(--surface)'};cursor:pointer">
-              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,${THEMES[name].gold},${THEMES[name].gold2});margin:0 auto 6px"></div>
-              <div style="font-size:var(--fs-sm);font-weight:600;color:${currentTheme===name?THEMES[name].gold:'var(--t2)'}">${THEMES[name].label}</div>
-            </button>`).join('')}
+          ${Object.keys(THEMES).map(name=>{
+            const th = THEMES[name], accent = th.tokens['--gold'], on = currentTheme===name
+            return `<button onclick="applyTheme('${name}')" aria-pressed="${on}" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:2px solid ${on?accent:'var(--line)'};background:${on?accent+'18':'var(--surface)'};cursor:pointer">
+              <div style="width:22px;height:22px;border-radius:50%;margin:0 auto 6px;background:linear-gradient(135deg,${accent},${th.tokens['--gold2']});border:2px solid ${th.tokens['--ink']}"></div>
+              <div style="font-size:var(--fs-sm);font-weight:600;color:${on?accent:'var(--t2)'}">${esc(uiLang==='en' ? th.labelEn : th.label)}</div>
+            </button>`}).join('')}
         </div>
       </div>
       <div class="card" style="margin-bottom:14px">
@@ -4739,7 +4809,7 @@ function renderYearCal(){
       var dk=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       var evs=getEventsForDate(dk);
       var isT=dk===tk;
-      mini+='<div style="font-size:var(--fs-base);text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(184,134,11,.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
+      mini+='<div style="font-size:var(--fs-base);text-align:center;color:'+(isT?'var(--sprout)':'var(--t4)')+'('+(evs.length?'background:rgba(var(--accent-rgb),.2);border-radius:3px;':'')+';cursor:pointer" data-gdate="'+dk+'">'+d+'</div>';
     }
     var mm=m,yy=y;
     html+='<div style="background:var(--glass2);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px" data-ym="'+y+'-'+m+'">'+
