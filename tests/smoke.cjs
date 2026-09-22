@@ -1488,6 +1488,96 @@ async function main() {
     assert(r.identical, 'themes declare different token sets: ' + JSON.stringify(r.missing))
     assert(r.count > 25, 'a full theme should carry the whole palette, got ' + r.count + ' tokens')
   })
+  await check('no colour token is reused between themes — the bug the first pass shipped', async () => {
+    // The first version of this feature left --tile-a identical in original and moss,
+    // and --tile-b identical in original and aqua, so two of the three stat tiles simply
+    // did not move when you switched. Byte-equality is the cheap half of the check;
+    // the perceptual half below catches "different hex, same colour to the eye".
+    const r = await page.evaluate(() => {
+      const names = Object.keys(THEMES)
+      const fixed = new Set(Object.keys(typeof THEME_TOKENS_BASE === 'object' ? THEME_TOKENS_BASE : {}))
+      const clashes = []
+      Object.keys(THEMES[names[0]].tokens).forEach(k => {
+        if (fixed.has(k)) return
+        const seen = {}
+        names.forEach(n => { const v = THEMES[n].tokens[k]; (seen[v] = seen[v] || []).push(n) })
+        Object.entries(seen).forEach(([v, who]) => { if (who.length > 1) clashes.push(k + ' = ' + v + ' in ' + who.join(' & ')) })
+      })
+      return clashes
+    })
+    assert(!r.length, 'these tokens do not change between themes:\n      ' + r.join('\n      '))
+  })
+  await check('the tokens that carry meaning are far enough apart to actually look different', async () => {
+    const r = await page.evaluate(() => {
+      const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+      const lab = hex => {
+        const r = lin(parseInt(hex.slice(1, 3), 16)), g = lin(parseInt(hex.slice(3, 5), 16)), b = lin(parseInt(hex.slice(5, 7), 16))
+        const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+        const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+        const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+        return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+                1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+                0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s]
+      }
+      const dE = (p, q) => { const a = lab(p), b = lab(q); return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) * 100 }
+      const names = Object.keys(THEMES), out = []
+      // the three stat tiles are wayfinding to three different screens — inside one
+      // theme they must be clearly apart, or the tiles stop being a map
+      names.forEach(n => {
+        const t = THEMES[n].tokens
+        const tri = [['--tile-a1', '--tile-b1'], ['--tile-b1', '--tile-c1'], ['--tile-a1', '--tile-c1']]
+        tri.forEach(([x, y]) => { const d = dE(t[x], t[y]); if (d < 12) out.push(n + ': ' + x + ' vs ' + y + ' only ' + d.toFixed(0) + ' apart') })
+      })
+      // and the same role must not look the same in two different themes
+      ;['--tile-a1', '--tile-b1', '--tile-c1', '--green', '--purple'].forEach(k => {
+        for (let i = 0; i < names.length; i++) for (let j = i + 1; j < names.length; j++) {
+          const d = dE(THEMES[names[i]].tokens[k], THEMES[names[j]].tokens[k])
+          if (d < 3) out.push(k + ': ' + names[i] + ' and ' + names[j] + ' are the same colour (' + d.toFixed(0) + ')')
+        }
+      })
+      return out
+    })
+    assert(!r.length, r.join('\n      '))
+  })
+  await check('every tile and tag colour is readable on what it sits on', async () => {
+    const r = await page.evaluate(() => {
+      const L = hex => { const f = c => { c = parseInt(c, 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(hex.slice(1, 3)) + 0.7152 * f(hex.slice(3, 5)) + 0.0722 * f(hex.slice(5, 7)) }
+      const ct = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+      const bad = []
+      Object.keys(THEMES).forEach(n => {
+        const t = THEMES[n].tokens
+        // white numerals sit on the tile fills and on the CTA
+        ;['--tile-a1', '--tile-b1', '--tile-c1', '--cta1', '--cta2'].forEach(k => {
+          const c = ct(t[k], '#ffffff'); if (c < 4.5) bad.push(n + ' ' + k + ' ' + t[k] + ' -> white is only ' + c.toFixed(2))
+        })
+        // --green is tag text on a white card
+        const g = ct(t['--green'], '#ffffff'); if (g < 4.5) bad.push(n + ' --green ' + t['--green'] + ' on white is only ' + g.toFixed(2))
+      })
+      return bad
+    })
+    assert(!r.length, r.join('\n      '))
+  })
+  await check('a tag keeps its tint and its text in the same family', async () => {
+    // .tag-person and .tag-context colour their text from a token but used to take their
+    // background from a frozen rgba(), so theming the text alone gave plum-on-violet.
+    for (const th of ['original', 'moss', 'aqua']) {
+      const r = await page.evaluate(n => {
+        applyTheme(n)
+        const probe = (cls, prop) => { const el = document.createElement('span'); el.className = cls
+          document.body.appendChild(el); const cs = getComputedStyle(el)
+          const v = { bg: cs.backgroundColor, fg: cs.color }; el.remove(); return v }
+        return { person: probe('tag-person'), context: probe('tag-context'), resolved: probe('tag-status-resolved') }
+      }, th)
+      for (const [name, v] of Object.entries(r)) {
+        const bg = (v.bg.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
+        const fg = (v.fg.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
+        const dom = a => a.indexOf(Math.max(...a))
+        assert(dom(bg) === dom(fg), th + ': .tag-' + name + ' tint ' + v.bg + ' and text ' + v.fg + ' are different colour families')
+      }
+    }
+    await page.evaluate(() => applyTheme('original'))
+  })
   await check('switching moves surfaces, text and lines — not only the accent', async () => {
     const read = () => page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement)
