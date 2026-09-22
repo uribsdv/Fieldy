@@ -1665,6 +1665,94 @@ async function main() {
       }
     }
   })
+  await check('the Tao screen stays a dark room in every theme', async () => {
+    // The whole point of that tab is that entering it feels like stepping somewhere
+    // quieter. A theme may change its colour family; it may never lighten it toward
+    // the rest of the app.
+    const r = await page.evaluate(() => {
+      const rel = hex => { const f = c => { c = parseInt(c, 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(hex.slice(1, 3)) + 0.7152 * f(hex.slice(3, 5)) + 0.0722 * f(hex.slice(5, 7)) }
+      return Object.keys(THEMES).map(n => {
+        const t = THEMES[n].tokens
+        return { theme: n, bg: t['--tao-bg'], lum: rel(t['--tao-bg']),
+                 panel: rel(t['--tao-panel']), line2: rel(t['--tao-line2']) }
+      })
+    })
+    for (const v of r) {
+      assert(v.lum < 0.012, v.theme + ': the Tao background is no longer dark (' + v.bg + ', luminance ' + v.lum.toFixed(4) + ')')
+      assert(v.panel < 0.02 && v.line2 < 0.04, v.theme + ': a Tao surface drifted light (panel ' + v.panel.toFixed(3) + ', line ' + v.line2.toFixed(3) + ')')
+    }
+    // and all three must be equally dark — one theme must not be the "brighter" Tao
+    const lums = r.map(v => v.lum)
+    assert(Math.max(...lums) - Math.min(...lums) < 0.004,
+      'the themes differ in how dark the Tao screen is: ' + r.map(v => v.theme + ' ' + v.lum.toFixed(4)).join(', '))
+  })
+  await check('the Tao text ramp keeps its contrast on that dark background', async () => {
+    const r = await page.evaluate(() => {
+      const rel = hex => { const f = c => { c = parseInt(c, 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(hex.slice(1, 3)) + 0.7152 * f(hex.slice(3, 5)) + 0.0722 * f(hex.slice(5, 7)) }
+      const ct = (a, b) => { const x = rel(a), y = rel(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+      const bad = []
+      Object.keys(THEMES).forEach(n => {
+        const t = THEMES[n].tokens, bg = t['--tao-bg']
+        ;[['--tao-t1', 7], ['--tao-t2', 4.5], ['--tao-t3', 4.5], ['--tao-gold', 4.5], ['--tao-gold3', 4.5]].forEach(([k, min]) => {
+          const c = ct(t[k], bg)
+          if (c < min) bad.push(n + ' ' + k + ' ' + t[k] + ' is only ' + c.toFixed(2) + ':1 on ' + bg)
+        })
+      })
+      return bad
+    })
+    assert(!r.length, r.join('\n      '))
+  })
+  await check('the breathing word is readable on the light meditation card', async () => {
+    // .breath-text used --tao-gold, a colour built for the dark screen, on the cream
+    // modal — about 1.7:1. --tao-ink is the same family, dark enough for that surface.
+    for (const th of ['original', 'moss', 'aqua']) {
+      const r = await page.evaluate(n => {
+        applyTheme(n); navigateTo('tao'); startMeditation(0)
+        const el = document.getElementById('breath-text')
+        const modal = document.querySelector('.modal')
+        const v = { fg: getComputedStyle(el).color, bg: getComputedStyle(modal).backgroundColor }
+        stopMeditation(false)
+        return v
+      }, th)
+      const px = str => (str.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
+      const rel = rgb => { const f = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]) }
+      const a2 = rel(px(r.fg)), b2 = rel(px(r.bg))
+      const ratio = (Math.max(a2, b2) + 0.05) / (Math.min(a2, b2) + 0.05)
+      assert(ratio >= 4.5, th + ': the breathing word is only ' + ratio.toFixed(2) + ':1 on the meditation card')
+    }
+    await page.evaluate(() => applyTheme('original'))
+  })
+  await check('the meditation ring is drawn in the theme colour, not a frozen gold', async () => {
+    // canvas cannot read var(), so this one is refreshed in applyTheme like STATUS_HEX —
+    // exactly the trap that left the ring gold in every theme.
+    const r = await page.evaluate(() => {
+      const out = {}
+      Object.keys(THEMES).forEach(n => { applyTheme(n)
+        out[n] = { ...TAO_CANVAS, want: THEMES[n].tokens['--tao-gold3'], rgb: THEMES[n].tokens['--tao-accent-rgb'] } })
+      return out
+    })
+    for (const [n, v] of Object.entries(r)) {
+      assert(v.ring === v.want, n + ': the ring is ' + v.ring + ' but the theme says ' + v.want)
+      assert(v.track.indexOf(v.rgb) >= 0, n + ': the ring track ' + v.track + ' is not built from this theme accent')
+    }
+    const vals = Object.values(r).map(v => v.ring)
+    assert(new Set(vals).size === 3, 'the ring colour repeats between themes: ' + vals.join(', '))
+    await page.evaluate(() => applyTheme('original'))
+  })
+  await check('no Tao colour is still hardcoded past the tokens', async () => {
+    const src = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+    const frozen = [/rgba\(184,134,11/g, /rgba\(13,10,5/g, /rgba\(28,21,8/g, /rgba\(196,146,42/g]
+    const found = []
+    frozen.forEach(re => { const m = src.match(re) || []
+      // the TAO_CANVAS initialiser keeps one literal on purpose: it is the first-paint
+      // value, replaced the moment applyTheme runs
+      const allowed = re.source.indexOf('196,146,42') >= 0 ? 1 : 0
+      if (m.length > allowed) found.push(re.source + ' x' + m.length) })
+    assert(!found.length, 'still frozen to the gold palette: ' + found.join(', '))
+  })
   await check('the accent-only presets it replaced still land somewhere sane', async () => {
     const r = await page.evaluate(() => {
       const out = {}
