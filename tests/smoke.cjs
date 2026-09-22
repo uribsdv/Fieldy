@@ -1404,6 +1404,76 @@ async function main() {
     await context.unroute(MOCKL + '/**')
   }
 
+  section('Mark as done, straight off the focus card')
+  await check('the focus card carries the button — and only when it is a task', async () => {
+    await page.evaluate(s2 => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s2)) }, seededState())
+    await page.goto(BASE + '?md=1', { waitUntil: 'load' })
+    await page.evaluate(() => { setState({ tasks: { now: [{ id: 'f1', text: 'focus task', done: false, color: 'red' }, { id: 'f2', text: 'second', done: false, color: 'orange' }], today: [], later: [] }, focus: '', sites: [], events: [] }) })
+    await page.waitForTimeout(150)
+    const onTask = await page.evaluate(() => !!document.querySelector('.rn-item button[onclick*="completeFromFocus"]'))
+    assert(onTask, 'no "mark as done" button on a task focus card')
+    // a stuck site ranks top and has no completed state — it must not get the button
+    await page.evaluate(() => { const d = new Date(); d.setDate(d.getDate() - 40)
+      setState({ tasks: { now: [], today: [], later: [] }, sites: [{ name: 'Stuck', status: 'open', stuckSince: d.getTime() }] }) })
+    await page.waitForTimeout(150)
+    const r = await page.evaluate(() => ({ first: (document.querySelector('.rn-item') || {}).textContent || '', btn: !!document.querySelector('.rn-item button[onclick*="completeFromFocus"]') }))
+    assert(/Stuck/.test(r.first), 'the stuck site did not reach the focus card: ' + r.first.trim())
+    assert(!r.btn, 'a stuck site was offered "mark as done"')
+  })
+  await check('pressing it completes the task and the card advances to the next one', async () => {
+    await page.evaluate(() => setState({ sites: [], tasks: { now: [{ id: 'f1', text: 'first task', done: false, color: 'red' }, { id: 'f2', text: 'next task', done: false, color: 'orange' }], today: [], later: [] } }))
+    await page.waitForTimeout(150)
+    const before = await page.evaluate(() => (document.querySelector('.rn-item') || {}).textContent || '')
+    assert(/first task/.test(before), 'wrong task on the card to start: ' + before.trim())
+    await page.click('.rn-item button[onclick*="completeFromFocus"]')
+    await page.waitForTimeout(250)
+    const r = await page.evaluate(() => ({
+      done: state.tasks.now.find(t => t.id === 'f1').done,
+      stillOpen: state.tasks.now.find(t => t.id === 'f2').done,
+      card: (document.querySelector('.rn-item') || {}).textContent || ''
+    }))
+    assert(r.done, 'the task was not marked done')
+    assert(!r.stillOpen, 'the wrong task got completed')
+    assert(/next task/.test(r.card), 'the card did not advance: ' + r.card.trim())
+  })
+  await check('tapping the button does not also open the tasks screen behind it', async () => {
+    await page.evaluate(() => { navigateTo('home'); setState({ tasks: { now: [{ id: 'g1', text: 'stay here', done: false, color: 'red' }], today: [], later: [] } }) })
+    await page.waitForTimeout(150)
+    await page.click('.rn-item button[onclick*="completeFromFocus"]')
+    await page.waitForTimeout(200)
+    assert(await page.evaluate(() => currentScreen) === 'home', 'the card click fired through the button and navigated away')
+  })
+  await check('it offers undo, and undo restores the task and the streak', async () => {
+    await page.evaluate(() => { localStorage.removeItem('fieldy_undo'); setState({ streak: 4, lastStreakDate: getTodayPlus(-1), tasks: { now: [{ id: 'u1', text: 'undo me', done: false, color: 'red' }], today: [], later: [] } }) })
+    await page.waitForTimeout(150)
+    await page.click('.rn-item button[onclick*="completeFromFocus"]')
+    await page.waitForTimeout(200)
+    const mid = await page.evaluate(() => ({ done: state.tasks.now[0].done, streak: state.streak, toast: !!document.getElementById('undo-toast') }))
+    assert(mid.done, 'task not completed')
+    assert(mid.toast, 'no undo bubble was offered')
+    assert(mid.streak === 5, 'completing should have advanced the streak, got ' + mid.streak)
+    await page.evaluate(() => undoLast())
+    await page.waitForTimeout(250)
+    const after = await page.evaluate(() => ({ done: state.tasks.now[0].done, streak: state.streak, date: state.lastStreakDate, gone: !document.getElementById('undo-toast') }))
+    assert(!after.done, 'undo did not un-complete the task')
+    assert(after.gone, 'the undo bubble stayed on screen')
+    assert(after.streak === 4 && after.date === (await page.evaluate(() => getTodayPlus(-1))),
+      'undo left the streak credited for a day that was taken back: ' + JSON.stringify(after))
+  })
+  await check('the button is translated and survives a theme switch', async () => {
+    await page.evaluate(() => { localStorage.setItem('fieldy_ui_lang', 'en') })
+    await page.goto(BASE + '?md=2', { waitUntil: 'load' })
+    await page.evaluate(() => { applyTheme('aqua'); setState({ sites: [], events: [], focus: '', tasks: { now: [{ id: 'e1', text: 'english check', done: false, color: 'red' }], today: [], later: [] } }) })
+    await page.waitForTimeout(200)
+    const r = await page.evaluate(() => { const b = document.querySelector('.rn-item button[onclick*="completeFromFocus"]')
+      return b ? { txt: b.textContent.trim(), bg: getComputedStyle(b).backgroundImage } : null })
+    assert(r, 'the button disappeared in English/aqua')
+    assert(/Mark as done/.test(r.txt), 'button not translated: ' + r.txt)
+    assert(!/[\u0590-\u05FF]/.test(r.txt), 'Hebrew left on the button: ' + r.txt)
+    assert(/26,\s*123,\s*168|rgb\(26/.test(r.bg), 'the button did not follow the theme: ' + r.bg)
+    await page.evaluate(() => { localStorage.setItem('fieldy_ui_lang', 'he'); applyTheme('original') })
+  })
+
   section('Themes — a full reskin, not just the accent')
   await check('every theme declares the same tokens, so none leaks the previous palette', async () => {
     const r = await page.evaluate(() => {

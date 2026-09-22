@@ -1246,6 +1246,8 @@ const TRANSLATIONS = {
   home_braindump_placeholder: {he:'מה רץ לך בראש? תכתוב כאן ותשחרר...', en:"What's on your mind? Write it here and let go..."},
   home_braindump_save: {he:'שמור ופנה מקום', en:'Save and clear space'},
   home_braindump_saved: {he:'נשמר', en:'Saved'},
+  rn_mark_done: {he:'סמן כבוצע', en:'Mark as done'},
+  undo_task_done: {he:'המשימה סומנה כבוצעה', en:'Task marked done'},
   // Quick calm (60s breathing break, overwhelmed/scattered only)
   qc_button: {he:'ויסות מהיר · 60 שניות', en:'Quick calm · 60 seconds'},
   qc_title: {he:'ויסות מהיר', en:'Quick calm'},
@@ -2348,6 +2350,25 @@ function openTaskFromRightNow(id) {
 }
 function openSiteFromRightNow(name) { siteFilter = 'all'; navigateTo('sites') }
 function toggleRightNowExpanded() { rightNowExpanded = !rightNowExpanded; renderCurrentScreen() }
+// "Mark as done" straight off the focus card. toggleTask() already owns the
+// real work (streak, sound, haptics, the completion log), so this only adds
+// what the home screen needs on top: once the task is done it drops out of the
+// ranking and the card advances to the next thing — meaning the checkbox on
+// the tasks screen is no longer within reach to undo a mis-tap. Hence the same
+// undo bubble a delete gets. The streak is snapshotted because toggleTask()
+// only ever increments it (once a day), so un-toggling would otherwise leave a
+// day credited that was taken back.
+function completeFromFocus(id, e) {
+  if(e) e.stopPropagation()
+  const t = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].find(x => x.id === id)
+  if(!t || t.done) return
+  const streakBefore = state.streak, dateBefore = state.lastStreakDate
+  toggleTask(id)
+  offerUndo(tr('undo_task_done'), function() {
+    toggleTask(id)
+    setState({streak: streakBefore, lastStreakDate: dateBefore})
+  })
+}
 // Small banner explaining that the current mood is limiting what's shown,
 // with the escape hatch. Shared by the home list and the tasks screen.
 function moodLimitBarHtml(mood, hidden, style) {
@@ -2370,12 +2391,18 @@ function rightNowHtml(mood) {
       <div style="font-size:14px;font-weight:600;color:var(--t1);line-height:1.4">${it.icon ? '<span style="color:'+it.color+'">'+icon(it.icon)+'</span> ' : ''}${esc(it.title)}</div>
       ${it.sub ? `<div style="font-size:12px;color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
     </div>`
-    return `<div ${wrap};display:flex;align-items:center;gap:12px">
-      ${it.icon ? iconBadge(it.icon, it.color) : ''}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4">${esc(it.title)}</div>
-        ${it.sub ? `<div style="font-size:13px;color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
+    // Only a task can be "done" — a focus line, a stuck site or a calendar event
+    // has no completed state, so they keep the plain card.
+    const done = it.kind === 'task' ? `<button onclick="completeFromFocus(${jsArg(it.id)}, event)" style="width:100%;margin-top:12px;padding:11px;border-radius:var(--radius-lg);border:none;background:linear-gradient(135deg,var(--cta1),var(--cta2));color:var(--surface);font-size:var(--fs-base);font-weight:700;cursor:pointer">${icon('check')} ${tr('rn_mark_done')}</button>` : ''
+    return `<div ${wrap}">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${it.icon ? iconBadge(it.icon, it.color) : ''}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:16px;font-weight:700;color:var(--t1);line-height:1.4">${esc(it.title)}</div>
+          ${it.sub ? `<div style="font-size:13px;color:var(--t3);margin-top:4px">${it.sub}</div>` : ''}
+        </div>
       </div>
+      ${done}
     </div>`
   }
   return `<div style="font-size:var(--fs-base);color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">${icon('target')} ${tr('rn_title')}</div>
