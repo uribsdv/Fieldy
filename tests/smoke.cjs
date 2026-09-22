@@ -1558,6 +1558,36 @@ async function main() {
     })
     assert(!r.length, r.join('\n      '))
   })
+  await check('the "resolved" tag is readable, and its tint did not change to get there', async () => {
+    // --green-light is the vivid mint the chip is tinted with; it sat at ~1.6:1 as text
+    // on its own tint. The fix adds --green-ink rather than darkening the mint, so the
+    // chip looks the same and only the lettering moved.
+    const r = await page.evaluate(() => {
+      const L = rgb => { const f = x => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]) }
+      const ct = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+      const out = []
+      Object.keys(THEMES).forEach(n => {
+        applyTheme(n)
+        const el = document.createElement('span'); el.className = 'tag-status-resolved'
+        el.textContent = 'x'; document.body.appendChild(el)
+        const cs = getComputedStyle(el)
+        const bg = (cs.backgroundColor.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
+        const a2 = parseFloat((cs.backgroundColor.match(/[\d.]+/g) || [])[3] || '1')
+        const flat = bg.map(c => Math.round(c * a2 + 255 * (1 - a2)))
+        const fg = (cs.color.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
+        el.remove()
+        out.push({ theme: n, ratio: ct(fg, flat), tint: flat, fg })
+      })
+      return out
+    })
+    for (const v of r) {
+      assert(v.ratio >= 4.5, v.theme + ': "resolved" tag text is only ' + v.ratio.toFixed(2) + ':1 on its own tint')
+      // the tint must still be a pale one — darkening it would have changed the chip's look
+      assert(Math.min(...v.tint) > 200, v.theme + ': the chip tint got dark (' + v.tint.join(',') + ') — the fix was supposed to leave it alone')
+    }
+    await page.evaluate(() => applyTheme('original'))
+  })
   await check('a tag keeps its tint and its text in the same family', async () => {
     // .tag-person and .tag-context colour their text from a token but used to take their
     // background from a frozen rgba(), so theming the text alone gave plum-on-violet.
@@ -1569,11 +1599,24 @@ async function main() {
           const v = { bg: cs.backgroundColor, fg: cs.color }; el.remove(); return v }
         return { person: probe('tag-person'), context: probe('tag-context'), resolved: probe('tag-status-resolved') }
       }, th)
+      // hue distance, not "which channel is biggest" — a teal with G=123 B=126 flips
+      // that heuristic on rounding while being plainly the same colour family
+      const hue = rgb => {
+        const f = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+        const r2 = f(rgb[0]), g2 = f(rgb[1]), b2 = f(rgb[2])
+        const l = Math.cbrt(0.4122214708 * r2 + 0.5363325363 * g2 + 0.0514459929 * b2)
+        const m = Math.cbrt(0.2119034982 * r2 + 0.6806995451 * g2 + 0.1073969566 * b2)
+        const s2 = Math.cbrt(0.0883024619 * r2 + 0.2817188376 * g2 + 0.6299787005 * b2)
+        const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s2
+        const B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s2
+        return (Math.atan2(B, A) * 180 / Math.PI + 360) % 360
+      }
       for (const [name, v] of Object.entries(r)) {
         const bg = (v.bg.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
         const fg = (v.fg.match(/[\d.]+/g) || []).slice(0, 3).map(Number)
-        const dom = a => a.indexOf(Math.max(...a))
-        assert(dom(bg) === dom(fg), th + ': .tag-' + name + ' tint ' + v.bg + ' and text ' + v.fg + ' are different colour families')
+        const d = Math.abs(hue(bg) - hue(fg)) % 360
+        const gap = Math.min(d, 360 - d)
+        assert(gap <= 60, th + ': .tag-' + name + ' tint ' + v.bg + ' and text ' + v.fg + ' are ' + gap.toFixed(0) + '° apart — different colour families')
       }
     }
     await page.evaluate(() => applyTheme('original'))

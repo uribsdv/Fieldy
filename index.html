@@ -36,7 +36,7 @@
   --surface:#ffffff;--surface-2:#f0e7cf;--surface-3:#fdf9ee;--surface-input:#fffdf6;--accent-soft:#fdf1da;--accent-line:#f0d9a3;--gold-deep:#a8711a;--t5:#e3d9bd;
   /* large-fill colours, themed (see THEMES): stat tiles, the primary CTA, the progress track */
   --tile-a1:#a46908;--tile-a2:#a56108;--tile-a-label:#fde8c4;--tile-b1:#18826f;--tile-b2:#147263;--tile-b-label:#c8ebe3;--tile-c1:#735bac;--tile-c2:#5f4792;--tile-c-label:#dfd3f5;
-  --green-rgb:2,134,113;--green-light-rgb:74,222,128;--purple-rgb:107,70,193;
+  --green-rgb:2,134,113;--green-light-rgb:74,222,128;--purple-rgb:107,70,193;--green-ink:#007e69;
   --cta1:#a0690d;--cta2:#956d0b;--progress-track:#eee3c9;--accent-rgb:184,121,15;
   /* status / meaning colours (fixed across themes — they carry meaning) */
   --red:#ef4444;--red-dark:#c0392b;--red-soft:#fdeaea;--orange:#e8940c;--amber:#f59e0b;--amber-line:#f5c877;--green:#028671;--green-light:#4ade80;--purple:#6b46c1;--stuck:#b84600;--stuck-soft:#fdece0;--blue:#3d5a80;--blue-soft:#eef2f7;--blue-line:#cdd9e8;
@@ -87,10 +87,10 @@ textarea,select,input{font-family:inherit}
 .tag-time{background:var(--accent-soft);color:var(--gold)}
 .tag-red{background:#ef444422;color:var(--red);font-weight:600}
 .tag-orange{background:#f59e0b22;color:var(--amber);font-weight:600}
-.tag-green{background:rgba(var(--green-light-rgb),.13);color:var(--green-light);font-weight:600}
+.tag-green{background:rgba(var(--green-light-rgb),.13);color:var(--green-ink);font-weight:600}
 .tag-status-open{background:#ef444422;color:var(--red);font-weight:600}
 .tag-status-pending{background:#f59e0b22;color:var(--amber);font-weight:600}
-.tag-status-resolved{background:rgba(var(--green-light-rgb),.13);color:var(--green-light);font-weight:600}
+.tag-status-resolved{background:rgba(var(--green-light-rgb),.13);color:var(--green-ink);font-weight:600}
 /* Checkbox */
 .cb{width:26px;height:26px;border-radius:var(--radius-sm);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:#fff;transition:all 0.15s;border:2px solid}
 /* Progress */
@@ -1359,6 +1359,11 @@ function setUiLang(lang) {
 // the root element, and a key one theme defines but another omits would stay
 // stuck on the previous theme's value. A smoke test enforces that.
 //
+// --green-light is the vivid mint that tints the "resolved" chip and colours its
+// status dot; --green-ink is the same family dark enough to READ on that tint
+// (the mint itself sat at 1.6:1). Two tokens because one value cannot be both a
+// pale background and legible text on itself.
+//
 // What does NOT move: --red and --stuck. A real alarm has to be recognisable
 // the instant it appears, and re-learning "which red means late" per theme is
 // exactly the load this app exists to remove. The non-alarm status colours DO
@@ -1382,7 +1387,7 @@ const THEMES = {
     '--accent-soft':'#fdf1da', '--accent-line':'#f0d9a3',
     '--t1':'#211d17', '--t2':'#6b6255', '--t3':'#948a7a', '--t4':'#b0a68f', '--t5':'#e3d9bd',
     '--line':'rgba(43,38,32,.09)', '--border':'rgba(43,38,32,.14)',
-    '--green':'#028671', '--green-rgb':'2,134,113', '--green-light':'#4ade80', '--green-light-rgb':'74,222,128',
+    '--green':'#028671', '--green-rgb':'2,134,113', '--green-light':'#4ade80', '--green-light-rgb':'74,222,128', '--green-ink':'#007e69',
     '--purple':'#6b46c1', '--purple-rgb':'107,70,193',
     '--blue':'#3d5a80', '--blue-soft':'#eef2f7', '--blue-line':'#cdd9e8',
     '--tile-a1':'#a46908', '--tile-a2':'#a56108', '--tile-a-label':'#fde8c4',
@@ -1396,7 +1401,7 @@ const THEMES = {
     '--accent-soft':'#e1f9ea', '--accent-line':'#b3ebc8',
     '--t1':'#10261d', '--t2':'#567366', '--t3':'#7d9188', '--t4':'#94aea2', '--t5':'#c3e2d3',
     '--line':'rgba(20,61,43,.10)', '--border':'rgba(20,61,43,.16)',
-    '--green':'#008386', '--green-rgb':'0,131,134', '--green-light':'#00e2b7', '--green-light-rgb':'0,226,183',
+    '--green':'#008386', '--green-rgb':'0,131,134', '--green-light':'#00e2b7', '--green-light-rgb':'0,226,183', '--green-ink':'#007b7e',
     '--purple':'#8e4771', '--purple-rgb':'142,71,113',
     '--blue':'#2f6f9c', '--blue-soft':'#e9f2f8', '--blue-line':'#c3daea',
     '--tile-a1':'#6b4a2a', '--tile-a2':'#5c3f23', '--tile-a-label':'#ecdcc9',
@@ -1410,7 +1415,7 @@ const THEMES = {
     '--accent-soft':'#def7ff', '--accent-line':'#abe4ff',
     '--t1':'#102b3f', '--t2':'#5c7a8e', '--t3':'#7e8e9a', '--t4':'#95aabb', '--t5':'#c4ddf2',
     '--line':'rgba(26,123,168,.12)', '--border':'rgba(26,123,168,.18)',
-    '--green':'#1a7f45', '--green-rgb':'26,127,69', '--green-light':'#00e094', '--green-light-rgb':'0,224,148',
+    '--green':'#1a7f45', '--green-rgb':'26,127,69', '--green-light':'#00e094', '--green-light-rgb':'0,224,148', '--green-ink':'#1a7f45',
     '--purple':'#7a55a3', '--purple-rgb':'122,85,163',
     '--blue':'#4a63b0', '--blue-soft':'#eef0fa', '--blue-line':'#ccd3ee',
     '--tile-a1':'#0d4e72', '--tile-a2':'#0b4160', '--tile-a-label':'#c5e4f7',
