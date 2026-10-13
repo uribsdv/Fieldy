@@ -1248,6 +1248,37 @@ const TRANSLATIONS = {
   home_braindump_placeholder: {he:'מה רץ לך בראש? תכתוב כאן ותשחרר...', en:"What's on your mind? Write it here and let go..."},
   home_braindump_save: {he:'שמור ופנה מקום', en:'Save and clear space'},
   home_braindump_saved: {he:'נשמר', en:'Saved'},
+  // Analysis preview (approve before anything is written)
+  prev_title: {he:'לאישור לפני הוספה', en:'Review before adding'},
+  prev_intro: {he:'שום דבר עוד לא נשמר. בטל סימון של כל מה שלא מדויק, ואז אשר.', en:'Nothing has been saved yet. Untick anything that is wrong, then confirm.'},
+  prev_group_new: {he:'חדש — ייווצר', en:'New — will be created'},
+  prev_group_update: {he:'יתעדכן — כבר קיים', en:'Update — already exists'},
+  prev_group_skip: {he:'דילוג — נראה כפול', en:'Skip — looks like a duplicate'},
+  prev_count: {he:'{n} פריטים', en:'{n} items'},
+  prev_all: {he:'סמן הכל', en:'Select all'},
+  prev_none: {he:'נקה הכל', en:'Clear all'},
+  prev_confirm: {he:'אשר {n}', en:'Confirm {n}'},
+  prev_cancel: {he:'ביטול', en:'Cancel'},
+  prev_nothing: {he:'אין מה להוסיף מההודעה הזו.', en:'Nothing to add from this message.'},
+  prev_same_as: {he:'כבר קיימת משימה דומה: "{t}"', en:'A similar task already exists: "{t}"'},
+  prev_already_same: {he:'קיים, ואין מה לשנות', en:'Exists, nothing to change'},
+  prev_already_in_calendar: {he:'כבר בלוח באותו תאריך', en:'Already on the calendar that day'},
+  prev_many_matches: {he:'{n} אתרים בשם דומה ({list}) — לא ניחשתי', en:'{n} similar site names ({list}) — not guessing'},
+  prev_dir_match: {he:'מתאים לרשומה בספרייה: {n}', en:'Matches a directory entry: {n}'},
+  prev_needs_choice: {he:'דורש בחירה', en:'Needs a choice'},
+  prev_empty: {he:'(ריק)', en:'(empty)'},
+  field_issue: {he:'תקלה', en:'Issue'},
+  field_status: {he:'סטטוס', en:'Status'},
+  field_contractor: {he:'קבלן', en:'Contractor'},
+  field_province: {he:'מחוז', en:'Province'},
+  field_location: {he:'מיקום', en:'Location'},
+  field_mondayLink: {he:'קישור מונדיי', en:'Monday link'},
+  field_year: {he:'שנה', en:'Year'},
+  field_remo: {he:'REMO', en:'REMO'},
+  field_role: {he:'תפקיד', en:'Role'},
+  field_company: {he:'חברה', en:'Company'},
+  field_pending: {he:'ממתין ל', en:'Waiting on'},
+  field_focus: {he:'מוקד היום', en:"Today's focus"},
   rn_mark_done: {he:'סמן כבוצע', en:'Mark as done'},
   undo_task_done: {he:'המשימה סומנה כבוצעה', en:'Task marked done'},
   // Quick calm (60s breathing break, overwhelmed/scattered only)
@@ -1531,6 +1562,10 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 function navigateTo(screen, ctx=null) {
   if(ctx) actionCtx = ctx
   if(medInterval && screen !== 'tao') { stopMeditation(false) }
+  // An un-approved analysis is abandoned on leaving the screen. Nothing was
+  // written, so there is nothing to undo — and coming back days later to a
+  // stale preview of an old paste would be worse than starting again.
+  if(previewPlan && screen !== 'input') previewPlan = null
 
   // Hide all screens
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'))
@@ -2797,8 +2832,73 @@ function renderHome() {
 }
 
 // ── INPUT ────────────────────────────────────────
+const PREVIEW_GROUPS = [
+  {id: 'new',    key: 'prev-new',    icon: 'plus',          color: 'var(--green)',  label: 'prev_group_new',    openByDefault: true},
+  {id: 'update', key: 'prev-update', icon: 'refresh',       color: 'var(--amber)',  label: 'prev_group_update', openByDefault: false},
+  {id: 'skip',   key: 'prev-skip',   icon: 'alert-triangle',color: 'var(--t3)',     label: 'prev_group_skip',   openByDefault: false}
+]
+const PREVIEW_KIND_ICON = {task: 'clipboard', site: 'map-pin', person: 'users', event: 'calendar', focus: 'target'}
+
+function previewRowHtml(it) {
+  const diffs = (it.diffs || []).map(d =>
+    `<div style="font-size:var(--fs-sm);color:var(--t2);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">
+       <span style="color:var(--t3)">${esc(tr('field_' + d.field) === 'field_' + d.field ? d.field : tr('field_' + d.field))}:</span>
+       <span style="text-decoration:line-through;color:var(--t3)">${esc(d.from) || tr('prev_empty')}</span>
+       <span style="color:var(--t3)">←</span>
+       <span style="color:var(--t1);font-weight:600">${esc(d.to)}</span>
+     </div>`).join('')
+  return `<label class="prev-row" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer">
+    <input type="checkbox" ${it.checked ? 'checked' : ''} data-prev="${esc(it.key)}"
+      onchange="togglePreviewItem(${jsArg(it.key)})"
+      style="margin-top:3px;width:18px;height:18px;accent-color:var(--gold);flex:none;cursor:pointer">
+    <span style="flex:1;min-width:0">
+      <span style="display:flex;align-items:center;gap:6px;font-size:var(--fs-base);font-weight:600;color:var(--t1);line-height:1.4">
+        <span style="color:var(--t3);flex:none">${icon(PREVIEW_KIND_ICON[it.kind] || 'circle')}</span>
+        <span>${esc(it.title)}</span>
+        ${it.needsChoice ? `<span style="flex:none;font-size:var(--fs-2xs);background:rgba(var(--accent-rgb),.14);color:var(--gold);border-radius:var(--radius-pill);padding:2px 8px;font-weight:700">${tr('prev_needs_choice')}</span>` : ''}
+      </span>
+      ${it.sub ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${esc(it.sub)}</div>` : ''}
+      ${diffs}
+      ${it.because ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:3px">${esc(it.because)}</div>` : ''}
+    </span>
+  </label>`
+}
+function previewHtml() {
+  const plan = previewPlan
+  const chosen = plan.items.filter(i => i.checked).length
+  const groups = PREVIEW_GROUPS.map(g => {
+    const rows = plan.items.filter(i => i.group === g.id)
+    if(!rows.length) return ''
+    // "new" always open — it is the thing to act on. The other two stay folded
+    // unless he opens them, same rule the home screen follows.
+    if(g.openByDefault && accordionOpen[g.key] === undefined) accordionOpen[g.key] = true
+    const allOn = rows.every(r => r.checked)
+    return creamPanelHtml(accordionHtml(g.key,
+      {icon: g.icon, color: g.color, title: tr(g.label), hint: tr('prev_count').replace('{n}', rows.length)},
+      function() {
+        return `<div style="display:flex;justify-content:flex-end;margin-bottom:-4px">
+            <button onclick="event.stopPropagation();setPreviewGroup(${jsArg(g.id)}, ${allOn ? 'false' : 'true'})"
+              style="font-size:var(--fs-sm);color:var(--gold);font-weight:600;padding:4px 2px">
+              ${allOn ? tr('prev_none') : tr('prev_all')}</button>
+          </div>` + rows.map(previewRowHtml).join('')
+      }), 'padding:12px 16px;margin-bottom:12px')
+  }).join('')
+  return `<div style="padding:48px 16px 24px">
+    ${backHeaderHtml(tr('prev_title'))}
+    <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:14px;line-height:1.6">${tr('prev_intro')}</div>
+    ${groups || `<div class="card" style="text-align:center;color:var(--t3);padding:20px">${tr('prev_nothing')}</div>`}
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button onclick="cancelPreview()" class="btn-secondary" style="flex:1">${tr('prev_cancel')}</button>
+      <button onclick="confirmPreview()" class="btn-primary" style="flex:2;background:linear-gradient(135deg,var(--cta1),var(--cta2))"
+        ${chosen ? '' : 'disabled style="flex:2;opacity:.5;background:var(--t4)"'}>
+        ${icon('check')} ${tr('prev_confirm').replace('{n}', chosen)}</button>
+    </div>
+  </div>`
+}
+
 function renderInput() {
   const el = document.getElementById('screen-input')
+  if(previewPlan) { el.innerHTML = previewHtml(); return }
   el.innerHTML = `
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml('הוסף הודעות')}
@@ -2811,6 +2911,163 @@ function renderInput() {
       <button id="input-btn" class="btn-primary" onclick="doAnalyze()">${icon('zap')} ארגן את היום</button>
     </div>
   `
+}
+
+// ── ANALYSIS PREVIEW ─────────────────────────────
+// Everything the AI returns used to go straight into state in one setState().
+// When it guessed a site wrong, invented a task or re-created something that was
+// already there, the only fix was to go and clean it up by hand. buildPreview()
+// turns the same parsed JSON — no extra AI call, no change to the prompt or its
+// shape — into a plan the user approves first. It is a pure function: it reads
+// state but never writes, so "cancel" is genuinely free.
+//
+// Three groups, decided per item:
+//   new     — nothing like it exists. Checked by default.
+//   update  — it exists and the AI brought a different value. Shown as old -> new
+//             and UNCHECKED, because silently replacing something Uri typed is
+//             the failure this whole screen exists to prevent.
+//   skip    — looks like something already there. Unchecked.
+// A site whose name matches several directory entries (same place, different
+// years) is never guessed at: it is flagged and left for him to decide.
+let previewPlan = null
+
+// "Duplicate" for a task means the wording is the same or near enough — that is
+// the case that actually happens, pasting a WhatsApp thread that overlaps one
+// pasted earlier. Dice coefficient over character bigrams, which tolerates a
+// changed word or ending without matching two genuinely different asks.
+function normForMatch(v) {
+  return String(v == null ? '' : v).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
+}
+function textSimilarity(a, b) {
+  const x = normForMatch(a), y = normForMatch(b)
+  if(!x || !y) return 0
+  if(x === y) return 1
+  if(x.length < 2 || y.length < 2) return 0
+  const grams = str => { const m = new Map()
+    for(let i = 0; i < str.length - 1; i++) { const g = str.slice(i, i + 2); m.set(g, (m.get(g) || 0) + 1) }
+    return m }
+  const ga = grams(x), gb = grams(y)
+  let shared = 0
+  ga.forEach((n, g) => { if(gb.has(g)) shared += Math.min(n, gb.get(g)) })
+  return (2 * shared) / ((x.length - 1) + (y.length - 1))
+}
+const DUP_THRESHOLD = 0.85
+function openTasks() {
+  return ['now','today','later'].reduce((all, b) =>
+    all.concat((state.tasks[b] || []).filter(t => !t.done).map(t => ({...t, bucket: b}))), [])
+}
+function findDuplicateTask(text) {
+  let best = null
+  openTasks().forEach(t => {
+    const sim = textSimilarity(text, t.text)
+    if(sim >= DUP_THRESHOLD && (!best || sim > best.sim)) best = {task: t, sim}
+  })
+  return best
+}
+// Which incoming fields actually differ from what is already stored. An empty
+// incoming value is never a difference — it must not be able to erase anything.
+function fieldDiffs(existing, incoming, skipKeys) {
+  const out = []
+  Object.keys(incoming || {}).forEach(k => {
+    if((skipKeys || []).indexOf(k) >= 0) return
+    const nv = incoming[k]
+    if(nv === null || nv === undefined || nv === '') return
+    const ov = existing ? existing[k] : undefined
+    if(String(ov == null ? '' : ov) !== String(nv)) out.push({field: k, from: ov == null ? '' : String(ov), to: String(nv)})
+  })
+  return out
+}
+function buildPreview(p, sourceText) {
+  const items = []
+  let n = 0
+  const add = o => { items.push({key: 'p' + (n++), checked: o.group === 'new', ...o}) }   // an explicit `checked` in o overrides the default
+
+  ;['now','today','later'].forEach(bucket => {
+    ;(p[bucket] || []).forEach(t => {
+      if(!t || !t.text) return
+      const dup = findDuplicateTask(t.text)
+      add({kind: 'task', bucket, payload: t, title: t.text,
+           sub: [t.site, t.assignee, t.time].filter(Boolean).join(' · '),
+           group: dup ? 'skip' : 'new',
+           because: dup ? tr('prev_same_as').replace('{t}', dup.task.text) : ''})
+    })
+  })
+
+  ;(p.sites || []).forEach(site => {
+    if(!site || !site.name) return
+    const existing = state.sites.find(x => x.name === site.name)
+    if(existing) {
+      const diffs = fieldDiffs(existing, site, ['name'])
+      add({kind: 'site', payload: site, title: site.name, diffs,
+           group: diffs.length ? 'update' : 'skip',
+           because: diffs.length ? '' : tr('prev_already_same')})
+      return
+    }
+    const dir = (typeof findInSiteDirectory === 'function') ? findInSiteDirectory(site.name) : []
+    if(dir.length > 1) {
+      // It belongs in "new" — it does not exist yet, and ticking it creates it
+      // under exactly the name the AI gave, touching no directory entry. What it
+      // must not be is ticked by default, because which of the matches he means
+      // is precisely what nobody here knows.
+      add({kind: 'site', payload: site, title: site.name, group: 'new', needsChoice: true, checked: false,
+           because: tr('prev_many_matches').replace('{n}', dir.length)
+                    .replace('{list}', dir.slice(0, 3).map(d => d.name + (d.year ? ' (' + d.year + ')' : '')).join(' · '))})
+      return
+    }
+    add({kind: 'site', payload: site, title: site.name, group: 'new',
+         because: dir.length === 1 ? tr('prev_dir_match').replace('{n}', dir[0].name) : ''})
+  })
+
+  ;(p.people || []).forEach(person => {
+    if(!person || !person.name) return
+    const existing = (state.people || []).find(x => x.name === person.name)
+    if(!existing) { add({kind: 'person', payload: person, title: person.name, group: 'new'}); return }
+    const diffs = fieldDiffs(existing, person, ['name'])
+    add({kind: 'person', payload: person, title: person.name, diffs,
+         group: diffs.length ? 'update' : 'skip',
+         because: diffs.length ? '' : tr('prev_already_same')})
+  })
+
+  ;(p.events || []).forEach(ev => {
+    if(!ev || !ev.title) return
+    const same = (state.events || []).find(e =>
+      normForMatch(e.title) === normForMatch(ev.title) && (e.date || '') === (ev.date || getToday()))
+    add({kind: 'event', payload: ev, title: ev.title,
+         sub: [ev.date || getToday(), ev.time].filter(Boolean).join(' · '),
+         group: same ? 'skip' : 'new',
+         because: same ? tr('prev_already_in_calendar') : ''})
+  })
+
+  if(p.focus && p.focus !== state.focus) {
+    add({kind: 'focus', payload: p.focus, title: p.focus,
+         group: state.focus ? 'update' : 'new',
+         diffs: state.focus ? [{field: 'focus', from: state.focus, to: p.focus}] : []})
+  }
+  return {items, raw: p, text: sourceText || ''}
+}
+
+function togglePreviewItem(key) {
+  if(!previewPlan) return
+  const it = previewPlan.items.find(x => x.key === key)
+  if(!it) return
+  it.checked = !it.checked
+  haptic('light')
+  renderInput()
+}
+function setPreviewGroup(group, on) {
+  if(!previewPlan) return
+  previewPlan.items.forEach(it => { if(it.group === group) it.checked = !!on })
+  haptic('light')
+  renderInput()
+}
+function cancelPreview() {
+  // nothing was written, so this only drops the plan and hands the text back
+  const txt = previewPlan ? previewPlan.text : ''
+  previewPlan = null
+  haptic('light')
+  renderInput()
+  const el = document.getElementById('input-text')
+  if(el) el.value = txt
 }
 
 async function doAnalyze() {
@@ -2828,43 +3085,11 @@ async function doAnalyze() {
     console.log('AI raw:', parsed.slice(0,500))
     const p = JSON.parse(parsed.replace(/```json|```/g,'').trim())
     console.log('Events from AI:', JSON.stringify(p.events))
-    const s = Date.now()
-    const tag = (arr,pfx) => (arr||[]).map((t,i)=>({...t,id:`${pfx}${s}${i}`,done:false}))
-    const existingSiteNames = new Set(state.sites.map(x=>x.name))
-    const newAiSites = (p.sites||[]).filter(x=>x.name && !existingSiteNames.has(x.name))
-    const taggedSites = (p.sites||[]).map(x => existingSiteNames.has(x.name) ? x : {...x, createdAt: new Date().toISOString()})
-    setState({
-      tasks:{now:[...state.tasks.now,...tag(p.now,'n')],today:[...state.tasks.today,...tag(p.today,'d')],later:[...state.tasks.later,...tag(p.later,'l')]},
-      sites: mergeSites(state.sites, taggedSites),
-      people: mergePeople(state.people, p.people||[]),
-      events: (function(){
-        var ts = Date.now(), td = getToday();
-        // events[] is only for genuinely calendar-worthy items (meetings,
-        // deadlines, appointments) per SYSTEM_PROMPT rules 2-3. It used to
-        // mirror EVERY task too — that meant deleting or finishing a task in
-        // the Tasks screen left a duplicate "ghost" entry behind on the
-        // calendar forever, since the two had no link back to each other.
-        var aiEvs = (p.events||[]).map(function(e,i){
-          return {id:'ev'+ts+i,title:e.title||'',date:e.date||td,time:e.time||'',
-                  note:e.note||'',recurring:e.recurring||'',notify:e.notify||'60',color:'var(--bamboo)',site:e.site||null};
-        });
-        var existing = state.events || [];
-        return [...existing,...aiEvs];
-      })(),
-      focus: p.focus || state.focus,
-      focusDate: p.focus ? getToday() : state.focusDate
-    })
-    newAiSites.forEach(x => logEvent('site_created', {name: x.name, contractor: x.contractor||null, status: x.status||'open'}))
-    if(p.moodGuess && MOOD_LIB[p.moodGuess]) logMood(p.moodGuess, 'auto')
-    if((p.events||[]).length > 0) {
-      var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(var(--accent-rgb),0.95);color:var(--surface);padding:10px 18px;border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:600;z-index:999;backdrop-filter:blur(8px)';
-      toast.innerHTML = icon('calendar') + ' ' + (p.events||[]).length + ' אירועים נוספו ללוח';
-      document.body.appendChild(toast);
-      setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},2500);
-    }
-    navigateTo('home')
-
+    // Nothing is written yet — the user approves the plan first.
+    previewPlan = buildPreview(p, text)
+    const skelDone = document.getElementById('input-skel'); if(skelDone) skelDone.style.display = 'none'
+    renderInput()
+    return
   } catch(e) {
     const skel2 = document.getElementById('input-skel'); if(skel2) skel2.style.display = 'none'
     err.textContent = 'שגיאה: ' + e.message
@@ -2873,6 +3098,57 @@ async function doAnalyze() {
     btn.style.background = 'linear-gradient(135deg,var(--gold),var(--gold2))'
     btn.style.color = '#fff'
   }
+}
+
+// Applies only what is ticked, in a single setState — so either the whole
+// approved set lands or nothing does. Anything unticked is simply dropped;
+// it was never written anywhere to begin with.
+function confirmPreview() {
+  if(!previewPlan) return
+  const on = previewPlan.items.filter(i => i.checked)
+  if(!on.length) { cancelPreview(); return }
+  const ts = Date.now(), today = getToday()
+  let seq = 0
+  const patch = {}
+
+  const byBucket = {now: [], today: [], later: []}
+  on.filter(i => i.kind === 'task').forEach(i => {
+    byBucket[i.bucket].push({...i.payload, id: 'p' + ts + (seq++), done: false})
+  })
+  if(byBucket.now.length || byBucket.today.length || byBucket.later.length) {
+    patch.tasks = {now: [...state.tasks.now, ...byBucket.now],
+                   today: [...state.tasks.today, ...byBucket.today],
+                   later: [...state.tasks.later, ...byBucket.later]}
+  }
+
+  const sites = on.filter(i => i.kind === 'site').map(i => i.payload)
+  if(sites.length) {
+    const known = new Set(state.sites.map(x => x.name))
+    patch.sites = mergeSites(state.sites, sites.map(x => known.has(x.name) ? x : {...x, createdAt: new Date().toISOString()}))
+  }
+  const people = on.filter(i => i.kind === 'person').map(i => i.payload)
+  if(people.length) patch.people = mergePeople(state.people || [], people)
+
+  const evs = on.filter(i => i.kind === 'event').map((i, k) => ({
+    id: 'ev' + ts + k, title: i.payload.title || '', date: i.payload.date || today,
+    time: i.payload.time || '', note: i.payload.note || '', recurring: i.payload.recurring || '',
+    notify: i.payload.notify || '60', color: 'var(--bamboo)', site: i.payload.site || null}))
+  if(evs.length) patch.events = [...(state.events || []), ...evs]
+
+  const focusItem = on.find(i => i.kind === 'focus')
+  if(focusItem) { patch.focus = focusItem.payload; patch.focusDate = today }
+
+  setState(patch)
+
+  sites.filter(x => !state.sites.some(e => e.name === x.name))
+    .forEach(x => logEvent('site_created', {name: x.name, contractor: x.contractor || null, status: x.status || 'open'}))
+  const p2 = previewPlan.raw
+  if(p2 && p2.moodGuess && MOOD_LIB[p2.moodGuess]) logMood(p2.moodGuess, 'auto')
+  logEvent('analysis_applied', {applied: on.length, offered: previewPlan.items.length})
+
+  previewPlan = null
+  playFx('add'); haptic('success')
+  navigateTo('home')
 }
 
 // ── TASKS ────────────────────────────────────────
@@ -4692,7 +4968,15 @@ function mergeSites(ex, inc) {
   return Object.values(m)
 }
 function mergePeople(ex, inc) {
-  const m={}; ex.forEach(p=>m[p.name]=p); inc.forEach(p=>m[p.name]={...(m[p.name]||{}),...p}); return Object.values(m)
+  // Same empty-field guard mergeSites has. Without it an existing contact loses
+  // its role/company the moment the AI returns the template's blank defaults.
+  const m={}; ex.forEach(p=>m[p.name]=p)
+  inc.forEach(p=>{
+    const prev = m[p.name]||{}, clean = {}
+    Object.keys(p).forEach(k=>{ if(p[k]!==null && p[k]!=='' && p[k]!==undefined) clean[k]=p[k] })
+    m[p.name] = {...prev, ...clean}
+  })
+  return Object.values(m)
 }
 
 // ═══ CALENDAR ═══
