@@ -578,6 +578,27 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    for a reply") take a pale gold that reads there; the deep gold token is for
    light surfaces */
 [data-theme="nachal"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:#F3D78E!important;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+/* ── Nachal · the forest behind Sites, Tasks, People and Calendar ──
+   The first version of this theme had these photographs at 20–25% under a
+   mask that showed them only in a band mid-screen; v2 replaced them with the
+   plain gradient. They come back here full-screen, fixed behind the content,
+   under a dark green veil so the white headings written on the page and the
+   translucent cards above them stay readable. Home and the Tao keep their own
+   rooms. */
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar){isolation:isolate}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{
+  content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 26% at 85% 18%,rgba(196,232,206,.12),rgba(196,232,206,0) 70%),
+    radial-gradient(54% 22% at 10% 62%,rgba(168,214,196,.10),rgba(168,214,196,0) 70%),
+    linear-gradient(var(--nh-veil-extra,transparent),var(--nh-veil-extra,transparent)),
+    linear-gradient(180deg,rgba(16,38,30,.58) 0%,rgba(14,34,27,.60) 55%,rgba(12,28,22,.66) 100%),
+    var(--nh-forest,none) center top/cover no-repeat,
+    #2A3F3E}
+[data-theme="nachal"] #screen-sites{--nh-forest:url('assets/backgrounds/bg-fern-mist.webp')}
+[data-theme="nachal"] #screen-tasks{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
+[data-theme="nachal"] #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(12,30,24,.16)}
+[data-theme="nachal"] #screen-calendar{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
 /* ── Nachal · soft surfaces ──
    Outdoors the near-white cards glared. On Sites, Tasks, People and Calendar
    every light surface (cards, the sticky header, the search field, chips, the
@@ -624,6 +645,7 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 [data-theme="nachal"] .site-tool-btn{background:rgba(var(--nh-soft-rgb),.82)!important}
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card button[style*="background:var(--blue-soft)"]{background:var(--nh-soft-ctl)!important}
 [data-theme="nachal"] .site-selbar{background:var(--nh-soft-strong)}
+[data-theme="nachal"] #screen-people button[data-act="clear"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.3)!important}
 /* the region and route sheets: frosted, the same mist */
 [data-theme="nachal"] .modal:has(.region-sheet),
 [data-theme="nachal"] .modal:has(.route-list),
