@@ -1474,6 +1474,146 @@ async function main() {
     await page.evaluate(() => { localStorage.setItem('fieldy_ui_lang', 'he'); applyTheme('original') })
   })
 
+  section('Analysis preview — approve before anything is written')
+  {
+    const seedForPreview = () => page.evaluate(() => {
+      setState({ tasks: { now: [{ id: 'x1', text: 'להתקשר לקבלן בדולרס', done: false, color: 'red' }], today: [], later: [] },
+        sites: [{ name: 'Claveria', status: 'open', issue: 'משאבה תקועה', contractor: 'asc' }],
+        people: [{ name: 'Gio', role: 'engineer', company: 'SPIS' }],
+        events: [], focus: 'לסגור את דוח הרבעון' })
+    })
+    const AI = {
+      now: [{ text: 'להתקשר לקבלן בדולרס', site: null }, { text: 'לאסוף מנוע מטוגגאראו', site: 'Claveria' }],
+      today: [], later: [],
+      sites: [{ name: 'Claveria', status: 'pending', issue: '', contractor: 'asc' }, { name: 'Upi 3', status: 'open', province: 'Maguindanao' }],
+      people: [{ name: 'Gio', role: 'engineer', company: '', pending: 'דוח באר' }, { name: 'Dave', role: 'other', company: '' }],
+      events: [{ title: 'NIA meeting', date: '2026-10-20', time: '09:00' }],
+      focus: 'לבדוק את San Lorenzo', moodGuess: 'focused'
+    }
+    await check('it sorts the result into new / update / skip, and nothing is checked that would overwrite', async () => {
+      await page.evaluate(s2 => { localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s2)) }, seededState())
+      await page.goto(BASE + '?pv=1', { waitUntil: 'load' })
+      await seedForPreview()
+      const r = await page.evaluate(ai => {
+        previewPlan = buildPreview(ai, 'raw')
+        return previewPlan.items.map(i => ({ kind: i.kind, title: i.title, group: i.group, checked: i.checked,
+          diffs: (i.diffs || []).map(d => d.field + ':' + d.from + '>' + d.to) }))
+      }, AI)
+      const by = k => r.filter(i => i.kind === k)
+      const dup = by('task').find(i => /קבלן בדולרס/.test(i.title))
+      assert(dup && dup.group === 'skip' && !dup.checked, 'the re-pasted task was not flagged as a duplicate: ' + JSON.stringify(dup))
+      const fresh = by('task').find(i => /מנוע/.test(i.title))
+      assert(fresh && fresh.group === 'new' && fresh.checked, 'a genuinely new task was not offered: ' + JSON.stringify(fresh))
+      const known = by('site').find(i => i.title === 'Claveria')
+      assert(known && known.group === 'update', 'an existing site was not shown as an update: ' + JSON.stringify(known))
+      assert(!known.checked, 'an update to an existing site was ticked by default — that is the overwrite this screen prevents')
+      assert(known.diffs.join() === 'status:open>pending',
+        'the diff is wrong; an empty incoming field must not count as a change: ' + known.diffs.join())
+      const newSite = by('site').find(i => i.title === 'Upi 3')
+      assert(newSite && newSite.group === 'new' && newSite.checked, 'a new site was not offered: ' + JSON.stringify(newSite))
+      const gio = by('person').find(i => i.title === 'Gio')
+      assert(gio.group === 'update' && !gio.checked && gio.diffs.join() === 'pending:>דוח באר',
+        'person diff wrong (company:"" must not count): ' + JSON.stringify(gio))
+      const focus = by('focus')[0]
+      assert(focus && focus.group === 'update' && !focus.checked, 'replacing the focus was not offered as an unticked update')
+      assert(focus.diffs[0] === 'focus:לסגור את דוח הרבעון>לבדוק את San Lorenzo', 'focus diff missing old value: ' + focus.diffs.join())
+    })
+    await check('building the plan touches nothing in state', async () => {
+      const after = await page.evaluate(() => ({ tasks: state.tasks.now.length, sites: state.sites.length,
+        people: state.people.length, events: (state.events || []).length, focus: state.focus,
+        stored: JSON.parse(localStorage.getItem('fieldy_v2')).sites.length }))
+      assert(after.tasks === 1 && after.sites === 1 && after.people === 1 && after.events === 0,
+        'the preview wrote to state before approval: ' + JSON.stringify(after))
+      assert(after.focus === 'לסגור את דוח הרבעון', 'the focus was replaced before approval')
+      assert(after.stored === 1, 'the preview reached localStorage before approval')
+    })
+    await check('cancel leaves state untouched and hands the pasted text back', async () => {
+      await page.evaluate(() => { navigateTo('input'); renderInput() })
+      await page.waitForTimeout(150)
+      await page.evaluate(() => { previewPlan = buildPreview({ now: [{ text: 'משהו חדש לגמרי' }] }, 'the original paste'); renderInput() })
+      await page.waitForTimeout(150)
+      const before = await page.evaluate(() => JSON.stringify(state))
+      await page.evaluate(() => cancelPreview())
+      await page.waitForTimeout(200)
+      const r = await page.evaluate(() => ({ same: JSON.stringify(state), plan: previewPlan,
+        box: (document.getElementById('input-text') || {}).value }))
+      assert(r.same === before, 'cancel changed state')
+      assert(r.plan === null, 'cancel left the plan hanging around')
+      assert(r.box === 'the original paste', 'cancel did not restore the pasted text: ' + JSON.stringify(r.box))
+    })
+    await check('confirm applies only what is ticked', async () => {
+      await seedForPreview()
+      const r = await page.evaluate(ai => {
+        previewPlan = buildPreview(ai, 'raw')
+        // approve the new site and the new person, nothing else
+        previewPlan.items.forEach(i => { i.checked = (i.title === 'Upi 3' || i.title === 'Dave') })
+        confirmPreview()
+        return { sites: state.sites.map(s2 => s2.name).sort(), people: state.people.map(p2 => p2.name).sort(),
+                 tasks: state.tasks.now.length, events: (state.events || []).length, focus: state.focus,
+                 claveria: state.sites.find(s2 => s2.name === 'Claveria').status, plan: previewPlan }
+      }, AI)
+      assert(r.sites.join() === 'Claveria,Upi 3', 'wrong sites after confirm: ' + r.sites.join())
+      assert(r.people.join() === 'Dave,Gio', 'wrong people after confirm: ' + r.people.join())
+      assert(r.tasks === 1, 'an unticked task was created anyway')
+      assert(r.events === 0, 'an unticked event was created anyway')
+      assert(r.focus === 'לסגור את דוח הרבעון', 'an unticked focus change was applied anyway')
+      assert(r.claveria === 'open', 'an unticked site update was applied anyway — Claveria became ' + r.claveria)
+      assert(r.plan === null, 'the plan survived confirm')
+    })
+    await check('an existing field is never erased by an empty one coming back from the AI', async () => {
+      const r = await page.evaluate(() => {
+        setState({ people: [{ name: 'Gio', role: 'engineer', company: 'SPIS', pending: 'דוח' }] })
+        previewPlan = buildPreview({ people: [{ name: 'Gio', role: '', company: '', pending: 'דוח חדש' }] }, 'x')
+        previewPlan.items.forEach(i => { i.checked = true })
+        confirmPreview()
+        return state.people.find(p2 => p2.name === 'Gio')
+      })
+      assert(r.company === 'SPIS', 'company was wiped by an empty value: ' + JSON.stringify(r))
+      assert(r.role === 'engineer', 'role was wiped by an empty value: ' + JSON.stringify(r))
+      assert(r.pending === 'דוח חדש', 'the real change did not apply: ' + JSON.stringify(r))
+    })
+    await check('a site name matching several directory entries is flagged, not guessed', async () => {
+      const r = await page.evaluate(() => {
+        setState({ sites: [], siteDirectory: [
+          { name: 'San Lorenzo', year: '2024', contractor: 'asc' },
+          { name: 'San Lorenzo', year: '2026', contractor: '11-16' }] })
+        previewPlan = buildPreview({ sites: [{ name: 'San Lorenzo', status: 'open' }] }, 'x')
+        return previewPlan.items.find(i => i.kind === 'site')
+      })
+      assert(r.needsChoice, 'two directory matches were silently resolved: ' + JSON.stringify(r))
+      assert(!r.checked, 'an ambiguous site was ticked by default')
+      assert(r.group === 'new', 'an ambiguous site that does not exist yet was filed under "already exists": ' + r.group)
+      assert(/2024|2026/.test(r.because), 'the ambiguous row does not say what it matched: ' + r.because)
+    })
+    await check('leaving the screen abandons an unapproved plan', async () => {
+      await page.evaluate(() => { previewPlan = buildPreview({ now: [{ text: 'תלוי באוויר' }] }, 'x'); navigateTo('home') })
+      await page.waitForTimeout(200)
+      const r = await page.evaluate(() => ({ plan: previewPlan, tasks: state.tasks.now.some(t => t.text === 'תלוי באוויר') }))
+      assert(r.plan === null, 'the plan survived navigating away')
+      assert(!r.tasks, 'an abandoned plan still wrote a task')
+    })
+    await check('the preview screen renders, is translated, and its icons exist', async () => {
+      await page.evaluate(() => { localStorage.setItem('fieldy_ui_lang', 'en') })
+      await page.goto(BASE + '?pv=2', { waitUntil: 'load' })
+      await seedForPreview()
+      await page.evaluate(ai => { previewPlan = buildPreview(ai, 'raw'); navigateTo('input'); renderInput() }, AI)
+      await page.waitForTimeout(250)
+      const r = await page.evaluate(() => {
+        const el = document.getElementById('screen-input')
+        return { txt: el.textContent, boxes: el.querySelectorAll('input[type=checkbox][data-prev]').length,
+          ticked: el.querySelectorAll('input[type=checkbox][data-prev]:checked').length,
+          emptyIcons: Object.values(PREVIEW_KIND_ICON).filter(n => !icon(n)).concat(
+            PREVIEW_GROUPS.map(g => g.icon).filter(n => !icon(n))) }
+      })
+      assert(r.boxes > 0, 'the preview rendered no checkboxes')
+      assert(!r.emptyIcons.length, 'these preview icons do not exist: ' + r.emptyIcons.join(', '))
+      assert(/Review before adding|New —|Confirm/.test(r.txt), 'the preview is not translated: ' + r.txt.slice(0, 160))
+      assert(!/[\u0590-\u05FF]/.test(r.txt.replace(/להתקשר|לאסוף|דוח|לבדוק|לסגור|מנוע|מטוגגאראו|קבלן|בדולרס|הרבעון|באר|את|של/g, '')),
+        'Hebrew chrome left in the English preview: ' + r.txt.slice(0, 200))
+      await page.evaluate(() => { localStorage.setItem('fieldy_ui_lang', 'he'); previewPlan = null })
+    })
+  }
+
   section('Themes — a full reskin, not just the accent')
   await check('every theme declares the same tokens, so none leaks the previous palette', async () => {
     const r = await page.evaluate(() => {
@@ -1484,7 +1624,7 @@ async function main() {
       names.forEach(n => { const miss = [...all].filter(k => !(k in THEMES[n].tokens)); if (miss.length) missing[n] = miss })
       return { names, identical: new Set(sets).size === 1, count: all.size, missing }
     })
-    assert(r.names.length === 3, 'expected three themes, got ' + JSON.stringify(r.names))
+    assert(r.names.length >= 3, 'expected at least three themes, got ' + JSON.stringify(r.names))
     assert(r.identical, 'themes declare different token sets: ' + JSON.stringify(r.missing))
     assert(r.count > 25, 'a full theme should carry the whole palette, got ' + r.count + ' tokens')
   })
@@ -1739,7 +1879,7 @@ async function main() {
       assert(v.track.indexOf(v.rgb) >= 0, n + ': the ring track ' + v.track + ' is not built from this theme accent')
     }
     const vals = Object.values(r).map(v => v.ring)
-    assert(new Set(vals).size === 3, 'the ring colour repeats between themes: ' + vals.join(', '))
+    assert(new Set(vals).size === vals.length, 'the ring colour repeats between themes: ' + vals.join(', '))
     await page.evaluate(() => applyTheme('original'))
   })
   await check('no Tao colour is still hardcoded past the tokens', async () => {

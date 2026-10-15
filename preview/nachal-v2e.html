@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2e — ערפל עמוק, אבני עוגן</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* --- the four base colours, mapped onto the Nachal tokens they belong to --- */
+   --t1:#14241B;        /* was #002e2d — deepest, card headings */
+   --t2:#1A2F23;        /* was #2d6564 — body */
+   --t3:#2D4F38;        /* was #6b8c8a — hints */
+   --t4:#5C6B73;        /* was #7fa7a5 — slate, faintest chrome */
+   --green-ink:#1A2F23; /* was #426331 — tag text */
+   --gold-deep:#14241B; /* was #033a36 */
+   /* sage, and the darkened sage that actually paints UI shapes. #7FA58A over
+      the glass measures 2.3:1, under the 3:1 floor, so the shapes use the
+      darkened one and #7FA58A stays for the soft fills that carry no meaning. */
+   --sage:#7FA58A; --sage-rgb:127,165,138;
+   --sage-ink:#457058;
+
+   --card-a:.62;
+   --card:rgba(255,255,255,var(--card-a));
+   --card-line:rgba(255,255,255,.35);
+   --chrome:#f4fbf8;
+ }
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   :root{--card-a:.88}
+ }
+ @media (prefers-reduced-transparency:reduce){ :root{--card-a:.94} }
+
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#111c16;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ .phone{width:390px;height:844px;border-radius:34px;overflow:hidden;position:relative;
+        box-shadow:0 26px 70px rgba(0,0,0,.55)}
+ .bg{position:absolute;inset:0;z-index:0;
+     background:url('../assets/backgrounds/bg-water-ripple.webp') center/cover no-repeat}
+ /* deep mist over the whole photograph: richer green, less washed out */
+ .mist{position:absolute;inset:0;z-index:1;pointer-events:none;
+       background:linear-gradient(180deg, rgba(14,28,20,.45) 0%, rgba(14,28,20,.15) 50%, rgba(10,22,16,.6) 100%)}
+ /* the mist already carries most of the top; what is left is a short lift
+    under the greeting, masked to the right so the fern keeps its light */
+ .wash{position:absolute;left:0;right:0;top:0;height:300px;z-index:2;pointer-events:none;
+       background:linear-gradient(to bottom,
+         rgba(4,22,18,.44) 0%, rgba(4,22,18,.38) 30%, rgba(4,22,18,.22) 58%,
+         rgba(4,22,18,.08) 82%, rgba(4,22,18,0) 100%);
+       -webkit-mask-image:linear-gradient(to left,#000 0%,#000 46%,transparent 88%);
+               mask-image:linear-gradient(to left,#000 0%,#000 46%,transparent 88%)}
+
+ /* ---- decoration ---------------------------------------------------------
+    the photograph is already a soft mist, so blurring everything dissolves it
+    into the haze. depth runs the other way: the near piece is sharp and
+    shadowed, the far ones blur into the fog. three stones, not seven — the
+    water is the subject and the stones only anchor it. */
+ .deco{position:absolute;inset:0;pointer-events:none}
+ .deco i{position:absolute;display:block;background-repeat:no-repeat;background-size:contain}
+ .deco-back{z-index:3}   /* under the glass — seen through the cards */
+ .deco-front{z-index:5}  /* in front of the scroll, behind the floating bar */
+
+ .fern{width:250px;height:320px;left:-78px;top:-66px;transform:rotate(-16deg);
+       opacity:.9;filter:drop-shadow(0 6px 14px rgba(6,28,22,.3));
+       background-image:url('../assets/leaves/fern-curve.png')}
+ .fern-far{width:190px;height:240px;left:44px;top:-112px;transform:rotate(26deg);
+           opacity:.3;filter:blur(7px);
+           background-image:url('../assets/leaves/fern-tall.png')}
+ .dr1{width:28px;height:28px;left:30px;top:372px;opacity:.62;filter:blur(1.5px)
+      drop-shadow(0 3px 7px rgba(6,28,22,.25));
+      background-image:url('../assets/leaves/droplet-round.png')}
+ .dr2{width:24px;height:30px;right:52px;top:296px;opacity:.5;filter:blur(3px);
+      background-image:url('../assets/leaves/droplet-tear.png')}
+
+ /* two far stones, soft and far apart, with open water between them */
+ .sfar1{width:106px;height:106px;left:146px;bottom:78px;opacity:.36;filter:blur(8px);
+        background-image:url('../assets/pebbles/pebble-11.png')}
+ .sfar2{width:82px;height:82px;right:36px;bottom:116px;opacity:.32;filter:blur(8px);
+        background-image:url('../assets/pebbles/pebble-09.png')}
+ /* one near stone, cropped by the bottom-left corner. 92px of visible width
+    out of 390 — under a quarter — so the water below stays open and smooth. */
+ .snear{width:168px;height:168px;left:-72px;bottom:-30px;opacity:.96;
+        filter:drop-shadow(0 -6px 18px rgba(6,28,22,.35));
+        background-image:url('../assets/pebbles/pebble-02.png')}
+
+ /* ---- content ------------------------------------------------------------ */
+ .scroll{position:absolute;inset:0;overflow:auto;padding:28px 16px 196px;z-index:4}
+ .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px}
+ .greet{font-size:27px;font-weight:800;color:var(--chrome);line-height:1.18;
+        text-shadow:0 1px 3px rgba(2,18,14,.6),0 0 18px rgba(2,18,14,.4)}
+ .place{font-size:12.5px;color:#e6f5ed;margin-top:3px;text-shadow:0 1px 3px rgba(2,18,14,.7)}
+ .gear{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.96);
+       border:1px solid rgba(255,255,255,.8);display:grid;place-items:center;
+       color:var(--t1);font-size:17px;box-shadow:0 5px 16px rgba(8,26,20,.3);flex:none}
+ .stats{display:flex;gap:9px;align-items:center;font-size:12.5px;font-weight:600;
+        color:#eaf7f1;margin:10px 2px 0;text-shadow:0 1px 3px rgba(2,18,14,.8)}
+ .stats b{font-weight:800;font-size:14px}
+ .stats s{text-decoration:none;opacity:.55}
+
+ /* section heading: large light type on the photograph, over a feathered
+    ellipse — no straight edge anywhere, so it reads as shade, not a chip */
+ .sec{position:relative;margin:22px 0 11px;padding:6px 2px}
+ .sec::before{content:'';position:absolute;top:-30px;bottom:-30px;right:-64px;left:-10px;
+   z-index:-1;
+   background:radial-gradient(ellipse 46% 56% at 66% 50%,
+     rgba(4,22,18,.62) 0%, rgba(4,22,18,.54) 42%,
+     rgba(4,22,18,.26) 72%, rgba(4,22,18,0) 100%)}
+ .sec h2{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;
+         text-shadow:0 1px 4px rgba(2,16,13,.7)}
+
+ .card{background:var(--card);border:1px solid var(--card-line);
+       border-radius:32px 28px 32px 28px;padding:20px 22px;position:relative;
+       /* the weight is inside the glass now, not a slab of shadow under it */
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.6),
+                  inset 0 0 22px rgba(255,255,255,.22),
+                  inset 0 -14px 24px -18px rgba(12,34,24,.3),
+                  0 2px 10px rgba(8,22,16,.14)}
+ .card.glass{-webkit-backdrop-filter:blur(18px) saturate(1.15);
+             backdrop-filter:blur(18px) saturate(1.15)}
+ .card.alt{border-radius:28px 32px 28px 32px}
+ .card h3{font-size:16px;color:var(--t1);font-weight:700;line-height:1.5}
+ .card p{font-size:13.5px;color:var(--t2);line-height:1.5;margin-top:6px}
+ .hint{font-size:12.5px;color:var(--t3);margin-top:9px;font-weight:600;line-height:1.5}
+ /* tags: a filled pill in sage, forest-green type */
+ .pill{display:inline-block;font-size:11.5px;font-weight:800;border-radius:99px;
+       padding:4px 12px;background:rgba(var(--sage-rgb),.25);color:var(--green-ink);
+       margin-bottom:9px;line-height:1.5}
+ .bar{height:8px;border-radius:99px;background:rgba(var(--sage-rgb),.22);margin-top:14px;overflow:hidden}
+ .bar i{display:block;height:100%;width:58%;border-radius:99px;background:var(--sage-ink)}
+ .check{display:flex;align-items:center;gap:11px;margin-top:12px}
+ .check i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+          background:var(--sage-ink);color:#fff;font-size:12px;font-style:normal;flex:none}
+ .check em{width:22px;height:22px;border-radius:50%;border:2px solid var(--sage-ink);flex:none}
+ .check span{font-size:13.5px;color:var(--t1);line-height:1.5}
+
+ .more{margin-top:18px;border-radius:99px;padding:11px 18px;display:flex;align-items:center;
+       gap:9px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.35);
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 2px 10px rgba(8,22,16,.14)}
+ .more span{font-size:13px;font-weight:700;color:var(--t2);line-height:1.5}
+ .more .dot{width:8px;height:8px;border-radius:50%;background:#a86208;flex:none}
+ .more .chev{margin-inline-start:auto;color:var(--t2);font-size:13px;font-weight:700}
+
+ /* a floating capsule, and a small soft disc behind the active icon */
+ .nav{position:absolute;left:20px;right:20px;bottom:24px;height:62px;border-radius:99px;z-index:6;
+      display:flex;justify-content:space-around;align-items:center;
+      background:rgba(255,255,255,.84);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.35);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 6px 20px rgba(8,22,16,.26)}
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   .nav{background:rgba(255,255,255,.95)}
+ }
+ .nav b{font-size:11px;font-weight:600;color:var(--t2);display:grid;justify-items:center;gap:3px}
+ .nav b span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center}
+ .nav b.on{color:var(--t1);font-weight:800}
+ .nav b.on span{background:rgba(var(--sage-rgb),.3)}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="bg"></div>
+ <div class="mist"></div>
+ <div class="wash"></div>
+
+ <div class="deco deco-back">
+   <i class="fern-far"></i><i class="fern"></i>
+   <i class="dr1"></i><i class="dr2"></i>
+   <i class="sfar1"></i><i class="sfar2"></i>
+ </div>
+
+ <div class="scroll">
+  <div class="top">
+    <div>
+      <div class="greet">בוקר טוב, אורי</div>
+      <div class="place">Region II · Cagayan Valley</div>
+    </div>
+    <div class="gear">⚙</div>
+  </div>
+  <div class="stats"><span><b>3</b> עכשיו</span><s>·</s><span><b>7</b> אתרים</span><s>·</s><span><b>0</b> ממתין</span></div>
+
+  <div class="sec"><h2>הדבר הכי חשוב היום</h2></div>
+  <div class="card glass">
+    <span class="pill">מוקד</span>
+    <h3>לבדוק את אתר San Lorenzo</h3>
+    <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+    <div class="hint">תקוע 14 ימים · ממתין לאישור</div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div class="sec"><h2>משימות להיום</h2></div>
+  <div class="card alt glass">
+    <span class="pill">3 פתוחות</span>
+    <div class="check"><i>✓</i><span>לאסוף מנוע מטוגגאראו</span></div>
+    <div class="check"><em></em><span>להתקשר לקבלן בדולרס</span></div>
+    <div class="check"><em></em><span>דוח חודשי — ליקווידציה</span></div>
+  </div>
+
+  <div class="more"><span class="dot"></span><span>עוד — קופה קטנה, חיבור לשרת</span><span class="chev">⌄</span></div>
+ </div>
+
+ <div class="deco deco-front"><i class="snear"></i></div>
+
+ <div class="nav">
+   <b class="on"><span>⌂</span>בית</b><b><span>☰</span>משימות</b>
+   <b><span>⌖</span>אתרים</b><b><span>▤</span>לוח</b><b><span>☯</span>טאו</b>
+ </div>
+</div></body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2ב — רקע 100%</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* full-strength landscape + a dark green scrim, which is what lets the photo
+      stay visible: the scrim pulls the whole image into a band where white
+      chrome text clears 4.5:1, instead of fading the photo out to nothing. */
+   --bg-img:url('../assets/backgrounds/bg-water-ripple.webp');
+   --chrome:#eaf5f0;        /* text directly on the landscape */
+   --chrome-dim:#ddf3ea;
+   --card:rgba(255,255,255,.88);   /* every piece of body text lives in here */
+   --card-line:rgba(255,255,255,.55);
+   --t1:#002e2d; --t2:#2d6564; --t3:#6b8c8a;
+   --accent:#007068; --accent2:#34b3a7;
+   --tile1:#498059; --tile2:#346b45; --tile3:#1c5430;
+   --amber:#f59e0b; --red:#ef4444;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#25332c;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ .phone{width:390px;height:844px;border-radius:34px;overflow:hidden;position:relative;
+        box-shadow:0 26px 70px rgba(0,0,0,.55)}
+ /* the landscape, at full strength — nothing dims it */
+ .bg{position:absolute;inset:0;background-image:var(--bg-img);background-size:cover;background-position:center}
+ .scroll{position:absolute;inset:0;overflow:auto;padding:30px 16px 96px}
+ /* chrome text: the only text not inside a card */
+ .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+ .greetbox{background:rgba(16,38,33,.64);border:1px solid rgba(255,255,255,.14);
+            border-radius:22px 14px 22px 14px;padding:9px 14px;-webkit-backdrop-filter:none;backdrop-filter:none}
+ .greet{font-size:25px;font-weight:800;color:var(--chrome);line-height:1.2}
+ .place{font-size:12.5px;color:var(--chrome-dim);margin-top:3px}
+ .bell{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);
+       border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;color:var(--chrome);font-size:17px}
+ .seclabel{display:inline-block;font-size:13px;font-weight:700;color:var(--chrome);margin:16px 2px 9px;
+            background:rgba(16,38,33,.64);border:1px solid rgba(255,255,255,.14);
+            border-radius:99px;padding:5px 13px}
+ /* organic corners — never a plain rounded rectangle */
+ .card{background:var(--card);border:1px solid var(--card-line);
+       border-radius:26px 18px 26px 18px;padding:15px 16px;margin-bottom:11px;
+       box-shadow:0 8px 26px rgba(8,26,20,.22);position:relative}
+ .card.alt{border-radius:18px 26px 18px 26px}
+ .card h3{font-size:15px;color:var(--t1);font-weight:700}
+ .card p{font-size:13px;color:var(--t2);line-height:1.6;margin-top:4px}
+ .hint{font-size:12px;color:var(--t3);margin-top:6px}
+ .pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:99px;padding:3px 10px;
+       background:rgba(73,128,89,.16);color:#2b5c3a;margin-bottom:7px}
+ .bar{height:7px;border-radius:99px;background:rgba(28,84,48,.14);margin-top:11px;overflow:hidden}
+ .bar i{display:block;height:100%;width:58%;border-radius:99px;background:linear-gradient(90deg,var(--tile2),var(--tile1))}
+ /* banner, same glass language */
+ .banner{background:rgba(255,255,255,.85);border:1px solid rgba(245,158,11,.45);
+         border-radius:22px 14px 22px 14px;padding:11px 14px;margin-bottom:13px}
+ .banner b{font-size:13.5px;color:#8a5a06;font-weight:700}
+ .banner span{display:block;font-size:12.5px;color:var(--t2);margin-top:2px}
+ /* one green hue, three depths */
+ .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:4px 0 13px}
+ .tile{border-radius:20px 14px 20px 14px;padding:14px 8px;text-align:center;color:#fff;
+       box-shadow:0 7px 20px rgba(8,26,20,.22)}
+ .t1{background:var(--tile1)} .t2{background:var(--tile2)} .t3{background:var(--tile3)}
+ .tile .n{font-size:23px;font-weight:800;line-height:1}
+ .tile .l{font-size:12px;font-weight:600;margin-top:3px;color:rgba(255,255,255,.88)}
+ /* pebbles beside the focus card, never under its text */
+ .focuswrap{position:relative}
+ .peb{position:absolute;pointer-events:none;background-repeat:no-repeat;background-size:contain;z-index:0}
+ .p1{width:62px;height:62px;left:-26px;bottom:-16px;opacity:.95;
+     background-image:url('../assets/pebbles/pebble-11.png')}
+ .p2{width:42px;height:42px;left:4px;bottom:-26px;opacity:.85;
+     background-image:url('../assets/pebbles/pebble-09.png')}
+ .p3{width:54px;height:70px;right:-20px;top:-26px;opacity:.65;
+     background-image:url('../assets/leaves/sprig-dark.png')}
+ .focuswrap .card{position:relative;z-index:1}
+ .check{display:flex;align-items:center;gap:9px;margin-top:9px}
+ .check i{width:21px;height:21px;border-radius:50%;display:grid;place-items:center;
+          background:var(--tile2);color:#fff;font-size:12px;font-style:normal;flex:none}
+ .check em{width:21px;height:21px;border-radius:50%;border:1.6px solid rgba(28,84,48,.3);flex:none}
+ .check span{font-size:13px;color:var(--t1)}
+ /* backdrop-filter: here and nowhere else */
+ .nav{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:99px;
+      display:flex;justify-content:space-around;align-items:center;
+      background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.5);box-shadow:0 10px 30px rgba(8,26,20,.3)}
+ .nav b{font-size:11px;font-weight:600;color:var(--t2);display:grid;justify-items:center;gap:3px}
+ .nav b.on{color:#204d31;font-weight:800;background:rgba(73,128,89,.22);
+           border-radius:99px;padding:7px 15px}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="bg"></div>
+ <div class="scroll">
+  <div class="top">
+    <div class="greetbox"><div class="greet">בוקר טוב, אורי</div>
+         <div class="place">Region II · Cagayan Valley</div></div>
+    <div class="bell">⌾</div>
+  </div>
+
+  <div class="banner"><b>⚠ נדרש חיבור לשרת</b>
+    <span>תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</span></div>
+
+  <div class="tiles">
+    <div class="tile t3"><div class="n">0</div><div class="l">ממתין</div></div>
+    <div class="tile t2"><div class="n">7</div><div class="l">אתרים</div></div>
+    <div class="tile t1"><div class="n">3</div><div class="l">עכשיו</div></div>
+  </div>
+
+  <div class="seclabel">הדבר הכי חשוב היום</div>
+  <div class="focuswrap">
+    <div class="peb p1"></div><div class="peb p2"></div><div class="peb p3"></div>
+    <div class="card">
+      <span class="pill">מוקד</span>
+      <h3>לבדוק את אתר San Lorenzo</h3>
+      <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+      <div class="hint">תקוע 14 ימים · ממתין לאישור</div>
+      <div class="bar"><i></i></div>
+    </div>
+  </div>
+
+  <div class="seclabel">משימות להיום</div>
+  <div class="card alt">
+    <span class="pill">3 פתוחות</span>
+    <div class="check"><i>✓</i><span>לאסוף מנוע מטוגגאראו</span></div>
+    <div class="check"><em></em><span>להתקשר לקבלן בדולרס</span></div>
+    <div class="check"><em></em><span>דוח חודשי — ליקווידציה</span></div>
+  </div>
+
+  <div class="seclabel">קופה קטנה</div>
+  <div class="card">
+    <h3>₱0</h3><p>חודש 2026-10 · 0 הוצאות</p>
+  </div>
+ </div>
+ <div class="nav">
+   <b class="on"><span>⌂</span>בית</b><b><span>☰</span>משימות</b>
+   <b><span>⌖</span>אתרים</b><b><span>▤</span>לוח</b><b><span>☯</span>טאו</b>
+ </div>
+</div></body></html>

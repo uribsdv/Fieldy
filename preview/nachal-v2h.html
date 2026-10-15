@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2h — קרוב לייחוס</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* sampled from the reference, not guessed */
+   --ink:#0B1A12;            /* card headings */
+   --ink2:#3E4A43;           /* card body (ref #434c47, nudged for AA on the mint) */
+   --card:rgba(240,248,243,var(--card-a));
+   --card-a:.95;             /* ref #e7f1e9 = near-opaque mint-white */
+   --on-dark:#FFFFFF;
+   --on-dark2:#DCE9E1;
+
+   --sage-ink:#4A7760;       /* shapes on the card */
+   --tag-bg:#B9D4C6; --tag-ink:#1F4030;
+   --check-bg:#BCD8CC;       /* ref #bcd8cc */
+   --nav-glass:rgba(236,242,239,var(--nav-a)); --nav-a:.56;
+   --capsule:#BCD9CD;        /* ref #bcd9cd */
+   --capsule-ring:#3A6149;   /* the 3:1 boundary the pale capsule would otherwise lack */
+ }
+ /* no backdrop-filter, or reduced transparency: denser glass */
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   :root{--card-a:.99;--nav-a:.94}
+ }
+ @media (prefers-reduced-transparency:reduce){ :root{--card-a:1;--nav-a:.96} }
+
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#0d1512;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+ /* the room: deep teal-green with sage light pooling at the edges. pure CSS —
+    the reference background is smooth and illustrated, with nothing in it
+    to photograph. */
+ .phone{width:390px;height:844px;border-radius:38px;overflow:hidden;position:relative;
+        background:
+          radial-gradient(64% 30% at 0% 30%, rgba(126,162,100,.80), rgba(126,162,100,0) 74%),
+          radial-gradient(58% 34% at 100% 44%, rgba(42,68,68,.80), rgba(42,68,68,0) 76%),
+          radial-gradient(70% 20% at 0% 66%, rgba(80,112,84,.50), rgba(80,112,84,0) 76%),
+          linear-gradient(168deg,#496A4F 0%,#385844 30%,#304944 62%,#2A3F3E 100%);
+        box-shadow:0 26px 70px rgba(0,0,0,.5)}
+ /* soft organic shapes, blurred: a pale streak from the top, a small leaf,
+    and a big disc of light that the nav floats across */
+ .blob{position:absolute;pointer-events:none}
+ .b-streak{width:110px;height:200px;left:118px;top:-90px;border-radius:50%;transform:rotate(8deg);
+           background:linear-gradient(180deg,rgba(168,200,182,.46),rgba(168,200,182,0));filter:blur(14px)}
+ .b-leaf{width:50px;height:46px;left:50px;top:84px;opacity:.9;
+         border-radius:62% 38% 70% 30% / 58% 44% 56% 42%;transform:rotate(-24deg);
+         background:linear-gradient(150deg,#6F9170,#4C6B50);filter:blur(1.5px)}
+ .b-disc{width:230px;height:170px;left:60px;bottom:-62px;border-radius:50%;
+         background:radial-gradient(circle at 46% 38%,rgba(172,196,160,.9),rgba(150,182,140,.55) 70%);
+         filter:blur(3px)}
+
+ .screen{position:absolute;inset:0;padding:40px 22px 0}
+
+ .top{display:flex;align-items:flex-start;justify-content:space-between}
+ .greet{font-size:35px;font-weight:400;color:var(--on-dark);line-height:1.15;letter-spacing:-.3px}
+ .stats{font-size:13px;font-weight:500;color:#fff;margin-top:6px;text-shadow:0 1px 3px rgba(8,24,18,.45);display:flex;gap:7px;align-items:center}
+ .stats b{font-weight:700;color:#fff}
+ .stats s{text-decoration:none;opacity:.55}
+ .gear{position:relative;width:34px;height:34px;color:var(--on-dark);margin-top:6px}
+ .gear svg{width:26px;height:26px}
+ /* the server-needed banner, folded into a dot on the settings button */
+ .gear u{position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;
+         background:#C78A4B;border:2px solid #3A5B4A}
+
+ .tools{display:flex;gap:12px;margin-top:16px;align-items:center}
+ .ask{flex:1;height:50px;border-radius:99px;display:flex;align-items:center;gap:10px;padding:0 18px;
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);
+      -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+      color:rgba(255,255,255,.88);font-size:15px;font-weight:400}
+ .ask svg{width:20px;height:20px;flex:none}
+ .calm{width:50px;height:50px;flex:none;color:#fff;display:grid;place-items:center;
+       border-radius:60% 40% 55% 45% / 50% 60% 40% 50%;
+       background:linear-gradient(150deg,#7F9F72,#5E7F55);
+       box-shadow:0 10px 18px -8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25)}
+ .calm svg{width:24px;height:24px}
+
+ .sec{margin:20px 2px 10px;font-size:22px;font-weight:400;color:var(--on-dark);letter-spacing:-.2px}
+
+ /* the large cards: near-opaque mint-white glass, big radius, and a second and
+    third sheet showing beneath the first, as in the reference */
+ .card{position:relative;background:var(--card);border-radius:32px;padding:18px 22px;
+       box-shadow:0 22px 40px -22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.7)}
+ .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+ .stack::before,.stack::after{content:'';position:absolute;z-index:-1;border-radius:0 0 28px 28px}
+ .stack::before{left:20px;right:20px;bottom:-9px;height:34px;background:rgba(224,236,228,.55)}
+ .stack::after{left:40px;right:40px;bottom:-17px;height:34px;background:rgba(224,236,228,.30)}
+ .stack{z-index:1}
+
+ .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+ .card h3{font-size:21px;font-weight:500;color:var(--ink);line-height:1.25;letter-spacing:-.3px}
+ .card p{font-size:14px;color:var(--ink2);line-height:1.5;margin-top:6px}
+ .tag{flex:none;font-size:12px;font-weight:600;border-radius:99px;padding:4px 13px;
+      background:var(--tag-bg);color:var(--tag-ink);margin-top:3px}
+ .bar{height:7px;border-radius:99px;background:rgba(27,46,36,.13);margin-top:14px;overflow:hidden}
+ .bar i{display:block;height:100%;width:46%;border-radius:99px;background:var(--sage-ink)}
+
+ .task{display:flex;align-items:center;gap:14px;padding:6px 0}
+ .task+.task{margin-top:2px}
+ .tick{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;
+       background:var(--check-bg);color:#1F4030}
+ .tick svg{width:20px;height:20px}
+ .tick.done{background:var(--sage-ink);color:#fff}
+ .task .t{flex:1}
+ .task .t b{display:block;font-size:16px;font-weight:500;color:var(--ink);line-height:1.3}
+ .task .t span{display:block;font-size:13px;color:var(--ink2);margin-top:1px}
+ .task.done .t b{color:var(--ink2)}
+
+ /* the third sheet is dark glass and sits half behind the bar */
+ .peek{margin-top:14px;height:128px;border-radius:32px;padding:18px 22px;color:#fff;
+       background:rgba(22,40,34,.34);border:1px solid rgba(255,255,255,.2);
+       -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+ .peek h3{font-size:23px;font-weight:400}
+ .peek .sub{font-size:13px;color:var(--on-dark2);margin-top:4px}
+
+ .nav{position:absolute;left:14px;right:14px;bottom:18px;height:80px;border-radius:99px;z-index:5;
+      display:flex;justify-content:space-around;align-items:center;padding:0 7px;
+      background:var(--nav-glass);
+      -webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+      border:1px solid rgba(255,255,255,.5);
+      box-shadow:0 18px 34px -14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.55)}
+ .nav b{width:62px;display:grid;justify-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--ink)}
+ .nav b svg{width:24px;height:24px}
+ .nav b.on{width:76px;height:64px;align-content:center;border-radius:99px;font-weight:600;
+           background:var(--capsule);box-shadow:inset 0 0 0 1.5px var(--capsule-ring)}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="blob b-streak"></div><div class="blob b-leaf"></div><div class="blob b-disc"></div>
+
+ <div class="screen">
+  <div class="top">
+    <div>
+      <div class="greet">בוקר טוב, אורי</div>
+      <div class="stats"><span><b>3</b> עכשיו</span><s>·</s><span><b>7</b> אתרים</span><s>·</s><span><b>0</b> ממתין</span></div>
+    </div>
+    <div class="gear"><svg viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg><u></u></div>
+  </div>
+
+  <div class="tools">
+    <div class="ask"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>ארגן את היום…</div>
+    <div class="calm"><svg viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg></div>
+  </div>
+
+  <div class="sec">הדבר הכי חשוב היום</div>
+  <div class="card glass stack">
+    <div class="row"><h3>לבדוק את אתר San Lorenzo</h3><span class="tag">מוקד</span></div>
+    <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div class="card glass" style="margin-top:20px">
+    <div class="row"><h3>משימות להיום</h3><span class="tag">3 פתוחות</span></div>
+    <div style="margin-top:8px">
+      <div class="task done"><span class="tick done"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="t"><b>לאסוף מנוע</b><span>טוגגאראו</span></div></div>
+      <div class="task"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="t"><b>להתקשר לקבלן</b><span>דולרס</span></div></div>
+      <div class="task"><span class="tick"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="t"><b>דוח חודשי</b><span>ליקווידציה</span></div></div>
+    </div>
+  </div>
+
+  <div class="peek"><h3>קופה קטנה</h3><div class="sub">₱0 · 0 הוצאות החודש</div></div>
+ </div>
+
+ <div class="nav">
+   <b class="on"><svg viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>בית</b>
+   <b><svg viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>משימות</b>
+   <b><svg viewBox="0 0 24 24"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>אתרים</b>
+   <b><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>לוח</b>
+   <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20 5 5 0 0 1 0-10 5 5 0 0 0 0-10z"/></svg>טאו</b>
+ </div>
+</div></body></html>

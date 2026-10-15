@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2g — אוויר נקי, זכוכית חלבית</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   --t1:#1B2E24;            /* dark slate: headings, card text */
+   --t2:#3A4F44;            /* body */
+   --t3:#52636B;            /* slate: hints, on light only */
+
+   --glass-a:.70;           /* the two large cards */
+   --glass:rgba(255,255,255,var(--glass-a));
+   --glass-line:rgba(255,255,255,.55);
+   --nav-a:.60;
+
+   --sage-ink:#4A7760;      /* shapes on light glass */
+   --sage-wash:rgba(127,165,138,.18);
+   --sage-capsule:#3A6149;  /* active tab: dark enough for 3:1 on the nav, light text inside */
+
+   /* one green in three levels, for the three counters */
+   --pebble-1:#3F6A51; --pebble-2:#A9C5B3; --pebble-3:#DCE8E0;
+
+   --r-card:30px;
+   /* long, soft, ambient — falloff rather than a dark blur under the edge */
+   --lift:0 2px 6px rgba(27,46,36,.04),
+          0 14px 32px -14px rgba(27,46,36,.14),
+          0 38px 70px -34px rgba(27,46,36,.22);
+ }
+ /* no blur available, or the device asks for less transparency: denser surfaces */
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   :root{--glass-a:.92;--nav-a:.94}
+ }
+ @media (prefers-reduced-transparency:reduce){ :root{--glass-a:.96;--nav-a:.96} }
+
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#dde5e0;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ /* no photograph: mist, then sage, then forest — and the forest only down
+    where the floating bar sits */
+ .phone{width:390px;height:844px;border-radius:34px;overflow:hidden;position:relative;
+        background:linear-gradient(180deg,
+          #EEF3F0 0%, #DCE7E0 34%, #B9CDBF 60%, #7C9D88 80%, #2D4F38 96%);
+        box-shadow:0 26px 70px rgba(20,40,30,.3)}
+
+ /* two stones, soft and low, beside the bar. nothing else is decorated. */
+ .deco{position:absolute;inset:0;pointer-events:none;z-index:1}
+ .deco i{position:absolute;display:block;background-repeat:no-repeat;background-size:contain}
+ .st-a{width:150px;height:150px;left:-46px;bottom:-34px;opacity:.7;filter:blur(5px);
+       background-image:url('../assets/pebbles/pebble-03.png')}
+ .st-b{width:118px;height:118px;right:-30px;bottom:-22px;opacity:.55;filter:blur(7px);
+       background-image:url('../assets/pebbles/pebble-02.png')}
+
+ /* the content fades out before it reaches the dark foot, so a heading can
+    never scroll onto forest green and lose its contrast */
+ .scroll{position:absolute;inset:0;overflow:auto;padding:30px 20px 130px;z-index:2;
+         scrollbar-width:none;
+         -webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 104px),transparent calc(100% - 74px));
+                 mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 104px),transparent calc(100% - 74px))}
+ .scroll::-webkit-scrollbar{display:none}
+
+ .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+ .greet{font-size:28px;font-weight:800;color:var(--t1);line-height:1.2;letter-spacing:-.4px}
+ .place{font-size:12.5px;color:var(--t3);margin-top:5px;font-weight:500}
+ .gear{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);
+       border:1px solid rgba(255,255,255,.7);display:grid;place-items:center;
+       color:var(--t2);font-size:17px;flex:none;
+       box-shadow:0 6px 16px -8px rgba(27,46,36,.28)}
+
+ /* three small stones in a row — one green, three depths */
+ .metrics{display:flex;gap:10px;margin-top:18px}
+ .metric{flex:1;height:66px;display:flex;flex-direction:column;align-items:center;
+         justify-content:center;gap:5px;
+         border-radius:42% 58% 52% 48% / 50% 52% 48% 50%;
+         box-shadow:0 12px 22px -14px rgba(27,46,36,.38), inset 0 1px 0 rgba(255,255,255,.35)}
+ .metric:nth-child(2){border-radius:56% 44% 48% 52% / 52% 50% 50% 48%}
+ .metric:nth-child(3){border-radius:48% 52% 44% 56% / 50% 52% 48% 50%}
+ .metric .n{font-size:24px;font-weight:800;line-height:1;letter-spacing:-.4px}
+ .metric .l{font-size:11.5px;font-weight:600;line-height:1}
+ .metric.m1{background:var(--pebble-1);color:#fff}
+ .metric.m1 .l{color:rgba(255,255,255,.92)}
+ .metric.m2{background:var(--pebble-2);color:var(--t1)}
+ .metric.m2 .l{color:#25392E}
+ .metric.m3{background:var(--pebble-3);color:var(--t1)}
+ .metric.m3 .l{color:var(--t2)}
+
+ .sec{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-.2px;margin:20px 2px 10px}
+
+ .card{background:var(--glass);border:1px solid var(--glass-line);
+       border-radius:var(--r-card);padding:22px 24px;box-shadow:var(--lift)}
+ .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+ .card h3{font-size:17px;color:var(--t1);font-weight:700;line-height:1.5;letter-spacing:-.2px}
+ .card p{font-size:14px;color:var(--t2);line-height:1.55;margin-top:6px}
+ .hint{font-size:12.5px;color:var(--t3);margin-top:10px;font-weight:600;line-height:1.5}
+ .pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:99px;
+       padding:4px 13px;background:var(--sage-wash);color:#22402F;margin-bottom:10px;line-height:1.5}
+ .bar{height:6px;border-radius:99px;background:rgba(27,46,36,.10);margin-top:15px;overflow:hidden}
+ .bar i{display:block;height:100%;width:58%;border-radius:99px;background:var(--sage-ink)}
+
+ .check{display:flex;align-items:center;gap:13px;padding:7px 0}
+ .check+.check{border-top:1px solid rgba(27,46,36,.07)}
+ .check i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+          background:var(--sage-ink);color:#fff;font-size:12px;font-style:normal;flex:none}
+ .check em{width:22px;height:22px;border-radius:50%;border:1.8px solid var(--sage-ink);flex:none}
+ .check span{font-size:14px;color:var(--t1);line-height:1.5}
+ .check.done span{color:var(--t3)}
+
+ .more{margin-top:12px;border-radius:99px;padding:12px 20px;display:flex;align-items:center;
+       gap:10px;background:rgba(255,255,255,.78);border:1px solid var(--glass-line);
+       box-shadow:0 10px 24px -16px rgba(27,46,36,.3)}
+ .more span{font-size:13px;font-weight:600;color:var(--t2)}
+ .more .dot{width:7px;height:7px;border-radius:50%;background:#A86208;flex:none}
+ .more .chev{margin-inline-start:auto;color:var(--t3);font-size:13px;font-weight:700}
+
+ /* milky frosted capsule; the active tab is a sage capsule holding icon + label */
+ .nav{position:absolute;left:20px;right:20px;bottom:24px;height:66px;border-radius:99px;z-index:3;
+      display:flex;justify-content:space-around;align-items:center;padding:0 8px;
+      background:rgba(255,255,255,var(--nav-a));
+      -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,.6);
+      box-shadow:0 1px 2px rgba(27,46,36,.05), 0 14px 32px -14px rgba(10,24,16,.4)}
+ .nav b{font-size:11px;font-weight:600;color:var(--t1);display:grid;justify-items:center;gap:4px}
+ .nav b span{font-size:15px}
+ .nav b.on{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;
+           color:#fff;background:var(--sage-capsule);border-radius:99px;padding:11px 18px}
+ .nav b.on span{font-size:16px}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="deco"><i class="st-a"></i><i class="st-b"></i></div>
+ <div class="scroll">
+  <div class="top">
+    <div>
+      <div class="greet">בוקר טוב, אורי</div>
+      <div class="place">Region II · Cagayan Valley</div>
+    </div>
+    <div class="gear">⚙</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric m1"><div class="n">3</div><div class="l">עכשיו</div></div>
+    <div class="metric m2"><div class="n">7</div><div class="l">אתרים</div></div>
+    <div class="metric m3"><div class="n">0</div><div class="l">ממתין</div></div>
+  </div>
+
+  <div class="sec">הדבר הכי חשוב היום</div>
+  <div class="card glass">
+    <span class="pill">מוקד</span>
+    <h3>לבדוק את אתר San Lorenzo</h3>
+    <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+    <div class="hint">תקוע 14 ימים · ממתין לאישור</div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div class="sec">משימות להיום</div>
+  <div class="card glass">
+    <span class="pill">3 פתוחות</span>
+    <div class="check done"><i>✓</i><span>לאסוף מנוע מטוגגאראו</span></div>
+    <div class="check"><em></em><span>להתקשר לקבלן בדולרס</span></div>
+    <div class="check"><em></em><span>דוח חודשי — ליקווידציה</span></div>
+  </div>
+
+  <div class="more"><span class="dot"></span><span>עוד — קופה קטנה, חיבור לשרת</span><span class="chev">⌄</span></div>
+ </div>
+
+ <div class="nav">
+   <b class="on"><span>⌂</span>בית</b><b><span>☰</span>משימות</b>
+   <b><span>⌖</span>אתרים</b><b><span>▤</span>לוח</b><b><span>☯</span>טאו</b>
+ </div>
+</div></body></html>

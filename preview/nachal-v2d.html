@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2d — זכוכית חלבית וקומפוזיציה</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* frosted glass: you read the river through it */
+   --card-a:.62;
+   --card:rgba(255,255,255,var(--card-a));
+   --card-line:rgba(255,255,255,.5);
+   /* text on glass is darker than text on a solid card: the floor underneath
+      is the photograph, not white, so every value here is cut to the worst pixel */
+   --t1:#002e2d; --t2:#174846; --t3:#275856;
+   --chrome:#f4fbf8;
+   --green:#1c5430; --green-mid:#346b45; --green-soft:#498059;
+ }
+ /* no backdrop-filter, or the device asks for less transparency: denser card */
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   :root{--card-a:.88}
+ }
+ @media (prefers-reduced-transparency:reduce){ :root{--card-a:.94} }
+
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#25332c;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ .phone{width:390px;height:844px;border-radius:34px;overflow:hidden;position:relative;
+        box-shadow:0 26px 70px rgba(0,0,0,.55)}
+ .bg{position:absolute;inset:0;z-index:0;
+     background:url('../assets/backgrounds/bg-water-ripple.webp') center/cover no-repeat}
+
+ /* the photograph is brightest at the top, exactly where the greeting sits.
+    a wash down from the edge — no border, no shape, the sky just gets deeper —
+    masked to the right so the left corner keeps its light for the fern. */
+ .wash{position:absolute;left:0;right:0;top:0;height:340px;z-index:1;pointer-events:none;
+       background:linear-gradient(to bottom,
+         rgba(4,22,18,.72) 0%, rgba(4,22,18,.68) 26%, rgba(4,22,18,.52) 48%,
+         rgba(4,22,18,.26) 70%, rgba(4,22,18,.08) 86%, rgba(4,22,18,0) 100%);
+       -webkit-mask-image:linear-gradient(to left,#000 0%,#000 46%,transparent 88%);
+               mask-image:linear-gradient(to left,#000 0%,#000 46%,transparent 88%)}
+
+ /* ---- decoration ---------------------------------------------------------
+    the photograph is already a soft mist, so blur alone cannot carry depth —
+    blurring everything just dissolves it into the haze. depth here runs the
+    other way: the near pieces are sharp and shadowed, the far ones blur into
+    the fog. nothing uses backdrop-filter. */
+ .deco{position:absolute;inset:0;pointer-events:none}
+ .deco i{position:absolute;display:block;background-repeat:no-repeat;background-size:contain}
+ .deco-back{z-index:2}    /* under the glass — you see it through the cards */
+ .deco-front{z-index:4}   /* in front of the scroll, behind the floating bar */
+
+ /* one fern, top-left, cropped by the corner */
+ .fern{width:250px;height:320px;left:-78px;top:-66px;transform:rotate(-16deg);
+       opacity:.9;filter:drop-shadow(0 6px 14px rgba(6,28,22,.3));
+       background-image:url('../assets/leaves/fern-curve.png')}
+ /* its echo, deep in the fog */
+ .fern-far{width:190px;height:240px;left:44px;top:-112px;transform:rotate(26deg);
+           opacity:.34;filter:blur(7px);
+           background-image:url('../assets/leaves/fern-tall.png')}
+ /* two droplets. that is all. */
+ .dr1{width:36px;height:36px;left:26px;top:366px;opacity:.85;filter:blur(1px)
+      drop-shadow(0 3px 7px rgba(6,28,22,.3));
+      background-image:url('../assets/leaves/droplet-round.png')}
+ .dr2{width:24px;height:30px;right:52px;top:296px;opacity:.55;filter:blur(3px);
+      background-image:url('../assets/leaves/droplet-tear.png')}
+
+ /* one pile of stones at the bottom edge, overlapping, half cut off by the frame.
+    the back of the pile is soft, the front is sharp. */
+ .sfar1{width:168px;height:168px;left:58px;bottom:56px;opacity:.5;filter:blur(7px);
+        background-image:url('../assets/pebbles/pebble-11.png')}
+ .sfar2{width:132px;height:132px;right:48px;bottom:74px;opacity:.36;filter:blur(8px);
+        background-image:url('../assets/pebbles/pebble-09.png')}
+ .smid1{width:186px;height:186px;left:4px;bottom:4px;opacity:.85;filter:blur(2px)
+        drop-shadow(0 -4px 12px rgba(6,28,22,.22));
+        background-image:url('../assets/pebbles/pebble-03.png')}
+ .smid2{width:150px;height:150px;right:6px;bottom:18px;opacity:.8;filter:blur(3px)
+        drop-shadow(0 -4px 12px rgba(6,28,22,.2));
+        background-image:url('../assets/pebbles/pebble-08.png')}
+ .snear1{width:232px;height:232px;left:-62px;bottom:-96px;opacity:.97;
+         filter:drop-shadow(0 -6px 18px rgba(6,28,22,.35));
+         background-image:url('../assets/pebbles/pebble-02.png')}
+ .snear2{width:178px;height:178px;left:134px;bottom:-66px;opacity:.97;filter:blur(1px)
+         drop-shadow(0 -5px 14px rgba(6,28,22,.3));
+         background-image:url('../assets/pebbles/pebble-10.png')}
+ .snear3{width:206px;height:206px;right:-58px;bottom:-84px;opacity:.97;filter:blur(1.5px)
+         drop-shadow(0 -5px 14px rgba(6,28,22,.3));
+         background-image:url('../assets/pebbles/pebble-05.png')}
+
+ /* ---- content ------------------------------------------------------------ */
+ .scroll{position:absolute;inset:0;overflow:auto;padding:28px 16px 196px;z-index:3}
+ .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px}
+ .greet{font-size:27px;font-weight:800;color:var(--chrome);line-height:1.18;
+        text-shadow:0 1px 3px rgba(2,18,14,.6),0 0 18px rgba(2,18,14,.4)}
+ .place{font-size:12.5px;color:#e6f5ed;margin-top:3px;text-shadow:0 1px 3px rgba(2,18,14,.7)}
+ .gear{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.96);
+       border:1px solid rgba(255,255,255,.8);display:grid;place-items:center;
+       color:var(--t1);font-size:17px;box-shadow:0 5px 16px rgba(8,26,20,.3);flex:none}
+ /* the three counters as one quiet line, not three coloured tiles */
+ .stats{display:flex;gap:9px;align-items:center;font-size:12.5px;font-weight:600;
+        color:#eaf7f1;margin:10px 2px 0;text-shadow:0 1px 3px rgba(2,18,14,.8)}
+ .stats b{font-weight:800;font-size:14px}
+ .stats s{text-decoration:none;opacity:.5}
+
+ /* section heading: large light type straight on the photograph. behind it the
+    photograph is pushed down by a feathered wash that hugs the words and dies
+    out before it reaches an edge — a shadow in the scene, not a chip. */
+ .sec{position:relative;margin:22px 0 11px;padding:6px 2px}
+ .sec::before{content:'';position:absolute;top:-30px;bottom:-30px;right:-64px;left:-10px;
+   z-index:-1;
+   background:radial-gradient(ellipse 46% 56% at 66% 50%,
+     rgba(4,22,18,.70) 0%, rgba(4,22,18,.62) 42%,
+     rgba(4,22,18,.30) 72%, rgba(4,22,18,0) 100%)}
+ .sec h2{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;
+         text-shadow:0 1px 4px rgba(2,16,13,.7)}
+
+ .card{background:var(--card);border:1px solid var(--card-line);
+       border-radius:26px 18px 26px 18px;padding:16px 17px;
+       box-shadow:0 12px 34px rgba(8,26,20,.24);position:relative}
+ .card.glass{-webkit-backdrop-filter:blur(18px) saturate(1.15);
+             backdrop-filter:blur(18px) saturate(1.15)}
+ .card.alt{border-radius:18px 26px 18px 26px}
+ .card h3{font-size:16px;color:var(--t1);font-weight:700;line-height:1.35}
+ .card p{font-size:13.5px;color:var(--t2);line-height:1.6;margin-top:5px}
+ .hint{font-size:12.5px;color:var(--t3);margin-top:7px;font-weight:600}
+ .pill{display:inline-block;font-size:11.5px;font-weight:800;border-radius:99px;
+       padding:3px 11px;background:rgba(255,255,255,.76);color:#17442c;margin-bottom:8px}
+ .bar{height:7px;border-radius:99px;background:rgba(10,45,30,.2);margin-top:12px;overflow:hidden}
+ .bar i{display:block;height:100%;width:58%;border-radius:99px;
+        background:linear-gradient(90deg,var(--green),var(--green-soft))}
+ .check{display:flex;align-items:center;gap:10px;margin-top:11px}
+ .check i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+          background:var(--green);color:#fff;font-size:12px;font-style:normal;flex:none}
+ .check em{width:22px;height:22px;border-radius:50%;border:1.8px solid rgba(10,45,30,.45);flex:none}
+ .check span{font-size:13.5px;color:var(--t1)}
+
+ /* everything that used to shout for attention: one closed row */
+ .more{margin-top:18px;border-radius:99px;padding:10px 16px;display:flex;align-items:center;
+       gap:9px;background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.45);
+       box-shadow:0 6px 18px rgba(8,26,20,.2)}
+ .more span{font-size:13px;font-weight:700;color:var(--t2)}
+ .more .dot{width:8px;height:8px;border-radius:50%;background:#a86208;flex:none}
+ .more .chev{margin-inline-start:auto;color:var(--t2);font-size:13px;font-weight:700}
+
+ .nav{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:99px;z-index:5;
+      display:flex;justify-content:space-around;align-items:center;
+      background:rgba(255,255,255,.84);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.55);box-shadow:0 10px 30px rgba(8,26,20,.34)}
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   .nav{background:rgba(255,255,255,.95)}
+ }
+ .nav b{font-size:11px;font-weight:600;color:var(--t2);display:grid;justify-items:center;gap:3px}
+ .nav b.on{color:#15351f;font-weight:800;background:rgba(73,128,89,.26);border-radius:99px;padding:7px 15px}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="bg"></div>
+ <div class="wash"></div>
+
+ <div class="deco deco-back">
+   <i class="fern-far"></i><i class="fern"></i>
+   <i class="dr1"></i><i class="dr2"></i>
+   <i class="sfar1"></i><i class="sfar2"></i><i class="smid1"></i><i class="smid2"></i>
+ </div>
+
+ <div class="scroll">
+  <div class="top">
+    <div>
+      <div class="greet">בוקר טוב, אורי</div>
+      <div class="place">Region II · Cagayan Valley</div>
+    </div>
+    <div class="gear">⚙</div>
+  </div>
+  <div class="stats"><span><b>3</b> עכשיו</span><s>·</s><span><b>7</b> אתרים</span><s>·</s><span><b>0</b> ממתין</span></div>
+
+  <div class="sec"><h2>הדבר הכי חשוב היום</h2></div>
+  <div class="card glass">
+    <span class="pill">מוקד</span>
+    <h3>לבדוק את אתר San Lorenzo</h3>
+    <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+    <div class="hint">תקוע 14 ימים · ממתין לאישור</div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div class="sec"><h2>משימות להיום</h2></div>
+  <div class="card alt glass">
+    <span class="pill">3 פתוחות</span>
+    <div class="check"><i>✓</i><span>לאסוף מנוע מטוגגאראו</span></div>
+    <div class="check"><em></em><span>להתקשר לקבלן בדולרס</span></div>
+    <div class="check"><em></em><span>דוח חודשי — ליקווידציה</span></div>
+  </div>
+
+  <div class="more"><span class="dot"></span><span>עוד — קופה קטנה, חיבור לשרת</span><span class="chev">⌄</span></div>
+ </div>
+
+ <div class="deco deco-front">
+   <i class="snear1"></i><i class="snear2"></i><i class="snear3"></i>
+ </div>
+
+ <div class="nav">
+   <b class="on"><span>⌂</span>בית</b><b><span>☰</span>משימות</b>
+   <b><span>⌖</span>אתרים</b><b><span>▤</span>לוח</b><b><span>☯</span>טאו</b>
+ </div>
+</div></body></html>
