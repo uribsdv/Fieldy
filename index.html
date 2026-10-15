@@ -117,7 +117,7 @@ textarea,select,input{font-family:inherit}
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
 [data-theme="nachal"]{
-  --nh-card-a:.95;--nh-nav-a:.58;
+  --nh-card-a:.95;--nh-nav-a:.82;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
@@ -183,7 +183,7 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
   background:rgba(236,242,239,var(--nh-nav-a))!important;
-  -webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
 [data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
@@ -328,7 +328,7 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] #screen-tao{
   background:
     radial-gradient(75% 34% at 50% 0%,rgba(61,191,174,.22),rgba(61,191,174,0) 72%),
-    linear-gradient(180deg,#14241B 0%,#0E1C14 100%)!important}
+    linear-gradient(180deg,var(--tao-bg2) 0%,var(--tao-bg) 100%)!important}
 [data-theme="nachal"] #screen-tao::before{display:none}
 [data-theme="nachal"] #screen-tao > div[style*="min-height:100%"]{background:transparent!important}
 /* one soft fern in the top corner, outside the text, behind everything */
@@ -360,17 +360,15 @@ textarea,select,input{font-family:inherit}
 /* small controls and fields: translucent, with the same hairline */
 [data-theme="nachal"] #screen-tao button[style*="background:var(--tao-panel)"]{
   background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
-[data-theme="nachal"] #screen-tao input,[data-theme="nachal"] #screen-tao textarea{
-  background:rgba(8,18,13,.55)!important;border-color:rgba(255,255,255,.14)!important}
 /* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
 [data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
 /* the meditation sheet is dark too, so its text and its ring read */
-[data-theme="nachal"] .modal:has(#med-circle){background:#0E1C14!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
+[data-theme="nachal"] .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
 [data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
 [data-theme="nachal"] .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
 /* the nav bar over the Tao: dark glass to match the room; the active
    destination is the same pale capsule as on every other screen */
-[data-theme="nachal"]{--nh-tao-nav-a:.66}
+[data-theme="nachal"]{--nh-tao-nav-a:.92}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   [data-theme="nachal"]{--nh-tao-nav-a:.94}}
 @media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
@@ -381,6 +379,52 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn .nav-icon svg{stroke:#E4EFE8}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-label{color:var(--t1)}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
+/* ── Nachal · fields ───────────────────────────────
+   Every text field, textarea, select and search box in this theme is a soft,
+   rounded glass shape instead of a square one: a full capsule for a single
+   line, 24px for a textarea, never under 52px tall. Two contexts, set as
+   custom properties: light surfaces (cards, sheets, modals) get a milky white
+   field with a sage edge; the dark Tao room gets a faint white one. Focus is
+   a soft ring in the theme's accent drawn with box-shadow, so the field never
+   changes size or moves the page. */
+html[data-theme="nachal"]{
+  --nh-field-bg:rgba(255,255,255,.72);--nh-field-bd:#5E8A72;--nh-field-ink:var(--t1);--nh-field-ph:#566A5E;
+  --nh-field-ring:rgba(var(--accent-rgb),.30);--nh-field-focus-bd:var(--gold);
+  --nh-field-shadow:inset 0 1px 3px rgba(20,50,36,.10);
+  --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2334473D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+html[data-theme="nachal"] #screen-tao{
+  --nh-field-bg:rgba(255,255,255,.06);--nh-field-bd:rgba(255,255,255,.14);--nh-field-ink:var(--tao-t1);--nh-field-ph:#93AA9C;
+  --nh-field-ring:rgba(111,224,204,.32);--nh-field-focus-bd:var(--tao-gold);
+  --nh-field-shadow:inset 0 2px 6px rgba(0,0,0,.28);
+  --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C0DACC' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]),
+html[data-theme="nachal"] textarea,
+html[data-theme="nachal"] select{
+  box-sizing:border-box;min-height:52px;padding:14px 20px!important;line-height:1.4;
+  border-radius:999px!important;
+  background-color:var(--nh-field-bg)!important;border:1px solid var(--nh-field-bd)!important;
+  color:var(--nh-field-ink)!important;box-shadow:var(--nh-field-shadow);outline:none;
+  transition:box-shadow .15s ease,border-color .15s ease}
+html[data-theme="nachal"] textarea{border-radius:24px!important;padding:14px 18px!important}
+/* the lead-in fields were 44px; the floor is 52 */
+html[data-theme="nachal"] textarea[style*="min-height:44px"]{min-height:52px!important}
+html[data-theme="nachal"] select{
+  -webkit-appearance:none;appearance:none;padding:14px 20px 14px 46px!important;
+  background-image:var(--nh-chev)!important;background-repeat:no-repeat!important;
+  background-position:left 18px center!important;background-size:14px!important}
+html[dir="ltr"][data-theme="nachal"] select{padding:14px 46px 14px 20px!important;background-position:right 18px center!important}
+html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]):focus,
+html[data-theme="nachal"] textarea:focus,
+html[data-theme="nachal"] select:focus{
+  border-color:var(--nh-field-focus-bd)!important;outline:none;
+  box-shadow:0 0 0 3px var(--nh-field-ring),var(--nh-field-shadow)}
+html[data-theme="nachal"] input::placeholder,
+html[data-theme="nachal"] textarea::placeholder{color:var(--nh-field-ph);opacity:1}
+html[data-theme="nachal"] input:disabled,
+html[data-theme="nachal"] textarea:disabled,
+html[data-theme="nachal"] select:disabled{opacity:.6}
+@media (prefers-reduced-motion:reduce){
+  html[data-theme="nachal"] input,html[data-theme="nachal"] textarea,html[data-theme="nachal"] select{transition:none}}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
