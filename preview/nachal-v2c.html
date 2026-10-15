@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2c — קישוטים כחלק מהקומפוזיציה</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   --chrome:#eaf5f0; --chrome-dim:#ddf3ea;
+   --card:rgba(255,255,255,.88); --card-line:rgba(255,255,255,.55);
+   --t1:#002e2d; --t2:#2d6564; --t3:#4b6b69;
+   --tile1:#498059; --tile2:#346b45; --tile3:#1c5430;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#25332c;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ .phone{width:390px;height:844px;border-radius:34px;overflow:hidden;position:relative;
+        box-shadow:0 26px 70px rgba(0,0,0,.55)}
+ .bg{position:absolute;inset:0;background:url('../assets/backgrounds/bg-water-ripple.webp') center/cover no-repeat}
+ /* decoration layer: above the photo, below the content, never under text */
+ .deco{position:absolute;inset:0;pointer-events:none;z-index:1}
+ .deco i{position:absolute;display:block;background-repeat:no-repeat;background-size:contain}
+ /* 1 — a bed of pebbles across the bottom, behind the floating bar */
+ /* the bar floats over their middle, so the tops read above it and the
+    bottoms below — the bed of stones stays legible as a composition */
+ .pb1{width:140px;height:140px;left:-30px;bottom:18px;opacity:1;
+      background-image:url('../assets/pebbles/pebble-02.png')}
+ .pb2{width:112px;height:112px;left:92px;bottom:-6px;opacity:.97;
+      background-image:url('../assets/pebbles/pebble-07.png')}
+ .pb3{width:128px;height:128px;left:176px;bottom:22px;opacity:.93;
+      background-image:url('../assets/pebbles/pebble-10.png')}
+ .pb4{width:96px;height:96px;right:-18px;bottom:6px;opacity:.97;
+      background-image:url('../assets/pebbles/pebble-05.png')}
+ /* 2 — a large fern in the empty corner beside the greeting */
+ .fern{width:150px;height:200px;left:-34px;top:-18px;opacity:.6;transform:rotate(-12deg);
+       background-image:url('../assets/leaves/fern-curve.png')}
+ /* 3 and 5 live in the scroll flow, not the fixed layer: a fixed decoration
+    scrolls out of its gap and ends up behind a card, which the rule forbids */
+ .gap{position:relative;height:54px}
+ .gap i{position:absolute;display:block;background-repeat:no-repeat;background-size:contain}
+ .g-dr1{width:42px;height:42px;left:10px;top:4px;opacity:.9;
+        background-image:url('../assets/leaves/droplet-round.png')}
+ .g-pb5{width:78px;height:78px;left:56px;top:-10px;opacity:.95;
+        background-image:url('../assets/pebbles/pebble-11.png')}
+ .g-dr2{width:30px;height:38px;right:14px;top:6px;opacity:.85;
+        background-image:url('../assets/leaves/droplet-tear.png')}
+ .g-pb6{width:58px;height:58px;left:18px;top:-4px;opacity:.9;
+        background-image:url('../assets/pebbles/pebble-09.png')}
+ .g-dr3{width:34px;height:34px;left:92px;top:12px;opacity:.8;
+        background-image:url('../assets/leaves/droplet-blob.png')}
+ .scroll{position:absolute;inset:0;overflow:auto;padding:30px 16px 186px;z-index:2}
+ .top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+ .greetbox{background:rgba(16,38,33,.64);border:1px solid rgba(255,255,255,.14);
+           border-radius:22px 14px 22px 14px;padding:9px 14px}
+ .greet{font-size:25px;font-weight:800;color:var(--chrome);line-height:1.2}
+ .place{font-size:12.5px;color:var(--chrome-dim);margin-top:3px}
+ /* settings button: clearly a button */
+ .gear{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.88);
+       border:1px solid rgba(255,255,255,.6);display:grid;place-items:center;
+       color:var(--t1);font-size:17px;box-shadow:0 5px 16px rgba(8,26,20,.26);flex:none}
+ .seclabel{display:inline-block;font-size:13px;font-weight:700;color:var(--chrome);margin:16px 2px 9px;
+           background:rgba(16,38,33,.64);border:1px solid rgba(255,255,255,.14);
+           border-radius:99px;padding:5px 13px}
+ .card{background:var(--card);border:1px solid var(--card-line);
+       border-radius:26px 18px 26px 18px;padding:15px 16px;margin-bottom:11px;
+       box-shadow:0 8px 26px rgba(8,26,20,.22);position:relative}
+ .card.alt{border-radius:18px 26px 18px 26px}
+ .card h3{font-size:15px;color:var(--t1);font-weight:700}
+ .card p{font-size:13px;color:var(--t2);line-height:1.6;margin-top:4px}
+ .hint{font-size:12px;color:var(--t3);margin-top:6px}
+ .pillrow{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+ .pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:99px;padding:3px 10px;
+       background:rgba(73,128,89,.16);color:#2b5c3a}
+ /* 4 — a small leaf as a design mark beside the pill */
+ .leafmark{width:22px;height:22px;background:url('../assets/leaves/leaf-soft.png') center/contain no-repeat;opacity:.9}
+ .bar{height:7px;border-radius:99px;background:rgba(28,84,48,.14);margin-top:11px;overflow:hidden}
+ .bar i{display:block;height:100%;width:58%;border-radius:99px;background:linear-gradient(90deg,var(--tile2),var(--tile1))}
+ .banner{background:rgba(255,255,255,.88);border:1px solid rgba(245,158,11,.45);
+         border-radius:22px 14px 22px 14px;padding:11px 14px;margin-bottom:13px}
+ .banner b{font-size:13.5px;color:#8a5a06;font-weight:700}
+ .banner span{display:block;font-size:12.5px;color:var(--t2);margin-top:2px}
+ .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:4px 0 13px}
+ .tile{border-radius:20px 14px 20px 14px;padding:14px 8px;text-align:center;color:#fff;
+       box-shadow:0 7px 20px rgba(8,26,20,.22)}
+ .t1{background:var(--tile1)} .t2{background:var(--tile2)} .t3{background:var(--tile3)}
+ .tile .n{font-size:23px;font-weight:800;line-height:1}
+ .tile .l{font-size:12px;font-weight:600;margin-top:3px;color:rgba(255,255,255,.9)}
+ .check{display:flex;align-items:center;gap:9px;margin-top:9px}
+ .check i{width:21px;height:21px;border-radius:50%;display:grid;place-items:center;
+          background:var(--tile2);color:#fff;font-size:12px;font-style:normal;flex:none}
+ .check em{width:21px;height:21px;border-radius:50%;border:1.6px solid rgba(28,84,48,.3);flex:none}
+ .check span{font-size:13px;color:var(--t1)}
+ .nav{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:99px;z-index:3;
+      display:flex;justify-content:space-around;align-items:center;
+      background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.5);box-shadow:0 10px 30px rgba(8,26,20,.3)}
+ .nav b{font-size:11px;font-weight:600;color:var(--t2);display:grid;justify-items:center;gap:3px}
+ .nav b.on{color:#204d31;font-weight:800;background:rgba(73,128,89,.22);border-radius:99px;padding:7px 15px}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div class="bg"></div>
+ <div class="deco">
+   <i class="fern"></i>
+   <i class="pb1"></i><i class="pb2"></i><i class="pb3"></i><i class="pb4"></i>
+ </div>
+ <div class="scroll">
+  <div class="top">
+    <div class="greetbox"><div class="greet">בוקר טוב, אורי</div>
+         <div class="place">Region II · Cagayan Valley</div></div>
+    <div class="gear">⚙</div>
+  </div>
+  <div class="banner"><b>⚠ נדרש חיבור לשרת</b>
+    <span>תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</span></div>
+  <div class="tiles">
+    <div class="tile t3"><div class="n">0</div><div class="l">ממתין</div></div>
+    <div class="tile t2"><div class="n">7</div><div class="l">אתרים</div></div>
+    <div class="tile t1"><div class="n">3</div><div class="l">עכשיו</div></div>
+  </div>
+  <div class="seclabel">הדבר הכי חשוב היום</div>
+  <div class="card">
+    <div class="pillrow"><span class="pill">מוקד</span><span class="leafmark"></span></div>
+    <h3>לבדוק את אתר San Lorenzo</h3>
+    <p>בדרך לטוגגאראו — לוודא שהקבלן קיבל את האישור לפני סוף השבוע.</p>
+    <div class="hint">תקוע 14 ימים · ממתין לאישור</div>
+    <div class="bar"><i></i></div>
+  </div>
+  <div class="gap"><i class="g-dr1"></i><i class="g-pb5"></i><i class="g-dr2"></i></div>
+  <div class="seclabel">משימות להיום</div>
+  <div class="card alt">
+    <span class="pill">3 פתוחות</span>
+    <div class="check"><i>✓</i><span>לאסוף מנוע מטוגגאראו</span></div>
+    <div class="check"><em></em><span>להתקשר לקבלן בדולרס</span></div>
+    <div class="check"><em></em><span>דוח חודשי — ליקווידציה</span></div>
+  </div>
+  <div class="gap"><i class="g-pb6"></i><i class="g-dr3"></i></div>
+  <div class="seclabel">קופה קטנה</div>
+  <div class="card"><h3>₱0</h3><p>חודש 2026-10 · 0 הוצאות</p></div>
+ </div>
+ <div class="nav">
+   <b class="on"><span>⌂</span>בית</b><b><span>☰</span>משימות</b>
+   <b><span>⌖</span>אתרים</b><b><span>▤</span>לוח</b><b><span>☯</span>טאו</b>
+ </div>
+</div></body></html>
