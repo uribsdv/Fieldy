@@ -214,7 +214,6 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .btn-primary{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
 [data-theme="nachal"] .cal-day.today .cal-dn{color:var(--gold-deep)}
 [data-theme="nachal"] .cal-view-tab.active{color:var(--gold-deep)}
-[data-theme="nachal"] .tao-subnav-btn[style*="linear-gradient"]{background:var(--gold2)!important}
 /* buttons that carry white text on the accent gradient: the gradient's light
    end is too pale for white type, so they use the page's sage like the primary action */
 [data-theme="nachal"] [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{
@@ -319,6 +318,69 @@ textarea,select,input{font-family:inherit}
   width:calc(100% - 40px);max-width:390px;height:50px;border-radius:99px;
   color:#fff;font-size:var(--fs-xl);font-weight:600;background:linear-gradient(135deg,#4A7760,#3A6149);
   border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
+/* ── Nachal · Tao ──────────────────────────────────
+   The Tao stays dark and is a different room from Home: deeper and greener,
+   with a soft teal-green light at the top. The gradient is on the screen
+   itself, not on the content wrapper inside it, so it runs to the bottom edge
+   under the nav bar — the wrapper used to end 120px above it and the page's
+   light colour showed in the strip. Cards are dark glass; two of them blur
+   what is behind them, the rest are translucent only. */
+[data-theme="nachal"] #screen-tao{
+  background:
+    radial-gradient(75% 34% at 50% 0%,rgba(61,191,174,.22),rgba(61,191,174,0) 72%),
+    linear-gradient(180deg,#14241B 0%,#0E1C14 100%)!important}
+[data-theme="nachal"] #screen-tao::before{display:none}
+[data-theme="nachal"] #screen-tao > div[style*="min-height:100%"]{background:transparent!important}
+/* one soft fern in the top corner, outside the text, behind everything */
+[data-theme="nachal"] #screen-tao::after{
+  content:'';position:fixed;left:calc(50% - 215px);top:-18px;width:150px;height:190px;z-index:0;pointer-events:none;
+  background:url('assets/leaves/fern-curve.png') center/contain no-repeat;
+  opacity:.2;filter:blur(2.5px);transform:rotate(-14deg)}
+/* the big cards: the Tao chapter and the panels */
+[data-theme="nachal"] #screen-tao div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:28px!important;
+  padding:22px!important;line-height:1.5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 28px rgba(255,255,255,.025)}
+[data-theme="nachal"] #screen-tao .tao-glass{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+/* list cards: meditations and talk scenarios */
+[data-theme="nachal"] #screen-tao [id^="med-btn-"],
+[data-theme="nachal"] #screen-tao .talk-scenario-btn{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px!important;
+  padding:16px 18px!important;line-height:1.5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 22px rgba(255,255,255,.02)}
+/* tiles inside a panel, the weekly-focus link and the tab switcher */
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid"][style*="padding:12px 14px"]{
+  background:rgba(255,255,255,.05)!important;border-radius:20px!important;padding:14px 16px!important;line-height:1.5}
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid var(--tao-line)"]{border-color:rgba(255,255,255,.10)!important}
+[data-theme="nachal"] #screen-tao button.tao-subnav-btn[style*="background:var(--tao-bg2)"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:20px!important}
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.10);border-radius:22px!important;padding:5px!important}
+[data-theme="nachal"] #screen-tao .tao-subnav-btn{border-radius:17px!important}
+/* small controls and fields: translucent, with the same hairline */
+[data-theme="nachal"] #screen-tao button[style*="background:var(--tao-panel)"]{
+  background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
+[data-theme="nachal"] #screen-tao input,[data-theme="nachal"] #screen-tao textarea{
+  background:rgba(8,18,13,.55)!important;border-color:rgba(255,255,255,.14)!important}
+/* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
+[data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
+/* the meditation sheet is dark too, so its text and its ring read */
+[data-theme="nachal"] .modal:has(#med-circle){background:#0E1C14!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
+[data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
+[data-theme="nachal"] .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
+/* the nav bar over the Tao: dark glass to match the room; the active
+   destination is the same pale capsule as on every other screen */
+[data-theme="nachal"]{--nh-tao-nav-a:.66}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-theme="nachal"]{--nh-tao-nav-a:.94}}
+@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
+  background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn .nav-icon svg{stroke:#E4EFE8}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-label{color:var(--t1)}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1690,11 +1752,10 @@ const THEMES = {
     '--blue-soft':'#eaf3f0', '--blue-line':'#c7dcd6', '--tile-a1':'#5e7a5e', '--tile-a2':'#506b50',
     '--tile-a-label':'#dceedc', '--tile-b1':'#2d5952', '--tile-b2':'#1f4b45', '--tile-b-label':'#d3efe9',
     '--tile-c1':'#113242', '--tile-c2':'#032535', '--tile-c-label':'#d5ecf9', '--cta1':'#0e7c74',
-    '--cta2':'#0a6961', '--progress-track':'#d8ede7', '--accent-rgb':'0,112,104', '--tao-bg':'#040c0d',
-    '--tao-bg2':'#031111', '--tao-panel':'#001b1c', '--tao-panel2':'#041a1b', '--tao-line':'#022223',
-    '--tao-line2':'#003739', '--tao-t1':'#d0f5f6', '--tao-t1b':'#95d8da', '--tao-t2':'#66b0b2',
-    '--tao-t3':'#478789', '--tao-gold':'#3edbd0', '--tao-gold2':'#00bab0', '--tao-gold3':'#00a198',
-    '--tao-ink':'#007a72', '--tao-accent-rgb':'0,161,152', '--tao-bg-rgb':'4,12,13', '--tao-panel-rgb':'0,27,28'
+    '--cta2':'#0a6961', '--progress-track':'#d8ede7', '--accent-rgb':'0,112,104', '--tao-bg':'#0A150F', '--tao-bg2':'#0E1C14', '--tao-panel':'#0F2018', '--tao-panel2':'#14261C', '--tao-line':'#1B3023',
+    '--tao-line2':'#223A2B', '--tao-t1':'#E3F3EA', '--tao-t1b':'#C0DACC', '--tao-t2':'#9ABBA9', '--tao-t3':'#7F9F8E',
+    '--tao-gold':'#6FE0CC', '--tao-gold2':'#3DBFAE', '--tao-gold3':'#2E9E90', '--tao-ink':'#8FDCC8',
+    '--tao-accent-rgb':'61,191,174', '--tao-bg-rgb':'10,21,15', '--tao-panel-rgb':'15,32,24'
   }}
 }
 // The accent-only presets this replaced. Nobody should land on a theme that no
@@ -2282,6 +2343,8 @@ function renderTaoChapter(el, idx) {
     })(i);
   });
 
+  // Nachal blurs what is behind two of the big cards and no more
+  if(currentTheme === 'nachal') el.querySelectorAll('div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]').forEach(function(c, i){ if(i < 2) c.classList.add('tao-glass') });
   el.scrollTop = 0;
   if(taoMode==='tao') playWater();
 }
