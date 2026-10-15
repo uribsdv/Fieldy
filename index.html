@@ -80,13 +80,20 @@ textarea,select,input{font-family:inherit}
 .form-select{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:var(--t1);font-size:var(--fs-base);outline:none}
 /* Tags */
 /* site search and its filter chips (every theme) */
-.site-search{position:relative;margin-bottom:10px}
+.site-search-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.site-search{position:relative;flex:1;min-width:0}
+.site-region-btn .ic{width:16px;height:16px;flex:none}
+.region-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 10px;background:none;text-align:start;color:var(--t1)}
+.region-row + .region-row{border-top:1px solid var(--line)}
+.region-box{width:24px;height:24px;flex:none;border-radius:7px;border:2px solid var(--gold);display:grid;place-items:center;color:#fff;font-size:15px}
+.region-row[aria-checked="true"] .region-box{background:var(--gold)}
+.region-name{flex:1;font-size:var(--fs-lg);font-weight:600}
+.region-count{font-size:var(--fs-sm);color:var(--t3)}
 .site-search-ic{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;color:var(--t3);display:flex;pointer-events:none}
 .site-search-x{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:4px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--t2);background:none}
 #site-search::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
 .site-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * var(--space-4));padding:2px var(--space-4)}
 .site-chips::-webkit-scrollbar{display:none}
-.site-chips + .site-chips{margin-top:6px}
 mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;padding:0 1px}
 /* selecting sites for a route (every theme) */
 .site-check{flex:none;width:44px;height:44px;margin-block:-10px;margin-inline-start:-10px;display:grid;place-items:center;background:none;padding:0}
@@ -539,17 +546,19 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
 /* ── Nachal · site search ── */
-html[data-theme="nachal"] #site-search{padding:14px 48px!important}
+html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 [data-theme="nachal"] .site-search-ic{inset-inline-start:18px}
 [data-theme="nachal"] .site-chip{min-height:40px;border-radius:99px!important}
-[data-theme="nachal"] .site-chip.small{min-height:36px}
 [data-theme="nachal"] .site-chip:not([aria-pressed="true"]){background:rgba(255,255,255,.62)!important;border-color:rgba(74,119,96,.24)!important}
 [data-theme="nachal"] .site-chip[aria-pressed="true"]{box-shadow:0 0 14px -3px rgba(var(--nh-glow-teal),.8)}
 [data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="open"]{background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
 [data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="stuck"]{background:var(--stuck)!important;color:#fff!important;box-shadow:0 0 14px -1px rgba(var(--nh-glow-rose),.85)}
 [data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="pending"]{background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
 [data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="resolved"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
-[data-theme="nachal"] .site-chip.small[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
+[data-theme="nachal"] .site-region-btn{min-height:52px;padding:0 16px!important}
+[data-theme="nachal"] .site-region-btn[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
+[data-theme="nachal"] .region-box{border-color:var(--nh-sage-deep);border-radius:9px}
+[data-theme="nachal"] .region-row[aria-checked="true"] .region-box{background:var(--nh-sage-deep)}
 [data-theme="nachal"] mark.hl{background:rgba(246,214,140,.75);box-shadow:0 0 8px rgba(246,214,140,.55)}
 [data-theme="nachal"] .site-count,[data-theme="nachal"] .site-dir-head{text-shadow:0 1px 3px rgba(4,14,10,.6)}
 /* ── Nachal · selecting sites ── */
@@ -4369,12 +4378,12 @@ function renderSites() {
           ${addBtnHtml('showAddSite()')}
         </div>
       </div>
-      ${siteSearchBarHtml()}
+      <div class="site-search-row">
+        ${siteSearchBarHtml()}
+        ${siteRegionBtnHtml()}
+      </div>
       <div class="site-chips" role="group" aria-label="סינון לפי סטטוס">
         ${SITE_STATUS_CHIPS.map(([v,l])=>siteChipHtml('setSiteFilter', v, l, siteFilter===v)).join('')}
-      </div>
-      <div class="site-chips site-chips-prov" role="group" aria-label="סינון לפי מחוז">
-        ${SITE_PROVINCES.map(([v,l])=>siteChipHtml('toggleSiteProvince', v, l, siteProvince===v, true)).join('')}
       </div>
     </div>
     <div style="padding:12px 16px">
@@ -4404,7 +4413,7 @@ const SITE_PROVINCES = [['isabela','Isabela'],['cagayan','Cagayan'],['nueva vizc
 const CAR_PROVINCES = ['car','cordillera','abra','apayao','benguet','ifugao','kalinga','mountain province']
 const SITE_STATUS_WORDS = {open:'פתוח open', pending:'ממתין waiting pending', resolved:'נפתר done resolved'}
 const SITE_SEARCH_SKIP = {id:1, photo:1, casePhotos:1, mondayLink:1, location:1, createdAt:1, stuckSince:1, status:1, updated:1}
-let siteQuery = '', siteProvince = null, siteSearchTimer = null
+let siteQuery = '', siteProvinces = [], siteSearchTimer = null
 function normSearch(str) {
   return String(str == null ? '' : str).toLowerCase().normalize('NFKD')
     .replace(/[̀-֑ͯ-ׇ]/g, '')
@@ -4449,8 +4458,11 @@ function matchesQuery(o, toks) {
   const words = siteHaystack(o)
   return toks.every(t => words.some(w => wordMatch(t, w)))
 }
-function matchesProvince(o, prov) {
-  if(!prov) return true
+function matchesProvince(o, provs) {
+  if(!provs || !provs.length) return true
+  return provs.some(prov => inProvince(o, prov))
+}
+function inProvince(o, prov) {
   const p = normSearch((o.province || '') + ' ' + (o.municipality || ''))
   if(prov === 'car') return CAR_PROVINCES.some(c => (' ' + p + ' ').includes(' ' + c + ' '))
   if(prov === 'cagayan') return /(^| )cagayan( |$)/.test(normSearch(o.province || '')) && !/cagayan de oro/.test(p)
@@ -4463,14 +4475,14 @@ function matchesStatus(s, f) {
 }
 function filteredSites() {
   const toks = searchTokens(siteQuery)
-  return state.sites.filter(s => matchesStatus(s, siteFilter) && matchesProvince(s, siteProvince) && matchesQuery(s, toks))
+  return state.sites.filter(s => matchesStatus(s, siteFilter) && matchesProvince(s, siteProvinces) && matchesQuery(s, toks))
 }
 // Monday directory entries that match, minus any site already tracked by name
 function directoryMatches() {
   const toks = searchTokens(siteQuery)
-  if(!toks.length && !siteProvince) return []
+  if(!toks.length && !siteProvinces.length) return []
   const tracked = {}; state.sites.forEach(s => { tracked[normSearch(s.name)] = 1 })
-  return (state.siteDirectory || []).filter(d => !tracked[normSearch(d.name)] && matchesProvince(d, siteProvince) && matchesQuery(d, toks))
+  return (state.siteDirectory || []).filter(d => !tracked[normSearch(d.name)] && matchesProvince(d, siteProvinces) && matchesQuery(d, toks))
 }
 // Wraps the words that matched in <mark>; everything else is escaped as usual.
 function hlText(raw, toks) {
@@ -4492,13 +4504,13 @@ function siteSearchBarHtml() {
   return `<div class="site-search">
       <span class="site-search-ic" aria-hidden="true">${icon('search')}</span>
       <input id="site-search" type="search" dir="auto" autocomplete="off" enterkeyhint="search" aria-label="חיפוש אתרים"
-        placeholder="חיפוש: שם, מחוז, קוד (A08), קבלן…" value="${esc(siteQuery)}" oninput="onSiteSearchInput(this.value)"
+        placeholder="חיפוש אתר, קוד, קבלן" value="${esc(siteQuery)}" oninput="onSiteSearchInput(this.value)"
         style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-pill);padding:11px 42px;font-size:var(--fs-base);color:var(--t1);outline:none"/>
       <button id="site-search-clear" class="site-search-x" onclick="clearSiteSearch()" aria-label="נקה חיפוש" style="${siteQuery?'':'display:none'}">${icon('x')}</button>
     </div>`
 }
-function siteChipHtml(fn, v, label, on, small) {
-  return `<button class="site-chip${small?' small':''}" data-f="${esc(v)}" aria-pressed="${on}" onclick="${fn}('${esc(v)}')" style="flex:${small?'none':'1 0 auto'};white-space:nowrap;border-radius:var(--radius-pill);padding:${small?'6px 13px':'8px 10px'};font-size:${small?'var(--fs-sm)':'var(--fs-base)'};font-weight:600;border:1px solid ${on?(small?'var(--accent-line)':'transparent'):'var(--line)'};background:${on?(small?'var(--accent-soft)':'var(--gold)'):'var(--surface)'};color:${on?(small?'var(--gold)':'#fff'):'var(--t2)'}">${label}</button>`
+function siteChipHtml(fn, v, label, on) {
+  return `<button class="site-chip" data-f="${esc(v)}" aria-pressed="${on}" onclick="${fn}('${esc(v)}')" style="flex:1 0 auto;white-space:nowrap;border-radius:var(--radius-pill);padding:8px 10px;font-size:var(--fs-base);font-weight:600;border:1px solid ${on?'transparent':'var(--line)'};background:${on?'var(--gold)':'var(--surface)'};color:${on?'#fff':'var(--t2)'}">${label}</button>`
 }
 function onSiteSearchInput(v) {
   siteQuery = v
@@ -4511,8 +4523,46 @@ function clearSiteSearch() {
   renderSites()
   const inp = document.getElementById('site-search'); if(inp) inp.focus()
 }
-function resetSiteFilters() { siteQuery = ''; siteProvince = null; siteFilter = 'all'; renderSites() }
-function toggleSiteProvince(p) { siteProvince = siteProvince === p ? null : p; renderSites() }
+function resetSiteFilters() { siteQuery = ''; siteProvinces = []; siteFilter = 'all'; renderSites() }
+// ── region: one button that opens a small sheet of provinces (multi-select) ──
+function siteRegionLabel() {
+  if(!siteProvinces.length) return 'אזור'
+  if(siteProvinces.length === 1) return (SITE_PROVINCES.find(p => p[0] === siteProvinces[0]) || [0, siteProvinces[0]])[1]
+  return siteProvinces.length + ' אזורים'
+}
+function siteRegionBtnHtml() {
+  const on = siteProvinces.length > 0
+  return `<button id="site-region-btn" class="site-region-btn" aria-haspopup="dialog" aria-pressed="${on}" aria-label="סינון לפי אזור: ${on ? esc(siteRegionLabel()) : 'הכל'}" onclick="showRegionSheet()"
+      style="flex:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:var(--radius-pill);padding:0 14px;min-height:44px;font-size:var(--fs-base);font-weight:600;border:1px solid ${on?'var(--accent-line)':'var(--line)'};background:${on?'var(--accent-soft)':'var(--surface)'};color:${on?'var(--gold)':'var(--t2)'}">
+      <span>${esc(siteRegionLabel())}</span>${icon('chevron-down')}</button>`
+}
+function toggleSiteProvince(p) {
+  const i = siteProvinces.indexOf(p)
+  if(i >= 0) siteProvinces.splice(i, 1); else siteProvinces.push(p)
+  renderSites()
+  if(document.querySelector('.region-sheet')) showRegionSheet()
+}
+function clearSiteProvinces() { siteProvinces = []; renderSites(); if(document.querySelector('.region-sheet')) showRegionSheet() }
+function showRegionSheet() {
+  const n = filteredSites().length
+  openModal(`<div class="region-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:var(--fs-xl);font-weight:700">${icon('map-pin')} אזור</div>
+        <button onclick="clearSiteProvinces()" ${siteProvinces.length ? '' : 'disabled'} class="region-clear" style="background:none;color:var(--gold);font-size:var(--fs-base);font-weight:600;padding:10px 6px;min-height:44px;${siteProvinces.length ? '' : 'opacity:.45'}">נקה בחירה</button>
+      </div>
+      <div role="group" aria-label="מחוזות">
+        ${SITE_PROVINCES.map(([v, l]) => {
+          const on = siteProvinces.includes(v), c = state.sites.filter(s => inProvince(s, v)).length
+          return `<button class="region-row" role="checkbox" aria-checked="${on}" onclick="toggleSiteProvince('${v}')">
+              <span class="region-box">${on ? icon('check') : ''}</span>
+              <span class="region-name">${l}</span>
+              <span class="region-count">${c} ${c === 1 ? 'אתר' : 'אתרים'}</span>
+            </button>`
+        }).join('')}
+      </div>
+      <button class="btn-primary" style="margin-top:14px" onclick="closeModal()">הצג ${n} ${n === 1 ? 'אתר' : 'אתרים'}</button>
+    </div>`)
+}
 // only the list (and the map) redraws while typing, so the box keeps focus
 function refreshSiteResults() {
   if(currentScreen !== 'sites') return
@@ -4525,7 +4575,7 @@ function refreshSiteResults() {
 }
 function sitesResultsHtml(sites) {
   const toks = searchTokens(siteQuery)
-  const filtering = toks.length || siteProvince || siteFilter !== 'all'
+  const filtering = toks.length || siteProvinces.length || siteFilter !== 'all'
   const dir = directoryMatches()
   const dirShown = siteFilter === 'all' ? dir : []
   window.__dirResults = dirShown.slice(0, 30)
