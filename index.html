@@ -258,8 +258,9 @@ textarea,select,input{font-family:inherit}
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 24%);mask-image:linear-gradient(to bottom,transparent 0,#000 24%)}
 [data-theme="nachal"] .nh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 [data-theme="nachal"] .nh-date{font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:2px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
-[data-theme="nachal"] .nh-greet{font-size:32px;font-weight:400;color:#fff;line-height:1.15;letter-spacing:-.02em;text-shadow:0 1px 3px rgba(4,14,10,.5)}
-[data-theme="nachal"] .nh-greet .ic{width:.7em;height:.7em}
+[data-theme="nachal"] .nh-greet{font-size:28px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(4,14,10,.6),0 0 18px rgba(4,14,10,.4)}
+[data-theme="nachal"] .nh-greet .ic{width:.62em;height:.62em}
+[data-theme="nachal"] .nh-region{font-size:var(--fs-md);color:var(--nh-on-dark2);margin-top:3px;text-shadow:0 1px 3px rgba(4,14,10,.7)}
 /* three counts as one quiet line; each is still a button that opens its
    screen, with a 44px target made from padding the line does not show */
 [data-theme="nachal"] .nh-stats{display:flex;align-items:center;margin:-4px 0;font-size:var(--fs-md);font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(4,14,10,.6)}
@@ -291,9 +292,19 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .nh-prog-row b{color:#fff}
 [data-theme="nachal"] .nh-prog-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
 [data-theme="nachal"] .nh-prog-bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
-[data-theme="nachal"] .nh #daily-briefing{margin-top:14px;border:1px solid rgba(255,255,255,.4)!important;
+[data-theme="nachal"] .nh #daily-briefing{margin-top:0;border:1px solid rgba(255,255,255,.4)!important;
   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-[data-theme="nachal"] .nh-sec{margin:18px 2px 9px;font-size:var(--fs-base);font-weight:700;color:#fff;letter-spacing:.5px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
+/* section headings: large bold white type over a feathered wash with no edge */
+[data-theme="nachal"] .nh-sec{position:relative;margin:22px 2px 11px;padding:4px 2px;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;text-shadow:0 1px 4px rgba(2,16,13,.7)}
+[data-theme="nachal"] .nh-sec .ic{width:.8em;height:.8em}
+[data-theme="nachal"] .nh-sec::before{content:'';position:absolute;top:-26px;bottom:-26px;right:-64px;left:-10px;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 46% 56% at 66% 50%,rgba(5,24,18,.55) 0%,rgba(5,24,18,.46) 42%,rgba(5,24,18,.2) 72%,rgba(5,24,18,0) 100%)}
+[data-theme="nachal"] .nh{isolation:isolate}
+/* the quote of the day at the top, as a light card like the others */
+[data-theme="nachal"] .nh-quote{margin-top:14px}
+[data-theme="nachal"] .nh-quote > div{background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.4)!important;
+  border-radius:22px!important;margin-bottom:0!important;padding:14px 18px!important;
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
 [data-theme="nachal"] .nh-list{padding:6px 16px}
 [data-theme="nachal"] .nh-row{display:flex;align-items:center;gap:8px;min-height:48px}
 [data-theme="nachal"] .nh-row[role="button"]{cursor:pointer}
@@ -1505,7 +1516,8 @@ const TRANSLATIONS = {
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
   home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
   home_more: {he:'עוד', en:'More'},
-  home_more_hint: {he:'ציטוט, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote, insights, outside work, ask Fieldy'},
+  home_more_hint: {he:'תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Insights, outside work, ask Fieldy'},
+  home_focus_heading: {he:'הדבר הכי חשוב היום', en:'The most important thing today'},
   home_briefing_title: {he:'תדריך הבוקר', en:"Morning briefing"},
   home_briefing_refresh: {he:'רענן', en:'Refresh'},
   home_briefing_generate: {he:'צור תדריך', en:'Generate briefing'},
@@ -3201,7 +3213,8 @@ function renderHome() {
 //   three counters ....... one line of three tappable counts, each still goes to its screen
 //   add from WhatsApp .... the capsule above the nav bar
 //   mood picker + tip .... behind the leaf button, closed until it is tapped
-//   quote, insights, outside work, ask Fieldy .... inside the closed "more" row
+//   quote of the day .... a card at the top, under the header
+//   insights, outside work, ask Fieldy .... inside the closed "more" row
 let moodPanelOpen = false
 function toggleMoodPanel() { moodPanelOpen = !moodPanelOpen; if(currentScreen === 'home') renderHome() }
 
@@ -3250,6 +3263,7 @@ function renderHomeNachal() {
         <div class="nh-head">
           <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
           <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-region">Region II · Cagayan Valley</div>
           <div class="nh-stats">
             <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
             <button onclick="navigateTo('sites')"><b>${openSites}</b> ${tr('home_stat_sites')}</button><s>·</s>
@@ -3262,6 +3276,7 @@ function renderHomeNachal() {
         <span class="nh-strip-i">${icon('alert-triangle')}</span>
         <span class="nh-strip-t"><b>${tr('home_server_needed_title')}</b> · ${tr('home_server_needed_body')}</span>
       </div>` : ''}
+      ${(function(){ var q = quotePanelHtml(); return q ? `<div class="nh-quote">${q}</div>` : '' })()}
       <div class="nh-tools">
         <button class="nh-ask" onclick="navigateTo('input')">${icon('search')}<span>${tr('home_ask_organize')}</span></button>
         <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
@@ -3271,7 +3286,7 @@ function renderHomeNachal() {
         <div class="nh-prog-row"><span>${tr('home_progress')}</span><b>${done}/${total}</b></div>
         <div class="nh-prog-bar"><i style="width:${pct}%"></i></div>
       </div>` : ''}
-      ${dailyBriefingHtml()}
+      ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
       ${rightNowNachalHtml(curMood ? curMood.mood : null)}
       <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
         <div>
@@ -3282,7 +3297,7 @@ function renderHomeNachal() {
       </div>
       ${total===0&&!state.focus?`<div class="card">${emptyHtml(icon('clipboard'), tr('home_empty_start'), 'padding:24px 0')}</div>`:''}
       ${accordionHtml('nh-more', {title:tr('home_more'), hint:tr('home_more_hint')}, function(){
-        return quotePanelHtml() + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
+        return insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
       }, 'margin-top:12px')}
     </div>
     <div class="nh-wa-zone" aria-hidden="true"></div>
