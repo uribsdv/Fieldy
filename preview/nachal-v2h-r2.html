@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נחל v2h r2 — הבית המלא על הרקע המצויר</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{
+   /* the app's own size scale — cards are back to the sizes they had */
+   --fs-2xs:10px;--fs-xs:11px;--fs-sm:12px;--fs-md:13px;--fs-base:14px;--fs-lg:15px;--fs-xl:16px;--fs-2xl:18px;--fs-4xl:26px;
+
+   --t1:#0B1A12; --t2:#3B4740; --t3:#55615A;
+   --on-dark:#FFFFFF; --on-dark2:#E4EFE8;
+   --card-a:.95;
+   --card:rgba(240,248,243,var(--card-a));          /* mint-white, near-opaque */
+   --line:rgba(27,46,36,.12);
+   --accent:#4A7760; --accent-deep:#3A6149; --accent-soft:rgba(127,165,138,.18);
+   --amber-ink:#8A5A06; --amber-line:rgba(217,140,20,.5);
+   --stuck:#B84600; --blue:#396C8C; --purple:#766496;
+   --radius:20px;
+   --nav-a:.58;
+ }
+ @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+   :root{--card-a:.99;--nav-a:.95}
+ }
+ @media (prefers-reduced-transparency:reduce){ :root{--card-a:1;--nav-a:.97} }
+
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:#0d1512;
+      display:flex;justify-content:center;padding:26px 14px;min-height:100vh}
+ button{font:inherit;cursor:pointer;border:none;background:none}
+ svg.i{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em;fill:none;stroke:currentColor;
+       stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+ .phone{width:390px;height:844px;border-radius:38px;overflow:hidden;position:relative;
+        box-shadow:0 26px 70px rgba(0,0,0,.5)}
+ /* the illustrated background stays put; the page scrolls over it */
+ .bg{position:absolute;inset:0;background:url('../assets/backgrounds/bg-nachal-deep.webp') center/cover no-repeat}
+ .wash{position:absolute;inset:0;pointer-events:none;
+       background:linear-gradient(180deg,rgba(8,26,18,.50) 0%,rgba(8,26,18,.34) 40%,rgba(8,26,18,.20) 100%)}
+ .scroll{position:absolute;inset:0;overflow:auto;padding:48px 16px 120px;scrollbar-width:none}
+ .scroll::-webkit-scrollbar{display:none}
+
+ /* ---- header, straight on the background ---- */
+ .hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+ .date{font-size:var(--fs-base);color:var(--on-dark2);margin-bottom:4px}
+ .greet{font-size:32px;font-weight:400;color:var(--on-dark);letter-spacing:-.02em;line-height:1.15}
+ .region{font-size:var(--fs-base);color:var(--on-dark2);margin-top:2px}
+ .onbg{text-shadow:0 1px 3px rgba(4,14,10,.55)}
+ .gear{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:18px;
+       background:rgba(12,32,24,.32);border:1px solid rgba(255,255,255,.24)}
+ .prog{margin-bottom:16px}
+ .prog .row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--on-dark2);margin-bottom:6px}
+ .prog .row b{color:#fff}
+ .bar{height:6px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.2)}
+ .bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
+
+ /* ---- cards ---- */
+ .card{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;
+       box-shadow:0 14px 30px -18px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.7)}
+ /* the two main cards — the briefing (which holds the focus) and the first
+    "now" item — are the only ones that blur what is behind them */
+ .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+ .label{font-size:var(--fs-sm);color:var(--accent-deep);font-weight:700;letter-spacing:.5px}
+ .muted{color:var(--t3)}
+ .chip{background:#fff;border:1px solid rgba(74,119,96,.3);border-radius:8px;padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)}
+ .badge{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px}
+
+ .banner{border:1px solid var(--amber-line)}
+ .banner .ttl{font-size:var(--fs-base);color:var(--amber-ink);font-weight:700}
+ .banner .txt{font-size:var(--fs-base);color:var(--t3);margin-top:2px}
+
+ .quote{font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center}
+
+ /* stat tiles: same three destinations, now quiet translucent tiles */
+ .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+ .tile{text-align:center;border-radius:16px;padding:14px 8px;color:#fff;
+       background:rgba(12,32,24,.50);border:1px solid rgba(255,255,255,.22)}
+ .tile .ic{font-size:20px;line-height:1;margin-bottom:4px}
+ .tile .n{font-size:24px;font-weight:800}
+ .tile .l{font-size:var(--fs-base);font-weight:600;color:var(--on-dark2);margin-top:2px}
+
+ .cta{width:100%;display:block;margin-bottom:16px;padding:14px;border-radius:99px;
+      font-size:var(--fs-xl);font-weight:600;color:#fff;text-align:center;
+      background:rgba(12,32,24,.36);border:1px solid rgba(255,255,255,.3)}
+
+ .brief{border-right:3px solid var(--accent)}
+ .focus{display:flex;align-items:center;gap:10px;margin:10px 0 8px}
+ .focus .t{flex:1;font-size:var(--fs-base);font-weight:700;color:var(--t1);line-height:1.4}
+ .site{display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px}
+ .site b{font-weight:600}
+ .lead{display:flex;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin:8px 0 10px}
+
+ .now-label{font-size:var(--fs-base);color:#fff;font-weight:700;letter-spacing:.5px;margin:4px 2px 8px}
+ .rn{border-right:3px solid var(--accent)}
+ .rn .t{font-size:16px;font-weight:700;color:var(--t1);line-height:1.4}
+ .rn .s{font-size:13px;color:var(--t3);margin-top:4px}
+ .done-btn{width:100%;margin-top:12px;padding:11px;border-radius:12px;background:var(--accent-deep);color:#fff;font-size:var(--fs-base);font-weight:700}
+ .rn.small{padding:10px 14px}
+ .rn.small .t{font-size:14px;font-weight:600}
+ .rn.small .s{font-size:12px}
+ .limit{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
+        font-size:var(--fs-sm);color:var(--t2);background:var(--card);border:1px solid var(--amber-line);margin:-2px 0 16px}
+ .limit button{color:var(--accent-deep);font-weight:700;font-size:var(--fs-sm);white-space:nowrap}
+
+ .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+ .mood{padding:8px 1px;border-radius:12px;border:1.5px solid var(--line);background:#fff;text-align:center}
+ .mood .badge{width:28px;height:28px;margin:0 auto 2px;font-size:14px}
+ .mood .l{font-size:9.5px;font-weight:600;color:var(--t2);line-height:1.2;margin-top:2px}
+ .mood.on{border-color:#D98C14;background:rgba(245,158,11,.12)}
+ .mood.on .l{color:var(--amber-ink)}
+
+ .tip{border:1px solid var(--amber-line);background:linear-gradient(rgba(245,158,11,.07),rgba(245,158,11,.07)),var(--card)}
+ .tip .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+ .tip .lbl{font-size:var(--fs-sm);color:var(--amber-ink);font-weight:700;letter-spacing:1px}
+ .tip .other{background:#fff;border:1px solid var(--amber-line);border-radius:8px;padding:4px 10px;color:var(--amber-ink);font-size:var(--fs-sm);font-weight:600}
+ .calm{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;
+       border-radius:12px;border:1px solid var(--amber-line);background:#fff;color:var(--amber-ink);font-size:var(--fs-base);font-weight:700}
+ .tip .act{font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5}
+ .tip textarea{width:100%;min-height:70px;background:#fff;border:1px solid var(--amber-line);border-radius:10px;padding:10px 12px;
+               font:inherit;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px;color:var(--t1)}
+ .tip textarea::placeholder{color:var(--t3)}
+ .save{background:#946006;border-radius:8px;padding:8px 16px;color:#fff;font-size:var(--fs-md);font-weight:600;margin-top:8px}
+
+ .acc{display:flex;align-items:center;gap:10px}
+ .acc .ttl{font-size:var(--fs-base);font-weight:700;color:var(--t1)}
+ .acc .hint{flex:1;font-size:var(--fs-sm);color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .acc .chev{color:var(--accent-deep)}
+ .toggles{display:flex;gap:8px}
+ .toggles button{flex:1;padding:12px 4px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--t2);font-size:var(--fs-base);font-weight:600}
+
+ /* ---- the bar: frosted capsule, all six destinations ---- */
+ .nav{position:absolute;left:12px;right:12px;bottom:16px;height:70px;border-radius:99px;z-index:5;
+      display:flex;justify-content:space-around;align-items:center;padding:0 6px;
+      background:rgba(236,242,239,var(--nav-a));
+      -webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+      border:1px solid rgba(255,255,255,.5);
+      box-shadow:0 18px 34px -14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.55)}
+ .nav b{position:relative;width:52px;height:56px;display:grid;align-content:center;justify-items:center;gap:3px;
+        font-size:10.5px;font-weight:500;color:var(--t1)}
+ .nav b svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+ .nav b.on{width:58px;border-radius:22px;font-weight:700;background:#BCD9CD;box-shadow:inset 0 0 0 1.5px var(--accent-deep)}
+ .nav .nb{position:absolute;top:5px;left:9px;min-width:16px;height:16px;border-radius:99px;background:#C0392B;color:#fff;
+          font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+ @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+ <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+ <symbol id="flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+ <symbol id="settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+ <symbol id="alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01"/></symbol>
+ <symbol id="quote" viewBox="0 0 24 24"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2zM5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/></symbol>
+ <symbol id="shuffle" viewBox="0 0 24 24"><path d="m18 14 4 4-4 4M18 2l4 4-4 4M2 18h1.97a4 4 0 0 0 3.3-1.7l5.45-8.6a4 4 0 0 1 3.3-1.7H22M2 6h1.97a4 4 0 0 1 3.6 2.2M22 18h-6.04a4 4 0 0 1-3.3-1.8l-.36-.45"/></symbol>
+ <symbol id="msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+ <symbol id="flower" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/></symbol>
+ <symbol id="users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+ <symbol id="clip" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+ <symbol id="target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+ <symbol id="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+ <symbol id="pin" viewBox="0 0 24 24"><path d="M20 10c0 5-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+ <symbol id="book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></symbol>
+ <symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+ <symbol id="wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+ <symbol id="waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+ <symbol id="wind" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+ <symbol id="battery" viewBox="0 0 24 24"><rect width="16" height="10" x="2" y="7" rx="2"/><path d="M22 11v2"/></symbol>
+ <symbol id="refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M8 16H3v5"/></symbol>
+ <symbol id="bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4"/></symbol>
+ <symbol id="leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10ZM2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></symbol>
+ <symbol id="dumbbell" viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M6 20v-2a2 2 0 0 1 2-2M18 20v-2a2 2 0 0 0-2-2M6 4v2a2 2 0 0 0 2 2M18 4v2a2 2 0 0 1-2 2M3 9v6M21 9v6M12 8v8"/></symbol>
+ <symbol id="brain" viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18ZM12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18ZM12 5v13"/></symbol>
+</svg>
+
+<div class="phone">
+ <div class="bg"></div><div class="wash"></div>
+ <div class="scroll">
+
+  <div class="hdr">
+    <div class="onbg">
+      <div class="date">יום חמישי, 15 באוקטובר · <svg class="i"><use href="#flame"/></svg> 4 ימים</div>
+      <div class="greet">בוקר טוב, אורי <svg class="i"><use href="#sun"/></svg></div>
+      <div class="region">Region II · Cagayan Valley</div>
+    </div>
+    <button class="gear" aria-label="הגדרות"><svg class="i"><use href="#settings"/></svg></button>
+  </div>
+
+  <div class="card banner">
+    <div class="ttl"><svg class="i"><use href="#alert"/></svg> נדרש חיבור לשרת</div>
+    <div class="txt">תכונות ה-AI והסנכרון עובדות דרך השרת — לחץ להגדרות</div>
+  </div>
+
+  <div class="prog onbg">
+    <div class="row"><span>התקדמות היום</span><b>1/4</b></div>
+    <div class="bar"><i style="width:25%"></i></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="label" style="letter-spacing:1px"><svg class="i"><use href="#quote"/></svg> ציטוט</span>
+      <button class="chip"><svg class="i"><use href="#shuffle"/></svg> אחר</button>
+    </div>
+    <div class="quote" dir="auto">"Who's living your life?"</div>
+  </div>
+
+  <div class="tiles">
+    <button class="tile"><div class="ic"><svg class="i"><use href="#msg"/></svg></div><div class="n">3</div><div class="l">עכשיו</div></button>
+    <button class="tile"><div class="ic"><svg class="i"><use href="#flower"/></svg></div><div class="n">7</div><div class="l">אתרים</div></button>
+    <button class="tile"><div class="ic"><svg class="i"><use href="#users"/></svg></div><div class="n">0</div><div class="l">ממתין</div></button>
+  </div>
+
+  <button class="cta">+ הוסף הודעות מוואטסאפ</button>
+
+  <div class="card glass brief">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+      <span class="label"><svg class="i"><use href="#sun"/></svg> תדריך הבוקר</span>
+      <button class="chip" style="background:var(--accent-deep);border-color:transparent;color:#fff;font-weight:700"><svg class="i"><use href="#clip"/></svg> סקור משימות</button>
+    </div>
+    <div class="focus">
+      <span class="badge" style="background:var(--accent-soft);color:var(--accent-deep)"><svg class="i"><use href="#target"/></svg></span>
+      <div class="t">לבדוק את אתר San Lorenzo</div>
+      <span style="color:var(--accent-deep)"><svg class="i"><use href="#chev"/></svg></span>
+    </div>
+    <div class="site"><span style="color:var(--stuck)"><svg class="i"><use href="#alert"/></svg></span><b>San Lorenzo</b><span class="muted">תקוע 14 ימים</span></div>
+    <div class="site"><span style="color:var(--blue)"><svg class="i"><use href="#pin"/></svg></span><b>Dolores</b><span class="muted">ממתין לקבלן</span></div>
+    <div class="lead"><span style="color:var(--purple);flex:none"><svg class="i"><use href="#book"/></svg></span><span><b style="color:var(--t1)">סבלנות</b> · מה שתקוע לא זז מלחץ, הוא זז מצעד אחד.</span></div>
+    <div class="muted" style="font-size:var(--fs-sm)">חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.</div>
+  </div>
+
+  <div class="now-label onbg"><svg class="i"><use href="#target"/></svg> עכשיו</div>
+  <div class="card glass rn">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="badge" style="background:var(--accent-soft);color:var(--accent-deep)"><svg class="i"><use href="#clip"/></svg></span>
+      <div style="flex:1;min-width:0"><div class="t">להתקשר לקבלן בדולרס</div><div class="s">משימה · היום</div></div>
+    </div>
+    <button class="done-btn"><svg class="i"><use href="#check"/></svg> סמן כבוצע</button>
+  </div>
+  <div class="card rn small"><div class="t">דוח חודשי — ליקווידציה</div><div class="s">משימה · היום</div></div>
+  <div class="limit"><span><svg class="i"><use href="#wind"/></svg> מצב מפוזר: שני דברים קטנים וברורים, לא יותר.</span><button>הצג הכל (2)</button></div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)"><svg class="i"><use href="#wallet"/></svg> ליקוידציה שוטפת</div>
+        <div class="muted" style="font-size:var(--fs-sm);margin-top:2px">חודש 2026-10 · 0 הוצאות</div>
+      </div>
+      <div style="font-size:var(--fs-2xl);font-weight:800;color:var(--t1)">₱0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin-bottom:10px">איך אתה מרגיש עכשיו?</div>
+    <div class="moods">
+      <button class="mood"><span class="badge" style="background:rgba(239,68,68,.14);color:#B42B2B"><svg class="i"><use href="#waves"/></svg></span><div class="l">מוצף</div></button>
+      <button class="mood on"><span class="badge" style="background:rgba(245,158,11,.18);color:var(--amber-ink)"><svg class="i"><use href="#wind"/></svg></span><div class="l">מפוזר</div></button>
+      <button class="mood"><span class="badge" style="background:rgba(107,70,193,.14);color:#5A3AA8"><svg class="i"><use href="#battery"/></svg></span><div class="l">עייף</div></button>
+      <button class="mood"><span class="badge" style="background:rgba(26,143,122,.14);color:#147263"><svg class="i"><use href="#target"/></svg></span><div class="l">פוקוס</div></button>
+      <button class="mood"><span class="badge" style="background:rgba(232,148,12,.16);color:#8A5A06"><svg class="i"><use href="#flame"/></svg></span><div class="l">מוטיבציה גבוהה</div></button>
+    </div>
+  </div>
+
+  <div class="card tip">
+    <div class="hd">
+      <div class="lbl"><svg class="i"><use href="#wind"/></svg> מפוזר · המלצות עכשיו</div>
+      <button class="other"><svg class="i"><use href="#refresh"/></svg> טיפ אחר</button>
+    </div>
+    <button class="calm"><svg class="i"><use href="#wind"/></svg> ויסות מהיר · 60 שניות</button>
+    <div class="act">• בחר משימה אחת קטנה ותשים טיימר ל-10 דקות — רק עליה.</div>
+    <div class="act">• סגור טאבים/אפליקציות מיותרות לרגע. פחות גירויים, יותר פוקוס.</div>
+    <div class="act">• תגיד למישהו במה אתה מתחיל עכשיו — אחריות חיצונית עוזרת להתמקד.</div>
+    <textarea placeholder="מה רץ לך בראש? תכתוב כאן ותשחרר..."></textarea>
+    <button class="save">שמור ופנה מקום</button>
+  </div>
+
+  <div class="card"><div class="acc"><span style="color:var(--accent-deep)"><svg class="i"><use href="#bulb"/></svg></span><span class="ttl">תובנות</span><span class="hint">3 פריטים</span><span class="chev"><svg class="i"><use href="#chev"/></svg></span></div></div>
+
+  <div class="card">
+    <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin-bottom:10px"><svg class="i"><use href="#leaf"/></svg> מחוץ לעבודה</div>
+    <div class="toggles">
+      <button><svg class="i"><use href="#dumbbell"/></svg> סמן אימון</button>
+      <button><svg class="i"><use href="#flower"/></svg> סמן מדיטציה</button>
+    </div>
+  </div>
+
+  <div class="card"><div class="acc"><span style="color:var(--t1)"><svg class="i"><use href="#brain"/></svg></span><span class="ttl">שאל את Fieldy</span><span class="hint">דורש חיבור לשרת בהגדרות.</span><span class="chev"><svg class="i"><use href="#chev"/></svg></span></div></div>
+ </div>
+
+ <div class="nav">
+   <b class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>בית</b>
+   <b><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>משימות<span class="nb">3</span></b>
+   <b><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>אתרים</b>
+   <b><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8"/><circle cx="17" cy="7" r="2.6"/><path d="M15.5 14.3c2.6.4 4.4 2.3 4.9 5.2"/></svg>אנשים</b>
+   <b><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/></svg>לוח</b>
+   <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/></svg>טאו</b>
+ </div>
+</div></body></html>
