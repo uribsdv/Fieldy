@@ -106,6 +106,66 @@ textarea,select,input{font-family:inherit}
 /* Action result */
 .action-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-xl);padding:var(--space-4);font-size:var(--fs-lg);color:var(--t1);line-height:1.8;white-space:pre-wrap;margin-bottom:var(--space-3);direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
 
+/* ── NACHAL ────────────────────────────────────────
+   Decoration only, and only for this theme: every rule below is scoped to
+   [data-theme="nachal"], so the other three keep their exact pixels. The
+   photographic wash sits in its own layer behind everything, anchored to the
+   top where the image is brightest, and masked to nothing by 55% of the
+   screen — the dark half of the photo never reaches text. 35% at the top was
+   the largest value that still kept --t2 above 4.5:1 against the darkest
+   pixel in each row (measured per row, with the mask applied).
+   The "milky glass" card is CSS; the glass PNGs are irregular organic blobs
+   and would mean text sitting on a picture, which is the one thing this is
+   not allowed to do. backdrop-filter is used in the nav bar only. */
+[data-theme="nachal"] .screen{position:relative;isolation:isolate}
+[data-theme="nachal"] .screen::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-position:top center;background-size:cover;background-repeat:no-repeat;
+  opacity:.25;
+  /* nothing under the opaque page header, which would just hide it; the river
+     shows in the gaps between cards and is gone by 70% of the screen. 25% is
+     the ceiling that keeps --t2 above 4.5:1 against the darkest pixel of every
+     row it covers (measured per row, per background, with this exact mask). */
+  -webkit-mask-image:linear-gradient(to bottom,transparent 16%,#000 30%,#000 50%,transparent 70%);
+          mask-image:linear-gradient(to bottom,transparent 16%,#000 30%,#000 50%,transparent 70%)}
+[data-theme="nachal"] #screen-home::before{background-image:url('assets/backgrounds/bg-river-light.webp')}
+[data-theme="nachal"] #screen-tasks::before{background-image:url('assets/backgrounds/bg-water-ripple.webp')}
+[data-theme="nachal"] #screen-sites::before{background-image:url('assets/backgrounds/bg-fern-mist.webp');opacity:.20}
+[data-theme="nachal"] #screen-calendar::before{background-image:url('assets/backgrounds/bg-water-ripple.webp')}
+/* the Tao room is dark already, so its photo needs no mask — but 25% is the
+   ceiling that keeps --tao-t2 above 4.5:1 (45% measured 3.56) */
+[data-theme="nachal"] #screen-tao::before{
+  background-image:url('assets/backgrounds/bg-forest-night.webp');opacity:.25;
+  -webkit-mask-image:none;mask-image:none}
+/* pebbles, a sprig and a droplet — static, never behind body text */
+[data-theme="nachal"] #screen-home::after,
+[data-theme="nachal"] #screen-tasks::after,
+[data-theme="nachal"] #screen-sites::after,
+[data-theme="nachal"] #screen-tao::after{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-repeat:no-repeat}
+[data-theme="nachal"] #screen-home::after{
+  background-image:url('assets/pebbles/pebble-11.png'),url('assets/pebbles/pebble-09.png'),url('assets/leaves/sprig-dark.png');
+  background-position:left -24px bottom 96px, left 44px bottom 58px, right -16px top 10px;
+  background-size:104px auto, 74px auto, 92px auto;opacity:.11}
+[data-theme="nachal"] #screen-tasks::after{
+  background-image:url('assets/leaves/droplet-blob.png');
+  background-position:right -14px bottom 120px;background-size:88px auto;opacity:.10}
+[data-theme="nachal"] #screen-sites::after{
+  background-image:url('assets/pebbles/pebble-03.png');
+  background-position:left -20px bottom 110px;background-size:96px auto;opacity:.10}
+[data-theme="nachal"] #screen-tao::after{
+  background-image:url('assets/leaves/fern-dark.png');
+  background-position:right -22px bottom 70px;background-size:130px auto;opacity:.18}
+/* milky glass, in CSS */
+[data-theme="nachal"] .card,
+[data-theme="nachal"] .accordion{
+  background:rgba(255,255,255,.82);border:1px solid var(--border);
+  box-shadow:0 4px 18px rgba(20,50,48,.06)}
+[data-theme="nachal"] #nav{
+  background:rgba(187,226,224,.82);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+@media (prefers-reduced-motion:reduce){
+  [data-theme="nachal"] .screen::before,[data-theme="nachal"] .screen::after{transition:none!important}}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1463,6 +1523,22 @@ const THEMES = {
     '--tao-bg':'#060b0f', '--tao-bg2':'#070f14', '--tao-panel':'#0a1821', '--tao-panel2':'#0c171f', '--tao-line':'#0f1f28', '--tao-line2':'#153243', '--tao-t1':'#dbf0ff',
     '--tao-t1b':'#aad0e9', '--tao-t2':'#7fa8c4', '--tao-t3':'#5d7f96', '--tao-gold':'#46dbf6', '--tao-gold2':'#00bad4', '--tao-gold3':'#00a2b8', '--tao-ink':'#007f94',
     '--tao-accent-rgb':'0,162,184', '--tao-bg-rgb':'6,11,15', '--tao-panel-rgb':'10,24,33'
+  }},
+  nachal: {label:'נחל', labelEn:'River', tokens:{
+    '--gold':'#007068', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
+    '--surface-2':'#bbe2e0', '--surface-3':'#dff4f3', '--surface-input':'#eaf6f6', '--accent-soft':'#c6eeec',
+    '--accent-line':'#87e5e2', '--t1':'#002e2d', '--t2':'#2d6564', '--t3':'#6b8c8a',
+    '--t4':'#7fa7a5', '--t5':'#acd8d6', '--line':'rgba(24,54,58,.11)', '--border':'rgba(24,54,58,.17)',
+    '--green':'#4c6d3b', '--green-rgb':'76,109,59', '--green-light':'#7cd690', '--green-light-rgb':'124,214,144',
+    '--green-ink':'#426331', '--purple':'#766496', '--purple-rgb':'118,100,150', '--blue':'#396c8c',
+    '--blue-soft':'#eaf3f0', '--blue-line':'#c7dcd6', '--tile-a1':'#5e7a5e', '--tile-a2':'#506b50',
+    '--tile-a-label':'#dceedc', '--tile-b1':'#2d5952', '--tile-b2':'#1f4b45', '--tile-b-label':'#d3efe9',
+    '--tile-c1':'#113242', '--tile-c2':'#032535', '--tile-c-label':'#d5ecf9', '--cta1':'#0e7c74',
+    '--cta2':'#0a6961', '--progress-track':'#d8ede7', '--accent-rgb':'0,112,104', '--tao-bg':'#040c0d',
+    '--tao-bg2':'#031111', '--tao-panel':'#001b1c', '--tao-panel2':'#041a1b', '--tao-line':'#022223',
+    '--tao-line2':'#003739', '--tao-t1':'#d0f5f6', '--tao-t1b':'#95d8da', '--tao-t2':'#66b0b2',
+    '--tao-t3':'#478789', '--tao-gold':'#3edbd0', '--tao-gold2':'#00bab0', '--tao-gold3':'#00a198',
+    '--tao-ink':'#007a72', '--tao-accent-rgb':'0,161,152', '--tao-bg-rgb':'4,12,13', '--tao-panel-rgb':'0,27,28'
   }}
 }
 // The accent-only presets this replaced. Nobody should land on a theme that no
@@ -1476,6 +1552,7 @@ function applyTheme(name) {
   const t = THEMES[name] || THEMES[THEME_ALIASES[name]] || THEMES.original
   currentTheme = THEMES[name] ? name : (THEME_ALIASES[name] || 'original')
   try { localStorage.setItem('fieldy_theme', currentTheme) } catch(e) {}
+  document.documentElement.setAttribute('data-theme', currentTheme)
   const r = document.documentElement.style
   Object.keys(THEME_TOKENS_BASE).forEach(k => r.setProperty(k, THEME_TOKENS_BASE[k]))
   Object.keys(t.tokens).forEach(k => r.setProperty(k, t.tokens[k]))

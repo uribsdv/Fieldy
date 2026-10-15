@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fieldy — ערכת נחל, תצוגה מקדימה</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+      --accent-line: #87e5e2;
+      --accent-soft: #c6eeec;
+      --blue: #396c8c;
+      --blue-line: #c7dcd6;
+      --blue-soft: #eaf3f0;
+      --border: rgba(24,54,58,.17);
+      --cta1: #0e7c74;
+      --cta2: #0a6961;
+      --gold: #007068;
+      --gold-deep: #033a36;
+      --gold2: #34b3a7;
+      --green: #4c6d3b;
+      --green-ink: #426331;
+      --green-light: #7cd690;
+      --ink: #e7efef;
+      --line: rgba(24,54,58,.11);
+      --progress-track: #d8ede7;
+      --purple: #766496;
+      --surface-2: #bbe2e0;
+      --surface-3: #dff4f3;
+      --surface-input: #eaf6f6;
+      --t1: #002e2d;
+      --t2: #2d6564;
+      --t3: #6b8c8a;
+      --t4: #7fa7a5;
+      --t5: #acd8d6;
+      --tao-bg: #040c0d;
+      --tao-bg2: #031111;
+      --tao-gold: #3edbd0;
+      --tao-gold2: #00bab0;
+      --tao-gold3: #00a198;
+      --tao-ink: #007a72;
+      --tao-line: #022223;
+      --tao-line2: #003739;
+      --tao-panel: #001b1c;
+      --tao-panel2: #041a1b;
+      --tao-t1: #d0f5f6;
+      --tao-t1b: #95d8da;
+      --tao-t2: #66b0b2;
+      --tao-t3: #478789;
+      --tile-a-label: #dceedc;
+      --tile-a1: #5e7a5e;
+      --tile-a2: #506b50;
+      --tile-b-label: #d3efe9;
+      --tile-b1: #2d5952;
+      --tile-b2: #1f4b45;
+      --tile-c-label: #d5ecf9;
+      --tile-c1: #113242;
+      --tile-c2: #032535;
+      --accent-rgb: 0,112,104;
+      --green-light-rgb: 124,214,144;
+      --green-rgb: 76,109,59;
+      --purple-rgb: 118,100,150;
+      --tao-accent-rgb: 0,161,152;
+      --tao-bg-rgb: 4,12,13;
+      --tao-panel-rgb: 0,27,28;
+    --red:#ef4444; --stuck:#b84600; --amber:#f59e0b;
+    --radius-lg:12px; --radius-xl:14px; --radius-2xl:16px; --radius-pill:99px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:#4a5550;
+       display:flex;justify-content:center;padding:28px 14px;min-height:100vh}
+  .phone{width:390px;background:var(--ink);border-radius:30px;overflow:hidden;position:relative;
+         box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  /* the wash: strongest at the top, gone before the content area */
+  .wash{position:absolute;inset:0;background:url('../assets/backgrounds/bg-river-light.webp') top center/cover no-repeat;
+        opacity:.35;-webkit-mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.45) 32%,transparent 55%);
+        mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.45) 32%,transparent 55%);pointer-events:none}
+  .deco{position:absolute;pointer-events:none;background-repeat:no-repeat;background-size:contain}
+  .d1{width:96px;height:96px;left:-18px;bottom:120px;opacity:.12;background-image:url('../assets/pebbles/pebble-11.png')}
+  .d2{width:70px;height:70px;left:46px;bottom:86px;opacity:.10;background-image:url('../assets/pebbles/pebble-09.png')}
+  .d3{width:84px;height:110px;right:-10px;top:8px;opacity:.10;background-image:url('../assets/leaves/sprig-dark.png')}
+  .inner{position:relative;padding:28px 16px 90px}
+  .hdr{font-size:13px;color:var(--t2);font-weight:600}
+  .greet{font-size:25px;font-weight:800;color:var(--t1);margin:2px 0 3px}
+  .sub{font-size:13px;color:var(--t2);margin-bottom:18px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .tile{border-radius:var(--radius-2xl);padding:16px 8px;text-align:center;color:#fff}
+  .tile .n{font-size:24px;font-weight:800}
+  .tile .l{font-size:13px;font-weight:600;margin-top:2px}
+  .ta{background:linear-gradient(150deg,var(--tile-a1),var(--tile-a2))}
+  .tb{background:linear-gradient(150deg,var(--tile-b1),var(--tile-b2))}
+  .tc{background:linear-gradient(150deg,var(--tile-c1),var(--tile-c2))}
+  .ta .l{color:var(--tile-a-label)} .tb .l{color:var(--tile-b-label)} .tc .l{color:var(--tile-c-label)}
+  .cta{display:block;width:100%;padding:16px;border:none;border-radius:var(--radius-xl);
+       background:linear-gradient(135deg,var(--cta1),var(--cta2));color:#fff;font:700 16px inherit;margin-bottom:16px}
+  /* milky glass, built in CSS — no image behind text */
+  .card{background:color-mix(in srgb, var(--surface) 82%, transparent);
+        border:1px solid var(--border);border-radius:var(--radius-xl);
+        padding:14px;margin-bottom:10px;box-shadow:0 4px 18px rgba(20,50,48,.06)}
+  .card h3{font-size:14px;color:var(--t1);margin-bottom:6px}
+  .card p{font-size:13px;color:var(--t2);line-height:1.6}
+  .muted{font-size:12px;color:var(--t3);margin-top:6px}
+  .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .tag{font-size:12px;font-weight:600;border-radius:var(--radius-pill);padding:4px 10px}
+  .tg-green{background:rgba(var(--green-rgb),.12);color:var(--green-ink)}
+  .tg-person{background:rgba(var(--purple-rgb),.11);color:var(--purple)}
+  .tg-site{background:var(--blue-soft);color:var(--blue)}
+  .tg-stuck{background:#fdece0;color:var(--stuck)}
+  .tg-open{background:#fdeaea;color:var(--red)}
+  .nav{position:absolute;bottom:0;left:0;right:0;height:62px;display:flex;justify-content:space-around;
+       align-items:center;background:color-mix(in srgb, var(--surface-2) 80%, transparent);
+       -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .nav span{font-size:11px;color:var(--t2);font-weight:600}
+  .nav .on{color:var(--gold);font-weight:800}
+  .tao{margin-top:22px;width:390px;border-radius:30px;overflow:hidden;position:relative;background:var(--tao-bg);
+       box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  .tao .w{position:absolute;inset:0;opacity:.25;background:url('../assets/backgrounds/bg-forest-night.webp') top center/cover}
+  .tao .c{position:relative;padding:22px 16px}
+  .tao .lab{font-size:11px;letter-spacing:1.5px;color:var(--tao-gold);font-weight:700;margin-bottom:10px}
+  .tao .panel{background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:14px;padding:14px}
+  .tao .panel h4{color:var(--tao-t1);font-size:14px;margin-bottom:5px}
+  .tao .panel p{color:var(--tao-t2);font-size:13px;line-height:1.6}
+  .wrap{display:flex;flex-direction:column;align-items:center}
+
+  .altwrap{width:390px;margin-top:18px;background:var(--ink);border-radius:22px;padding:16px;
+           box-shadow:0 18px 44px rgba(0,0,0,.35)}
+  .altwrap h5{font-size:13px;color:var(--t2);font-weight:700;margin:10px 0 8px}
+  .alt-a{background:linear-gradient(150deg,#856f37,#786432)}
+  .alt-b{background:linear-gradient(150deg,#1e7778,#1b6b6c)}
+  .alt-c{background:linear-gradient(150deg,#144d6e,#124563)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="wrap">
+<div class="phone">
+  <div class="wash"></div><div class="deco d1"></div><div class="deco d2"></div><div class="deco d3"></div>
+  <div class="inner">
+    <div class="hdr">Region II · Cagayan Valley</div>
+    <div class="greet">בוקר טוב, אורי</div>
+    <div class="sub">"הטוב העליון הוא כמו מים."</div>
+    <div class="tiles">
+      <div class="tile tc"><div class="n">0</div><div class="l">ממתין</div></div>
+      <div class="tile tb"><div class="n">7</div><div class="l">אתרים</div></div>
+      <div class="tile ta"><div class="n">3</div><div class="l">עכשיו</div></div>
+    </div>
+    <button class="cta">+ הוסף הודעות מוואטסאפ</button>
+    <div class="card">
+      <h3>הדבר הכי חשוב היום</h3>
+      <p>לבדוק את אתר San Lorenzo בדרך לטוגגאראו, ולוודא שהקבלן קיבל את האישור.</p>
+      <div class="muted">טקסט שלישוני — רמז קטן מתחת לכרטיס</div>
+      <div class="row">
+        <span class="tag tg-green">נפתר</span>
+        <span class="tag tg-person">Gio</span>
+        <span class="tag tg-site">Iguig</span>
+        <span class="tag tg-stuck">תקוע 14 ימים</span>
+        <span class="tag tg-open">פתוח</span>
+      </div>
+    </div>
+    <div class="card"><h3>🎯 עכשיו</h3><p>לאסוף מנוע מטוגגאראו</p></div>
+  </div>
+  <div class="nav"><span class="on">בית</span><span>משימות</span><span>אתרים</span><span>לוח</span><span>טאו</span></div>
+</div>
+<div class="tao"><div class="w"></div><div class="c">
+  <div class="lab">☯ טאו · מנהיגות · ADHD</div>
+  <div class="panel"><h4>פרק 70 — האמת</h4><p>לדעת את אפס הידיעה, זו היא החכמה הנעלה. טקסט משני על הפאנל הכהה.</p></div>
+</div></div>
+
+<div class="altwrap">
+  <h5>אפשרות א — הנוכחית (ממתין #113242, ניגודיות 13.5)</h5>
+  <div class="tiles">
+    <div class="tile tc"><div class="n">0</div><div class="l">ממתין</div></div>
+    <div class="tile tb"><div class="n">7</div><div class="l">אתרים</div></div>
+    <div class="tile ta"><div class="n">3</div><div class="l">עכשיו</div></div>
+  </div>
+  <h5>אפשרות ב — ממתין בהיר יותר (#144d6e, ניגודיות 9.1) + חול-נהר ל"עכשיו"</h5>
+  <div class="tiles">
+    <div class="tile alt-c"><div class="n">0</div><div class="l">ממתין</div></div>
+    <div class="tile alt-b"><div class="n">7</div><div class="l">אתרים</div></div>
+    <div class="tile alt-a"><div class="n">3</div><div class="l">עכשיו</div></div>
+  </div>
+  <button class="cta" style="margin-top:14px">+ הוסף הודעות מוואטסאפ</button>
+</div>
+</div></body></html>
