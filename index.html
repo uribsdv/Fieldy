@@ -79,6 +79,15 @@ textarea,select,input{font-family:inherit}
 .form-input{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-md);padding:11px var(--space-3);color:var(--t1);font-size:var(--fs-base);outline:none;display:block;margin-bottom:var(--space-2-5);direction:rtl}
 .form-select{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:var(--t1);font-size:var(--fs-base);outline:none}
 /* Tags */
+/* site search and its filter chips (every theme) */
+.site-search{position:relative;margin-bottom:10px}
+.site-search-ic{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;color:var(--t3);display:flex;pointer-events:none}
+.site-search-x{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:4px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--t2);background:none}
+#site-search::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.site-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * var(--space-4));padding:2px var(--space-4)}
+.site-chips::-webkit-scrollbar{display:none}
+.site-chips + .site-chips{margin-top:6px}
+mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;padding:0 1px}
 .tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--t2)}
 /* Per-kind tint for the small pills on a task card (site/person/context/
    time) — was one flat muted colour for everything, which read as bland. */
@@ -491,6 +500,20 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
 [data-theme="nachal"] #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
+/* ── Nachal · site search ── */
+html[data-theme="nachal"] #site-search{padding:14px 48px!important}
+[data-theme="nachal"] .site-search-ic{inset-inline-start:18px}
+[data-theme="nachal"] .site-chip{min-height:40px;border-radius:99px!important}
+[data-theme="nachal"] .site-chip.small{min-height:36px}
+[data-theme="nachal"] .site-chip:not([aria-pressed="true"]){background:rgba(255,255,255,.62)!important;border-color:rgba(74,119,96,.24)!important}
+[data-theme="nachal"] .site-chip[aria-pressed="true"]{box-shadow:0 0 14px -3px rgba(var(--nh-glow-teal),.8)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="open"]{background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="stuck"]{background:var(--stuck)!important;color:#fff!important;box-shadow:0 0 14px -1px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="pending"]{background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="resolved"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
+[data-theme="nachal"] .site-chip.small[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
+[data-theme="nachal"] mark.hl{background:rgba(246,214,140,.75);box-shadow:0 0 8px rgba(246,214,140,.55)}
+[data-theme="nachal"] .site-count,[data-theme="nachal"] .site-dir-head{text-shadow:0 1px 3px rgba(4,14,10,.6)}
 /* ── Nachal · screen headers ──
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
@@ -4273,7 +4296,10 @@ async function runSpisDiagnosis() {
 }
 function renderSites() {
   const el = document.getElementById('screen-sites')
-  const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
+  // a re-render while typing in the search box keeps the caret where it was
+  const act = document.activeElement, typing = act && act.id === 'site-search'
+  const caret = typing ? [act.selectionStart, act.selectionEnd] : null
+  const sites = filteredSites()
 
   el.innerHTML = `
     <div class="screen-header">
@@ -4285,17 +4311,203 @@ function renderSites() {
           ${addBtnHtml('showAddSite()')}
         </div>
       </div>
-      <div style="display:flex;gap:6px">
-        ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:var(--radius-md);background:${siteFilter===v?'var(--gold)':'var(--surface)'};color:${siteFilter===v?'#fff':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${l}</button>`
-        ).join('')}
+      ${siteSearchBarHtml()}
+      <div class="site-chips" role="group" aria-label="סינון לפי סטטוס">
+        ${SITE_STATUS_CHIPS.map(([v,l])=>siteChipHtml('setSiteFilter', v, l, siteFilter===v)).join('')}
+      </div>
+      <div class="site-chips site-chips-prov" role="group" aria-label="סינון לפי מחוז">
+        ${SITE_PROVINCES.map(([v,l])=>siteChipHtml('toggleSiteProvince', v, l, siteProvince===v, true)).join('')}
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${sitesMapOn ? sitesMapHtml(sites) : ''}
-      ${sites.length===0?emptyHtml(icon('flower'), 'אין אתרים'):''}
-      ${sites.map(s=>siteCard(s)).join('')}
+      <div id="sites-map-wrap">${sitesMapOn ? sitesMapHtml(sites) : ''}</div>
+      <div id="sites-results">${sitesResultsHtml(sites)}</div>
     </div>`
+  if(typing) {
+    const inp = document.getElementById('site-search')
+    if(inp) { inp.focus(); try { inp.setSelectionRange(caret[0], caret[1]) } catch(e) {} }
+  }
+}
+
+// ── SITE SEARCH ───────────────────────────────────
+// One box that looks through everything written on a site — name, province,
+// municipality, the issue (where codes like "A08" live), contractor, REMO,
+// year, case notes, and any pump/manufacturer field the Monday directory
+// carries — plus its status in Hebrew and English. Every word typed has to
+// match somewhere; a word of 4+ letters also matches with one typo (two from
+// 7 letters). The status and province chips narrow the same list, and the
+// Monday directory is searched too, below the sites Uri tracks.
+const SITE_STATUS_CHIPS = [['all','הכל'],['open','פתוחים'],['stuck','תקועים'],['pending','ממתינים'],['resolved','נפתרו']]
+const SITE_PROVINCES = [['isabela','Isabela'],['cagayan','Cagayan'],['nueva vizcaya','Nueva Vizcaya'],['car','CAR']]
+const CAR_PROVINCES = ['car','cordillera','abra','apayao','benguet','ifugao','kalinga','mountain province']
+const SITE_STATUS_WORDS = {open:'פתוח open', pending:'ממתין waiting pending', resolved:'נפתר done resolved'}
+const SITE_SEARCH_SKIP = {id:1, photo:1, casePhotos:1, mondayLink:1, location:1, createdAt:1, stuckSince:1, status:1, updated:1}
+let siteQuery = '', siteProvince = null, siteSearchTimer = null
+function normSearch(str) {
+  return String(str == null ? '' : str).toLowerCase().normalize('NFKD')
+    .replace(/[̀-֑ͯ-ׇ]/g, '')
+    .replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+}
+function searchTokens(q) { return normSearch(q).split(' ').filter(Boolean) }
+// optimal-string-alignment distance, stopping early once it passes max
+function editDistance(a, b, max) {
+  if(Math.abs(a.length - b.length) > max) return max + 1
+  let prev2 = null, prev = Array.from({length: b.length + 1}, (_, j) => j)
+  for(let i = 1; i <= a.length; i++) {
+    const cur = [i]; let rowMin = i
+    for(let j = 1; j <= b.length; j++) {
+      let v = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1))
+      if(prev2 && i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) v = Math.min(v, prev2[j-2] + 1)
+      cur.push(v); if(v < rowMin) rowMin = v
+    }
+    if(rowMin > max) return max + 1
+    prev2 = prev; prev = cur
+  }
+  return prev[b.length]
+}
+// does one typed word match one word of the text? 2 = contains it, 1 = a typo away, 0 = no
+function wordMatch(tok, word) {
+  if(word.includes(tok)) return 2
+  if(tok.length < 4) return 0
+  const max = tok.length >= 7 ? 2 : 1
+  if(editDistance(tok, word, max) <= max) return 1
+  if(word.length > tok.length && editDistance(tok, word.slice(0, tok.length), max) <= max) return 1
+  return 0
+}
+function siteHaystack(o) {
+  const parts = []
+  Object.keys(o).forEach(k => { if(!SITE_SEARCH_SKIP[k] && (typeof o[k] === 'string' || typeof o[k] === 'number')) parts.push(o[k]) })
+  if(o.status) parts.push(SITE_STATUS_WORDS[o.status] || o.status)
+  if(o.stuckSince) parts.push('תקוע stuck')
+  return normSearch(parts.join(' ')).split(' ').filter(Boolean)
+}
+function matchesQuery(o, toks) {
+  if(!toks.length) return true
+  const words = siteHaystack(o)
+  return toks.every(t => words.some(w => wordMatch(t, w)))
+}
+function matchesProvince(o, prov) {
+  if(!prov) return true
+  const p = normSearch((o.province || '') + ' ' + (o.municipality || ''))
+  if(prov === 'car') return CAR_PROVINCES.some(c => (' ' + p + ' ').includes(' ' + c + ' '))
+  if(prov === 'cagayan') return /(^| )cagayan( |$)/.test(normSearch(o.province || '')) && !/cagayan de oro/.test(p)
+  return p.includes(prov)
+}
+function matchesStatus(s, f) {
+  if(f === 'all') return true
+  if(f === 'stuck') return !!s.stuckSince
+  return s.status === f
+}
+function filteredSites() {
+  const toks = searchTokens(siteQuery)
+  return state.sites.filter(s => matchesStatus(s, siteFilter) && matchesProvince(s, siteProvince) && matchesQuery(s, toks))
+}
+// Monday directory entries that match, minus any site already tracked by name
+function directoryMatches() {
+  const toks = searchTokens(siteQuery)
+  if(!toks.length && !siteProvince) return []
+  const tracked = {}; state.sites.forEach(s => { tracked[normSearch(s.name)] = 1 })
+  return (state.siteDirectory || []).filter(d => !tracked[normSearch(d.name)] && matchesProvince(d, siteProvince) && matchesQuery(d, toks))
+}
+// Wraps the words that matched in <mark>; everything else is escaped as usual.
+function hlText(raw, toks) {
+  const text = String(raw == null ? '' : raw)
+  if(!toks || !toks.length) return esc(text)
+  return text.split(/(\s+)/).map(seg => {
+    if(!seg || /^\s+$/.test(seg)) return esc(seg)
+    const nw = normSearch(seg)
+    if(!nw) return esc(seg)
+    let best = 0, hit = null
+    toks.forEach(t => nw.split(' ').forEach(w => { const m = wordMatch(t, w); if(m > best) { best = m; hit = t } }))
+    if(!best) return esc(seg)
+    const at = best === 2 ? seg.toLowerCase().indexOf(hit) : -1
+    if(at < 0) return '<mark class="hl">' + esc(seg) + '</mark>'
+    return esc(seg.slice(0, at)) + '<mark class="hl">' + esc(seg.slice(at, at + hit.length)) + '</mark>' + esc(seg.slice(at + hit.length))
+  }).join('')
+}
+function siteSearchBarHtml() {
+  return `<div class="site-search">
+      <span class="site-search-ic" aria-hidden="true">${icon('search')}</span>
+      <input id="site-search" type="search" dir="auto" autocomplete="off" enterkeyhint="search" aria-label="חיפוש אתרים"
+        placeholder="חיפוש: שם, מחוז, קוד (A08), קבלן…" value="${esc(siteQuery)}" oninput="onSiteSearchInput(this.value)"
+        style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-pill);padding:11px 42px;font-size:var(--fs-base);color:var(--t1);outline:none"/>
+      <button id="site-search-clear" class="site-search-x" onclick="clearSiteSearch()" aria-label="נקה חיפוש" style="${siteQuery?'':'display:none'}">${icon('x')}</button>
+    </div>`
+}
+function siteChipHtml(fn, v, label, on, small) {
+  return `<button class="site-chip${small?' small':''}" data-f="${esc(v)}" aria-pressed="${on}" onclick="${fn}('${esc(v)}')" style="flex:${small?'none':'1 0 auto'};white-space:nowrap;border-radius:var(--radius-pill);padding:${small?'6px 13px':'8px 10px'};font-size:${small?'var(--fs-sm)':'var(--fs-base)'};font-weight:600;border:1px solid ${on?(small?'var(--accent-line)':'transparent'):'var(--line)'};background:${on?(small?'var(--accent-soft)':'var(--gold)'):'var(--surface)'};color:${on?(small?'var(--gold)':'#fff'):'var(--t2)'}">${label}</button>`
+}
+function onSiteSearchInput(v) {
+  siteQuery = v
+  const x = document.getElementById('site-search-clear'); if(x) x.style.display = v ? '' : 'none'
+  clearTimeout(siteSearchTimer)
+  siteSearchTimer = setTimeout(refreshSiteResults, 180)
+}
+function clearSiteSearch() {
+  siteQuery = ''; clearTimeout(siteSearchTimer)
+  renderSites()
+  const inp = document.getElementById('site-search'); if(inp) inp.focus()
+}
+function resetSiteFilters() { siteQuery = ''; siteProvince = null; siteFilter = 'all'; renderSites() }
+function toggleSiteProvince(p) { siteProvince = siteProvince === p ? null : p; renderSites() }
+// only the list (and the map) redraws while typing, so the box keeps focus
+function refreshSiteResults() {
+  if(currentScreen !== 'sites') return
+  const sites = filteredSites()
+  const r = document.getElementById('sites-results'); if(r) r.innerHTML = sitesResultsHtml(sites)
+  const m = document.getElementById('sites-map-wrap'); if(m) m.innerHTML = sitesMapOn ? sitesMapHtml(sites) : ''
+}
+function sitesResultsHtml(sites) {
+  const toks = searchTokens(siteQuery)
+  const filtering = toks.length || siteProvince || siteFilter !== 'all'
+  const dir = directoryMatches()
+  const dirShown = siteFilter === 'all' ? dir : []
+  window.__dirResults = dirShown.slice(0, 30)
+  if(!state.sites.length && !dirShown.length && !filtering) return emptyHtml(icon('flower'), 'אין אתרים')
+  if(!sites.length && !dirShown.length) {
+    const hidden = dir.length && siteFilter !== 'all'
+    return `<div class="card site-empty" style="text-align:center;padding:22px 18px">
+        <div style="font-size:26px;color:var(--t3);margin-bottom:6px">${icon('search')}</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">לא מצאתי אתר שמתאים</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-top:4px;line-height:1.5">${hidden ? 'יש ' + dir.length + ' התאמות בספריית Monday — הן מוצגות תחת "הכל".' : 'אולי מילה אחרת, או רק חלק מהשם. גם שגיאת כתיב קטנה בסדר.'}</div>
+        <button onclick="${hidden ? "setSiteFilter('all')" : 'resetSiteFilters()'}" style="margin-top:12px;background:var(--surface-2);border-radius:var(--radius-pill);padding:9px 18px;color:var(--t1);font-size:var(--fs-base);font-weight:600">${hidden ? 'הצג הכל' : 'נקה חיפוש וסינון'}</button>
+      </div>`
+  }
+  const count = filtering
+    ? `<div class="site-count" aria-live="polite" style="font-size:var(--fs-sm);color:var(--t3);margin:0 2px 8px">${sites.length} מתוך ${state.sites.length} אתרים${dir.length && siteFilter === 'all' ? ' · ' + dir.length + ' בספריית Monday' : ''}</div>`
+    : ''
+  const dirHtml = dirShown.length ? `
+      <div class="site-dir-head" style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin:16px 2px 8px">${icon('book')} מספריית Monday <span style="font-weight:500;color:var(--t3)">· לא במעקב</span></div>
+      ${window.__dirResults.map((d, i) => directoryCardHtml(d, i, toks)).join('')}
+      ${dirShown.length > 30 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:4px 2px">ועוד ${dirShown.length - 30} — חדד את החיפוש</div>` : ''}` : ''
+  return count + sites.map(s => siteCard(s, toks)).join('') + dirHtml
+}
+function directoryCardHtml(d, i, toks) {
+  const where = [d.province, d.municipality].filter(Boolean).map(x => hlText(x, toks)).join(', ')
+  const meta = [d.contractor && hlText(String(d.contractor).toUpperCase(), toks), d.year && hlText(d.year, toks), d.remo && 'REMO ' + hlText(d.remo, toks)].filter(Boolean).join(' · ')
+  return `<div class="card site-dir-card" style="margin-bottom:8px;padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="min-width:0">
+          <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${icon('map-pin')} ${hlText(d.name, toks)}</div>
+          ${where ? `<div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${where}</div>` : ''}
+          ${meta ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${meta}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${d.location ? `<a href="${esc(mapsLinkFor(d.location))}" target="_blank" rel="noopener" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>` : ''}
+          <button onclick="addSiteFromDirectory(${i})" style="background:var(--surface-2);border-radius:var(--radius-pill);padding:5px 11px;color:var(--t1);font-size:var(--fs-sm);font-weight:600">+ למעקב</button>
+        </div>
+      </div>
+    </div>`
+}
+// opens the new-site form with the directory entry already filled in
+function addSiteFromDirectory(i) {
+  const d = (window.__dirResults || [])[i]; if(!d) return
+  showAddSite()
+  const nameEl = document.getElementById('add-site-name'); if(nameEl) nameEl.value = d.name
+  const yearEl = document.getElementById('add-site-year')
+  if(yearEl && d.year && [...yearEl.options].some(o => o.value === String(d.year))) yearEl.value = String(d.year)
+  autofillFromDirectory()
 }
 
 // ── SITES MAP (dependency-free, works offline) ────
@@ -4404,17 +4616,17 @@ let TAO_CANVAS = {ring:'#b8860b', track:'rgba(196,146,42,0.15)'}   // canvas ign
 let STATUS_HEX = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}   // refreshed by applyTheme(); real hex because call sites append alpha
 function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
 
-function siteCard(s) {
+function siteCard(s, toks) {
   const col = STATUS_HEX[s.status]||'#6b6255'
   const stuckDays = daysStuck(s)
   return `
     <div class="card site-card${s.stuckSince?' is-stuck':''}" data-st="${esc(s.status)}" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(s.name)}</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${icon('map-pin')} ${hlText(s.name, toks)}</div>
         ${s.stuckSince?`<span class="site-stuck-badge" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
       </div>
-      ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${esc(s.province)}</div>`:''}
-      ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
+      ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${hlText(s.province, toks)}</div>`:''}
+      ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${hlText(s.issue, toks)}</div>`:''}
       ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         ${s.contractor?`<span class="tag">${esc(String(s.contractor).toUpperCase())}</span>`:''}
