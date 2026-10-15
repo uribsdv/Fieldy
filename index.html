@@ -193,12 +193,13 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .nav-btn.active{background:var(--nh-capsule);box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
 [data-theme="nachal"] .nav-btn.active .nav-label{color:var(--t1);font-weight:700}
 [data-theme="nachal"] .nav-btn.active::after{display:none}
-[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#B23B2B}
+[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#8E3A68;box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(236,168,212,.75)}
 
 /* the bar that explains why the list is shortened for the current mood is an
    inline-tinted strip; on this page it needs a light ground to be read */
 [data-theme="nachal"] div:has(> .right-now-toggle){
-  background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(232,166,52,.85)!important;color:var(--t2)!important}
+  background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(206,170,84,.9)!important;color:var(--t2)!important;
+  box-shadow:0 0 16px -4px rgba(246,214,140,.7)}
 /* the mood tip is tinted with the mood's own colour; on this page it needs a
    light ground to be read, and keeps its coloured edge */
 [data-theme="nachal"] .nh-mood > div:not(.card){background:rgba(240,248,243,var(--nh-card-a))!important;color:var(--t1)}
@@ -436,6 +437,73 @@ html[data-theme="nachal"] textarea:disabled,
 html[data-theme="nachal"] select:disabled{opacity:.6}
 @media (prefers-reduced-motion:reduce){
   html[data-theme="nachal"] input,html[data-theme="nachal"] textarea,html[data-theme="nachal"] select{transition:none}}
+/* ── Nachal · the fairy-forest glow (sites, tasks and shared parts) ──
+   The cards stay the same mint-white glass; what changes is the light around
+   them. A soft mint/teal halo sits outside each card, a faint gradient edge
+   (mint → lavender → pale gold) replaces the status-tinted hairline, and each
+   status carries its own gentle glow: rose-lilac for open and stuck, warm pale
+   gold for waiting and urgent, lavender for in progress, mint for done. The
+   saturated red and orange are gone from this theme. Text sits on the same
+   light card as before, so its contrast is unchanged; status words are deep
+   inks on pale fills (5.1:1 or more). Nothing moves except the stuck badge,
+   which breathes once every seven seconds, and not at all for reduced motion. */
+[data-theme="nachal"]{
+  --nh-glow-mint:150,228,196;--nh-glow-teal:86,205,190;--nh-glow-lav:190,176,246;--nh-glow-gold:246,214,140;--nh-glow-rose:236,168,212;
+  --nh-rose:#8E3A68;--nh-rose-soft:#F5E1EC;--nh-gold-ink:#765608;--nh-gold-soft:#F6EBC9;
+  --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#265E44;--nh-mint-soft:#D5F0E0;
+  --nh-card-solid:#EEF6F1}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks) .card{
+  box-shadow:0 0 0 1px rgba(var(--nh-glow-mint),.16),0 0 26px -6px rgba(var(--nh-glow-teal),.45),
+    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+[data-theme="nachal"] #screen-sites .site-card{
+  border:1px solid transparent!important;
+  background:linear-gradient(var(--nh-card-solid),var(--nh-card-solid)) padding-box,
+    linear-gradient(135deg,rgba(var(--nh-glow-mint),.95),rgba(var(--nh-glow-lav),.8) 50%,rgba(var(--nh-glow-gold),.9)) border-box!important}
+[data-theme="nachal"] #screen-sites .site-card.is-stuck{
+  box-shadow:0 0 0 1px rgba(var(--nh-glow-rose),.30),0 0 28px -6px rgba(var(--nh-glow-rose),.55),
+    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+/* status words: a deep ink on a pale fill, with a halo of the same family */
+[data-theme="nachal"] .tag-status-open{background:var(--nh-rose-soft);color:var(--nh-rose);box-shadow:0 0 12px -2px rgba(var(--nh-glow-rose),.8)}
+[data-theme="nachal"] .tag-status-pending{background:var(--nh-gold-soft);color:var(--nh-gold-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-gold),.85)}
+[data-theme="nachal"] .tag-status-resolved{background:var(--nh-mint-soft);color:var(--nh-mint-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-mint),.85)}
+/* the three status buttons on a site: quiet glass until chosen, then the status's own glow */
+[data-theme="nachal"] #screen-sites .site-st{
+  background:rgba(255,255,255,.6)!important;color:var(--t2)!important;border:1px solid rgba(74,119,96,.26)!important;
+  border-radius:14px!important;min-height:40px}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"]{font-weight:700}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="open"]{
+  background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{
+  background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{
+  background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
+[data-theme="nachal"] #screen-sites .site-stuck-btn{background:rgba(255,255,255,.6)!important;border:1px solid rgba(74,119,96,.26)!important;border-radius:14px!important;color:var(--t2)!important}
+[data-theme="nachal"] #screen-sites .site-stuck-btn[aria-pressed="true"]{
+  background:var(--nh-rose-soft)!important;border-color:rgba(126,48,96,.5)!important;color:var(--nh-rose)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-stuck-badge{box-shadow:0 0 12px -1px rgba(var(--nh-glow-rose),.8);animation:nh-breathe 7s ease-in-out infinite}
+@keyframes nh-breathe{0%,100%{box-shadow:0 0 9px -2px rgba(236,168,212,.55)}50%{box-shadow:0 0 18px 0 rgba(236,168,212,.95)}}
+@media (prefers-reduced-motion:reduce){[data-theme="nachal"] .site-stuck-badge{animation:none}}
+/* tasks: the time buckets and the priority ticks in the same soft hues */
+[data-theme="nachal"] #screen-tasks .nh-bucket{border-radius:18px!important}
+[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-gold-soft)!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-gold),.9)}
+[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"][data-b="today"]{background:var(--nh-lav-soft)!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-lav),.9)}
+[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"][data-b="later"]{background:#E3ECE7!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-mint),.7)}
+[data-theme="nachal"] #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
+[data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
+/* ── Nachal · screen headers ──
+   The title, buttons and filters start right under the status bar (its safe
+   area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
+   and enough opacity that a card scrolled under it cannot be read through it. */
+[data-theme="nachal"]{--nh-hdr-a:.86}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-theme="nachal"]{--nh-hdr-a:.98}}
+@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-hdr-a:.99}}
+[data-theme="nachal"] .screen-header,
+[data-theme="nachal"] .cal-header{
+  padding-top:calc(env(safe-area-inset-top,0px) + 14px)!important;padding-bottom:12px!important;
+  background:rgba(240,248,243,var(--nh-hdr-a))!important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.25);backdrop-filter:blur(24px) saturate(1.25)}
+[data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1740,6 +1808,12 @@ function setUiLang(lang) {
 //           to a teal that also clears 4.5:1 on white, which the original
 //           never did (3.98).
 //   aqua  — --blue (site tags) sat 21° from the ocean accent; nudged to indigo.
+// Nachal's "fairy-forest" status hues, which replace the saturated red and
+// orange in that one theme: a deep ink that reads on a light card, used with
+// a pale fill and a glow of its own family (the CSS holds those). Every status
+// keeps its word, so the hue is never the only signal. The other three themes
+// keep the fixed alarm colours above.
+const NH_SOFT = {rose:'#8E3A68', gold:'#765608', lav:'#574A8F', mint:'#265E44', neutral:'#4A5A52'}
 const THEME_TOKENS_BASE = {
   '--surface':'#ffffff', '--ink3':'#ffffff',
   '--red':'#ef4444', '--red-dark':'#c0392b', '--red-soft':'#fdeaea',
@@ -1798,7 +1872,11 @@ const THEMES = {
     '--tao-t1b':'#aad0e9', '--tao-t2':'#7fa8c4', '--tao-t3':'#5d7f96', '--tao-gold':'#46dbf6', '--tao-gold2':'#00bad4', '--tao-gold3':'#00a2b8', '--tao-ink':'#007f94',
     '--tao-accent-rgb':'0,162,184', '--tao-bg-rgb':'6,11,15', '--tao-panel-rgb':'10,24,33'
   }},
-  nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43', tokens:{
+  nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43',
+    alarm:{'--red':NH_SOFT.rose, '--red-dark':'#74284F', '--red-soft':'#F5E1EC', '--stuck':'#7E3060', '--stuck-soft':'#F3DCE8',
+      '--orange':NH_SOFT.gold, '--amber':NH_SOFT.gold, '--amber-line':'#E6CF8E'},
+    status:{open:NH_SOFT.rose, pending:NH_SOFT.gold, resolved:NH_SOFT.mint},
+    tokens:{
     '--gold':'#00605A', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
     '--surface-2':'#bbe2e0', '--surface-3':'#dff4f3', '--surface-input':'#eaf6f6', '--accent-soft':'#c6eeec',
     '--accent-line':'#87e5e2', '--t1':'#0B1A12', '--t2':'#34473D', '--t3':'#4A5A52',
@@ -1829,6 +1907,7 @@ function applyTheme(name) {
   const r = document.documentElement.style
   Object.keys(THEME_TOKENS_BASE).forEach(k => r.setProperty(k, THEME_TOKENS_BASE[k]))
   Object.keys(t.tokens).forEach(k => r.setProperty(k, t.tokens[k]))
+  if(t.alarm) Object.keys(t.alarm).forEach(k => r.setProperty(k, t.alarm[k]))
   // legacy aliases still referenced in a handful of places
   r.setProperty('--cherry', t.tokens['--gold'])
   r.setProperty('--bamboo', t.tokens['--gold'])
@@ -1837,7 +1916,7 @@ function applyTheme(name) {
   // site status dots/chips build their own alpha by appending to the hex, so this
   // one cannot be a var() — it is refreshed here instead. open/pending are the
   // fixed alarm colours; only "resolved" follows the theme.
-  STATUS_HEX = {open: THEME_TOKENS_BASE['--red'], pending: THEME_TOKENS_BASE['--amber'], resolved: t.tokens['--green-light']}
+  STATUS_HEX = t.status ? Object.assign({}, t.status) : {open: THEME_TOKENS_BASE['--red'], pending: THEME_TOKENS_BASE['--amber'], resolved: t.tokens['--green-light']}
   TAO_CANVAS = {ring: t.tokens['--tao-gold3'], track: 'rgba(' + t.tokens['--tao-accent-rgb'] + ',0.15)'}
   // the phone's browser/status bar tint, so the chrome above the app matches it
   const meta = document.querySelector('meta[name="theme-color"]')
@@ -3650,7 +3729,8 @@ function renderTasks() {
       if(undone.length > limit || tasks.length > undone.length) { hiddenByMood = tasks.length - Math.min(limit, undone.length); tasks = undone.slice(0, limit) }
     }
   }
-  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const NH = currentTheme === 'nachal'
+  const BCOLS = NH ? {now:NH_SOFT.gold,today:NH_SOFT.lav,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
   const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
@@ -3661,7 +3741,7 @@ function renderTasks() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
+          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
             <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
             <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${[tr('home_stat_now'),tr('task_bucket_today'),tr('task_bucket_later')][i]}</div>
             ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
@@ -3683,13 +3763,14 @@ function renderTasks() {
 function setTaskContextFilter(v) { taskContextFilter=v; renderTasks() }
 
 function taskCard(t) {
-  const colors = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
+  const NH = currentTheme === 'nachal'
+  const colors = NH ? {red:NH_SOFT.rose,orange:NH_SOFT.gold,green:NH_SOFT.mint} : {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
     <div class="card" style="border:1px solid var(--line);border-right:3px solid ${t.done?'var(--t5)':(overdue?'var(--red)':c)};padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s,box-shadow .15s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
+        <div onclick="toggleTask(${jsArg(t.id)})"${NH?` class="nh-check" data-pri="${esc(t.color||'orange')}"`:''} style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
         <div style="flex:1">
           <div style="font-size:var(--fs-xl);font-weight:500;color:var(--t1);text-decoration:${t.done?'line-through':'none'};line-height:1.4">${esc(t.text)}</div>
           ${t.note?`<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
@@ -4327,10 +4408,10 @@ function siteCard(s) {
   const col = STATUS_HEX[s.status]||'#6b6255'
   const stuckDays = daysStuck(s)
   return `
-    <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
+    <div class="card site-card${s.stuckSince?' is-stuck':''}" data-st="${esc(s.status)}" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(s.name)}</div>
-        ${s.stuckSince?`<span style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
+        ${s.stuckSince?`<span class="site-stuck-badge" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
       </div>
       ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${esc(s.province)}</div>`:''}
       ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
@@ -4346,9 +4427,9 @@ function siteCard(s) {
       </div>
       <div style="display:flex;gap:6px;margin-top:10px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" class="site-st" data-st="${st}" aria-pressed="${s.status===st}" style="flex:1;padding:7px 4px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" style="background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:7px 9px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base)">${icon('alert-triangle')}</button>
+        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" class="site-stuck-btn" aria-pressed="${!!s.stuckSince}" style="background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:7px 9px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base)">${icon('alert-triangle')}</button>
         ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', icon('edit'), '', 'edit')}
         ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
       </div>
