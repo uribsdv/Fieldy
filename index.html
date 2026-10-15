@@ -103,6 +103,9 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 .site-selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:95;box-sizing:border-box;width:calc(100% - 28px);max-width:402px;
   display:flex;align-items:center;gap:8px;padding:7px;padding-inline-start:16px;border-radius:20px;
   background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.35)}
+/* the screen's enter animation moves it with a transform, which would carry
+   a fixed child with it for a moment; the bar waits until it has finished */
+.screen.enter .site-selbar{visibility:hidden}
 .site-selbar-n{flex:1;min-width:0;font-size:var(--fs-base);font-weight:700;color:var(--t1)}
 .site-selbar-go{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-radius:14px;padding:10px 16px;min-height:44px;font-size:var(--fs-base);font-weight:700}
 .site-selbar-go:disabled{opacity:.45;cursor:default}
@@ -402,6 +405,22 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
   background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
 /* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
 [data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
+/* the Leadership tab: the quote, the weekly focus and the tool it links to
+   read as one thread, a soft line of the room's teal light running from the
+   quote card into the focus card and along the edge of the linked tool. Same
+   cards, same colours; only the gap between them becomes the connection. */
+[data-theme="nachal"] #screen-tao .tao-thread{margin-bottom:16px}
+[data-theme="nachal"] #screen-tao .tao-thread > div{position:relative;margin-bottom:0!important}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div{margin-top:26px!important}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div::before{content:'';position:absolute;left:50%;top:-27px;width:2px;height:26px;transform:translateX(-50%);
+  background:linear-gradient(rgba(111,224,204,.25),rgba(111,224,204,.8) 50%,rgba(111,224,204,.25));box-shadow:0 0 8px rgba(111,224,204,.55);pointer-events:none}
+[data-theme="nachal"] #screen-tao .tao-thread > div::after{content:'';position:absolute;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;
+  background:#8FE8D6;box-shadow:0 0 0 3px rgba(111,224,204,.18),0 0 10px rgba(111,224,204,.8);pointer-events:none}
+[data-theme="nachal"] #screen-tao .tao-thread > div:first-child::after{bottom:-5px}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div::after{top:-5px}
+[data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{border-color:rgba(111,224,204,.42)!important;
+  box-shadow:inset -3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
+html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box-shadow:inset 3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
 /* the meditation sheet is dark too, so its text and its ring read */
 [data-theme="nachal"] .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
 [data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
@@ -544,6 +563,10 @@ html[data-theme="nachal"] #site-search{padding:14px 48px!important}
 [data-theme="nachal"] .site-selbar-go{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep));border-radius:99px}
 [data-theme="nachal"] .site-selbar-x{background:rgba(255,255,255,.7);border:1px solid rgba(74,119,96,.26);border-radius:99px;color:var(--t2)}
 [data-theme="nachal"] .site-tool-btn{background:rgba(240,248,243,.92)!important;border:1px solid rgba(255,255,255,.4);box-shadow:0 0 14px -4px rgba(var(--nh-glow-teal),.7)}
+/* amber section labels written straight on the dark page (People's "waiting
+   for a reply") take a pale gold that reads there; the deep gold token is for
+   light surfaces */
+[data-theme="nachal"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:#F3D78E!important;text-shadow:0 1px 3px rgba(4,14,10,.6)}
 /* ── Nachal · screen headers ──
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
@@ -2436,7 +2459,10 @@ function renderTaoChapter(el, idx) {
 
   var modeContentHtml = '';
   if(taoMode==='lead') {
-    modeContentHtml = quoteHtml + weekHtml + leadHtml + sinekHtml;
+    // Nachal joins the quote, the weekly focus and its linked tool with one thread
+    var pair = quoteHtml + weekHtml
+    if(currentTheme === 'nachal' && quoteHtml && weekHtml) pair = '<div class="tao-thread">' + pair + '</div>'
+    modeContentHtml = pair + leadHtml + sinekHtml;
   } else if(taoMode==='adhd') {
     modeContentHtml = adhdHtml;
   } else if(taoMode==='talk') {
