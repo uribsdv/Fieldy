@@ -111,8 +111,12 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
   display:flex;align-items:center;gap:8px;padding:7px;padding-inline-start:16px;border-radius:20px;
   background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.35)}
 /* the screen's enter animation moves it with a transform, which would carry
-   a fixed child with it for a moment; the bar waits until it has finished */
-.screen.enter .site-selbar{visibility:hidden}
+   a fixed child with it for a moment; the bar stays invisible for that long.
+   A one-shot animation of its own rather than hiding it while .enter is set:
+   under reduced motion the screen never animates, .enter is never removed,
+   and the bar must still appear. */
+@keyframes selbar-wait{0%,99%{visibility:hidden}100%{visibility:visible}}
+.screen.enter .site-selbar{animation:selbar-wait var(--dur-base) linear}
 .site-selbar-n{flex:1;min-width:0;font-size:var(--fs-base);font-weight:700;color:var(--t1)}
 .site-selbar-go{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-radius:14px;padding:10px 16px;min-height:44px;font-size:var(--fs-base);font-weight:700}
 .site-selbar-go:disabled{opacity:.45;cursor:default}
@@ -155,14 +159,14 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
 [data-theme="nachal"]{
-  --nh-card-a:.95;--nh-nav-a:.82;
+  --nh-card-a:.95;--nh-nav-a:.94;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.95}}
+  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.98}}
 @media (prefers-reduced-transparency:reduce){
-  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.97}}
+  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.99}}
 [data-theme="nachal"] body{background:#2A3F3E}
 /* the room: deep teal-green with sage light pooling at the left and teal-grey
    on the right. This reuses the page's existing atmosphere layer, so no new
@@ -220,8 +224,8 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
    capsule that holds its icon and its label together */
 [data-theme="nachal"] #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
-  background:rgba(236,242,239,var(--nh-nav-a))!important;
-  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
+  background:rgba(226,238,231,var(--nh-nav-a))!important;
+  -webkit-backdrop-filter:blur(40px) saturate(1.2);backdrop-filter:blur(40px) saturate(1.2);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
 [data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
@@ -233,6 +237,15 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 [data-theme="nachal"] .nav-btn.active::after{display:none}
 [data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#8E3A68;box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(236,168,212,.75)}
 
+/* on every screen but Home (which has its own) and the Tao, whatever scrolls
+   past the bottom is blurred and dimmed around the floating capsule, so card
+   text never shows beside it or in the strip beneath it */
+[data-theme="nachal"] .screen:not(#screen-home):not(#screen-tao)::after{
+  content:'';position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:50;pointer-events:none;
+  width:100%;max-width:430px;height:112px;
+  background:linear-gradient(to bottom,rgba(30,48,42,0) 0,rgba(30,48,42,.6) 30%,rgba(30,48,42,.7) 100%);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
 /* the bar that explains why the list is shortened for the current mood is an
    inline-tinted strip; on this page it needs a light ground to be read */
 [data-theme="nachal"] div:has(> .right-now-toggle){
@@ -439,6 +452,7 @@ html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box
   [data-theme="nachal"]{--nh-tao-nav-a:.94}}
 @media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
+  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
   background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
@@ -623,7 +637,7 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   background:var(--nh-soft)!important;-webkit-backdrop-filter:var(--nh-soft-blur);backdrop-filter:var(--nh-soft-blur)}
 [data-theme="nachal"] :is(#screen-tasks,#screen-people,#screen-calendar) .card:not([style*="border"]){border:1px solid var(--nh-soft-edge)}
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) :is(.card,.screen-header,.cal-header,.ev-card),
-[data-theme="nachal"] #screen-calendar > div:nth-child(2){--t2:#2C3E35;--t3:#394A41}
+[data-theme="nachal"] #screen-calendar > div:nth-child(2){--t2:#2C3E35;--t3:#33433B}
 /* controls on those surfaces: a lighter mist, never white */
 [data-theme="nachal"] .site-chip:not([aria-pressed="true"]),
 [data-theme="nachal"] .site-region-btn:not([aria-pressed="true"]),
@@ -4755,10 +4769,14 @@ function siteSelBarHtml() {
     </div>`
 }
 // the bar floats just above the nav bar, wherever the theme puts it
+// and the list gets bottom room for the nav bar plus the bar, so the last card scrolls clear of both
 function positionSiteSelBar() {
+  const el = document.getElementById('screen-sites')
   const bar = document.querySelector('#sites-selbar .site-selbar'), nav = document.getElementById('nav')
-  if(!bar || !nav) return
-  bar.style.bottom = Math.max(8, window.innerHeight - nav.getBoundingClientRect().top + 10) + 'px'
+  if(!bar || !nav) { if(el) el.style.paddingBottom = ''; return }
+  const bottom = Math.max(8, window.innerHeight - nav.getBoundingClientRect().top + 10)
+  bar.style.bottom = bottom + 'px'
+  if(el) el.style.paddingBottom = (bottom + bar.offsetHeight + 24) + 'px'
 }
 window.addEventListener('resize', positionSiteSelBar)
 // long-press anywhere on a card that is not a button or link
