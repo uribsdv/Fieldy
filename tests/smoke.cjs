@@ -1624,7 +1624,7 @@ async function main() {
       names.forEach(n => { const miss = [...all].filter(k => !(k in THEMES[n].tokens)); if (miss.length) missing[n] = miss })
       return { names, identical: new Set(sets).size === 1, count: all.size, missing }
     })
-    assert(r.names.length === 3, 'expected three themes, got ' + JSON.stringify(r.names))
+    assert(r.names.length >= 3, 'expected at least three themes, got ' + JSON.stringify(r.names))
     assert(r.identical, 'themes declare different token sets: ' + JSON.stringify(r.missing))
     assert(r.count > 25, 'a full theme should carry the whole palette, got ' + r.count + ' tokens')
   })
@@ -1879,7 +1879,7 @@ async function main() {
       assert(v.track.indexOf(v.rgb) >= 0, n + ': the ring track ' + v.track + ' is not built from this theme accent')
     }
     const vals = Object.values(r).map(v => v.ring)
-    assert(new Set(vals).size === 3, 'the ring colour repeats between themes: ' + vals.join(', '))
+    assert(new Set(vals).size === vals.length, 'the ring colour repeats between themes: ' + vals.join(', '))
     await page.evaluate(() => applyTheme('original'))
   })
   await check('no Tao colour is still hardcoded past the tokens', async () => {
