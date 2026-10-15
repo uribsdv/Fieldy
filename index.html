@@ -2788,6 +2788,67 @@ function personalToggleHtml(key, onclick, iconName, doneLabel, todoLabel) {
   const on = !!(state.personal[key]||{})[getToday()]
   return `<button onclick="${onclick}" style="flex:1;padding:12px 4px;border-radius:var(--radius-md);border:1.5px solid ${on?'var(--green)':'var(--line)'};background:${on?'#1a8f7a18':'var(--surface)'};color:${on?'var(--green)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${iconAny(iconName)} ${on?doneLabel:todoLabel}</button>`
 }
+// Home sections that more than one layout renders. They live here, as plain
+// functions returning exactly the markup they used to be inlined as, so the
+// original home and the Nachal home share one source for every one of them.
+function quotePanelHtml() { var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ${tr('home_quote_label')}</span>
+          <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} ${tr('home_quote_other')}</button>
+        </div>
+        <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
+      `) : '' }
+function moodPickerHtml(curMood) {
+  return `<div class="card" style="margin-top:16px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${tr('home_mood_prompt')}</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
+          ${MOOD_ORDER.map(m=>{
+            const d = MOOD_LIB[m]
+            const active = curMood && curMood.mood===m
+            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
+              <div style="display:flex;justify-content:center;margin-bottom:2px">${iconBadge(d.icon, d.color)}</div>
+              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
+            </button>`
+          }).join('')}
+        </div>
+      </div>`
+}
+function moodTipHtml(curMood, moodDef) {
+  return moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
+          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
+        </div>
+        ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
+        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
+        <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>
+          <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} ${tr('home_braindump_saved')}</span>
+        </div>
+      </div>` : ''
+}
+function outsideWorkHtml() {
+  return `<div class="card" style="margin-top:16px">
+        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} ${tr('home_outside_work')}</div>
+        <div style="display:flex;gap:8px">
+          ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), tr('home_gym_done') + ' ' + icon('check'), tr('home_gym_todo'))}
+          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), tr('home_meditation_done') + ' ' + icon('check'), tr('home_meditation_todo'))}
+        </div>
+      </div>`
+}
+function askFieldyHtml() {
+  return `<div class="card" style="margin-top:12px">
+        ${accordionHtml('ask-fieldy', {icon:'brain', color:'var(--t1)', title:tr('home_ask_fieldy'), hint:serverConfigured()?tr('home_ask_fieldy_hint_short'):tr('home_ask_fieldy_hint_off')}, function(){
+          return serverConfigured() ? `
+            <input id="ask-fieldy-input" class="form-input" placeholder="${tr('home_ask_fieldy_placeholder')}" style="margin-bottom:10px"/>
+            <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">${tr('home_ask_fieldy_btn')}</button>
+            <div id="ask-fieldy-answer" data-content="he" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
+            <div id="ask-fieldy-maps-wrap"></div>` : `<div style="font-size:var(--fs-base);color:var(--t2)">${tr('home_ask_fieldy_hint_on')}</div>`
+        })}
+      </div>`
+}
+
 function renderHome() {
   const el = document.getElementById('screen-home')
   const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
@@ -2824,13 +2885,7 @@ function renderHome() {
       </div>` : ''}
     </div>
     <div style="padding:16px">
-      ${(function(){ var qod = getQuoteOfTheDay(); return qod ? creamPanelHtml(`
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:var(--fs-sm);color:var(--gold);font-weight:700;letter-spacing:1px">${icon('quote')} ${tr('home_quote_label')}</span>
-          <button onclick="rerollQuote()" style="background:var(--surface);border:1px solid var(--accent-line);border-radius:var(--radius-sm);padding:3px 9px;color:var(--t2);font-size:var(--fs-xs)">${icon('shuffle')} ${tr('home_quote_other')}</button>
-        </div>
-        <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
-      `) : '' })()}
+      ${quotePanelHtml()}
       <!-- Stat tiles + the WhatsApp CTA are the biggest solid-fill blocks on Home, so their
            saturation reads as "how urgent is this" even for routine counts. They were toned
            down from #e8940c/#d67d0a/#1a8f7a/#147263/#6b46c1/#5936a3 and now come from theme
@@ -2859,51 +2914,13 @@ function renderHome() {
       </div>
       ${total===0&&!state.focus?emptyHtml(icon('clipboard'), tr('home_empty_start'), 'margin-top:20px'):''}
 
-      <div class="card" style="margin-top:16px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${tr('home_mood_prompt')}</div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
-          ${MOOD_ORDER.map(m=>{
-            const d = MOOD_LIB[m]
-            const active = curMood && curMood.mood===m
-            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
-              <div style="display:flex;justify-content:center;margin-bottom:2px">${iconBadge(d.icon, d.color)}</div>
-              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
-            </button>`
-          }).join('')}
-        </div>
-      </div>
-      ${moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
-          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
-        </div>
-        ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
-        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
-        <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>
-          <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} ${tr('home_braindump_saved')}</span>
-        </div>
-      </div>` : ''}
+      ${moodPickerHtml(curMood)}
+      ${moodTipHtml(curMood, moodDef)}
       ${insightsAccordionHtml(moodPatterns)}
 
-      <div class="card" style="margin-top:16px">
-        <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${icon('leaf')} ${tr('home_outside_work')}</div>
-        <div style="display:flex;gap:8px">
-          ${personalToggleHtml('gymLog', 'toggleGymToday()', icon('dumbbell'), tr('home_gym_done') + ' ' + icon('check'), tr('home_gym_todo'))}
-          ${personalToggleHtml('meditationLog', 'toggleMeditationToday()', icon('flower'), tr('home_meditation_done') + ' ' + icon('check'), tr('home_meditation_todo'))}
-        </div>
-      </div>
+      ${outsideWorkHtml()}
 
-      <div class="card" style="margin-top:12px">
-        ${accordionHtml('ask-fieldy', {icon:'brain', color:'var(--t1)', title:tr('home_ask_fieldy'), hint:serverConfigured()?tr('home_ask_fieldy_hint_short'):tr('home_ask_fieldy_hint_off')}, function(){
-          return serverConfigured() ? `
-            <input id="ask-fieldy-input" class="form-input" placeholder="${tr('home_ask_fieldy_placeholder')}" style="margin-bottom:10px"/>
-            <button id="ask-fieldy-btn" class="btn-primary" onclick="askFieldy()">${tr('home_ask_fieldy_btn')}</button>
-            <div id="ask-fieldy-answer" data-content="he" style="margin-top:12px;font-size:var(--fs-lg);color:var(--t1);line-height:1.6;display:none"></div>
-            <div id="ask-fieldy-maps-wrap"></div>` : `<div style="font-size:var(--fs-base);color:var(--t2)">${tr('home_ask_fieldy_hint_on')}</div>`
-        })}
-      </div>
+      ${askFieldyHtml()}
     </div>
   `
 }
