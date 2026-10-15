@@ -107,65 +107,205 @@ textarea,select,input{font-family:inherit}
 .action-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-xl);padding:var(--space-4);font-size:var(--fs-lg);color:var(--t1);line-height:1.8;white-space:pre-wrap;margin-bottom:var(--space-3);direction:ltr;text-align:left;max-height:300px;overflow-y:auto}
 
 /* ── NACHAL ────────────────────────────────────────
-   Decoration only, and only for this theme: every rule below is scoped to
-   [data-theme="nachal"], so the other three keep their exact pixels. The
-   photographic wash sits in its own layer behind everything, anchored to the
-   top where the image is brightest, and masked to nothing by 55% of the
-   screen — the dark half of the photo never reaches text. 35% at the top was
-   the largest value that still kept --t2 above 4.5:1 against the darkest
-   pixel in each row (measured per row, with the mask applied).
-   The "milky glass" card is CSS; the glass PNGs are irregular organic blobs
-   and would mean text sitting on a picture, which is the one thing this is
-   not allowed to do. backdrop-filter is used in the nav bar only. */
-[data-theme="nachal"] .screen{position:relative;isolation:isolate}
-[data-theme="nachal"] .screen::before{
-  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background-position:top center;background-size:cover;background-repeat:no-repeat;
-  opacity:.25;
-  /* nothing under the opaque page header, which would just hide it; the river
-     shows in the gaps between cards and is gone by 70% of the screen. 25% is
-     the ceiling that keeps --t2 above 4.5:1 against the darkest pixel of every
-     row it covers (measured per row, per background, with this exact mask). */
-  -webkit-mask-image:linear-gradient(to bottom,transparent 16%,#000 30%,#000 50%,transparent 70%);
-          mask-image:linear-gradient(to bottom,transparent 16%,#000 30%,#000 50%,transparent 70%)}
-[data-theme="nachal"] #screen-home::before{background-image:url('assets/backgrounds/bg-river-light.webp')}
-[data-theme="nachal"] #screen-tasks::before{background-image:url('assets/backgrounds/bg-water-ripple.webp')}
-[data-theme="nachal"] #screen-sites::before{background-image:url('assets/backgrounds/bg-fern-mist.webp');opacity:.20}
-[data-theme="nachal"] #screen-calendar::before{background-image:url('assets/backgrounds/bg-water-ripple.webp')}
-/* the Tao room is dark already, so its photo needs no mask — but 25% is the
-   ceiling that keeps --tao-t2 above 4.5:1 (45% measured 3.56) */
-[data-theme="nachal"] #screen-tao::before{
-  background-image:url('assets/backgrounds/bg-forest-night.webp');opacity:.25;
-  -webkit-mask-image:none;mask-image:none}
-/* pebbles, a sprig and a droplet — static, never behind body text */
-[data-theme="nachal"] #screen-home::after,
-[data-theme="nachal"] #screen-tasks::after,
-[data-theme="nachal"] #screen-sites::after,
-[data-theme="nachal"] #screen-tao::after{
-  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-repeat:no-repeat}
-[data-theme="nachal"] #screen-home::after{
-  background-image:url('assets/pebbles/pebble-11.png'),url('assets/pebbles/pebble-09.png'),url('assets/leaves/sprig-dark.png');
-  background-position:left -24px bottom 96px, left 44px bottom 58px, right -16px top 10px;
-  background-size:104px auto, 74px auto, 92px auto;opacity:.11}
-[data-theme="nachal"] #screen-tasks::after{
-  background-image:url('assets/leaves/droplet-blob.png');
-  background-position:right -14px bottom 120px;background-size:88px auto;opacity:.10}
-[data-theme="nachal"] #screen-sites::after{
-  background-image:url('assets/pebbles/pebble-03.png');
-  background-position:left -20px bottom 110px;background-size:96px auto;opacity:.10}
-[data-theme="nachal"] #screen-tao::after{
-  background-image:url('assets/leaves/fern-dark.png');
-  background-position:right -22px bottom 70px;background-size:130px auto;opacity:.18}
-/* milky glass, in CSS */
+   A deep teal-green room with near-opaque mint-white cards. The page is dark
+   and every surface that carries text is light, so text sits either on a
+   light card (the app's normal dark tokens) or on the dark page (white, set
+   explicitly below) — never in between. Every rule is scoped to
+   [data-theme="nachal"], so the other three themes keep their exact pixels.
+   There are no photographs: the page is a gradient and four soft shapes, all
+   CSS, so nothing here has to be downloaded and nothing sits behind text that
+   was not measured. backdrop-filter is used on two large cards, the thin
+   server strip, the search pill and the nav bar only. */
+[data-theme="nachal"]{
+  --nh-card-a:.95;--nh-nav-a:.58;
+  --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
+  --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
+/* no backdrop-filter, or the device asks for less transparency: denser surfaces */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.95}}
+@media (prefers-reduced-transparency:reduce){
+  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.97}}
+[data-theme="nachal"] body{background:#2A3F3E}
+/* the room: deep teal-green with sage light pooling at the left and teal-grey
+   on the right. This reuses the page's existing atmosphere layer, so no new
+   element is added for any theme. */
+[data-theme="nachal"] #bg-atmosphere{
+  background:
+    radial-gradient(64% 30% at 0% 30%,rgba(126,162,100,.58),rgba(126,162,100,0) 74%),
+    radial-gradient(58% 34% at 100% 44%,rgba(42,68,68,.80),rgba(42,68,68,0) 76%),
+    radial-gradient(70% 20% at 0% 66%,rgba(80,112,84,.50),rgba(80,112,84,0) 76%),
+    linear-gradient(168deg,#496A4F 0%,#385844 30%,#304944 62%,#2A3F3E 100%)}
+[data-theme="nachal"] #bg-atmosphere::before,
+[data-theme="nachal"] #bg-atmosphere::after{display:none}
+/* the four drifting blobs become three still shapes: a pale streak from the
+   top, a small leaf, and a soft disc of light that the nav bar floats across */
+[data-theme="nachal"] .bg-blob{animation:none!important;opacity:1;will-change:auto;right:auto;bottom:auto}
+[data-theme="nachal"] .bg-blob-gold{width:120px;height:220px;left:calc(50% - 83px);top:-90px;border-radius:50%;
+  transform:rotate(8deg);filter:blur(14px);
+  background:linear-gradient(180deg,rgba(168,200,182,.34),rgba(168,200,182,0))}
+[data-theme="nachal"] .bg-blob-teal{width:50px;height:46px;left:calc(50% - 145px);top:84px;
+  border-radius:62% 38% 70% 30% / 58% 44% 56% 42%;transform:rotate(-24deg);filter:blur(1.5px);
+  background:linear-gradient(150deg,#6F9170,#4C6B50);opacity:.9}
+[data-theme="nachal"] .bg-blob-terracotta{width:230px;height:200px;left:calc(50% - 135px);top:auto;bottom:-70px;
+  border-radius:50%;filter:blur(3px);
+  background:radial-gradient(circle at 46% 38%,rgba(172,196,160,.9),rgba(150,182,140,.55) 70%)}
+[data-theme="nachal"] .bg-blob-purple{display:none}
+/* text written straight on the page is white; anything on a light surface
+   goes back to the app's dark tokens */
+[data-theme="nachal"] .screen{color:var(--nh-on-dark)}
 [data-theme="nachal"] .card,
-[data-theme="nachal"] .accordion{
-  background:rgba(255,255,255,.82);border:1px solid var(--border);
-  box-shadow:0 4px 18px rgba(20,50,48,.06)}
+[data-theme="nachal"] .accordion,
+[data-theme="nachal"] .modal,
+[data-theme="nachal"] .screen-header,
+[data-theme="nachal"] .cal-header,
+[data-theme="nachal"] .ev-card,
+[data-theme="nachal"] .form-input,
+[data-theme="nachal"] .form-select{color:var(--t1)}
+[data-theme="nachal"] .empty{color:var(--nh-on-dark2)}
+/* mint-white cards: near-opaque, large radius, the weight inside the glass
+   rather than a slab of shadow beneath it */
+[data-theme="nachal"] .card{
+  background:rgba(240,248,243,var(--nh-card-a))!important;
+  border-radius:22px;
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+[data-theme="nachal"] .card:not([style*="border"]){border:1px solid rgba(255,255,255,.4)}
+[data-theme="nachal"] .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+[data-theme="nachal"] .accordion[data-acc="nh-more"]{
+  background:rgba(240,248,243,var(--nh-card-a));border:1px solid rgba(255,255,255,.4);border-radius:22px;
+  padding:14px 16px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+/* screen headers (tasks, sites, people, calendar) become a light sheet */
+[data-theme="nachal"] .screen-header,
+[data-theme="nachal"] .cal-header{
+  background:rgba(240,248,243,var(--nh-card-a))!important;border-bottom:none!important;
+  border-radius:0 0 26px 26px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55)}
+/* the floating nav capsule: frosted, with the active destination as a pale
+   capsule that holds its icon and its label together */
 [data-theme="nachal"] #nav{
-  background:rgba(187,226,224,.82);
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-@media (prefers-reduced-motion:reduce){
-  [data-theme="nachal"] .screen::before,[data-theme="nachal"] .screen::after{transition:none!important}}
+  width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
+  background:rgba(236,242,239,var(--nh-nav-a))!important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.5)!important;
+  box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
+[data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
+[data-theme="nachal"] .nav-label{color:var(--t1);font-weight:500}
+[data-theme="nachal"] .nav-btn .nav-icon svg,
+[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:var(--t1)}
+[data-theme="nachal"] .nav-btn.active{background:var(--nh-capsule);box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
+[data-theme="nachal"] .nav-btn.active .nav-label{color:var(--t1);font-weight:700}
+[data-theme="nachal"] .nav-btn.active::after{display:none}
+[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#B23B2B}
+
+/* the bar that explains why the list is shortened for the current mood is an
+   inline-tinted strip; on this page it needs a light ground to be read */
+[data-theme="nachal"] div:has(> .right-now-toggle){
+  background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(232,166,52,.85)!important;color:var(--t2)!important}
+/* the mood tip is tinted with the mood's own colour; on this page it needs a
+   light ground to be read, and keeps its coloured edge */
+[data-theme="nachal"] .nh-mood > div:not(.card){background:rgba(240,248,243,var(--nh-card-a))!important;color:var(--t1)}
+/* two screens whose body sits straight on the page get a light sheet: the
+   month/week/year grid, and the paste-and-organise form */
+[data-theme="nachal"] #screen-calendar > div:nth-child(2){
+  background:rgba(240,248,243,var(--nh-card-a));margin:12px 12px 0;border-radius:22px;padding:6px 0 8px;color:var(--t1);
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+[data-theme="nachal"] #screen-input > div{
+  background:rgba(240,248,243,var(--nh-card-a));border-radius:0 0 26px 26px;color:var(--t1);
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.55)}
+/* the primary button and the calendar's "today", in the page's own sage */
+[data-theme="nachal"] .btn-primary{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
+[data-theme="nachal"] .cal-day.today .cal-dn{color:var(--gold-deep)}
+[data-theme="nachal"] .cal-view-tab.active{color:var(--gold-deep)}
+[data-theme="nachal"] .tao-subnav-btn[style*="linear-gradient"]{background:var(--gold2)!important}
+/* buttons that carry white text on the accent gradient: the gradient's light
+   end is too pale for white type, so they use the page's sage like the primary action */
+[data-theme="nachal"] [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{
+  background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))!important}
+/* the "no server" message on the organise screen is amber text; on a light
+   sheet it takes a darker amber */
+[data-theme="nachal"] #screen-input [style*="color:var(--amber)"]{color:#7E5205!important}
+/* labels written straight on the page (a section heading between cards) take
+   the light tokens; every light surface puts the dark tokens back, so text on
+   a card is unchanged */
+[data-theme="nachal"] .screen:not(#screen-input) > div[style*="padding"] > div:not([class]):not([style*="background"]):not([style*="border"]){
+  --t1:#ffffff;--t2:#E6F0EA;--t3:#E6F0EA}
+[data-theme="nachal"] .card,[data-theme="nachal"] .accordion,[data-theme="nachal"] .modal,
+[data-theme="nachal"] .screen-header,[data-theme="nachal"] .cal-header,[data-theme="nachal"] .ev-card,
+[data-theme="nachal"] [style*="background:var(--surface"],[data-theme="nachal"] [style*="background:var(--accent-soft"]{
+  --t1:#0B1A12;--t2:#34473D;--t3:#4A5A52}
+/* the mood panel colours its text with the mood's own hue. Those hues are the
+   app's meaning colours and stay as they are everywhere else; inside this one
+   panel they are darkened to read on a light ground */
+[data-theme="nachal"] .nh-mood [style*="color:#ef4444"]{color:#B42B2B!important}
+[data-theme="nachal"] .nh-mood [style*="color:#f59e0b"],
+[data-theme="nachal"] .nh-mood [style*="color:#e8940c"]{color:#7E5205!important}
+[data-theme="nachal"] .nh-mood [style*="color:#1a8f7a"]{color:#10675A!important}
+[data-theme="nachal"] .nh-mood [style*="background:#f59e0b;"],
+[data-theme="nachal"] .nh-mood [style*="background:#e8940c;"]{background:#7E5205!important}
+[data-theme="nachal"] .nh-mood [style*="background:#ef4444;"]{background:#B42B2B!important}
+[data-theme="nachal"] .nh-mood [style*="background:#1a8f7a;"]{background:#10675A!important}
+/* ── Nachal home ── */
+[data-theme="nachal"] .nh{padding:44px 20px 78px}
+[data-theme="nachal"] .nh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+[data-theme="nachal"] .nh-date{font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:2px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
+[data-theme="nachal"] .nh-greet{font-size:32px;font-weight:400;color:#fff;line-height:1.15;letter-spacing:-.02em;text-shadow:0 1px 3px rgba(4,14,10,.5)}
+[data-theme="nachal"] .nh-greet .ic{width:.7em;height:.7em}
+/* three counts as one quiet line; each is still a button that opens its
+   screen, with a 44px target made from padding the line does not show */
+[data-theme="nachal"] .nh-stats{display:flex;align-items:center;margin:-4px 0;font-size:var(--fs-md);font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+[data-theme="nachal"] .nh-stats button{color:#fff;font-size:inherit;padding:14px 6px;text-shadow:inherit}
+[data-theme="nachal"] .nh-stats b{font-weight:800;font-size:var(--fs-base)}
+[data-theme="nachal"] .nh-stats s{text-decoration:none;opacity:.55}
+[data-theme="nachal"] .nh-gear{position:relative;width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;
+  color:#fff;font-size:20px;background:rgba(12,32,24,.32);border:1px solid rgba(255,255,255,.24)}
+[data-theme="nachal"] .nh-gear u{position:absolute;top:4px;right:4px;width:11px;height:11px;border-radius:50%;background:#C78A4B;border:2px solid #3A5B4A}
+/* the server-needed banner, as a thin strip with an amber edge. It exists only
+   while there is no connection, exactly as before. */
+[data-theme="nachal"] .nh-strip{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:8px 14px;border-radius:16px;cursor:pointer;
+  background:rgba(10,26,20,.52);border:1px solid rgba(232,166,52,.85);color:#fff;font-size:var(--fs-sm);line-height:1.45;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+[data-theme="nachal"] .nh-strip b{color:#FFD58A}
+[data-theme="nachal"] .nh-strip-i{color:#FFC862;flex:none;display:flex;margin-top:1px}
+[data-theme="nachal"] .nh-tools{display:flex;gap:12px;align-items:center;margin-top:14px}
+[data-theme="nachal"] .nh-ask{flex:1;height:50px;border-radius:99px;display:flex;align-items:center;gap:10px;padding:0 18px;
+  background:rgba(10,26,20,.34);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:15px;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+[data-theme="nachal"] .nh-calm{position:relative;width:50px;height:50px;flex:none;display:grid;place-items:center;color:#fff;font-size:22px;
+  border-radius:60% 40% 55% 45% / 50% 60% 40% 50%;background:linear-gradient(150deg,#6F8F63,#4B6C44);
+  box-shadow:0 10px 18px -8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25)}
+[data-theme="nachal"] .nh-calm.on{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+[data-theme="nachal"] .nh-calm u{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;border:2px solid #3A5B4A}
+[data-theme="nachal"] .nh-mood{margin-top:2px}
+[data-theme="nachal"] .nh-prog{margin-top:14px}
+[data-theme="nachal"] .nh-prog-row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:6px;text-shadow:0 1px 3px rgba(4,14,10,.5)}
+[data-theme="nachal"] .nh-prog-row b{color:#fff}
+[data-theme="nachal"] .nh-prog-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
+[data-theme="nachal"] .nh-prog-bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
+[data-theme="nachal"] .nh #daily-briefing{margin-top:14px;border:1px solid rgba(255,255,255,.4)!important;
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+[data-theme="nachal"] .nh-sec{margin:18px 2px 9px;font-size:var(--fs-base);font-weight:700;color:#fff;letter-spacing:.5px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
+[data-theme="nachal"] .nh-list{padding:6px 16px}
+[data-theme="nachal"] .nh-row{display:flex;align-items:center;gap:8px;min-height:48px}
+[data-theme="nachal"] .nh-row[role="button"]{cursor:pointer}
+[data-theme="nachal"] .nh-row + .nh-row{border-top:1px solid rgba(27,46,36,.09)}
+/* the tick is drawn at 28px and clicked at 44px */
+[data-theme="nachal"] .nh-tick{width:44px;height:44px;flex:none;display:grid;place-items:center;margin-inline-start:-8px}
+[data-theme="nachal"] .nh-tick span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:#BCD8CC;color:#1F4030;font-size:15px;box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
+[data-theme="nachal"] .nh-kind{width:28px;height:28px;flex:none;display:grid;place-items:center;font-size:17px}
+[data-theme="nachal"] .nh-rt{flex:1;min-width:0;padding:6px 0}
+[data-theme="nachal"] .nh-rt1{font-size:var(--fs-lg);font-weight:600;color:var(--t1);line-height:1.35}
+[data-theme="nachal"] .nh-row.first .nh-rt1{font-size:16px;font-weight:700}
+[data-theme="nachal"] .nh-rt2{font-size:var(--fs-sm);color:var(--t3);margin-top:2px;line-height:1.4}
+[data-theme="nachal"] .nh-peek{margin:12px 0;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:22px;
+  background:rgba(22,40,34,.34);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+[data-theme="nachal"] .nh-peek-t{font-size:var(--fs-base);font-weight:700}
+[data-theme="nachal"] .nh-peek-s{font-size:var(--fs-sm);color:var(--nh-on-dark2);margin-top:2px}
+[data-theme="nachal"] .nh-peek-n{font-size:var(--fs-2xl);font-weight:800}
+/* the one primary action of the app, above the nav bar */
+[data-theme="nachal"] .nh-wa{position:fixed;left:50%;transform:translateX(-50%);bottom:94px;z-index:90;
+  width:calc(100% - 40px);max-width:390px;height:50px;border-radius:99px;
+  color:#fff;font-size:var(--fs-xl);font-weight:600;background:linear-gradient(135deg,#4A7760,#3A6149);
+  border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1244,6 +1384,9 @@ const TRANSLATIONS = {
   home_ask_fieldy_hint_on: {he:'שאלה חופשית — תכנון עבודה, סדר עדיפויות לאתרים, או משהו מההיסטוריה שלך.', en:'Ask anything — work planning, site priorities, or something from your history.'},
   home_ask_fieldy_hint_off: {he:'דורש חיבור לשרת בהגדרות.', en:'Requires a server connection in Settings.'},
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
+  home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
+  home_more: {he:'עוד', en:'More'},
+  home_more_hint: {he:'ציטוט, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote, insights, outside work, ask Fieldy'},
   home_briefing_title: {he:'תדריך הבוקר', en:"Morning briefing"},
   home_briefing_refresh: {he:'רענן', en:'Refresh'},
   home_briefing_generate: {he:'צור תדריך', en:'Generate briefing'},
@@ -1524,13 +1667,13 @@ const THEMES = {
     '--tao-t1b':'#aad0e9', '--tao-t2':'#7fa8c4', '--tao-t3':'#5d7f96', '--tao-gold':'#46dbf6', '--tao-gold2':'#00bad4', '--tao-gold3':'#00a2b8', '--tao-ink':'#007f94',
     '--tao-accent-rgb':'0,162,184', '--tao-bg-rgb':'6,11,15', '--tao-panel-rgb':'10,24,33'
   }},
-  nachal: {label:'נחל', labelEn:'River', tokens:{
-    '--gold':'#007068', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
+  nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43', tokens:{
+    '--gold':'#00605A', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
     '--surface-2':'#bbe2e0', '--surface-3':'#dff4f3', '--surface-input':'#eaf6f6', '--accent-soft':'#c6eeec',
-    '--accent-line':'#87e5e2', '--t1':'#002e2d', '--t2':'#2d6564', '--t3':'#6b8c8a',
+    '--accent-line':'#87e5e2', '--t1':'#0B1A12', '--t2':'#34473D', '--t3':'#4A5A52',
     '--t4':'#7fa7a5', '--t5':'#acd8d6', '--line':'rgba(24,54,58,.11)', '--border':'rgba(24,54,58,.17)',
-    '--green':'#4c6d3b', '--green-rgb':'76,109,59', '--green-light':'#7cd690', '--green-light-rgb':'124,214,144',
-    '--green-ink':'#426331', '--purple':'#766496', '--purple-rgb':'118,100,150', '--blue':'#396c8c',
+    '--green':'#41602F', '--green-rgb':'65,96,47', '--green-light':'#7cd690', '--green-light-rgb':'124,214,144',
+    '--green-ink':'#426331', '--purple':'#5F4E80', '--purple-rgb':'95,78,128', '--blue':'#2F5F7E',
     '--blue-soft':'#eaf3f0', '--blue-line':'#c7dcd6', '--tile-a1':'#5e7a5e', '--tile-a2':'#506b50',
     '--tile-a-label':'#dceedc', '--tile-b1':'#2d5952', '--tile-b2':'#1f4b45', '--tile-b-label':'#d3efe9',
     '--tile-c1':'#113242', '--tile-c2':'#032535', '--tile-c-label':'#d5ecf9', '--cta1':'#0e7c74',
@@ -1568,7 +1711,7 @@ function applyTheme(name) {
   TAO_CANVAS = {ring: t.tokens['--tao-gold3'], track: 'rgba(' + t.tokens['--tao-accent-rgb'] + ',0.15)'}
   // the phone's browser/status bar tint, so the chrome above the app matches it
   const meta = document.querySelector('meta[name="theme-color"]')
-  if(meta) meta.setAttribute('content', t.tokens['--ink'])
+  if(meta) meta.setAttribute('content', t.themeColor || t.tokens['--ink'])
   renderCurrentScreen()
 }
 let currentScreen = 'home'
@@ -2850,6 +2993,7 @@ function askFieldyHtml() {
 }
 
 function renderHome() {
+  if(currentTheme === 'nachal') { renderHomeNachal(); return }
   const el = document.getElementById('screen-home')
   const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
   const done = all.filter(t=>t.done).length
@@ -2922,6 +3066,106 @@ function renderHome() {
 
       ${askFieldyHtml()}
     </div>
+  `
+}
+
+// ── NACHAL HOME ──────────────────────────────────
+// The same Home, laid out for the Nachal theme. Every section the original has
+// is here and works the same way — it reuses the same renderers and handlers —
+// but they are ordered for calm: a small header, one primary action, the day's
+// focus, what is next, and everything else folded behind one closed row.
+// Where the original shows something permanently, this lays it out like so:
+//   date + streak ........ the small line above the greeting
+//   settings ............. the round button; an amber dot while the server is not set up
+//   server banner ........ a thin strip, only while there is no connection
+//   three counters ....... one line of three tappable counts, each still goes to its screen
+//   add from WhatsApp .... the capsule above the nav bar
+//   mood picker + tip .... behind the leaf button, closed until it is tapped
+//   quote, insights, outside work, ask Fieldy .... inside the closed "more" row
+let moodPanelOpen = false
+function toggleMoodPanel() { moodPanelOpen = !moodPanelOpen; if(currentScreen === 'home') renderHome() }
+
+// Right-now list, as rows with a small tick. Same ranking, same limit, same
+// mood bar, same completeFromFocus() — only tasks have a done state, so only
+// they get a tick; a focus line, a stuck site or an event shows its own icon.
+function rightNowNachalHtml(mood) {
+  const all = rankRightNow(mood)
+  if(!all.length) return ''
+  const limit = moodLimit(mood)
+  const cap = (limit && !rightNowExpanded) ? limit : 6
+  const shown = all.slice(0, cap), hidden = all.length - shown.length
+  const row = (it, first) => {
+    const lead = it.kind === 'task'
+      ? `<button class="nh-tick" onclick="completeFromFocus(${jsArg(it.id)}, event)" aria-label="${tr('rn_mark_done')}"><span>${icon('check')}</span></button>`
+      : `<span class="nh-kind" style="color:${it.color}">${icon(it.icon)}</span>`
+    return `<div class="nh-row${first ? ' first' : ''}"${it.go ? ` onclick="${it.go}" role="button" tabindex="0"` : ''}>
+      ${lead}
+      <div class="nh-rt"><div class="nh-rt1">${esc(it.title)}</div>${it.sub ? `<div class="nh-rt2">${it.sub}</div>` : ''}</div>
+    </div>`
+  }
+  const bar = limit ? moodLimitBarHtml(mood, hidden, 'margin:6px 0 0') : ''
+  const more = (!limit && hidden > 0) ? `<div class="nh-rt2" style="padding:6px 2px 0">${tr('rn_more').replace('{n}', hidden)}</div>` : ''
+  return `<div class="nh-sec">${icon('target')} ${tr('rn_title')}</div>
+    <div class="card glass nh-list">${shown.map((it, i) => row(it, i === 0)).join('')}${bar}${more}</div>`
+}
+
+function renderHomeNachal() {
+  const el = document.getElementById('screen-home')
+  const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const done = all.filter(t=>t.done).length
+  const total = all.length
+  const curMood = getCurrentMood()
+  const moodDef = curMood ? MOOD_LIB[curMood.mood] : null
+  const nowCount = state.tasks.now.filter(t=>!t.done).length
+  const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
+  const pendingPeople = state.people.filter(p=>p.pending).length
+  const pct = total ? Math.round((done/total)*100) : 0
+  const moodPatterns = getMoodPatterns()
+  const offline = !serverConfigured()
+
+  ensureDailyBriefing()
+  el.innerHTML = `
+    <div class="nh">
+      <div class="nh-top">
+        <div class="nh-head">
+          <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
+          <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-stats">
+            <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
+            <button onclick="navigateTo('sites')"><b>${openSites}</b> ${tr('home_stat_sites')}</button><s>·</s>
+            <button onclick="navigateTo('people')"><b>${pendingPeople}</b> ${tr('home_stat_pending')}</button>
+          </div>
+        </div>
+        <button class="nh-gear" onclick="navigateTo('settings')" aria-label="${tr('settings_title')}">${icon('settings')}${offline ? '<u></u>' : ''}</button>
+      </div>
+      ${offline ? `<div class="nh-strip" onclick="navigateTo('settings')" role="button" tabindex="0">
+        <span class="nh-strip-i">${icon('alert-triangle')}</span>
+        <span class="nh-strip-t"><b>${tr('home_server_needed_title')}</b> · ${tr('home_server_needed_body')}</span>
+      </div>` : ''}
+      <div class="nh-tools">
+        <button class="nh-ask" onclick="navigateTo('input')">${icon('search')}<span>${tr('home_ask_organize')}</span></button>
+        <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
+      </div>
+      ${moodPanelOpen ? `<div class="nh-mood">${moodPickerHtml(curMood)}${moodTipHtml(curMood, moodDef)}</div>` : ''}
+      ${total > 0 ? `<div class="nh-prog">
+        <div class="nh-prog-row"><span>${tr('home_progress')}</span><b>${done}/${total}</b></div>
+        <div class="nh-prog-bar"><i style="width:${pct}%"></i></div>
+      </div>` : ''}
+      ${dailyBriefingHtml()}
+      ${rightNowNachalHtml(curMood ? curMood.mood : null)}
+      <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
+        <div>
+          <div class="nh-peek-t">${icon('wallet')} ${tr('home_petty_cash')}</div>
+          <div class="nh-peek-s">${tr('home_petty_cash_month').replace('{m}', currentMonthKey()).replace('{n}', pettyCashThisMonth().length)}</div>
+        </div>
+        <div class="nh-peek-n">₱${pettyCashMonthTotal().toLocaleString()}</div>
+      </div>
+      ${total===0&&!state.focus?`<div class="card">${emptyHtml(icon('clipboard'), tr('home_empty_start'), 'padding:24px 0')}</div>`:''}
+      ${accordionHtml('nh-more', {title:tr('home_more'), hint:tr('home_more_hint')}, function(){
+        return quotePanelHtml() + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
+      }, 'margin-top:12px')}
+    </div>
+    <button class="nh-wa" onclick="navigateTo('input')">${tr('home_add_whatsapp')}</button>
   `
 }
 
