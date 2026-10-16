@@ -121,6 +121,16 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 .site-selbar-go{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-radius:14px;padding:10px 16px;min-height:44px;font-size:var(--fs-base);font-weight:700}
 .site-selbar-go:disabled{opacity:.45;cursor:default}
 .site-selbar-x{background:var(--surface-2);color:var(--t2);border-radius:14px;padding:10px 14px;min-height:44px;font-size:var(--fs-base);font-weight:600}
+/* the site card: compact, the drawer opens on a tap (every theme) */
+.site-card{cursor:pointer}
+.site-nav{flex:none;width:44px;height:44px;margin:-6px -4px -6px -6px;display:grid;place-items:center;border-radius:50%;color:var(--gold);background:var(--accent-soft);font-size:18px}
+.site-status-tag{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:4px 13px;cursor:pointer;font-weight:600}
+.site-more{margin-inline-start:auto;color:var(--t3);display:flex;font-size:18px;transition:transform .15s}
+.site-card.is-open .site-more{transform:rotate(180deg)}
+.st-picker{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--surface-2);cursor:default}
+.st-picker-l{font-size:var(--fs-sm);color:var(--t3)}
+.st-opt{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:4px 14px;cursor:pointer;font-weight:600}
+.site-drawer{cursor:default}
 .tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--t2)}
 /* Per-kind tint for the small pills on a task card (site/person/context/
    time) — was one flat muted colour for everything, which read as bland. */
@@ -516,9 +526,9 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
    inks on pale fills (5.1:1 or more). Nothing moves except the stuck badge,
    which breathes once every seven seconds, and not at all for reduced motion. */
 [data-theme="nachal"]{
-  --nh-glow-mint:150,228,196;--nh-glow-teal:86,205,190;--nh-glow-lav:190,176,246;--nh-glow-gold:246,214,140;--nh-glow-rose:236,168,212;
-  --nh-rose:#8E3A68;--nh-rose-soft:#F5E1EC;--nh-gold-ink:#765608;--nh-gold-soft:#F6EBC9;
-  --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#265E44;--nh-mint-soft:#D5F0E0;
+  --nh-glow-mint:120,206,186;--nh-glow-teal:86,205,190;--nh-glow-lav:190,176,246;--nh-glow-gold:240,200,120;--nh-glow-rose:232,132,132;
+  --nh-rose:#A3333D;--nh-rose-soft:#F6DEDD;--nh-gold-ink:#85590C;--nh-gold-soft:#F5E6C6;
+  --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#1B6E5C;--nh-mint-soft:#D3EFE6;
   --nh-card-solid:#EEF6F1}
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks) .card{
   box-shadow:0 0 0 1px rgba(var(--nh-glow-mint),.16),0 0 26px -6px rgba(var(--nh-glow-teal),.45),
@@ -555,9 +565,7 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
 @media (prefers-reduced-motion:reduce){[data-theme="nachal"] .site-stuck-badge{animation:none}}
 /* tasks: the time buckets and the priority ticks in the same soft hues */
 [data-theme="nachal"] #screen-tasks .nh-bucket{border-radius:18px!important}
-[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-gold-soft)!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-gold),.9)}
-[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"][data-b="today"]{background:var(--nh-lav-soft)!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-lav),.9)}
-[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"][data-b="later"]{background:#E3ECE7!important;box-shadow:0 0 16px -3px rgba(var(--nh-glow-mint),.7)}
+[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-soft-ctl)!important;box-shadow:0 0 16px -4px rgba(var(--nh-glow-teal),.7)}
 [data-theme="nachal"] #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
 [data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
@@ -665,6 +673,41 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 [data-theme="nachal"] .modal:has(.route-list),
 [data-theme="nachal"] .modal:has(.route-missing){background:var(--nh-soft-strong)!important;
   -webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2);border-top:1px solid rgba(255,255,255,.45)!important}
+/* ── Nachal · watercolour status ──
+   The status tags (open, waiting, done), "stuck X days", the quick status
+   picker, the active task section and People's "waiting" are small painted
+   blobs: a warm rose-red, an ochre-amber, a soft teal-green, each in four
+   variants so neighbouring tags are not identical. They are pre-rendered WebP
+   images of about 4KB (assets/watercolor), not a live filter, drawn behind the
+   word with an irregular edge that spills a little past it. The word is a
+   dark ink of the same family, 4.5:1 or more against the darkest part of the
+   blob it sits on. Other chips (year, contractor, links) stay soft capsules. */
+[data-theme="nachal"] .wc{position:relative;isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;animation:none!important;font-weight:700}
+[data-theme="nachal"] .wc::before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;background:var(--wc) center/100% 100% no-repeat}
+[data-theme="nachal"] .wc[data-wc="rose"]{color:#3A0C12!important}
+[data-theme="nachal"] .wc[data-wc="ochre"]{color:#4A2F02!important}
+[data-theme="nachal"] .wc[data-wc="teal"]{color:#0C3A30!important}
+[data-theme="nachal"] .wc svg{stroke:currentColor}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="1"]{--wc:url('assets/watercolor/wc-rose-1.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="2"]{--wc:url('assets/watercolor/wc-rose-2.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="3"]{--wc:url('assets/watercolor/wc-rose-3.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="4"]{--wc:url('assets/watercolor/wc-rose-4.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="1"]{--wc:url('assets/watercolor/wc-ochre-1.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="2"]{--wc:url('assets/watercolor/wc-ochre-2.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="3"]{--wc:url('assets/watercolor/wc-ochre-3.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="4"]{--wc:url('assets/watercolor/wc-ochre-4.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="1"]{--wc:url('assets/watercolor/wc-teal-1.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="2"]{--wc:url('assets/watercolor/wc-teal-2.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="3"]{--wc:url('assets/watercolor/wc-teal-3.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="4"]{--wc:url('assets/watercolor/wc-teal-4.webp')}
+/* the active task section is a large tile: its blob stays inside it */
+[data-theme="nachal"] #screen-tasks .nh-bucket.wc::before{inset:10px 8px}
+/* ── Nachal · the compact site card ── */
+[data-theme="nachal"] .site-nav{background:var(--nh-soft-ctl);border:1px solid rgba(74,119,96,.26);color:var(--nh-sage-deep)}
+[data-theme="nachal"] .st-picker{background:rgba(var(--nh-soft-rgb),.8);border:1px solid var(--nh-soft-edge)}
+[data-theme="nachal"] .site-drawer{border-top-color:rgba(27,46,36,.14)!important}
+[data-theme="nachal"] #screen-sites .site-act{border-radius:14px!important}
+[data-theme="nachal"] #screen-sites .site-act[data-act="draft"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important}
 /* ── Nachal · screen headers ──
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
@@ -1984,12 +2027,13 @@ function setUiLang(lang) {
 //           to a teal that also clears 4.5:1 on white, which the original
 //           never did (3.98).
 //   aqua  — --blue (site tags) sat 21° from the ocean accent; nudged to indigo.
-// Nachal's "fairy-forest" status hues, which replace the saturated red and
-// orange in that one theme: a deep ink that reads on a light card, used with
-// a pale fill and a glow of its own family (the CSS holds those). Every status
-// keeps its word, so the hue is never the only signal. The other three themes
-// keep the fixed alarm colours above.
-const NH_SOFT = {rose:'#8E3A68', gold:'#765608', lav:'#574A8F', mint:'#265E44', neutral:'#4A5A52'}
+// Nachal's status hues: real alert colours in the theme's watercolour manner —
+// a warm rose-red, an ochre-amber and a soft teal-green. These are the inks
+// that read on a light card (borders, ticks, map pins, text); the status tags
+// themselves are painted watercolour blobs (assets/watercolor, see the CSS).
+// Every status keeps its word, so the hue is never the only signal. The other
+// three themes keep the fixed alarm colours above.
+const NH_SOFT = {rose:'#A3333D', gold:'#85590C', lav:'#574A8F', mint:'#1B6E5C', neutral:'#4A5A52'}
 const THEME_TOKENS_BASE = {
   '--surface':'#ffffff', '--ink3':'#ffffff',
   '--red':'#ef4444', '--red-dark':'#c0392b', '--red-soft':'#fdeaea',
@@ -2049,8 +2093,8 @@ const THEMES = {
     '--tao-accent-rgb':'0,162,184', '--tao-bg-rgb':'6,11,15', '--tao-panel-rgb':'10,24,33'
   }},
   nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43',
-    alarm:{'--red':NH_SOFT.rose, '--red-dark':'#74284F', '--red-soft':'#F5E1EC', '--stuck':'#7E3060', '--stuck-soft':'#F3DCE8',
-      '--orange':NH_SOFT.gold, '--amber':NH_SOFT.gold, '--amber-line':'#E6CF8E'},
+    alarm:{'--red':NH_SOFT.rose, '--red-dark':'#7F222B', '--red-soft':'#F6DEDD', '--stuck':'#9A2B35', '--stuck-soft':'#F4DCDB',
+      '--orange':NH_SOFT.gold, '--amber':NH_SOFT.gold, '--amber-line':'#E3C489'},
     status:{open:NH_SOFT.rose, pending:NH_SOFT.gold, resolved:NH_SOFT.mint},
     tokens:{
     '--gold':'#00605A', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
@@ -3909,7 +3953,8 @@ function renderTasks() {
     }
   }
   const NH = currentTheme === 'nachal'
-  const BCOLS = NH ? {now:NH_SOFT.gold,today:NH_SOFT.lav,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const BCOLS = NH ? {now:NH_SOFT.rose,today:NH_SOFT.gold,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const BWC = {now:'rose', today:'ochre'}
   const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
@@ -3920,7 +3965,7 @@ function renderTasks() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
+          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket${taskBucket===b&&BWC[b]?' wc':''}" data-wc="${BWC[b]||''}" data-v="${i+1}" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
             <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
             <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${[tr('home_stat_now'),tr('task_bucket_today'),tr('task_bucket_later')][i]}</div>
             ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
@@ -4802,10 +4847,17 @@ function bindSiteSelectGestures(el) {
   el.addEventListener('contextmenu', e => { if(fired || timer) e.preventDefault() })
   el.addEventListener('click', e => {
     if(fired) { fired = false; e.preventDefault(); e.stopPropagation(); return }
-    if(!siteSelectMode) return
-    const card = e.target.closest('[data-key]')
-    if(!card || e.target.closest('a,button,input,select,textarea')) return
-    toggleSiteSelected(card.dataset.key)
+    const interactive = e.target.closest('a,button,input,select,textarea')
+    // an open status picker closes on any tap outside it (that tap does nothing else)
+    if(sitePickerKey && !e.target.closest('.st-picker,.site-status-tag')) {
+      sitePickerKey = null; refreshSiteResults()
+      if(!interactive) { e.stopPropagation(); return }
+    }
+    const card = e.target.closest('.site-card[data-key], .site-dir-card[data-key]')
+    if(!card || interactive) return
+    if(siteSelectMode) return toggleSiteSelected(card.dataset.key)
+    // the drawer: only site cards have one, and a tap inside it does not close it
+    if(card.classList.contains('site-card') && !e.target.closest('.site-drawer')) toggleSiteDrawer(card.dataset.key)
   }, true)
 }
 // where a site or directory entry is, for Google Maps; null if nowhere
@@ -5033,38 +5085,76 @@ let TAO_CANVAS = {ring:'#b8860b', track:'rgba(196,146,42,0.15)'}   // canvas ign
 let STATUS_HEX = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}   // refreshed by applyTheme(); real hex because call sites append alpha
 function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
 
+// A site card shows only what is needed at a glance: the name, one line of
+// where/what (province · issue, where codes like A08 live), one status tag,
+// "stuck X days" when it applies, and the navigate icon. Tapping the card
+// opens its drawer with everything else; tapping the status tag opens a
+// three-status picker, so a status change stays two taps.
+let siteOpenKey = null, sitePickerKey = null
+const SITE_WC = {open:'rose', pending:'ochre', resolved:'teal'}
+// which of the four painted variants a site gets, stable per name
+function wcVariant(str) { let h = 0; for(const c of String(str)) h = (h * 31 + c.charCodeAt(0)) | 0; return 1 + Math.abs(h) % 4 }
 function siteCard(s, toks) {
   const col = STATUS_HEX[s.status]||'#6b6255'
-  const stuckDays = daysStuck(s)
+  const key = siteKey(s), sel = siteSelected.includes(key)
+  const open = !siteSelectMode && siteOpenKey === key, picking = !siteSelectMode && sitePickerKey === key
+  const v = wcVariant(s.name)
+  const line = [s.province, s.municipality].filter(Boolean).map(x => hlText(x, toks)).concat(s.issue ? [hlText(s.issue, toks)] : []).join(' · ')
   return `
-    <div class="card site-card${s.stuckSince?' is-stuck':''}${siteSelected.includes(siteKey(s))?' is-selected':''}" data-st="${esc(s.status)}" data-key="${esc(siteKey(s))}" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        ${siteCheckHtml(siteKey(s), siteSelected.includes(siteKey(s)))}
-        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1);flex:1">${icon('map-pin')} ${hlText(s.name, toks)}</div>
-        ${s.stuckSince?`<span class="site-stuck-badge" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
+    <div class="card site-card${s.stuckSince?' is-stuck':''}${sel?' is-selected':''}${open?' is-open':''}" data-st="${esc(s.status)}" data-key="${esc(key)}" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
+      <div class="site-head" style="display:flex;align-items:flex-start;gap:8px">
+        ${siteCheckHtml(key, sel)}
+        <div style="flex:1;min-width:0">
+          <div class="site-name" style="font-size:var(--fs-lg);font-weight:700;color:var(--t1);line-height:1.3">${hlText(s.name, toks)}</div>
+          ${line?`<div class="site-line" style="font-size:var(--fs-base);color:var(--t2);margin-top:2px;line-height:1.4;${open?'':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${line}</div>`:''}
+        </div>
+        ${s.location?`<a href="${esc(singleRouteUrl(s))}" target="_blank" rel="noopener" class="site-nav site-nav-link" aria-label="ניווט אל ${esc(s.name)}" title="ניווט">${icon('navigation')}</a>`:''}
       </div>
-      ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${hlText(s.province, toks)}</div>`:''}
-      ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${hlText(s.issue, toks)}</div>`:''}
-      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        ${s.contractor?`<span class="tag">${esc(String(s.contractor).toUpperCase())}</span>`:''}
-        <span class="tag tag-status-${esc(s.status)}">${STATUS_LABEL[s.status]||esc(s.status)}</span>
+      <div class="site-tags" style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
+        <button class="tag tag-status-${esc(s.status)} site-status-tag wc" data-wc="${SITE_WC[s.status]||'rose'}" data-v="${v}" aria-haspopup="menu" aria-expanded="${picking}" aria-label="סטטוס: ${STATUS_LABEL[s.status]||esc(s.status)} — לחץ לשינוי" onclick="toggleStatusPicker(this.closest('[data-key]').dataset.key)">${STATUS_LABEL[s.status]||esc(s.status)}</button>
+        ${s.stuckSince?`<span class="site-stuck-badge wc" data-wc="rose" data-v="${1 + (v % 4)}" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${daysStuck(s)} ימים</span>`:''}
+        <span class="site-more" aria-hidden="true">${icon('chevron-down')}</span>
+      </div>
+      ${picking ? `<div class="st-picker" role="menu" aria-label="שינוי סטטוס">
+          <span class="st-picker-l">שנה ל:</span>
+          ${['open','pending','resolved'].map(st => `<button role="menuitemradio" aria-checked="${s.status===st}" class="tag tag-status-${st} st-opt wc" data-wc="${SITE_WC[st]}" data-v="${1 + ((v + st.length) % 4)}" onclick="pickSiteStatus(${jsArg(s.name)},'${st}')">${s.status===st?icon('check')+' ':''}${STATUS_LABEL[st]}</button>`).join('')}
+        </div>` : ''}
+      ${open ? siteDrawerHtml(s) : ''}
+    </div>`
+}
+// the drawer: every other field, link and action the card used to carry
+function siteDrawerHtml(s) {
+  const chip = 'text-decoration:none;color:var(--gold)'
+  return `<div class="site-drawer" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+      ${s.caseDetail?`<div class="site-notes" style="font-size:var(--fs-base);color:var(--t2);line-height:1.55;margin-bottom:10px;white-space:pre-wrap">${esc(s.caseDetail)}</div>`:''}
+      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-bottom:10px;cursor:pointer"/>`:''}
+      <div class="site-chips-row" style="display:flex;gap:8px;flex-wrap:wrap">
+        ${s.contractor?`<span class="tag">${icon('user')} ${esc(String(s.contractor).toUpperCase())}</span>`:''}
         ${s.year?`<span class="tag">${icon('calendar')} ${esc(s.year)}</span>`:''}
-        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:4px 10px;font-size:var(--fs-sm);color:var(--t2);cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
-        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} Remo</a>`:''}
-        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>`:''}
-        ${s.location?`<a href="${esc(singleRouteUrl(s))}" target="_blank" rel="noopener" class="tag site-nav-link" aria-label="ניווט אל ${esc(s.name)}" title="ניווט" style="text-decoration:none;color:var(--gold)">${icon('navigation')}</a>`:''}
-        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('link')} Monday.com</a>`:''}
+        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" class="tag" style="border:1px solid var(--line);cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
+        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('external-link')} Remo</a>`:''}
+        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('map')} Maps</a>`:''}
+        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('link')} Monday.com</a>`:''}
       </div>
-      <div class="site-actions" style="display:flex;gap:6px;margin-top:10px">
+      <div class="site-drawer-l" style="font-size:var(--fs-sm);color:var(--t3);margin:12px 0 6px">שינוי סטטוס</div>
+      <div class="site-actions" style="display:flex;gap:6px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" class="site-st" data-st="${st}" aria-pressed="${s.status===st}" style="flex:1;padding:7px 4px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" class="site-st" data-st="${st}" aria-pressed="${s.status===st}" style="flex:1;padding:8px 4px;min-height:40px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" class="site-stuck-btn" aria-pressed="${!!s.stuckSince}" style="background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:7px 9px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base)">${icon('alert-triangle')}</button>
-        ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', icon('edit'), '', 'edit')}
-        ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
+      </div>
+      <div class="site-drawer-actions" style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" class="site-stuck-btn site-act" aria-pressed="${!!s.stuckSince}" style="flex:1;min-height:40px;background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:8px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('alert-triangle')} ${s.stuckSince?'בטל תקוע':'סמן תקוע'}</button>
+        <button onclick="showAddSite(${jsArg(s.name)})" data-act="edit" aria-label="edit" class="site-act" style="flex:1;min-height:40px;background:var(--blue-soft);border-radius:var(--radius-sm);padding:8px;color:var(--blue);font-size:var(--fs-base);font-weight:600">${icon('edit')} עריכה</button>
+        <button onclick="openAction({text:${jsArg(s.name+': '+(s.issue||''))},assignee:${jsArg(s.contractor||'')}})" data-act="draft" aria-label="draft" class="site-act" style="flex:1;min-height:40px;background:rgba(var(--green-rgb),.13);border-radius:var(--radius-sm);padding:8px;color:var(--green);font-size:var(--fs-base);font-weight:600">${icon('message-square')} הודעה</button>
       </div>
     </div>`
+}
+function toggleSiteDrawer(key) { siteOpenKey = siteOpenKey === key ? null : key; sitePickerKey = null; refreshSiteResults() }
+function toggleStatusPicker(key) { sitePickerKey = sitePickerKey === key ? null : key; refreshSiteResults() }
+function pickSiteStatus(name, st) {
+  sitePickerKey = null
+  refreshSiteResults()
+  requestStatusChange(name, st)
 }
 
 function toggleSiteStuck(name) {
@@ -5320,6 +5410,7 @@ function doAddSite() {
   } else {
     site.id = Date.now()
     site.createdAt = new Date().toISOString()
+    siteOpenKey = siteKey(site)
     setState({sites:[...state.sites, site]})
     logEvent('site_created', {name: site.name, contractor: site.contractor||null, status: site.status})
   }
@@ -5367,7 +5458,7 @@ function personCard(p) {
         </div>
       </div>
       ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:${NH?'var(--nh-gold-soft)':'#f59e0b11'};border-radius:var(--radius-sm);border:1px solid ${NH?'#76560833':'#f59e0b22'}">
-        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${icon('hourglass')} ממתין</div>
+        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${NH?`<span class="wc" data-wc="ochre" data-v="2">${icon('hourglass')} ממתין</span>`:`${icon('hourglass')} ממתין`}</div>
         <div style="font-size:var(--fs-base);color:var(--t2);line-height:1.5">${esc(p.pending)}</div>
       </div>`:''}
     </div>`
