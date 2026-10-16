@@ -79,6 +79,61 @@ textarea,select,input{font-family:inherit}
 .form-input{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-md);padding:11px var(--space-3);color:var(--t1);font-size:var(--fs-base);outline:none;display:block;margin-bottom:var(--space-2-5);direction:rtl}
 .form-select{width:100%;background:var(--surface-2);border:1px solid var(--t4);border-radius:var(--radius-sm);padding:var(--space-2-5) var(--space-2);color:var(--t1);font-size:var(--fs-base);outline:none}
 /* Tags */
+/* site search and its filter chips (every theme) */
+.site-search-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.site-search{position:relative;flex:1;min-width:0}
+.site-region-btn .ic{width:16px;height:16px;flex:none}
+.region-row{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 10px;background:none;text-align:start;color:var(--t1)}
+.region-row + .region-row{border-top:1px solid var(--line)}
+.region-box{width:24px;height:24px;flex:none;border-radius:7px;border:2px solid var(--gold);display:grid;place-items:center;color:#fff;font-size:15px}
+.region-row[aria-checked="true"] .region-box{background:var(--gold)}
+.region-name{flex:1;font-size:var(--fs-lg);font-weight:600}
+.region-count{font-size:var(--fs-sm);color:var(--t3)}
+.site-search-ic{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;color:var(--t3);display:flex;pointer-events:none}
+.site-search-x{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:4px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--t2);background:none}
+#site-search::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.site-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * var(--space-4));padding:2px var(--space-4)}
+.site-chips::-webkit-scrollbar{display:none}
+mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;padding:0 1px}
+/* selecting sites for a route (every theme) */
+.site-check{flex:none;width:44px;height:44px;margin-block:-10px;margin-inline-start:-10px;display:grid;place-items:center;background:none;padding:0}
+.site-check span{width:24px;height:24px;border-radius:7px;border:2px solid var(--gold);display:grid;place-items:center;color:#fff;font-size:15px}
+.site-check[aria-checked="true"] span{background:var(--gold)}
+#screen-sites .card.is-selected{outline:2px solid var(--gold);outline-offset:-2px}
+#screen-sites[data-selecting]{padding-bottom:210px}
+#screen-sites[data-selecting] .site-actions{display:none!important}
+#screen-sites[data-selecting] [data-key]{cursor:pointer}
+/* a long-press on a card selects it, so the phone's own long-press (text
+   selection, the link callout) is turned off on the cards */
+#screen-sites [data-key]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.site-nav-link{display:inline-grid;place-items:center;width:32px;padding:3px 0!important}
+.site-selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:95;box-sizing:border-box;width:calc(100% - 28px);max-width:402px;
+  display:flex;align-items:center;gap:8px;padding:7px;padding-inline-start:16px;border-radius:20px;
+  background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.35)}
+/* the screen's enter animation moves it with a transform, which would carry
+   a fixed child with it for a moment; the bar stays invisible for that long.
+   A one-shot animation of its own rather than hiding it while .enter is set:
+   under reduced motion the screen never animates, .enter is never removed,
+   and the bar must still appear. */
+@keyframes selbar-wait{0%,99%{visibility:hidden}100%{visibility:visible}}
+.screen.enter .site-selbar{animation:selbar-wait var(--dur-base) linear}
+.site-selbar-n{flex:1;min-width:0;font-size:var(--fs-base);font-weight:700;color:var(--t1)}
+.site-selbar-go{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-radius:14px;padding:10px 16px;min-height:44px;font-size:var(--fs-base);font-weight:700}
+.site-selbar-go:disabled{opacity:.45;cursor:default}
+.site-selbar-x{background:var(--surface-2);color:var(--t2);border-radius:14px;padding:10px 14px;min-height:44px;font-size:var(--fs-base);font-weight:600}
+.site-titlebar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;min-height:40px}
+.site-hbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;padding:0}
+.site-hbtn-add{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff}
+/* the site card: compact, the drawer opens on a tap (every theme) */
+.site-card{cursor:pointer}
+.site-nav{flex:none;width:44px;height:44px;margin:-6px -4px -6px -6px;display:grid;place-items:center;border-radius:50%;color:var(--gold);background:var(--accent-soft);font-size:18px}
+.site-status-tag{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:4px 13px;cursor:pointer;font-weight:600}
+.site-more{margin-inline-start:auto;color:var(--t3);display:flex;font-size:18px;transition:transform .15s}
+.site-card.is-open .site-more{transform:rotate(180deg)}
+.st-picker{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--surface-2);cursor:default}
+.st-picker-l{font-size:var(--fs-sm);color:var(--t3)}
+.st-opt{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:4px 14px;cursor:pointer;font-weight:600}
+.site-drawer{cursor:default}
 .tag{font-size:var(--fs-base);padding:3px 9px;border-radius:var(--radius-pill);background:var(--surface-2);color:var(--t2)}
 /* Per-kind tint for the small pills on a task card (site/person/context/
    time) — was one flat muted colour for everything, which read as bland. */
@@ -117,14 +172,14 @@ textarea,select,input{font-family:inherit}
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
 [data-theme="nachal"]{
-  --nh-card-a:.95;--nh-nav-a:.82;
+  --nh-card-a:.95;--nh-nav-a:.94;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.95}}
+  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.98}}
 @media (prefers-reduced-transparency:reduce){
-  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.97}}
+  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.99}}
 [data-theme="nachal"] body{background:#2A3F3E}
 /* the room: deep teal-green with sage light pooling at the left and teal-grey
    on the right. This reuses the page's existing atmosphere layer, so no new
@@ -182,8 +237,8 @@ textarea,select,input{font-family:inherit}
    capsule that holds its icon and its label together */
 [data-theme="nachal"] #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
-  background:rgba(236,242,239,var(--nh-nav-a))!important;
-  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
+  background:rgba(226,238,231,var(--nh-nav-a))!important;
+  -webkit-backdrop-filter:blur(40px) saturate(1.2);backdrop-filter:blur(40px) saturate(1.2);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
 [data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
@@ -193,12 +248,22 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .nav-btn.active{background:var(--nh-capsule);box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
 [data-theme="nachal"] .nav-btn.active .nav-label{color:var(--t1);font-weight:700}
 [data-theme="nachal"] .nav-btn.active::after{display:none}
-[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#B23B2B}
+[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#A3333D;box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(232,132,132,.7)}
 
+/* on every screen but Home (which has its own) and the Tao, whatever scrolls
+   past the bottom is blurred and dimmed around the floating capsule, so card
+   text never shows beside it or in the strip beneath it */
+[data-theme="nachal"] .screen:not(#screen-home):not(#screen-tao)::after{
+  content:'';position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:50;pointer-events:none;
+  width:100%;max-width:430px;height:112px;
+  background:linear-gradient(to bottom,rgba(30,48,42,0) 0,rgba(30,48,42,.6) 30%,rgba(30,48,42,.7) 100%);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
 /* the bar that explains why the list is shortened for the current mood is an
    inline-tinted strip; on this page it needs a light ground to be read */
 [data-theme="nachal"] div:has(> .right-now-toggle){
-  background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(232,166,52,.85)!important;color:var(--t2)!important}
+  background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(206,170,84,.9)!important;color:var(--t2)!important;
+  box-shadow:0 0 16px -4px rgba(246,214,140,.7)}
 /* the mood tip is tinted with the mood's own colour; on this page it needs a
    light ground to be read, and keeps its coloured edge */
 [data-theme="nachal"] .nh-mood > div:not(.card){background:rgba(240,248,243,var(--nh-card-a))!important;color:var(--t1)}
@@ -373,6 +438,22 @@ textarea,select,input{font-family:inherit}
   background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
 /* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
 [data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
+/* the Leadership tab: the quote, the weekly focus and the tool it links to
+   read as one thread, a soft line of the room's teal light running from the
+   quote card into the focus card and along the edge of the linked tool. Same
+   cards, same colours; only the gap between them becomes the connection. */
+[data-theme="nachal"] #screen-tao .tao-thread{margin-bottom:16px}
+[data-theme="nachal"] #screen-tao .tao-thread > div{position:relative;margin-bottom:0!important}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div{margin-top:26px!important}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div::before{content:'';position:absolute;left:50%;top:-27px;width:2px;height:26px;transform:translateX(-50%);
+  background:linear-gradient(rgba(111,224,204,.25),rgba(111,224,204,.8) 50%,rgba(111,224,204,.25));box-shadow:0 0 8px rgba(111,224,204,.55);pointer-events:none}
+[data-theme="nachal"] #screen-tao .tao-thread > div::after{content:'';position:absolute;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;
+  background:#8FE8D6;box-shadow:0 0 0 3px rgba(111,224,204,.18),0 0 10px rgba(111,224,204,.8);pointer-events:none}
+[data-theme="nachal"] #screen-tao .tao-thread > div:first-child::after{bottom:-5px}
+[data-theme="nachal"] #screen-tao .tao-thread > div + div::after{top:-5px}
+[data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{border-color:rgba(111,224,204,.42)!important;
+  box-shadow:inset -3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
+html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box-shadow:inset 3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
 /* the meditation sheet is dark too, so its text and its ring read */
 [data-theme="nachal"] .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
 [data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
@@ -384,6 +465,7 @@ textarea,select,input{font-family:inherit}
   [data-theme="nachal"]{--nh-tao-nav-a:.94}}
 @media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
+  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
   background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
@@ -399,7 +481,7 @@ textarea,select,input{font-family:inherit}
    a soft ring in the theme's accent drawn with box-shadow, so the field never
    changes size or moves the page. */
 html[data-theme="nachal"]{
-  --nh-field-bg:rgba(255,255,255,.72);--nh-field-bd:#5E8A72;--nh-field-ink:var(--t1);--nh-field-ph:#566A5E;
+  --nh-field-bg:rgba(238,247,241,.62);--nh-field-bd:#5E8A72;--nh-field-ink:var(--t1);--nh-field-ph:#566A5E;
   --nh-field-ring:rgba(var(--accent-rgb),.30);--nh-field-focus-bd:var(--gold);
   --nh-field-shadow:inset 0 1px 3px rgba(20,50,36,.10);
   --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2334473D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
@@ -436,6 +518,220 @@ html[data-theme="nachal"] textarea:disabled,
 html[data-theme="nachal"] select:disabled{opacity:.6}
 @media (prefers-reduced-motion:reduce){
   html[data-theme="nachal"] input,html[data-theme="nachal"] textarea,html[data-theme="nachal"] select{transition:none}}
+/* ── Nachal · the fairy-forest glow (sites, tasks and shared parts) ──
+   The cards stay the same mint-white glass; what changes is the light around
+   them. A soft mint/teal halo sits outside each card, a faint gradient edge
+   (mint → lavender → pale gold) replaces the status-tinted hairline, and each
+   status carries its own gentle glow: rose-lilac for open and stuck, warm pale
+   gold for waiting and urgent, lavender for in progress, mint for done. The
+   saturated red and orange are gone from this theme. Text sits on the same
+   light card as before, so its contrast is unchanged; status words are deep
+   inks on pale fills (5.1:1 or more). Nothing moves except the stuck badge,
+   which breathes once every seven seconds, and not at all for reduced motion. */
+[data-theme="nachal"]{
+  --nh-glow-mint:120,206,186;--nh-glow-teal:86,205,190;--nh-glow-lav:190,176,246;--nh-glow-gold:240,200,120;--nh-glow-rose:232,132,132;
+  --nh-rose:#A3333D;--nh-rose-soft:#F6DEDD;--nh-gold-ink:#85590C;--nh-gold-soft:#F5E6C6;
+  --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#1B6E5C;--nh-mint-soft:#D3EFE6;
+  --nh-card-solid:#EEF6F1}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks) .card{
+  box-shadow:0 0 0 1px rgba(var(--nh-glow-mint),.16),0 0 26px -6px rgba(var(--nh-glow-teal),.45),
+    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+[data-theme="nachal"] #screen-sites .site-card{position:relative;border:1px solid transparent!important}
+/* the faint mint → lavender → gold edge, drawn as a ring so the card itself can stay translucent */
+[data-theme="nachal"] #screen-sites .site-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(var(--nh-glow-mint),.95),rgba(var(--nh-glow-lav),.8) 50%,rgba(var(--nh-glow-gold),.9));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+[data-theme="nachal"] #screen-sites .site-card.is-stuck{
+  box-shadow:0 0 0 1px rgba(var(--nh-glow-rose),.30),0 0 28px -6px rgba(var(--nh-glow-rose),.55),
+    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+/* status words: a deep ink on a pale fill, with a halo of the same family */
+[data-theme="nachal"] .tag-status-open{background:var(--nh-rose-soft);color:var(--nh-rose);box-shadow:0 0 12px -2px rgba(var(--nh-glow-rose),.8)}
+[data-theme="nachal"] .tag-status-pending{background:var(--nh-gold-soft);color:var(--nh-gold-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-gold),.85)}
+[data-theme="nachal"] .tag-status-resolved{background:var(--nh-mint-soft);color:var(--nh-mint-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-mint),.85)}
+/* the three status buttons on a site: quiet glass until chosen, then the status's own glow */
+[data-theme="nachal"] #screen-sites .site-st{
+  background:rgba(255,255,255,.6)!important;color:var(--t2)!important;border:1px solid rgba(74,119,96,.26)!important;
+  border-radius:14px!important;min-height:40px}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"]{font-weight:700}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="open"]{
+  background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{
+  background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{
+  background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
+[data-theme="nachal"] #screen-sites .site-stuck-btn{background:rgba(255,255,255,.6)!important;border:1px solid rgba(74,119,96,.26)!important;border-radius:14px!important;color:var(--t2)!important}
+[data-theme="nachal"] #screen-sites .site-stuck-btn[aria-pressed="true"]{
+  background:var(--nh-rose-soft)!important;border-color:rgba(126,48,96,.5)!important;color:var(--nh-rose)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-stuck-badge{box-shadow:0 0 12px -1px rgba(var(--nh-glow-rose),.8);animation:nh-breathe 7s ease-in-out infinite}
+@keyframes nh-breathe{0%,100%{box-shadow:0 0 9px -2px rgba(236,168,212,.55)}50%{box-shadow:0 0 18px 0 rgba(236,168,212,.95)}}
+@media (prefers-reduced-motion:reduce){[data-theme="nachal"] .site-stuck-badge{animation:none}}
+/* tasks: the time buckets and the priority ticks in the same soft hues */
+[data-theme="nachal"] #screen-tasks .nh-bucket{border-radius:18px!important}
+[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-soft-ctl)!important;box-shadow:0 0 16px -4px rgba(var(--nh-glow-teal),.7)}
+[data-theme="nachal"] #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
+[data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
+/* ── Nachal · site search ── */
+html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
+[data-theme="nachal"] .site-search-ic{inset-inline-start:18px}
+[data-theme="nachal"] .site-chip{min-height:40px;border-radius:99px!important}
+[data-theme="nachal"] .site-chip:not([aria-pressed="true"]){background:rgba(255,255,255,.62)!important;border-color:rgba(74,119,96,.24)!important}
+[data-theme="nachal"] .site-chip[aria-pressed="true"]{box-shadow:0 0 14px -3px rgba(var(--nh-glow-teal),.8)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="open"]{background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="stuck"]{background:var(--stuck)!important;color:#fff!important;box-shadow:0 0 14px -1px rgba(var(--nh-glow-rose),.85)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="pending"]{background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
+[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="resolved"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
+[data-theme="nachal"] .site-region-btn{min-height:52px;padding:0 16px!important}
+[data-theme="nachal"] .site-region-btn[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
+[data-theme="nachal"] .region-box{border-color:var(--nh-sage-deep);border-radius:9px}
+[data-theme="nachal"] .region-row[aria-checked="true"] .region-box{background:var(--nh-sage-deep)}
+[data-theme="nachal"] mark.hl{background:rgba(246,214,140,.75);box-shadow:0 0 8px rgba(246,214,140,.55)}
+[data-theme="nachal"] .site-count,[data-theme="nachal"] .site-dir-head{text-shadow:0 1px 3px rgba(4,14,10,.6)}
+/* ── Nachal · selecting sites ── */
+[data-theme="nachal"] .site-check span{border-color:var(--nh-sage-deep);border-radius:9px;background:rgba(255,255,255,.75);box-shadow:0 0 10px -2px rgba(var(--nh-glow-teal),.8)}
+[data-theme="nachal"] .site-check[aria-checked="true"] span{background:var(--nh-sage-deep);color:#fff}
+[data-theme="nachal"] #screen-sites .card.is-selected{outline:2px solid var(--nh-sage-deep);outline-offset:-1px;
+  box-shadow:0 0 0 4px rgba(var(--nh-glow-teal),.28),0 0 30px -4px rgba(var(--nh-glow-teal),.7),0 14px 30px -18px rgba(0,0,0,.55)}
+[data-theme="nachal"] .site-selbar{border-radius:99px;background:rgba(240,248,243,.9);border:1px solid rgba(255,255,255,.5);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:0 0 26px -6px rgba(var(--nh-glow-teal),.65),0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.6)}
+[data-theme="nachal"] .site-selbar-go{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep));border-radius:99px}
+[data-theme="nachal"] .site-selbar-x{background:rgba(255,255,255,.7);border:1px solid rgba(74,119,96,.26);border-radius:99px;color:var(--t2)}
+[data-theme="nachal"] .site-tool-btn{background:rgba(240,248,243,.92)!important;border:1px solid rgba(255,255,255,.4);box-shadow:0 0 14px -4px rgba(var(--nh-glow-teal),.7)}
+/* amber section labels written straight on the dark page (People's "waiting
+   for a reply") take a pale gold that reads there; the deep gold token is for
+   light surfaces */
+[data-theme="nachal"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:#F3D78E!important;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+/* ── Nachal · the forest behind Sites, Tasks, People and Calendar ──
+   The first version of this theme had these photographs at 20–25% under a
+   mask that showed them only in a band mid-screen; v2 replaced them with the
+   plain gradient. They come back here full-screen, fixed behind the content,
+   under a dark green veil so the white headings written on the page and the
+   translucent cards above them stay readable. Home and the Tao keep their own
+   rooms. */
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar){isolation:isolate}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{
+  content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 26% at 85% 18%,rgba(196,232,206,.12),rgba(196,232,206,0) 70%),
+    radial-gradient(54% 22% at 10% 62%,rgba(168,214,196,.10),rgba(168,214,196,0) 70%),
+    linear-gradient(var(--nh-veil-extra,transparent),var(--nh-veil-extra,transparent)),
+    linear-gradient(180deg,rgba(16,38,30,.58) 0%,rgba(14,34,27,.60) 55%,rgba(12,28,22,.66) 100%),
+    var(--nh-forest,none) center top/cover no-repeat,
+    #2A3F3E}
+[data-theme="nachal"] #screen-sites{--nh-forest:url('assets/backgrounds/bg-fern-mist.webp')}
+[data-theme="nachal"] #screen-tasks{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
+[data-theme="nachal"] #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(12,30,24,.16)}
+[data-theme="nachal"] #screen-calendar{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
+/* ── Nachal · soft surfaces ──
+   Outdoors the near-white cards glared. On Sites, Tasks, People and Calendar
+   every light surface (cards, the sticky header, the search field, chips, the
+   selection bar and the sheets) is one pale mint-mist, translucent and
+   blurred, so the forest behind shows through softly. One set of variables
+   holds it. The text tokens inside these surfaces are a step darker, so
+   status words, names and notes stay at AA on the translucent fill. */
+[data-theme="nachal"]{
+  --nh-soft-rgb:230,243,235;--nh-soft-a:.75;--nh-soft-strong-a:.86;
+  --nh-soft:rgba(var(--nh-soft-rgb),var(--nh-soft-a));
+  --nh-soft-strong:rgba(var(--nh-soft-rgb),var(--nh-soft-strong-a));
+  --nh-soft-ctl:rgba(236,246,240,.6);
+  --nh-soft-edge:rgba(255,255,255,.34);
+  --nh-soft-blur:blur(18px) saturate(1.15)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-theme="nachal"]{--nh-soft-a:.95;--nh-soft-strong-a:.97;--nh-soft-ctl:rgba(236,246,240,.95)}}
+@media (prefers-reduced-transparency:reduce){
+  [data-theme="nachal"]{--nh-soft-a:.98;--nh-soft-strong-a:.99;--nh-soft-ctl:rgb(236,246,240)}}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card,
+[data-theme="nachal"] #screen-calendar .ev-card,
+[data-theme="nachal"] #screen-calendar > div:nth-child(2){
+  background:var(--nh-soft)!important;-webkit-backdrop-filter:var(--nh-soft-blur);backdrop-filter:var(--nh-soft-blur)}
+[data-theme="nachal"] :is(#screen-tasks,#screen-people,#screen-calendar) .card:not([style*="border"]){border:1px solid var(--nh-soft-edge)}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) :is(.card,.screen-header,.cal-header,.ev-card),
+[data-theme="nachal"] #screen-calendar > div:nth-child(2){--t2:#2C3E35;--t3:#33433B}
+/* controls on those surfaces: a lighter mist, never white */
+[data-theme="nachal"] .site-chip:not([aria-pressed="true"]),
+[data-theme="nachal"] .site-region-btn:not([aria-pressed="true"]),
+[data-theme="nachal"] #screen-sites .site-st,
+[data-theme="nachal"] #screen-sites .site-stuck-btn:not([aria-pressed="true"]),
+[data-theme="nachal"] #screen-tasks .nh-bucket:not([aria-pressed="true"]),
+[data-theme="nachal"] #screen-tasks .screen-header button[style*="background:var(--surface)"]{background:var(--nh-soft-ctl)!important}
+/* tags tinted with a little alpha would darken on a translucent card; here they get their own pale fills */
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-person{background:#E4DFEE}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-context{background:#DCE8D6}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-site{background:#DCEBE6}
+/* the calendar's days of the next/previous month stay quieter than this month's, but legible */
+[data-theme="nachal"] #screen-calendar .cal-day.other-month .cal-dn{color:#3A4942}
+[data-theme="nachal"] #screen-calendar .week-dnum:not(.today){color:var(--t1)}
+[data-theme="nachal"] #screen-calendar .week-dnum.today{color:var(--gold-deep)}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="open"]{background:var(--nh-rose-soft)!important}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{background:var(--nh-gold-soft)!important}
+[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{background:var(--nh-mint-soft)!important}
+[data-theme="nachal"] .site-tool-btn{background:rgba(var(--nh-soft-rgb),.82)!important}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card button[style*="background:var(--blue-soft)"]{background:var(--nh-soft-ctl)!important}
+[data-theme="nachal"] .site-selbar{background:var(--nh-soft-strong)}
+[data-theme="nachal"] #screen-people button[data-act="clear"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.3)!important}
+/* the region and route sheets: frosted, the same mist */
+[data-theme="nachal"] .modal:has(.region-sheet),
+[data-theme="nachal"] .modal:has(.route-list),
+[data-theme="nachal"] .modal:has(.route-missing){background:var(--nh-soft-strong)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2);border-top:1px solid rgba(255,255,255,.45)!important}
+/* ── Nachal · watercolour status ──
+   The status tags (open, waiting, done), "stuck X days", the quick status
+   picker, the active task section and People's "waiting" are small painted
+   blobs: a warm rose-red, an ochre-amber, a soft teal-green, each in four
+   variants so neighbouring tags are not identical. They are pre-rendered WebP
+   images of about 4KB (assets/watercolor), not a live filter, drawn behind the
+   word with an irregular edge that spills a little past it. The word is a
+   dark ink of the same family, 4.5:1 or more against the darkest part of the
+   blob it sits on. Other chips (year, contractor, links) stay soft capsules. */
+[data-theme="nachal"] .wc{position:relative;isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;animation:none!important;font-weight:700}
+[data-theme="nachal"] .wc::before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;background:var(--wc) center/100% 100% no-repeat}
+[data-theme="nachal"] .wc[data-wc="rose"]{color:#3A0C12!important}
+[data-theme="nachal"] .wc[data-wc="ochre"]{color:#4A2F02!important}
+[data-theme="nachal"] .wc[data-wc="teal"]{color:#0C3A30!important}
+[data-theme="nachal"] .wc svg{stroke:currentColor}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="1"]{--wc:url('assets/watercolor/wc-rose-1.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="2"]{--wc:url('assets/watercolor/wc-rose-2.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="3"]{--wc:url('assets/watercolor/wc-rose-3.webp')}
+[data-theme="nachal"] .wc[data-wc="rose"][data-v="4"]{--wc:url('assets/watercolor/wc-rose-4.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="1"]{--wc:url('assets/watercolor/wc-ochre-1.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="2"]{--wc:url('assets/watercolor/wc-ochre-2.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="3"]{--wc:url('assets/watercolor/wc-ochre-3.webp')}
+[data-theme="nachal"] .wc[data-wc="ochre"][data-v="4"]{--wc:url('assets/watercolor/wc-ochre-4.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="1"]{--wc:url('assets/watercolor/wc-teal-1.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="2"]{--wc:url('assets/watercolor/wc-teal-2.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="3"]{--wc:url('assets/watercolor/wc-teal-3.webp')}
+[data-theme="nachal"] .wc[data-wc="teal"][data-v="4"]{--wc:url('assets/watercolor/wc-teal-4.webp')}
+/* the active task section is a large tile: its blob stays inside it */
+[data-theme="nachal"] #screen-tasks .nh-bucket.wc::before{inset:10px 8px}
+/* ── Nachal · the compact site card ── */
+[data-theme="nachal"] .site-nav{background:var(--nh-soft-ctl);border:1px solid rgba(74,119,96,.26);color:var(--nh-sage-deep)}
+[data-theme="nachal"] .st-picker{background:rgba(var(--nh-soft-rgb),.8);border:1px solid var(--nh-soft-edge)}
+[data-theme="nachal"] .site-drawer{border-top-color:rgba(27,46,36,.14)!important}
+[data-theme="nachal"] #screen-sites .site-act{border-radius:14px!important}
+[data-theme="nachal"] #screen-sites .site-act[data-act="draft"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important}
+/* ── Nachal · the compact sites header ── */
+[data-theme="nachal"] #screen-sites .screen-header{padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:10px!important}
+[data-theme="nachal"] .site-hbtn:not(.site-hbtn-add){background:var(--nh-soft-ctl)!important;border:1px solid rgba(74,119,96,.26)!important}
+[data-theme="nachal"] .site-hbtn-add{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
+[data-theme="nachal"] #screen-sites .site-search-row{margin-bottom:6px}
+[data-theme="nachal"] #screen-sites .site-chip{min-height:36px;padding:5px 10px!important}
+[data-theme="nachal"] #screen-sites .site-chips{padding-top:1px;padding-bottom:1px}
+[data-theme="nachal"] .modal:has(.sites-menu){background:var(--nh-soft-strong)!important;-webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2)}
+/* ── Nachal · screen headers ──
+   The title, buttons and filters start right under the status bar (its safe
+   area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
+   and enough opacity that a card scrolled under it cannot be read through it. */
+[data-theme="nachal"]{--nh-hdr-a:.86}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-theme="nachal"]{--nh-hdr-a:.98}}
+@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-hdr-a:.99}}
+[data-theme="nachal"] .screen-header,
+[data-theme="nachal"] .cal-header{
+  padding-top:calc(env(safe-area-inset-top,0px) + 14px)!important;padding-bottom:12px!important;
+  background:rgba(var(--nh-soft-rgb),var(--nh-hdr-a))!important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.25);backdrop-filter:blur(24px) saturate(1.25)}
+[data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -895,6 +1191,9 @@ const ICONS = {
   'feather': '<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>',
   'lock': '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   'wifi': '<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  'more': '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>',
+  'navigation': '<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+  'check-square': '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
   'external-link': '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
   'map': '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
   'palette': '<circle cx="12" cy="12" r="10"/><circle cx="8" cy="10" r="1.2" fill="currentColor"/><circle cx="12" cy="7" r="1.2" fill="currentColor"/><circle cx="16" cy="10" r="1.2" fill="currentColor"/><path d="M12 22c-2 0-2-2-1-3s2-2 4-2h2a5 5 0 0 0 5-5"/>',
@@ -1740,6 +2039,13 @@ function setUiLang(lang) {
 //           to a teal that also clears 4.5:1 on white, which the original
 //           never did (3.98).
 //   aqua  — --blue (site tags) sat 21° from the ocean accent; nudged to indigo.
+// Nachal's status hues: real alert colours in the theme's watercolour manner —
+// a warm rose-red, an ochre-amber and a soft teal-green. These are the inks
+// that read on a light card (borders, ticks, map pins, text); the status tags
+// themselves are painted watercolour blobs (assets/watercolor, see the CSS).
+// Every status keeps its word, so the hue is never the only signal. The other
+// three themes keep the fixed alarm colours above.
+const NH_SOFT = {rose:'#A3333D', gold:'#85590C', lav:'#574A8F', mint:'#1B6E5C', neutral:'#4A5A52'}
 const THEME_TOKENS_BASE = {
   '--surface':'#ffffff', '--ink3':'#ffffff',
   '--red':'#ef4444', '--red-dark':'#c0392b', '--red-soft':'#fdeaea',
@@ -1798,7 +2104,11 @@ const THEMES = {
     '--tao-t1b':'#aad0e9', '--tao-t2':'#7fa8c4', '--tao-t3':'#5d7f96', '--tao-gold':'#46dbf6', '--tao-gold2':'#00bad4', '--tao-gold3':'#00a2b8', '--tao-ink':'#007f94',
     '--tao-accent-rgb':'0,162,184', '--tao-bg-rgb':'6,11,15', '--tao-panel-rgb':'10,24,33'
   }},
-  nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43', tokens:{
+  nachal: {label:'נחל', labelEn:'River', themeColor:'#2F4B43',
+    alarm:{'--red':NH_SOFT.rose, '--red-dark':'#7F222B', '--red-soft':'#F6DEDD', '--stuck':'#9A2B35', '--stuck-soft':'#F4DCDB',
+      '--orange':NH_SOFT.gold, '--amber':NH_SOFT.gold, '--amber-line':'#E3C489'},
+    status:{open:NH_SOFT.rose, pending:NH_SOFT.gold, resolved:NH_SOFT.mint},
+    tokens:{
     '--gold':'#00605A', '--gold2':'#34b3a7', '--gold-deep':'#033a36', '--ink':'#e7efef',
     '--surface-2':'#bbe2e0', '--surface-3':'#dff4f3', '--surface-input':'#eaf6f6', '--accent-soft':'#c6eeec',
     '--accent-line':'#87e5e2', '--t1':'#0B1A12', '--t2':'#34473D', '--t3':'#4A5A52',
@@ -1829,6 +2139,7 @@ function applyTheme(name) {
   const r = document.documentElement.style
   Object.keys(THEME_TOKENS_BASE).forEach(k => r.setProperty(k, THEME_TOKENS_BASE[k]))
   Object.keys(t.tokens).forEach(k => r.setProperty(k, t.tokens[k]))
+  if(t.alarm) Object.keys(t.alarm).forEach(k => r.setProperty(k, t.alarm[k]))
   // legacy aliases still referenced in a handful of places
   r.setProperty('--cherry', t.tokens['--gold'])
   r.setProperty('--bamboo', t.tokens['--gold'])
@@ -1837,7 +2148,7 @@ function applyTheme(name) {
   // site status dots/chips build their own alpha by appending to the hex, so this
   // one cannot be a var() — it is refreshed here instead. open/pending are the
   // fixed alarm colours; only "resolved" follows the theme.
-  STATUS_HEX = {open: THEME_TOKENS_BASE['--red'], pending: THEME_TOKENS_BASE['--amber'], resolved: t.tokens['--green-light']}
+  STATUS_HEX = t.status ? Object.assign({}, t.status) : {open: THEME_TOKENS_BASE['--red'], pending: THEME_TOKENS_BASE['--amber'], resolved: t.tokens['--green-light']}
   TAO_CANVAS = {ring: t.tokens['--tao-gold3'], track: 'rgba(' + t.tokens['--tao-accent-rgb'] + ',0.15)'}
   // the phone's browser/status bar tint, so the chrome above the app matches it
   const meta = document.querySelector('meta[name="theme-color"]')
@@ -2302,7 +2613,10 @@ function renderTaoChapter(el, idx) {
 
   var modeContentHtml = '';
   if(taoMode==='lead') {
-    modeContentHtml = quoteHtml + weekHtml + leadHtml + sinekHtml;
+    // Nachal joins the quote, the weekly focus and its linked tool with one thread
+    var pair = quoteHtml + weekHtml
+    if(currentTheme === 'nachal' && quoteHtml && weekHtml) pair = '<div class="tao-thread">' + pair + '</div>'
+    modeContentHtml = pair + leadHtml + sinekHtml;
   } else if(taoMode==='adhd') {
     modeContentHtml = adhdHtml;
   } else if(taoMode==='talk') {
@@ -3650,7 +3964,9 @@ function renderTasks() {
       if(undone.length > limit || tasks.length > undone.length) { hiddenByMood = tasks.length - Math.min(limit, undone.length); tasks = undone.slice(0, limit) }
     }
   }
-  const BCOLS = {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const NH = currentTheme === 'nachal'
+  const BCOLS = NH ? {now:NH_SOFT.rose,today:NH_SOFT.gold,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const BWC = {now:'rose', today:'ochre'}
   const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
@@ -3661,7 +3977,7 @@ function renderTasks() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')" style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
+          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket${taskBucket===b&&BWC[b]?' wc':''}" data-wc="${BWC[b]||''}" data-v="${i+1}" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
             <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
             <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${[tr('home_stat_now'),tr('task_bucket_today'),tr('task_bucket_later')][i]}</div>
             ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
@@ -3683,13 +3999,14 @@ function renderTasks() {
 function setTaskContextFilter(v) { taskContextFilter=v; renderTasks() }
 
 function taskCard(t) {
-  const colors = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
+  const NH = currentTheme === 'nachal'
+  const colors = NH ? {red:NH_SOFT.rose,orange:NH_SOFT.gold,green:NH_SOFT.mint} : {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
     <div class="card" style="border:1px solid var(--line);border-right:3px solid ${t.done?'var(--t5)':(overdue?'var(--red)':c)};padding:15px;margin-bottom:9px;opacity:${t.done?'0.55':'1'};transition:opacity 0.2s,box-shadow .15s">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        <div onclick="toggleTask(${jsArg(t.id)})" style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
+        <div onclick="toggleTask(${jsArg(t.id)})"${NH?` class="nh-check" data-pri="${esc(t.color||'orange')}"`:''} style="width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;background:${t.done?c:'transparent'};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:var(--surface)">${t.done?icon('check'):''}</div>
         <div style="flex:1">
           <div style="font-size:var(--fs-xl);font-weight:500;color:var(--t1);text-decoration:${t.done?'line-through':'none'};line-height:1.4">${esc(t.text)}</div>
           ${t.note?`<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:3px;line-height:1.4">${esc(t.note)}</div>`:''}
@@ -4192,29 +4509,506 @@ async function runSpisDiagnosis() {
 }
 function renderSites() {
   const el = document.getElementById('screen-sites')
-  const sites = siteFilter==='all' ? state.sites : state.sites.filter(s=>s.status===siteFilter)
+  // a re-render while typing in the search box keeps the caret where it was
+  const act = document.activeElement, typing = act && act.id === 'site-search'
+  const caret = typing ? [act.selectionStart, act.selectionEnd] : null
+  const sites = filteredSites()
 
   el.innerHTML = `
     <div class="screen-header">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:var(--fs-2xl);font-weight:700">${tr('nav_sites')}</div>
+      <div class="site-titlebar">
+        <div style="font-size:var(--fs-xl);font-weight:700">${tr('nav_sites')}</div>
         <div style="display:flex;gap:8px">
-          <button onclick="toggleSitesMap()" id="sites-map-toggle" aria-pressed="${sitesMapOn}" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};border-radius:var(--radius-md);padding:8px 12px;color:${sitesMapOn?'var(--gold)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('map')} מפה</button>
-          <button onclick="showSpisModal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('tool')} אבחון</button>
-          ${addBtnHtml('showAddSite()')}
+          <button onclick="toggleSitesMap()" id="sites-map-toggle" class="site-hbtn" aria-pressed="${sitesMapOn}" aria-label="מפה" title="מפה" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};color:${sitesMapOn?'var(--gold)':'var(--t2)'}">${icon('map')}</button>
+          <button onclick="showSitesMenu()" class="site-hbtn" aria-haspopup="dialog" aria-label="עוד פעולות" title="עוד" style="background:var(--surface-2);color:var(--t2)">${icon('more')}</button>
+          <button onclick="showAddSite()" class="site-hbtn site-hbtn-add" aria-label="הוסף אתר" title="הוסף אתר">${icon('plus')}</button>
         </div>
       </div>
-      <div style="display:flex;gap:6px">
-        ${[['open','פתוחים'],['pending','ממתינים'],['resolved','נפתרו'],['all','הכל']].map(([v,l])=>
-          `<button onclick="setSiteFilter('${v}')" style="flex:1;padding:8px 4px;border-radius:var(--radius-md);background:${siteFilter===v?'var(--gold)':'var(--surface)'};color:${siteFilter===v?'#fff':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${l}</button>`
-        ).join('')}
+      <div class="site-search-row">
+        ${siteSearchBarHtml()}
+        ${siteRegionBtnHtml()}
+      </div>
+      <div class="site-chips" role="group" aria-label="סינון לפי סטטוס">
+        ${SITE_STATUS_CHIPS.map(([v,l])=>siteChipHtml('setSiteFilter', v, l, siteFilter===v)).join('')}
       </div>
     </div>
     <div style="padding:12px 16px">
-      ${sitesMapOn ? sitesMapHtml(sites) : ''}
-      ${sites.length===0?emptyHtml(icon('flower'), 'אין אתרים'):''}
-      ${sites.map(s=>siteCard(s)).join('')}
+      <div id="sites-map-wrap">${sitesMapOn ? sitesMapHtml(sites) : ''}</div>
+      <div id="sites-results">${sitesResultsHtml(sites)}</div>
+    </div>
+    <div id="sites-selbar">${siteSelBarHtml()}</div>`
+  el.toggleAttribute('data-selecting', siteSelectMode)
+  bindSiteSelectGestures(el)
+  positionSiteSelBar()
+  if(typing) {
+    const inp = document.getElementById('site-search')
+    if(inp) { inp.focus(); try { inp.setSelectionRange(caret[0], caret[1]) } catch(e) {} }
+  }
+}
+
+// ── SITE SEARCH ───────────────────────────────────
+// One box that looks through everything written on a site — name, province,
+// municipality, the issue (where codes like "A08" live), contractor, REMO,
+// year, case notes, and any pump/manufacturer field the Monday directory
+// carries — plus its status in Hebrew and English. Every word typed has to
+// match somewhere; a word of 4+ letters also matches with one typo (two from
+// 7 letters). The status and province chips narrow the same list, and the
+// Monday directory is searched too, below the sites Uri tracks.
+const SITE_STATUS_CHIPS = [['all','הכל'],['open','פתוחים'],['stuck','תקועים'],['pending','ממתינים'],['resolved','נפתרו']]
+const SITE_PROVINCES = [['isabela','Isabela'],['cagayan','Cagayan'],['nueva vizcaya','Nueva Vizcaya'],['car','CAR']]
+const CAR_PROVINCES = ['car','cordillera','abra','apayao','benguet','ifugao','kalinga','mountain province']
+const SITE_STATUS_WORDS = {open:'פתוח open', pending:'ממתין waiting pending', resolved:'נפתר done resolved'}
+const SITE_SEARCH_SKIP = {id:1, photo:1, casePhotos:1, mondayLink:1, location:1, createdAt:1, stuckSince:1, status:1, updated:1}
+let siteQuery = '', siteProvinces = [], siteSearchTimer = null
+function normSearch(str) {
+  return String(str == null ? '' : str).toLowerCase().normalize('NFKD')
+    .replace(/[̀-֑ͯ-ׇ]/g, '')
+    .replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+}
+function searchTokens(q) { return normSearch(q).split(' ').filter(Boolean) }
+// optimal-string-alignment distance, stopping early once it passes max
+function editDistance(a, b, max) {
+  if(Math.abs(a.length - b.length) > max) return max + 1
+  let prev2 = null, prev = Array.from({length: b.length + 1}, (_, j) => j)
+  for(let i = 1; i <= a.length; i++) {
+    const cur = [i]; let rowMin = i
+    for(let j = 1; j <= b.length; j++) {
+      let v = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1))
+      if(prev2 && i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) v = Math.min(v, prev2[j-2] + 1)
+      cur.push(v); if(v < rowMin) rowMin = v
+    }
+    if(rowMin > max) return max + 1
+    prev2 = prev; prev = cur
+  }
+  return prev[b.length]
+}
+// does one typed word match one word of the text? 2 = contains it, 1 = a typo away, 0 = no
+function wordMatch(tok, word) {
+  if(word.includes(tok)) return 2
+  if(tok.length < 4) return 0
+  const max = tok.length >= 7 ? 2 : 1
+  if(editDistance(tok, word, max) <= max) return 1
+  if(word.length > tok.length && editDistance(tok, word.slice(0, tok.length), max) <= max) return 1
+  return 0
+}
+function siteHaystack(o) {
+  const parts = []
+  Object.keys(o).forEach(k => { if(!SITE_SEARCH_SKIP[k] && (typeof o[k] === 'string' || typeof o[k] === 'number')) parts.push(o[k]) })
+  if(o.status) parts.push(SITE_STATUS_WORDS[o.status] || o.status)
+  if(o.stuckSince) parts.push('תקוע stuck')
+  return normSearch(parts.join(' ')).split(' ').filter(Boolean)
+}
+function matchesQuery(o, toks) {
+  if(!toks.length) return true
+  const words = siteHaystack(o)
+  return toks.every(t => words.some(w => wordMatch(t, w)))
+}
+function matchesProvince(o, provs) {
+  if(!provs || !provs.length) return true
+  return provs.some(prov => inProvince(o, prov))
+}
+function inProvince(o, prov) {
+  const p = normSearch((o.province || '') + ' ' + (o.municipality || ''))
+  if(prov === 'car') return CAR_PROVINCES.some(c => (' ' + p + ' ').includes(' ' + c + ' '))
+  if(prov === 'cagayan') return /(^| )cagayan( |$)/.test(normSearch(o.province || '')) && !/cagayan de oro/.test(p)
+  return p.includes(prov)
+}
+function matchesStatus(s, f) {
+  if(f === 'all') return true
+  if(f === 'stuck') return !!s.stuckSince
+  return s.status === f
+}
+function filteredSites() {
+  const toks = searchTokens(siteQuery)
+  return state.sites.filter(s => matchesStatus(s, siteFilter) && matchesProvince(s, siteProvinces) && matchesQuery(s, toks))
+}
+// Monday directory entries that match, minus any site already tracked by name
+function directoryMatches() {
+  const toks = searchTokens(siteQuery)
+  if(!toks.length && !siteProvinces.length) return []
+  const tracked = {}; state.sites.forEach(s => { tracked[normSearch(s.name)] = 1 })
+  return (state.siteDirectory || []).filter(d => !tracked[normSearch(d.name)] && matchesProvince(d, siteProvinces) && matchesQuery(d, toks))
+}
+// Wraps the words that matched in <mark>; everything else is escaped as usual.
+function hlText(raw, toks) {
+  const text = String(raw == null ? '' : raw)
+  if(!toks || !toks.length) return esc(text)
+  return text.split(/(\s+)/).map(seg => {
+    if(!seg || /^\s+$/.test(seg)) return esc(seg)
+    const nw = normSearch(seg)
+    if(!nw) return esc(seg)
+    let best = 0, hit = null
+    toks.forEach(t => nw.split(' ').forEach(w => { const m = wordMatch(t, w); if(m > best) { best = m; hit = t } }))
+    if(!best) return esc(seg)
+    const at = best === 2 ? seg.toLowerCase().indexOf(hit) : -1
+    if(at < 0) return '<mark class="hl">' + esc(seg) + '</mark>'
+    return esc(seg.slice(0, at)) + '<mark class="hl">' + esc(seg.slice(at, at + hit.length)) + '</mark>' + esc(seg.slice(at + hit.length))
+  }).join('')
+}
+function siteSearchBarHtml() {
+  return `<div class="site-search">
+      <span class="site-search-ic" aria-hidden="true">${icon('search')}</span>
+      <input id="site-search" type="search" dir="auto" autocomplete="off" enterkeyhint="search" aria-label="חיפוש אתרים"
+        placeholder="חיפוש אתר, קוד, קבלן" value="${esc(siteQuery)}" oninput="onSiteSearchInput(this.value)"
+        style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-pill);padding:11px 42px;font-size:var(--fs-base);color:var(--t1);outline:none"/>
+      <button id="site-search-clear" class="site-search-x" onclick="clearSiteSearch()" aria-label="נקה חיפוש" style="${siteQuery?'':'display:none'}">${icon('x')}</button>
     </div>`
+}
+function siteChipHtml(fn, v, label, on) {
+  return `<button class="site-chip" data-f="${esc(v)}" aria-pressed="${on}" onclick="${fn}('${esc(v)}')" style="flex:1 0 auto;white-space:nowrap;border-radius:var(--radius-pill);padding:8px 10px;font-size:var(--fs-base);font-weight:600;border:1px solid ${on?'transparent':'var(--line)'};background:${on?'var(--gold)':'var(--surface)'};color:${on?'#fff':'var(--t2)'}">${label}</button>`
+}
+function onSiteSearchInput(v) {
+  siteQuery = v
+  const x = document.getElementById('site-search-clear'); if(x) x.style.display = v ? '' : 'none'
+  clearTimeout(siteSearchTimer)
+  siteSearchTimer = setTimeout(refreshSiteResults, 180)
+}
+function clearSiteSearch() {
+  siteQuery = ''; clearTimeout(siteSearchTimer)
+  renderSites()
+  const inp = document.getElementById('site-search'); if(inp) inp.focus()
+}
+function resetSiteFilters() { siteQuery = ''; siteProvinces = []; siteFilter = 'all'; renderSites() }
+// ── region: one button that opens a small sheet of provinces (multi-select) ──
+function siteRegionLabel() {
+  if(!siteProvinces.length) return 'אזור'
+  if(siteProvinces.length === 1) return (SITE_PROVINCES.find(p => p[0] === siteProvinces[0]) || [0, siteProvinces[0]])[1]
+  return siteProvinces.length + ' אזורים'
+}
+function siteRegionBtnHtml() {
+  const on = siteProvinces.length > 0
+  return `<button id="site-region-btn" class="site-region-btn" aria-haspopup="dialog" aria-pressed="${on}" aria-label="סינון לפי אזור: ${on ? esc(siteRegionLabel()) : 'הכל'}" onclick="showRegionSheet()"
+      style="flex:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;border-radius:var(--radius-pill);padding:0 14px;min-height:44px;font-size:var(--fs-base);font-weight:600;border:1px solid ${on?'var(--accent-line)':'var(--line)'};background:${on?'var(--accent-soft)':'var(--surface)'};color:${on?'var(--gold)':'var(--t2)'}">
+      <span>${esc(siteRegionLabel())}</span>${icon('chevron-down')}</button>`
+}
+function toggleSiteProvince(p) {
+  const i = siteProvinces.indexOf(p)
+  if(i >= 0) siteProvinces.splice(i, 1); else siteProvinces.push(p)
+  renderSites()
+  if(document.querySelector('.region-sheet')) showRegionSheet()
+}
+function clearSiteProvinces() { siteProvinces = []; renderSites(); if(document.querySelector('.region-sheet')) showRegionSheet() }
+function showRegionSheet() {
+  const n = filteredSites().length
+  openModal(`<div class="region-sheet">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:var(--fs-xl);font-weight:700">${icon('map-pin')} אזור</div>
+        <button onclick="clearSiteProvinces()" ${siteProvinces.length ? '' : 'disabled'} class="region-clear" style="background:none;color:var(--gold);font-size:var(--fs-base);font-weight:600;padding:10px 6px;min-height:44px;${siteProvinces.length ? '' : 'opacity:.45'}">נקה בחירה</button>
+      </div>
+      <div role="group" aria-label="מחוזות">
+        ${SITE_PROVINCES.map(([v, l]) => {
+          const on = siteProvinces.includes(v), c = state.sites.filter(s => inProvince(s, v)).length
+          return `<button class="region-row" role="checkbox" aria-checked="${on}" onclick="toggleSiteProvince('${v}')">
+              <span class="region-box">${on ? icon('check') : ''}</span>
+              <span class="region-name">${l}</span>
+              <span class="region-count">${c} ${c === 1 ? 'אתר' : 'אתרים'}</span>
+            </button>`
+        }).join('')}
+      </div>
+      <button class="btn-primary" style="margin-top:14px" onclick="closeModal()">הצג ${n} ${n === 1 ? 'אתר' : 'אתרים'}</button>
+    </div>`)
+}
+// only the list (and the map) redraws while typing, so the box keeps focus
+function refreshSiteResults() {
+  if(currentScreen !== 'sites') return
+  const sites = filteredSites()
+  const r = document.getElementById('sites-results'); if(r) r.innerHTML = sitesResultsHtml(sites)
+  const m = document.getElementById('sites-map-wrap'); if(m) m.innerHTML = sitesMapOn ? sitesMapHtml(sites) : ''
+  const b = document.getElementById('sites-selbar'); if(b) b.innerHTML = siteSelBarHtml()
+  const el = document.getElementById('screen-sites'); if(el) el.toggleAttribute('data-selecting', siteSelectMode)
+  positionSiteSelBar()
+}
+function sitesResultsHtml(sites) {
+  const toks = searchTokens(siteQuery)
+  const filtering = toks.length || siteProvinces.length || siteFilter !== 'all'
+  const dir = directoryMatches()
+  const dirShown = siteFilter === 'all' ? dir : []
+  window.__dirResults = dirShown.slice(0, 30)
+  if(!state.sites.length && !dirShown.length && !filtering) return emptyHtml(icon('flower'), 'אין אתרים')
+  if(!sites.length && !dirShown.length) {
+    const hidden = dir.length && siteFilter !== 'all'
+    return `<div class="card site-empty" style="text-align:center;padding:22px 18px">
+        <div style="font-size:26px;color:var(--t3);margin-bottom:6px">${icon('search')}</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">לא מצאתי אתר שמתאים</div>
+        <div style="font-size:var(--fs-base);color:var(--t2);margin-top:4px;line-height:1.5">${hidden ? 'יש ' + dir.length + ' התאמות בספריית Monday — הן מוצגות תחת "הכל".' : 'אולי מילה אחרת, או רק חלק מהשם. גם שגיאת כתיב קטנה בסדר.'}</div>
+        <button onclick="${hidden ? "setSiteFilter('all')" : 'resetSiteFilters()'}" style="margin-top:12px;background:var(--surface-2);border-radius:var(--radius-pill);padding:9px 18px;color:var(--t1);font-size:var(--fs-base);font-weight:600">${hidden ? 'הצג הכל' : 'נקה חיפוש וסינון'}</button>
+      </div>`
+  }
+  const countText = filtering
+    ? `${sites.length} מתוך ${state.sites.length} אתרים${dir.length && siteFilter === 'all' ? ' · ' + dir.length + ' בספריית Monday' : ''}`
+    : `${sites.length} אתרים`
+  const visibleKeys = sites.map(siteKey).concat(window.__dirResults.map(dirKey))
+  const allOn = visibleKeys.length && visibleKeys.every(k => siteSelected.includes(k))
+  const btn = 'background:var(--surface-2);border-radius:var(--radius-pill);padding:7px 13px;min-height:36px;color:var(--t1);font-size:var(--fs-sm);font-weight:600;flex:none'
+  const count = (filtering || siteSelectMode) ? `<div class="site-toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 2px 8px">
+      <div class="site-count" aria-live="polite" style="font-size:var(--fs-sm);color:var(--t3)">${countText}</div>
+      ${siteSelectMode ? `<button class="site-tool-btn" onclick="toggleSelectAllSites()" style="${btn}">${allOn ? 'נקה בחירה' : 'בחר הכל (' + visibleKeys.length + ')'}</button>` : ''}
+    </div>` : ''
+  const dirHtml = dirShown.length ? `
+      <div class="site-dir-head" style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin:16px 2px 8px">${icon('book')} מספריית Monday <span style="font-weight:500;color:var(--t3)">· לא במעקב</span></div>
+      ${window.__dirResults.map((d, i) => directoryCardHtml(d, i, toks)).join('')}
+      ${dirShown.length > 30 ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin:4px 2px">ועוד ${dirShown.length - 30} — חדד את החיפוש</div>` : ''}` : ''
+  return count + sites.map(s => siteCard(s, toks)).join('') + dirHtml
+}
+function directoryCardHtml(d, i, toks) {
+  const where = [d.province, d.municipality].filter(Boolean).map(x => hlText(x, toks)).join(', ')
+  const meta = [d.contractor && hlText(String(d.contractor).toUpperCase(), toks), d.year && hlText(d.year, toks), d.remo && 'REMO ' + hlText(d.remo, toks)].filter(Boolean).join(' · ')
+  const key = dirKey(d), on = siteSelected.includes(key)
+  return `<div class="card site-dir-card${on ? ' is-selected' : ''}" data-key="${esc(key)}" style="margin-bottom:8px;padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        ${siteCheckHtml(key, on)}
+        <div style="min-width:0;flex:1">
+          <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${icon('map-pin')} ${hlText(d.name, toks)}</div>
+          ${where ? `<div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${where}</div>` : ''}
+          ${meta ? `<div style="font-size:var(--fs-sm);color:var(--t3);margin-top:2px">${meta}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${d.location ? `<a href="${esc(mapsLinkFor(d.location))}" target="_blank" rel="noopener" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>` : ''}
+          <button onclick="addSiteFromDirectory(${i})" style="background:var(--surface-2);border-radius:var(--radius-pill);padding:5px 11px;color:var(--t1);font-size:var(--fs-sm);font-weight:600">+ למעקב</button>
+        </div>
+      </div>
+    </div>`
+}
+// opens the new-site form with the directory entry already filled in
+function addSiteFromDirectory(i) {
+  const d = (window.__dirResults || [])[i]; if(!d) return
+  showAddSite()
+  const nameEl = document.getElementById('add-site-name'); if(nameEl) nameEl.value = d.name
+  const yearEl = document.getElementById('add-site-year')
+  if(yearEl && d.year && [...yearEl.options].some(o => o.value === String(d.year))) yearEl.value = String(d.year)
+  autofillFromDirectory()
+}
+
+// ── SELECT SITES → GOOGLE MAPS ROUTE ──────────────
+// Long-press a card (or "בחירה למסלול") turns on checkboxes; a bar above the
+// nav keeps the count and "צור מסלול". The route is a Google Maps directions
+// link with no origin, so Maps starts from where Uri is. A stop uses stored
+// coordinates when there are any (the site's own, or its Monday directory
+// entry's), otherwise "name, municipality, province, Philippines".
+// Limits, per Google's Maps URLs documentation: a directions link takes one
+// destination plus "up to three waypoints on mobile browsers, and a maximum of
+// nine waypoints otherwise" (the Maps app, desktop), and a URL may be at most
+// 2,048 characters. On Android and iOS the link opens in the Maps app when it
+// is installed, otherwise in the browser. So there are two modes, app (10 stops
+// a link) and phone browser (4), and more stops are split into consecutive
+// legs, each starting where the last one ended; a leg whose URL would pass
+// 2,048 characters is split again.
+let siteSelectMode = false, siteSelected = []      // keys, in the order picked
+let routeOrder = 'mine', routeAckMissing = false, routeOrdered = null, routeNote = ''
+const MAPS_MAX_STOPS = 10, MAPS_WEB_STOPS = 4, MAPS_MAX_URL = 2048
+// app mode by default on Android (Maps is preinstalled there), browser mode on
+// iPhone/iPad (it often is not); the choice made in the route sheet is kept
+let routeMapsMode = (function(){
+  try { const m = localStorage.getItem('fieldy_maps_mode'); if(m === 'app' || m === 'web') return m } catch(e) {}
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'web' : 'app'
+})()
+function routeMaxStops() { return routeMapsMode === 'web' ? MAPS_WEB_STOPS : MAPS_MAX_STOPS }
+function setRouteMapsMode(m) { routeMapsMode = m; try { localStorage.setItem('fieldy_maps_mode', m) } catch(e) {}; renderRouteModal() }
+function siteKey(s) { return 's:' + s.name }
+function dirKey(d) { return 'd:' + [d.name, d.year || '', d.siteNumber || ''].join('|') }
+function siteCheckHtml(key, on) {
+  if(!siteSelectMode) return ''
+  return `<button class="site-check" role="checkbox" aria-checked="${on}" aria-label="בחירה" onclick="toggleSiteSelected(this.closest('[data-key]').dataset.key)"><span>${on ? icon('check') : ''}</span></button>`
+}
+function enterSiteSelect(firstKey) {
+  siteSelectMode = true
+  if(firstKey && !siteSelected.includes(firstKey)) siteSelected.push(firstKey)
+  refreshSiteResults()
+}
+function exitSiteSelect() { siteSelectMode = false; siteSelected = []; refreshSiteResults() }
+function toggleSiteSelected(key) {
+  const i = siteSelected.indexOf(key)
+  if(i >= 0) siteSelected.splice(i, 1); else siteSelected.push(key)
+  refreshSiteResults()
+}
+function toggleSelectAllSites() {
+  const keys = filteredSites().map(siteKey).concat((window.__dirResults || []).map(dirKey))
+  if(keys.length && keys.every(k => siteSelected.includes(k))) siteSelected = siteSelected.filter(k => !keys.includes(k))
+  else keys.forEach(k => { if(!siteSelected.includes(k)) siteSelected.push(k) })
+  refreshSiteResults()
+}
+function siteSelBarHtml() {
+  if(!siteSelectMode) return ''
+  const n = siteSelected.length
+  return `<div class="site-selbar" role="region" aria-label="אתרים שנבחרו">
+      <div class="site-selbar-n" aria-live="polite">${n ? 'נבחרו ' + n : 'בחר אתרים'}</div>
+      <button class="site-selbar-go" onclick="showRouteModal()" ${n ? '' : 'disabled'}>${icon('navigation')} צור מסלול</button>
+      <button class="site-selbar-x" onclick="exitSiteSelect()">ביטול</button>
+    </div>`
+}
+// the bar floats just above the nav bar, wherever the theme puts it
+// and the list gets bottom room for the nav bar plus the bar, so the last card scrolls clear of both
+function positionSiteSelBar() {
+  const el = document.getElementById('screen-sites')
+  const bar = document.querySelector('#sites-selbar .site-selbar'), nav = document.getElementById('nav')
+  if(!bar || !nav) { if(el) el.style.paddingBottom = ''; return }
+  const bottom = Math.max(8, window.innerHeight - nav.getBoundingClientRect().top + 10)
+  bar.style.bottom = bottom + 'px'
+  if(el) el.style.paddingBottom = (bottom + bar.offsetHeight + 24) + 'px'
+}
+window.addEventListener('resize', positionSiteSelBar)
+// long-press anywhere on a card that is not a button or link
+function bindSiteSelectGestures(el) {
+  if(el.__selBound) return
+  el.__selBound = true
+  let timer = null, startX = 0, startY = 0, fired = false
+  const cancel = () => { clearTimeout(timer); timer = null }
+  el.addEventListener('pointerdown', e => {
+    fired = false
+    const card = e.target.closest('[data-key]')
+    if(!card || e.target.closest('a,button,input,select,textarea') || (e.pointerType === 'mouse' && e.button !== 0)) return
+    startX = e.clientX; startY = e.clientY
+    timer = setTimeout(() => {
+      timer = null; fired = true
+      haptic('light')
+      if(siteSelectMode) toggleSiteSelected(card.dataset.key); else enterSiteSelect(card.dataset.key)
+    }, 550)
+  })
+  el.addEventListener('pointermove', e => { if(timer && Math.hypot(e.clientX - startX, e.clientY - startY) > 10) cancel() })
+  ;['pointerup','pointercancel','pointerleave'].forEach(t => el.addEventListener(t, cancel))
+  el.addEventListener('scroll', cancel, {passive: true})
+  el.addEventListener('contextmenu', e => { if(fired || timer) e.preventDefault() })
+  el.addEventListener('click', e => {
+    if(fired) { fired = false; e.preventDefault(); e.stopPropagation(); return }
+    const interactive = e.target.closest('a,button,input,select,textarea')
+    // an open status picker closes on any tap outside it (that tap does nothing else)
+    if(sitePickerKey && !e.target.closest('.st-picker,.site-status-tag')) {
+      sitePickerKey = null; refreshSiteResults()
+      if(!interactive) { e.stopPropagation(); return }
+    }
+    const card = e.target.closest('.site-card[data-key], .site-dir-card[data-key]')
+    if(!card || interactive) return
+    if(siteSelectMode) return toggleSiteSelected(card.dataset.key)
+    // the drawer: only site cards have one, and a tap inside it does not close it
+    if(card.classList.contains('site-card') && !e.target.closest('.site-drawer')) toggleSiteDrawer(card.dataset.key)
+  }, true)
+}
+// where a site or directory entry is, for Google Maps; null if nowhere
+function routeStopFor(o) {
+  let c = parseLatLon(o.location), loc = (o.location || '').trim()
+  if(!c && !loc && o.name) {
+    const d = directoryEntryFor(o.name)
+    if(d) { c = parseLatLon(d.location); loc = (d.location || '').trim() }
+  }
+  if(c) return {name: o.name, coord: c, q: c.lat.toFixed(6) + ',' + c.lon.toFixed(6)}
+  if(loc) return {name: o.name, q: /philippines/i.test(loc) ? loc : loc + ', Philippines'}
+  if(o.province || o.municipality) return {name: o.name, q: [o.name, o.municipality, o.province, 'Philippines'].filter(Boolean).join(', ')}
+  return null
+}
+function selectedRouteItems() {
+  return siteSelected.map(k => {
+    if(k.startsWith('s:')) return state.sites.find(s => siteKey(s) === k)
+    return (state.siteDirectory || []).find(d => dirKey(d) === k)
+  }).filter(Boolean)
+}
+function routeLegs(stops, max) {
+  max = max || MAPS_MAX_STOPS
+  const legs = []
+  for(let i = 0, origin = null; i < stops.length; ) {
+    let n = Math.min(max, stops.length - i)
+    // a long list of named stops can pass the URL limit before the stop limit
+    while(n > 1 && routeUrl({origin, stops: stops.slice(i, i + n)}).length > MAPS_MAX_URL) n--
+    const chunk = stops.slice(i, i + n)
+    legs.push({origin, stops: chunk, from: i + 1, to: i + chunk.length})
+    origin = chunk[chunk.length - 1]; i += n
+  }
+  return legs
+}
+function routeUrl(leg) {
+  const p = ['api=1']
+  if(leg.origin) p.push('origin=' + encodeURIComponent(leg.origin.q))
+  p.push('destination=' + encodeURIComponent(leg.stops[leg.stops.length - 1].q))
+  const wps = leg.stops.slice(0, -1).map(x => encodeURIComponent(x.q))
+  if(wps.length) p.push('waypoints=' + wps.join('%7C'))
+  p.push('travelmode=driving')
+  return 'https://www.google.com/maps/dir/?' + p.join('&')
+}
+function singleRouteUrl(o) { const st = routeStopFor(o); return st ? routeUrl({origin: null, stops: [st]}) : '' }
+function haversineKm(a, b) {
+  const R = 6371, rad = Math.PI / 180
+  const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+// greedy nearest-next from where Uri is; stops known only by name go last
+function nearestFirst(stops, here) {
+  const withC = stops.filter(x => x.coord), without = stops.filter(x => !x.coord), out = []
+  let cur = here
+  while(withC.length) {
+    let bi = 0
+    withC.forEach((x, i) => { if(haversineKm(cur, x.coord) < haversineKm(cur, withC[bi].coord)) bi = i })
+    cur = withC[bi].coord; out.push(withC.splice(bi, 1)[0])
+  }
+  return out.concat(without)
+}
+function showRouteModal() {
+  routeOrder = 'mine'; routeAckMissing = false; routeOrdered = null; routeNote = ''
+  renderRouteModal()
+}
+function setRouteOrder(o) {
+  routeOrder = o; routeOrdered = null; routeNote = ''
+  if(o === 'mine') return renderRouteModal()
+  const stops = routeStops().stops
+  if(!stops.some(x => x.coord)) { routeOrder = 'mine'; routeNote = 'לאף עצירה אין קואורדינטות, אז אין לפי מה למיין. נשאר הסדר שלך.'; return renderRouteModal() }
+  if(!navigator.geolocation) { routeOrder = 'mine'; routeNote = 'המכשיר לא נותן מיקום, אז נשאר הסדר שלך.'; return renderRouteModal() }
+  routeNote = 'מאתר את המיקום שלך…'; renderRouteModal()
+  navigator.geolocation.getCurrentPosition(pos => {
+    if(routeOrder !== 'near') return
+    routeOrdered = nearestFirst(routeStops().stops, {lat: pos.coords.latitude, lon: pos.coords.longitude})
+    routeNote = routeOrdered.some(x => !x.coord) ? 'עצירות בלי קואורדינטות הועברו לסוף.' : ''
+    renderRouteModal()
+  }, () => {
+    if(routeOrder !== 'near') return
+    routeOrder = 'mine'; routeNote = 'לא הצלחתי לקבל את המיקום שלך, אז נשאר הסדר שלך.'
+    renderRouteModal()
+  }, {enableHighAccuracy: false, timeout: 9000, maximumAge: 300000})
+}
+function routeStops() {
+  const items = selectedRouteItems(), stops = [], missing = []
+  items.forEach(o => { const st = routeStopFor(o); if(st) stops.push(st); else missing.push(o.name) })
+  return {stops, missing}
+}
+function openRouteLeg(i) {
+  const {stops} = routeStops()
+  const leg = routeLegs(routeOrder === 'near' && routeOrdered ? routeOrdered : stops, routeMaxStops())[i]
+  if(leg) window.open(routeUrl(leg), '_blank', 'noopener')
+  logEvent('site_route_opened', {stops: leg ? leg.stops.length : 0, order: routeOrder})
+}
+function renderRouteModal() {
+  const {stops, missing} = routeStops()
+  const btn2 = 'flex:1;border-radius:var(--radius-md);padding:10px;font-size:var(--fs-base);font-weight:600'
+  if(missing.length && !routeAckMissing) {
+    return openModal(`
+      <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${icon('alert-triangle')} לא לכולם יש מיקום</div>
+      <div style="font-size:var(--fs-base);color:var(--t2);line-height:1.55;margin-bottom:10px">לאתרים האלה אין קואורדינטות, כתובת או מחוז, אז Google Maps לא יידע לאן לנסוע:</div>
+      <div class="route-missing" style="background:var(--red-soft);color:var(--red-dark);border-radius:var(--radius-md);padding:10px 14px;font-size:var(--fs-base);font-weight:600;line-height:1.6;margin-bottom:14px">${missing.map(esc).join('<br>')}</div>
+      ${stops.length ? '' : `<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">לאף אתר שבחרת אין מיקום. הוסף מיקום בעריכת האתר ונסה שוב.</div>`}
+      <div style="display:flex;gap:8px">
+        <button onclick="closeModal()" style="${btn2};background:var(--surface-2);color:var(--t2)">חזרה</button>
+        ${stops.length ? `<button class="btn-primary" style="flex:1" onclick="routeAckMissing=true;renderRouteModal()">המשך בלעדיהם (${stops.length})</button>` : ''}
+      </div>`)
+  }
+  const ordered = routeOrder === 'near' && routeOrdered ? routeOrdered : stops
+  const legs = routeLegs(ordered, routeMaxStops())
+  const mode = (v, l) => `<button onclick="setRouteMapsMode('${v}')" aria-pressed="${routeMapsMode === v}" class="route-mode" style="${btn2};padding:8px 6px;line-height:1.3;border:1.5px solid ${routeMapsMode === v ? 'var(--gold)' : 'var(--line)'};background:${routeMapsMode === v ? 'var(--accent-soft)' : 'var(--surface)'};color:${routeMapsMode === v ? 'var(--gold)' : 'var(--t2)'}">${l}</button>`
+  const seg = (v, l) => `<button onclick="setRouteOrder('${v}')" aria-pressed="${routeOrder === v}" class="route-seg" style="${btn2};border:1.5px solid ${routeOrder === v ? 'var(--gold)' : 'var(--line)'};background:${routeOrder === v ? 'var(--accent-soft)' : 'var(--surface)'};color:${routeOrder === v ? 'var(--gold)' : 'var(--t2)'}">${l}</button>`
+  openModal(`
+    <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:2px">${icon('navigation')} מסלול ב-Google Maps</div>
+    <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:14px">${ordered.length} עצירות · יוצא מהמיקום הנוכחי שלך</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">${seg('mine', 'הסדר שלי')}${seg('near', 'הקרוב אליי ראשון')}</div>
+    <div class="route-mode-l" style="font-size:var(--fs-sm);color:var(--t3);margin:10px 0 6px">נפתח ב:</div>
+    <div style="display:flex;gap:8px;margin-bottom:6px">${mode('app', 'אפליקציית Google Maps<br><small>עד ' + MAPS_MAX_STOPS + ' עצירות במסלול</small>')}${mode('web', 'דפדפן בטלפון<br><small>עד ' + MAPS_WEB_STOPS + ' עצירות במסלול</small>')}</div>
+    <div class="route-mode-note" style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5;margin-bottom:8px">${routeMapsMode === 'web' ? 'בלי האפליקציה, Google Maps בדפדפן של הטלפון מקבל רק 3 עצירות ביניים בקישור, אז המסלול מחולק לפי זה.' : 'Google Maps פותח את הקישור באפליקציה כשהיא מותקנת. אם הוא נפתח אצלך בדפדפן, בחר "דפדפן בטלפון".'}</div>
+    ${routeNote ? `<div class="route-note" style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:8px">${esc(routeNote)}</div>` : ''}
+    <ol class="route-list" style="margin:6px 0 14px;padding-inline-start:22px;font-size:var(--fs-base);color:var(--t1);line-height:1.7;max-height:34vh;overflow:auto">
+      ${ordered.map(x => `<li>${esc(x.name)}${x.coord ? '' : ` <span style="color:var(--t3);font-size:var(--fs-sm)">· לפי שם</span>`}</li>`).join('')}
+    </ol>
+    ${legs.length > 1 ? `<div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5;margin-bottom:10px">חילקתי ל-${legs.length} מסלולים רצופים של עד ${routeMaxStops()} עצירות. כל אחד מתחיל איפה שהקודם נגמר.</div>` : ''}
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${legs.map((l, i) => `<button class="btn-primary route-leg" onclick="openRouteLeg(${i})" style="width:100%">${icon('external-link')} ${legs.length > 1 ? 'מסלול ' + (i + 1) + ' · ' + (l.from === l.to ? 'עצירה ' + l.from : 'עצירות ' + l.from + '–' + l.to) : 'פתח ב-Google Maps'}</button>`).join('')}
+      <button onclick="closeModal()" style="${btn2};background:var(--surface-2);color:var(--t2)">סגור</button>
+    </div>`)
 }
 
 // ── SITES MAP (dependency-free, works offline) ────
@@ -4323,36 +5117,87 @@ let TAO_CANVAS = {ring:'#b8860b', track:'rgba(196,146,42,0.15)'}   // canvas ign
 let STATUS_HEX = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}   // refreshed by applyTheme(); real hex because call sites append alpha
 function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
 
-function siteCard(s) {
+// A site card shows only what is needed at a glance: the name, one line of
+// where/what (province · issue, where codes like A08 live), one status tag,
+// "stuck X days" when it applies, and the navigate icon. Tapping the card
+// opens its drawer with everything else; tapping the status tag opens a
+// three-status picker, so a status change stays two taps.
+let siteOpenKey = null, sitePickerKey = null
+const SITE_WC = {open:'rose', pending:'ochre', resolved:'teal'}
+// which of the four painted variants a site gets, stable per name
+function wcVariant(str) { let h = 0; for(const c of String(str)) h = (h * 31 + c.charCodeAt(0)) | 0; return 1 + Math.abs(h) % 4 }
+function siteCard(s, toks) {
   const col = STATUS_HEX[s.status]||'#6b6255'
-  const stuckDays = daysStuck(s)
+  const key = siteKey(s), sel = siteSelected.includes(key)
+  const open = !siteSelectMode && siteOpenKey === key, picking = !siteSelectMode && sitePickerKey === key
+  const v = wcVariant(s.name)
+  const line = [s.province, s.municipality].filter(Boolean).map(x => hlText(x, toks)).concat(s.issue ? [hlText(s.issue, toks)] : []).join(' · ')
   return `
-    <div class="card" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(s.name)}</div>
-        ${s.stuckSince?`<span style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${stuckDays} ימים</span>`:''}
+    <div class="card site-card${s.stuckSince?' is-stuck':''}${sel?' is-selected':''}${open?' is-open':''}" data-st="${esc(s.status)}" data-key="${esc(key)}" style="border:1px solid ${s.stuckSince?'#b8460077':col+'33'};margin-bottom:8px">
+      <div class="site-head" style="display:flex;align-items:flex-start;gap:8px">
+        ${siteCheckHtml(key, sel)}
+        <div style="flex:1;min-width:0">
+          <div class="site-name" style="font-size:var(--fs-lg);font-weight:700;color:var(--t1);line-height:1.3">${hlText(s.name, toks)}</div>
+          ${line?`<div class="site-line" dir="auto" style="text-align:right;font-size:var(--fs-base);color:var(--t2);margin-top:2px;line-height:1.4;${open?'':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${line}</div>`:''}
+        </div>
+        ${s.location?`<a href="${esc(singleRouteUrl(s))}" target="_blank" rel="noopener" class="site-nav site-nav-link" aria-label="ניווט אל ${esc(s.name)}" title="ניווט">${icon('navigation')}</a>`:''}
       </div>
-      ${s.province?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:2px">${esc(s.province)}</div>`:''}
-      ${s.issue?`<div style="font-size:var(--fs-base);color:var(--t2);margin-top:6px;line-height:1.5">${esc(s.issue)}</div>`:''}
-      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-top:8px;cursor:pointer"/>`:''}
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        ${s.contractor?`<span class="tag">${esc(String(s.contractor).toUpperCase())}</span>`:''}
-        <span class="tag tag-status-${esc(s.status)}">${STATUS_LABEL[s.status]||esc(s.status)}</span>
+      <div class="site-tags" style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
+        <button class="tag tag-status-${esc(s.status)} site-status-tag wc" data-wc="${SITE_WC[s.status]||'rose'}" data-v="${v}" aria-haspopup="menu" aria-expanded="${picking}" aria-label="סטטוס: ${STATUS_LABEL[s.status]||esc(s.status)} — לחץ לשינוי" onclick="toggleStatusPicker(this.closest('[data-key]').dataset.key)">${STATUS_LABEL[s.status]||esc(s.status)}</button>
+        ${s.stuckSince?`<span class="site-stuck-badge wc" data-wc="rose" data-v="${1 + (v % 4)}" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${daysStuck(s)} ימים</span>`:''}
+        <span class="site-more" aria-hidden="true">${icon('chevron-down')}</span>
+      </div>
+      ${picking ? `<div class="st-picker" role="menu" aria-label="שינוי סטטוס">
+          <span class="st-picker-l">שנה ל:</span>
+          ${['open','pending','resolved'].map(st => `<button role="menuitemradio" aria-checked="${s.status===st}" class="tag tag-status-${st} st-opt wc" data-wc="${SITE_WC[st]}" data-v="${1 + ((v + st.length) % 4)}" onclick="pickSiteStatus(${jsArg(s.name)},'${st}')">${s.status===st?icon('check')+' ':''}${STATUS_LABEL[st]}</button>`).join('')}
+        </div>` : ''}
+      ${open ? siteDrawerHtml(s) : ''}
+    </div>`
+}
+// the drawer: every other field, link and action the card used to carry
+function siteDrawerHtml(s) {
+  const chip = 'text-decoration:none;color:var(--gold)'
+  return `<div class="site-drawer" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+      ${s.caseDetail?`<div class="site-notes" style="font-size:var(--fs-base);color:var(--t2);line-height:1.55;margin-bottom:10px;white-space:pre-wrap">${esc(s.caseDetail)}</div>`:''}
+      ${s.photo?`<img src="${esc(s.photo)}" onclick="viewPhoto(${jsArg(s.photo)})" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius-sm);margin-bottom:10px;cursor:pointer"/>`:''}
+      <div class="site-chips-row" style="display:flex;gap:8px;flex-wrap:wrap">
+        ${s.contractor?`<span class="tag">${icon('user')} ${esc(String(s.contractor).toUpperCase())}</span>`:''}
         ${s.year?`<span class="tag">${icon('calendar')} ${esc(s.year)}</span>`:''}
-        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" style="background:none;border:1px solid var(--line);border-radius:var(--radius-pill);padding:4px 10px;font-size:var(--fs-sm);color:var(--t2);cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
-        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} Remo</a>`:''}
-        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('map')} Maps</a>`:''}
-        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('link')} Monday.com</a>`:''}
+        ${s.remo?`<button id="remo-copy-${esc(s.id)}" onclick="copyToClipboard(${jsArg(s.remo)},${jsArg('remo-copy-'+s.id)})" class="tag" style="border:1px solid var(--line);cursor:pointer">${icon('clipboard')} REMO ${esc(s.remo)}</button>
+        <a href="https://remo.nastec.eu/dashboard/device/list" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('external-link')} Remo</a>`:''}
+        ${s.location?`<a href="${esc(mapsLinkFor(s.location))}" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('map')} Maps</a>`:''}
+        ${safeUrl(s.mondayLink)?`<a href="${esc(safeUrl(s.mondayLink))}" target="_blank" rel="noopener" class="tag" style="${chip}">${icon('link')} Monday.com</a>`:''}
       </div>
-      <div style="display:flex;gap:6px;margin-top:10px">
+      <div class="site-drawer-l" style="font-size:var(--fs-sm);color:var(--t3);margin:12px 0 6px">שינוי סטטוס</div>
+      <div class="site-actions" style="display:flex;gap:6px">
         ${['open','pending','resolved'].map(st=>`
-          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" style="flex:1;padding:7px 4px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
+          <button onclick="requestStatusChange(${jsArg(s.name)},'${st}')" class="site-st" data-st="${st}" aria-pressed="${s.status===st}" style="flex:1;padding:8px 4px;min-height:40px;border-radius:var(--radius-sm);background:${s.status===st?STATUS_HEX[st]+'33':'var(--surface-2)'};color:${s.status===st?STATUS_HEX[st]:'var(--t2)'};font-size:var(--fs-base);font-weight:600">${STATUS_LABEL[st]}</button>`
         ).join('')}
-        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" style="background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:7px 9px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base)">${icon('alert-triangle')}</button>
-        ${iconBtnHtml('showAddSite('+jsArg(s.name)+')', icon('edit'), '', 'edit')}
-        ${actionBtnHtml(s.name+': '+(s.issue||''), s.contractor)}
+      </div>
+      <div class="site-drawer-actions" style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="toggleSiteStuck(${jsArg(s.name)})" data-act="stuck" aria-label="stuck" class="site-stuck-btn site-act" aria-pressed="${!!s.stuckSince}" style="flex:1;min-height:40px;background:${s.stuckSince?'#b8460022':'var(--surface-2)'};border:1px solid ${s.stuckSince?'var(--stuck)':'transparent'};border-radius:var(--radius-sm);padding:8px;color:${s.stuckSince?'var(--stuck)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('alert-triangle')} ${s.stuckSince?'בטל תקוע':'סמן תקוע'}</button>
+        <button onclick="showAddSite(${jsArg(s.name)})" data-act="edit" aria-label="edit" class="site-act" style="flex:1;min-height:40px;background:var(--blue-soft);border-radius:var(--radius-sm);padding:8px;color:var(--blue);font-size:var(--fs-base);font-weight:600">${icon('edit')} עריכה</button>
+        <button onclick="openAction({text:${jsArg(s.name+': '+(s.issue||''))},assignee:${jsArg(s.contractor||'')}})" data-act="draft" aria-label="draft" class="site-act" style="flex:1;min-height:40px;background:rgba(var(--green-rgb),.13);border-radius:var(--radius-sm);padding:8px;color:var(--green);font-size:var(--fs-base);font-weight:600">${icon('message-square')} הודעה</button>
       </div>
     </div>`
+}
+function toggleSiteDrawer(key) { siteOpenKey = siteOpenKey === key ? null : key; sitePickerKey = null; refreshSiteResults() }
+// the header's ⋯ menu: the actions that used to be buttons in the header or above the list
+function showSitesMenu() {
+  const row = 'display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 10px;background:none;text-align:start;font-size:var(--fs-lg);font-weight:600;color:var(--t1)'
+  openModal(`<div class="sites-menu">
+      <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${tr('nav_sites')}</div>
+      <button style="${row}" onclick="closeModal();showSpisModal()">${icon('tool')} אבחון תקלה</button>
+      <button style="${row};border-top:1px solid var(--line)" onclick="closeModal();enterSiteSelect()">${icon('check-square')} בחירת אתרים למסלול</button>
+      <button style="${row};border-top:1px solid var(--line)" onclick="closeModal();toggleSitesMap()">${icon('map')} ${sitesMapOn ? 'הסתר מפה' : 'הצג מפה'}</button>
+      <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal()">סגור</button>
+    </div>`)
+}
+function toggleStatusPicker(key) { sitePickerKey = sitePickerKey === key ? null : key; refreshSiteResults() }
+function pickSiteStatus(name, st) {
+  sitePickerKey = null
+  refreshSiteResults()
+  requestStatusChange(name, st)
 }
 
 function toggleSiteStuck(name) {
@@ -4608,6 +5453,7 @@ function doAddSite() {
   } else {
     site.id = Date.now()
     site.createdAt = new Date().toISOString()
+    siteOpenKey = siteKey(site)
     setState({sites:[...state.sites, site]})
     logEvent('site_created', {name: site.name, contractor: site.contractor||null, status: site.status})
   }
@@ -4635,12 +5481,14 @@ function renderPeople() {
 }
 
 function personCard(p) {
-  const rc = {engineer:'var(--gold)',contractor:'#f59e0b',nia:'var(--gold2)',other:'#6b6255'}[p.role]||'#6b6255'
+  const NH = currentTheme === 'nachal'
+  const rc = NH ? ({engineer:'var(--gold)',contractor:NH_SOFT.gold,nia:'#1F6E66',other:NH_SOFT.neutral}[p.role]||NH_SOFT.neutral)
+    : ({engineer:'var(--gold)',contractor:'#f59e0b',nia:'var(--gold2)',other:'#6b6255'}[p.role]||'#6b6255')
   return `
-    <div class="card" style="border:1px solid ${p.pending?'#f59e0b33':'transparent'};margin-bottom:8px">
+    <div class="card" style="border:1px solid ${p.pending?(NH?'#76560833':'#f59e0b33'):'transparent'};margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:8px;flex:1">
-          <div style="width:32px;height:32px;border-radius:50%;background:${rc}22;border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:${rc};font-weight:700;flex-shrink:0">${esc((p.name||'')[0]?.toUpperCase()||'?')}</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:${NH?'rgba(255,255,255,.7)':rc+'22'};border:1.5px solid ${rc};display:flex;align-items:center;justify-content:center;font-size:var(--fs-base);color:${rc};font-weight:700;flex-shrink:0">${esc((p.name||'')[0]?.toUpperCase()||'?')}</div>
           <div>
             <div style="font-size:var(--fs-lg);font-weight:700;color:var(--t1)">${esc(p.name)}</div>
             ${p.company?`<div style="font-size:var(--fs-base);color:var(--t2)">${esc(p.company)}</div>`:''}
@@ -4652,8 +5500,8 @@ function personCard(p) {
           ${p.pending?`<button onclick="clearPending(${jsArg(p.name)})" data-act="clear" aria-label="clear" style="background:rgba(var(--green-light-rgb),.13);border:1px solid #4ade8044;border-radius:var(--radius-sm);padding:7px 9px;color:var(--green-light);font-size:var(--fs-base);font-weight:700">${icon('check')}</button>`:''}
         </div>
       </div>
-      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:#f59e0b11;border-radius:var(--radius-sm);border:1px solid #f59e0b22">
-        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${icon('hourglass')} ממתין</div>
+      ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:${NH?'var(--nh-soft-ctl)':'#f59e0b11'};border-radius:var(--radius-sm);border:1px solid ${NH?'#76560833':'#f59e0b22'}">
+        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${NH?`<span class="wc" data-wc="ochre" data-v="2">${icon('hourglass')} ממתין</span>`:`${icon('hourglass')} ממתין`}</div>
         <div style="font-size:var(--fs-base);color:var(--t2);line-height:1.5">${esc(p.pending)}</div>
       </div>`:''}
     </div>`
