@@ -117,7 +117,7 @@ textarea,select,input{font-family:inherit}
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
 [data-theme="nachal"]{
-  --nh-card-a:.95;--nh-nav-a:.58;
+  --nh-card-a:.95;--nh-nav-a:.82;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
@@ -183,7 +183,7 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
   background:rgba(236,242,239,var(--nh-nav-a))!important;
-  -webkit-backdrop-filter:blur(24px) saturate(1.3);backdrop-filter:blur(24px) saturate(1.3);
+  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
 [data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
@@ -214,7 +214,6 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .btn-primary{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
 [data-theme="nachal"] .cal-day.today .cal-dn{color:var(--gold-deep)}
 [data-theme="nachal"] .cal-view-tab.active{color:var(--gold-deep)}
-[data-theme="nachal"] .tao-subnav-btn[style*="linear-gradient"]{background:var(--gold2)!important}
 /* buttons that carry white text on the accent gradient: the gradient's light
    end is too pale for white type, so they use the page's sage like the primary action */
 [data-theme="nachal"] [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{
@@ -259,8 +258,9 @@ textarea,select,input{font-family:inherit}
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 24%);mask-image:linear-gradient(to bottom,transparent 0,#000 24%)}
 [data-theme="nachal"] .nh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 [data-theme="nachal"] .nh-date{font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:2px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
-[data-theme="nachal"] .nh-greet{font-size:32px;font-weight:400;color:#fff;line-height:1.15;letter-spacing:-.02em;text-shadow:0 1px 3px rgba(4,14,10,.5)}
-[data-theme="nachal"] .nh-greet .ic{width:.7em;height:.7em}
+[data-theme="nachal"] .nh-greet{font-size:28px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(4,14,10,.6),0 0 18px rgba(4,14,10,.4)}
+[data-theme="nachal"] .nh-greet .ic{width:.62em;height:.62em}
+[data-theme="nachal"] .nh-region{font-size:var(--fs-md);color:var(--nh-on-dark2);margin-top:3px;text-shadow:0 1px 3px rgba(4,14,10,.7)}
 /* three counts as one quiet line; each is still a button that opens its
    screen, with a 44px target made from padding the line does not show */
 [data-theme="nachal"] .nh-stats{display:flex;align-items:center;margin:-4px 0;font-size:var(--fs-md);font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(4,14,10,.6)}
@@ -292,9 +292,19 @@ textarea,select,input{font-family:inherit}
 [data-theme="nachal"] .nh-prog-row b{color:#fff}
 [data-theme="nachal"] .nh-prog-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
 [data-theme="nachal"] .nh-prog-bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
-[data-theme="nachal"] .nh #daily-briefing{margin-top:14px;border:1px solid rgba(255,255,255,.4)!important;
+[data-theme="nachal"] .nh #daily-briefing{margin-top:0;border:1px solid rgba(255,255,255,.4)!important;
   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-[data-theme="nachal"] .nh-sec{margin:18px 2px 9px;font-size:var(--fs-base);font-weight:700;color:#fff;letter-spacing:.5px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
+/* section headings: large bold white type over a feathered wash with no edge */
+[data-theme="nachal"] .nh-sec{position:relative;margin:22px 2px 11px;padding:4px 2px;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;text-shadow:0 1px 4px rgba(2,16,13,.7)}
+[data-theme="nachal"] .nh-sec .ic{width:.8em;height:.8em}
+[data-theme="nachal"] .nh-sec::before{content:'';position:absolute;top:-26px;bottom:-26px;right:-64px;left:-10px;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 46% 56% at 66% 50%,rgba(5,24,18,.55) 0%,rgba(5,24,18,.46) 42%,rgba(5,24,18,.2) 72%,rgba(5,24,18,0) 100%)}
+[data-theme="nachal"] .nh{isolation:isolate}
+/* the quote of the day at the top, as a light card like the others */
+[data-theme="nachal"] .nh-quote{margin-top:14px}
+[data-theme="nachal"] .nh-quote > div{background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.4)!important;
+  border-radius:22px!important;margin-bottom:0!important;padding:14px 18px!important;
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
 [data-theme="nachal"] .nh-list{padding:6px 16px}
 [data-theme="nachal"] .nh-row{display:flex;align-items:center;gap:8px;min-height:48px}
 [data-theme="nachal"] .nh-row[role="button"]{cursor:pointer}
@@ -319,6 +329,113 @@ textarea,select,input{font-family:inherit}
   width:calc(100% - 40px);max-width:390px;height:50px;border-radius:99px;
   color:#fff;font-size:var(--fs-xl);font-weight:600;background:linear-gradient(135deg,#4A7760,#3A6149);
   border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
+/* ── Nachal · Tao ──────────────────────────────────
+   The Tao stays dark and is a different room from Home: deeper and greener,
+   with a soft teal-green light at the top. The gradient is on the screen
+   itself, not on the content wrapper inside it, so it runs to the bottom edge
+   under the nav bar — the wrapper used to end 120px above it and the page's
+   light colour showed in the strip. Cards are dark glass; two of them blur
+   what is behind them, the rest are translucent only. */
+[data-theme="nachal"] #screen-tao{
+  background:
+    radial-gradient(75% 34% at 50% 0%,rgba(61,191,174,.22),rgba(61,191,174,0) 72%),
+    linear-gradient(180deg,var(--tao-bg2) 0%,var(--tao-bg) 100%)!important}
+[data-theme="nachal"] #screen-tao::before{display:none}
+[data-theme="nachal"] #screen-tao > div[style*="min-height:100%"]{background:transparent!important}
+/* one soft fern in the top corner, outside the text, behind everything */
+[data-theme="nachal"] #screen-tao::after{
+  content:'';position:fixed;left:calc(50% - 215px);top:-18px;width:150px;height:190px;z-index:0;pointer-events:none;
+  background:url('assets/leaves/fern-curve.png') center/contain no-repeat;
+  opacity:.2;filter:blur(2.5px);transform:rotate(-14deg)}
+/* the big cards: the Tao chapter and the panels */
+[data-theme="nachal"] #screen-tao div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:28px!important;
+  padding:22px!important;line-height:1.5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 28px rgba(255,255,255,.025)}
+[data-theme="nachal"] #screen-tao .tao-glass{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+/* list cards: meditations and talk scenarios */
+[data-theme="nachal"] #screen-tao [id^="med-btn-"],
+[data-theme="nachal"] #screen-tao .talk-scenario-btn{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px!important;
+  padding:16px 18px!important;line-height:1.5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 22px rgba(255,255,255,.02)}
+/* tiles inside a panel, the weekly-focus link and the tab switcher */
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid"][style*="padding:12px 14px"]{
+  background:rgba(255,255,255,.05)!important;border-radius:20px!important;padding:14px 16px!important;line-height:1.5}
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid var(--tao-line)"]{border-color:rgba(255,255,255,.10)!important}
+[data-theme="nachal"] #screen-tao button.tao-subnav-btn[style*="background:var(--tao-bg2)"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:20px!important}
+[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px"]{
+  background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.10);border-radius:22px!important;padding:5px!important}
+[data-theme="nachal"] #screen-tao .tao-subnav-btn{border-radius:17px!important}
+/* small controls and fields: translucent, with the same hairline */
+[data-theme="nachal"] #screen-tao button[style*="background:var(--tao-panel)"]{
+  background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
+/* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
+[data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
+/* the meditation sheet is dark too, so its text and its ring read */
+[data-theme="nachal"] .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
+[data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
+[data-theme="nachal"] .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
+/* the nav bar over the Tao: dark glass to match the room; the active
+   destination is the same pale capsule as on every other screen */
+[data-theme="nachal"]{--nh-tao-nav-a:.92}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-theme="nachal"]{--nh-tao-nav-a:.94}}
+@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
+  background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
+  box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn .nav-icon svg{stroke:#E4EFE8}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-label{color:var(--t1)}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
+/* ── Nachal · fields ───────────────────────────────
+   Every text field, textarea, select and search box in this theme is a soft,
+   rounded glass shape instead of a square one: a full capsule for a single
+   line, 24px for a textarea, never under 52px tall. Two contexts, set as
+   custom properties: light surfaces (cards, sheets, modals) get a milky white
+   field with a sage edge; the dark Tao room gets a faint white one. Focus is
+   a soft ring in the theme's accent drawn with box-shadow, so the field never
+   changes size or moves the page. */
+html[data-theme="nachal"]{
+  --nh-field-bg:rgba(255,255,255,.72);--nh-field-bd:#5E8A72;--nh-field-ink:var(--t1);--nh-field-ph:#566A5E;
+  --nh-field-ring:rgba(var(--accent-rgb),.30);--nh-field-focus-bd:var(--gold);
+  --nh-field-shadow:inset 0 1px 3px rgba(20,50,36,.10);
+  --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2334473D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+html[data-theme="nachal"] #screen-tao{
+  --nh-field-bg:rgba(255,255,255,.06);--nh-field-bd:rgba(255,255,255,.14);--nh-field-ink:var(--tao-t1);--nh-field-ph:#93AA9C;
+  --nh-field-ring:rgba(111,224,204,.32);--nh-field-focus-bd:var(--tao-gold);
+  --nh-field-shadow:inset 0 2px 6px rgba(0,0,0,.28);
+  --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C0DACC' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]),
+html[data-theme="nachal"] textarea,
+html[data-theme="nachal"] select{
+  box-sizing:border-box;min-height:52px;padding:14px 20px!important;line-height:1.4;
+  border-radius:999px!important;
+  background-color:var(--nh-field-bg)!important;border:1px solid var(--nh-field-bd)!important;
+  color:var(--nh-field-ink)!important;box-shadow:var(--nh-field-shadow);outline:none;
+  transition:box-shadow .15s ease,border-color .15s ease}
+html[data-theme="nachal"] textarea{border-radius:24px!important;padding:14px 18px!important}
+/* the lead-in fields were 44px; the floor is 52 */
+html[data-theme="nachal"] textarea[style*="min-height:44px"]{min-height:52px!important}
+html[data-theme="nachal"] select{
+  -webkit-appearance:none;appearance:none;padding:14px 20px 14px 46px!important;
+  background-image:var(--nh-chev)!important;background-repeat:no-repeat!important;
+  background-position:left 18px center!important;background-size:14px!important}
+html[dir="ltr"][data-theme="nachal"] select{padding:14px 46px 14px 20px!important;background-position:right 18px center!important}
+html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]):focus,
+html[data-theme="nachal"] textarea:focus,
+html[data-theme="nachal"] select:focus{
+  border-color:var(--nh-field-focus-bd)!important;outline:none;
+  box-shadow:0 0 0 3px var(--nh-field-ring),var(--nh-field-shadow)}
+html[data-theme="nachal"] input::placeholder,
+html[data-theme="nachal"] textarea::placeholder{color:var(--nh-field-ph);opacity:1}
+html[data-theme="nachal"] input:disabled,
+html[data-theme="nachal"] textarea:disabled,
+html[data-theme="nachal"] select:disabled{opacity:.6}
+@media (prefers-reduced-motion:reduce){
+  html[data-theme="nachal"] input,html[data-theme="nachal"] textarea,html[data-theme="nachal"] select{transition:none}}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1399,7 +1516,8 @@ const TRANSLATIONS = {
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
   home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
   home_more: {he:'עוד', en:'More'},
-  home_more_hint: {he:'ציטוט, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote, insights, outside work, ask Fieldy'},
+  home_more_hint: {he:'תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Insights, outside work, ask Fieldy'},
+  home_focus_heading: {he:'הדבר הכי חשוב היום', en:'The most important thing today'},
   home_briefing_title: {he:'תדריך הבוקר', en:"Morning briefing"},
   home_briefing_refresh: {he:'רענן', en:'Refresh'},
   home_briefing_generate: {he:'צור תדריך', en:'Generate briefing'},
@@ -1690,11 +1808,10 @@ const THEMES = {
     '--blue-soft':'#eaf3f0', '--blue-line':'#c7dcd6', '--tile-a1':'#5e7a5e', '--tile-a2':'#506b50',
     '--tile-a-label':'#dceedc', '--tile-b1':'#2d5952', '--tile-b2':'#1f4b45', '--tile-b-label':'#d3efe9',
     '--tile-c1':'#113242', '--tile-c2':'#032535', '--tile-c-label':'#d5ecf9', '--cta1':'#0e7c74',
-    '--cta2':'#0a6961', '--progress-track':'#d8ede7', '--accent-rgb':'0,112,104', '--tao-bg':'#040c0d',
-    '--tao-bg2':'#031111', '--tao-panel':'#001b1c', '--tao-panel2':'#041a1b', '--tao-line':'#022223',
-    '--tao-line2':'#003739', '--tao-t1':'#d0f5f6', '--tao-t1b':'#95d8da', '--tao-t2':'#66b0b2',
-    '--tao-t3':'#478789', '--tao-gold':'#3edbd0', '--tao-gold2':'#00bab0', '--tao-gold3':'#00a198',
-    '--tao-ink':'#007a72', '--tao-accent-rgb':'0,161,152', '--tao-bg-rgb':'4,12,13', '--tao-panel-rgb':'0,27,28'
+    '--cta2':'#0a6961', '--progress-track':'#d8ede7', '--accent-rgb':'0,112,104', '--tao-bg':'#0A150F', '--tao-bg2':'#0E1C14', '--tao-panel':'#0F2018', '--tao-panel2':'#14261C', '--tao-line':'#1B3023',
+    '--tao-line2':'#223A2B', '--tao-t1':'#E3F3EA', '--tao-t1b':'#C0DACC', '--tao-t2':'#9ABBA9', '--tao-t3':'#7F9F8E',
+    '--tao-gold':'#6FE0CC', '--tao-gold2':'#3DBFAE', '--tao-gold3':'#2E9E90', '--tao-ink':'#8FDCC8',
+    '--tao-accent-rgb':'61,191,174', '--tao-bg-rgb':'10,21,15', '--tao-panel-rgb':'15,32,24'
   }}
 }
 // The accent-only presets this replaced. Nobody should land on a theme that no
@@ -2282,6 +2399,8 @@ function renderTaoChapter(el, idx) {
     })(i);
   });
 
+  // Nachal blurs what is behind two of the big cards and no more
+  if(currentTheme === 'nachal') el.querySelectorAll('div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]').forEach(function(c, i){ if(i < 2) c.classList.add('tao-glass') });
   el.scrollTop = 0;
   if(taoMode==='tao') playWater();
 }
@@ -3094,7 +3213,8 @@ function renderHome() {
 //   three counters ....... one line of three tappable counts, each still goes to its screen
 //   add from WhatsApp .... the capsule above the nav bar
 //   mood picker + tip .... behind the leaf button, closed until it is tapped
-//   quote, insights, outside work, ask Fieldy .... inside the closed "more" row
+//   quote of the day .... a card at the top, under the header
+//   insights, outside work, ask Fieldy .... inside the closed "more" row
 let moodPanelOpen = false
 function toggleMoodPanel() { moodPanelOpen = !moodPanelOpen; if(currentScreen === 'home') renderHome() }
 
@@ -3143,6 +3263,7 @@ function renderHomeNachal() {
         <div class="nh-head">
           <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
           <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-region">Region II · Cagayan Valley</div>
           <div class="nh-stats">
             <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
             <button onclick="navigateTo('sites')"><b>${openSites}</b> ${tr('home_stat_sites')}</button><s>·</s>
@@ -3155,6 +3276,7 @@ function renderHomeNachal() {
         <span class="nh-strip-i">${icon('alert-triangle')}</span>
         <span class="nh-strip-t"><b>${tr('home_server_needed_title')}</b> · ${tr('home_server_needed_body')}</span>
       </div>` : ''}
+      ${(function(){ var q = quotePanelHtml(); return q ? `<div class="nh-quote">${q}</div>` : '' })()}
       <div class="nh-tools">
         <button class="nh-ask" onclick="navigateTo('input')">${icon('search')}<span>${tr('home_ask_organize')}</span></button>
         <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
@@ -3164,7 +3286,7 @@ function renderHomeNachal() {
         <div class="nh-prog-row"><span>${tr('home_progress')}</span><b>${done}/${total}</b></div>
         <div class="nh-prog-bar"><i style="width:${pct}%"></i></div>
       </div>` : ''}
-      ${dailyBriefingHtml()}
+      ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
       ${rightNowNachalHtml(curMood ? curMood.mood : null)}
       <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
         <div>
@@ -3175,7 +3297,7 @@ function renderHomeNachal() {
       </div>
       ${total===0&&!state.focus?`<div class="card">${emptyHtml(icon('clipboard'), tr('home_empty_start'), 'padding:24px 0')}</div>`:''}
       ${accordionHtml('nh-more', {title:tr('home_more'), hint:tr('home_more_hint')}, function(){
-        return quotePanelHtml() + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
+        return insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
       }, 'margin-top:12px')}
     </div>
     <div class="nh-wa-zone" aria-hidden="true"></div>
