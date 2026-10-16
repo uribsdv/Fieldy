@@ -121,6 +121,9 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 .site-selbar-go{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-radius:14px;padding:10px 16px;min-height:44px;font-size:var(--fs-base);font-weight:700}
 .site-selbar-go:disabled{opacity:.45;cursor:default}
 .site-selbar-x{background:var(--surface-2);color:var(--t2);border-radius:14px;padding:10px 14px;min-height:44px;font-size:var(--fs-base);font-weight:600}
+.site-titlebar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;min-height:40px}
+.site-hbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;padding:0}
+.site-hbtn-add{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff}
 /* the site card: compact, the drawer opens on a tap (every theme) */
 .site-card{cursor:pointer}
 .site-nav{flex:none;width:44px;height:44px;margin:-6px -4px -6px -6px;display:grid;place-items:center;border-radius:50%;color:var(--gold);background:var(--accent-soft);font-size:18px}
@@ -708,6 +711,14 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 [data-theme="nachal"] .site-drawer{border-top-color:rgba(27,46,36,.14)!important}
 [data-theme="nachal"] #screen-sites .site-act{border-radius:14px!important}
 [data-theme="nachal"] #screen-sites .site-act[data-act="draft"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important}
+/* ── Nachal · the compact sites header ── */
+[data-theme="nachal"] #screen-sites .screen-header{padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:10px!important}
+[data-theme="nachal"] .site-hbtn:not(.site-hbtn-add){background:var(--nh-soft-ctl)!important;border:1px solid rgba(74,119,96,.26)!important}
+[data-theme="nachal"] .site-hbtn-add{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
+[data-theme="nachal"] #screen-sites .site-search-row{margin-bottom:6px}
+[data-theme="nachal"] #screen-sites .site-chip{min-height:36px;padding:5px 10px!important}
+[data-theme="nachal"] #screen-sites .site-chips{padding-top:1px;padding-bottom:1px}
+[data-theme="nachal"] .modal:has(.sites-menu){background:var(--nh-soft-strong)!important;-webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2)}
 /* ── Nachal · screen headers ──
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
@@ -1180,6 +1191,7 @@ const ICONS = {
   'feather': '<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>',
   'lock': '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   'wifi': '<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+  'more': '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>',
   'navigation': '<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
   'check-square': '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
   'external-link': '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
@@ -4504,12 +4516,12 @@ function renderSites() {
 
   el.innerHTML = `
     <div class="screen-header">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:var(--fs-2xl);font-weight:700">${tr('nav_sites')}</div>
+      <div class="site-titlebar">
+        <div style="font-size:var(--fs-xl);font-weight:700">${tr('nav_sites')}</div>
         <div style="display:flex;gap:8px">
-          <button onclick="toggleSitesMap()" id="sites-map-toggle" aria-pressed="${sitesMapOn}" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};border-radius:var(--radius-md);padding:8px 12px;color:${sitesMapOn?'var(--gold)':'var(--t2)'};font-size:var(--fs-base);font-weight:600">${icon('map')} מפה</button>
-          <button onclick="showSpisModal()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 12px;color:var(--t2);font-size:var(--fs-base);font-weight:600">${icon('tool')} אבחון</button>
-          ${addBtnHtml('showAddSite()')}
+          <button onclick="toggleSitesMap()" id="sites-map-toggle" class="site-hbtn" aria-pressed="${sitesMapOn}" aria-label="מפה" title="מפה" style="background:${sitesMapOn?'var(--accent-soft)':'var(--surface-2)'};border:1px solid ${sitesMapOn?'var(--accent-line)':'transparent'};color:${sitesMapOn?'var(--gold)':'var(--t2)'}">${icon('map')}</button>
+          <button onclick="showSitesMenu()" class="site-hbtn" aria-haspopup="dialog" aria-label="עוד פעולות" title="עוד" style="background:var(--surface-2);color:var(--t2)">${icon('more')}</button>
+          <button onclick="showAddSite()" class="site-hbtn site-hbtn-add" aria-label="הוסף אתר" title="הוסף אתר">${icon('plus')}</button>
         </div>
       </div>
       <div class="site-search-row">
@@ -4729,12 +4741,10 @@ function sitesResultsHtml(sites) {
   const visibleKeys = sites.map(siteKey).concat(window.__dirResults.map(dirKey))
   const allOn = visibleKeys.length && visibleKeys.every(k => siteSelected.includes(k))
   const btn = 'background:var(--surface-2);border-radius:var(--radius-pill);padding:7px 13px;min-height:36px;color:var(--t1);font-size:var(--fs-sm);font-weight:600;flex:none'
-  const count = `<div class="site-toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 2px 8px">
+  const count = (filtering || siteSelectMode) ? `<div class="site-toolbar" style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 2px 8px">
       <div class="site-count" aria-live="polite" style="font-size:var(--fs-sm);color:var(--t3)">${countText}</div>
-      ${siteSelectMode
-        ? `<button class="site-tool-btn" onclick="toggleSelectAllSites()" style="${btn}">${allOn ? 'נקה בחירה' : 'בחר הכל (' + visibleKeys.length + ')'}</button>`
-        : `<button class="site-tool-btn" onclick="enterSiteSelect()" style="${btn}">${icon('check-square')} בחירה למסלול</button>`}
-    </div>`
+      ${siteSelectMode ? `<button class="site-tool-btn" onclick="toggleSelectAllSites()" style="${btn}">${allOn ? 'נקה בחירה' : 'בחר הכל (' + visibleKeys.length + ')'}</button>` : ''}
+    </div>` : ''
   const dirHtml = dirShown.length ? `
       <div class="site-dir-head" style="font-size:var(--fs-base);font-weight:700;color:var(--t1);margin:16px 2px 8px">${icon('book')} מספריית Monday <span style="font-weight:500;color:var(--t3)">· לא במעקב</span></div>
       ${window.__dirResults.map((d, i) => directoryCardHtml(d, i, toks)).join('')}
@@ -4775,12 +4785,26 @@ function addSiteFromDirectory(i) {
 // nav keeps the count and "צור מסלול". The route is a Google Maps directions
 // link with no origin, so Maps starts from where Uri is. A stop uses stored
 // coordinates when there are any (the site's own, or its Monday directory
-// entry's), otherwise "name, municipality, province, Philippines". A Maps link
-// takes one destination and up to nine waypoints, so more than ten stops are
-// split into consecutive legs, each starting where the last one ended.
+// entry's), otherwise "name, municipality, province, Philippines".
+// Limits, per Google's Maps URLs documentation: a directions link takes one
+// destination plus "up to three waypoints on mobile browsers, and a maximum of
+// nine waypoints otherwise" (the Maps app, desktop), and a URL may be at most
+// 2,048 characters. On Android and iOS the link opens in the Maps app when it
+// is installed, otherwise in the browser. So there are two modes, app (10 stops
+// a link) and phone browser (4), and more stops are split into consecutive
+// legs, each starting where the last one ended; a leg whose URL would pass
+// 2,048 characters is split again.
 let siteSelectMode = false, siteSelected = []      // keys, in the order picked
 let routeOrder = 'mine', routeAckMissing = false, routeOrdered = null, routeNote = ''
-const MAPS_MAX_STOPS = 10
+const MAPS_MAX_STOPS = 10, MAPS_WEB_STOPS = 4, MAPS_MAX_URL = 2048
+// app mode by default on Android (Maps is preinstalled there), browser mode on
+// iPhone/iPad (it often is not); the choice made in the route sheet is kept
+let routeMapsMode = (function(){
+  try { const m = localStorage.getItem('fieldy_maps_mode'); if(m === 'app' || m === 'web') return m } catch(e) {}
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'web' : 'app'
+})()
+function routeMaxStops() { return routeMapsMode === 'web' ? MAPS_WEB_STOPS : MAPS_MAX_STOPS }
+function setRouteMapsMode(m) { routeMapsMode = m; try { localStorage.setItem('fieldy_maps_mode', m) } catch(e) {}; renderRouteModal() }
 function siteKey(s) { return 's:' + s.name }
 function dirKey(d) { return 'd:' + [d.name, d.year || '', d.siteNumber || ''].join('|') }
 function siteCheckHtml(key, on) {
@@ -4878,12 +4902,16 @@ function selectedRouteItems() {
     return (state.siteDirectory || []).find(d => dirKey(d) === k)
   }).filter(Boolean)
 }
-function routeLegs(stops) {
+function routeLegs(stops, max) {
+  max = max || MAPS_MAX_STOPS
   const legs = []
-  for(let i = 0, origin = null; i < stops.length; i += MAPS_MAX_STOPS) {
-    const chunk = stops.slice(i, i + MAPS_MAX_STOPS)
+  for(let i = 0, origin = null; i < stops.length; ) {
+    let n = Math.min(max, stops.length - i)
+    // a long list of named stops can pass the URL limit before the stop limit
+    while(n > 1 && routeUrl({origin, stops: stops.slice(i, i + n)}).length > MAPS_MAX_URL) n--
+    const chunk = stops.slice(i, i + n)
     legs.push({origin, stops: chunk, from: i + 1, to: i + chunk.length})
-    origin = chunk[chunk.length - 1]
+    origin = chunk[chunk.length - 1]; i += n
   }
   return legs
 }
@@ -4943,7 +4971,7 @@ function routeStops() {
 }
 function openRouteLeg(i) {
   const {stops} = routeStops()
-  const leg = routeLegs(routeOrder === 'near' && routeOrdered ? routeOrdered : stops)[i]
+  const leg = routeLegs(routeOrder === 'near' && routeOrdered ? routeOrdered : stops, routeMaxStops())[i]
   if(leg) window.open(routeUrl(leg), '_blank', 'noopener')
   logEvent('site_route_opened', {stops: leg ? leg.stops.length : 0, order: routeOrder})
 }
@@ -4962,17 +4990,21 @@ function renderRouteModal() {
       </div>`)
   }
   const ordered = routeOrder === 'near' && routeOrdered ? routeOrdered : stops
-  const legs = routeLegs(ordered)
+  const legs = routeLegs(ordered, routeMaxStops())
+  const mode = (v, l) => `<button onclick="setRouteMapsMode('${v}')" aria-pressed="${routeMapsMode === v}" class="route-mode" style="${btn2};padding:8px 6px;line-height:1.3;border:1.5px solid ${routeMapsMode === v ? 'var(--gold)' : 'var(--line)'};background:${routeMapsMode === v ? 'var(--accent-soft)' : 'var(--surface)'};color:${routeMapsMode === v ? 'var(--gold)' : 'var(--t2)'}">${l}</button>`
   const seg = (v, l) => `<button onclick="setRouteOrder('${v}')" aria-pressed="${routeOrder === v}" class="route-seg" style="${btn2};border:1.5px solid ${routeOrder === v ? 'var(--gold)' : 'var(--line)'};background:${routeOrder === v ? 'var(--accent-soft)' : 'var(--surface)'};color:${routeOrder === v ? 'var(--gold)' : 'var(--t2)'}">${l}</button>`
   openModal(`
     <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:2px">${icon('navigation')} מסלול ב-Google Maps</div>
     <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:14px">${ordered.length} עצירות · יוצא מהמיקום הנוכחי שלך</div>
     <div style="display:flex;gap:8px;margin-bottom:8px">${seg('mine', 'הסדר שלי')}${seg('near', 'הקרוב אליי ראשון')}</div>
+    <div class="route-mode-l" style="font-size:var(--fs-sm);color:var(--t3);margin:10px 0 6px">נפתח ב:</div>
+    <div style="display:flex;gap:8px;margin-bottom:6px">${mode('app', 'אפליקציית Google Maps<br><small>עד ' + MAPS_MAX_STOPS + ' עצירות במסלול</small>')}${mode('web', 'דפדפן בטלפון<br><small>עד ' + MAPS_WEB_STOPS + ' עצירות במסלול</small>')}</div>
+    <div class="route-mode-note" style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5;margin-bottom:8px">${routeMapsMode === 'web' ? 'בלי האפליקציה, Google Maps בדפדפן של הטלפון מקבל רק 3 עצירות ביניים בקישור, אז המסלול מחולק לפי זה.' : 'Google Maps פותח את הקישור באפליקציה כשהיא מותקנת. אם הוא נפתח אצלך בדפדפן, בחר "דפדפן בטלפון".'}</div>
     ${routeNote ? `<div class="route-note" style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:8px">${esc(routeNote)}</div>` : ''}
     <ol class="route-list" style="margin:6px 0 14px;padding-inline-start:22px;font-size:var(--fs-base);color:var(--t1);line-height:1.7;max-height:34vh;overflow:auto">
       ${ordered.map(x => `<li>${esc(x.name)}${x.coord ? '' : ` <span style="color:var(--t3);font-size:var(--fs-sm)">· לפי שם</span>`}</li>`).join('')}
     </ol>
-    ${legs.length > 1 ? `<div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5;margin-bottom:10px">קישור של Google Maps מחזיק עד ${MAPS_MAX_STOPS} עצירות, אז חילקתי ל-${legs.length} מסלולים רצופים. כל אחד מתחיל איפה שהקודם נגמר.</div>` : ''}
+    ${legs.length > 1 ? `<div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.5;margin-bottom:10px">חילקתי ל-${legs.length} מסלולים רצופים של עד ${routeMaxStops()} עצירות. כל אחד מתחיל איפה שהקודם נגמר.</div>` : ''}
     <div style="display:flex;flex-direction:column;gap:8px">
       ${legs.map((l, i) => `<button class="btn-primary route-leg" onclick="openRouteLeg(${i})" style="width:100%">${icon('external-link')} ${legs.length > 1 ? 'מסלול ' + (i + 1) + ' · עצירות ' + l.from + '–' + l.to : 'פתח ב-Google Maps'}</button>`).join('')}
       <button onclick="closeModal()" style="${btn2};background:var(--surface-2);color:var(--t2)">סגור</button>
@@ -5150,6 +5182,17 @@ function siteDrawerHtml(s) {
     </div>`
 }
 function toggleSiteDrawer(key) { siteOpenKey = siteOpenKey === key ? null : key; sitePickerKey = null; refreshSiteResults() }
+// the header's ⋯ menu: the actions that used to be buttons in the header or above the list
+function showSitesMenu() {
+  const row = 'display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 10px;background:none;text-align:start;font-size:var(--fs-lg);font-weight:600;color:var(--t1)'
+  openModal(`<div class="sites-menu">
+      <div style="font-size:var(--fs-xl);font-weight:700;margin-bottom:6px">${tr('nav_sites')}</div>
+      <button style="${row}" onclick="closeModal();showSpisModal()">${icon('tool')} אבחון תקלה</button>
+      <button style="${row};border-top:1px solid var(--line)" onclick="closeModal();enterSiteSelect()">${icon('check-square')} בחירת אתרים למסלול</button>
+      <button style="${row};border-top:1px solid var(--line)" onclick="closeModal();toggleSitesMap()">${icon('map')} ${sitesMapOn ? 'הסתר מפה' : 'הצג מפה'}</button>
+      <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeModal()">סגור</button>
+    </div>`)
+}
 function toggleStatusPicker(key) { sitePickerKey = sitePickerKey === key ? null : key; refreshSiteResults() }
 function pickSiteStatus(name, st) {
   sitePickerKey = null
