@@ -259,6 +259,9 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
   background:linear-gradient(to bottom,rgba(30,48,42,0) 0,rgba(30,48,42,.6) 30%,rgba(30,48,42,.7) 100%);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
+/* over the four teal screens the zone is teal too */
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::after{
+  background:linear-gradient(to bottom,rgba(4,42,38,0) 0,rgba(4,42,38,.6) 30%,rgba(4,42,38,.72) 100%)}
 /* the bar that explains why the list is shortened for the current mood is an
    inline-tinted strip; on this page it needs a light ground to be read */
 [data-theme="nachal"] div:has(> .right-now-toggle){
@@ -533,18 +536,12 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
   --nh-rose:#A3333D;--nh-rose-soft:#F6DEDD;--nh-gold-ink:#85590C;--nh-gold-soft:#F5E6C6;
   --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#1B6E5C;--nh-mint-soft:#D3EFE6;
   --nh-card-solid:#EEF6F1}
+/* cards on these two screens: a thin light line of one hue, a soft drop shadow, no halo
+   and no bright top rim (the old inset highlight read as a pale stripe on a card's top edge) */
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks) .card{
-  box-shadow:0 0 0 1px rgba(var(--nh-glow-mint),.16),0 0 26px -6px rgba(var(--nh-glow-teal),.45),
-    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
-[data-theme="nachal"] #screen-sites .site-card{position:relative;border:1px solid transparent!important}
-/* the faint mint → lavender → gold edge, drawn as a ring so the card itself can stay translucent */
-[data-theme="nachal"] #screen-sites .site-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
-  background:linear-gradient(135deg,rgba(var(--nh-glow-mint),.95),rgba(var(--nh-glow-lav),.8) 50%,rgba(var(--nh-glow-gold),.9));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
-  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
-[data-theme="nachal"] #screen-sites .site-card.is-stuck{
-  box-shadow:0 0 0 1px rgba(var(--nh-glow-rose),.30),0 0 28px -6px rgba(var(--nh-glow-rose),.55),
-    0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
+  box-shadow:0 12px 26px -18px rgba(0,0,0,.6)}
+[data-theme="nachal"] #screen-sites .site-card{border:1px solid rgba(255,255,255,.30)!important}
+[data-theme="nachal"] #screen-sites .site-card.is-selected{box-shadow:0 0 0 3px rgba(150,230,210,.28),0 12px 26px -18px rgba(0,0,0,.6)}
 /* status words: a deep ink on a pale fill, with a halo of the same family */
 [data-theme="nachal"] .tag-status-open{background:var(--nh-rose-soft);color:var(--nh-rose);box-shadow:0 0 12px -2px rgba(var(--nh-glow-rose),.8)}
 [data-theme="nachal"] .tag-status-pending{background:var(--nh-gold-soft);color:var(--nh-gold-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-gold),.85)}
@@ -613,16 +610,24 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar){isolation:isolate}
 [data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{
   content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:-1;pointer-events:none;
-  background:
-    radial-gradient(60% 26% at 85% 18%,rgba(196,232,206,.12),rgba(196,232,206,0) 70%),
-    radial-gradient(54% 22% at 10% 62%,rgba(168,214,196,.10),rgba(168,214,196,0) 70%),
+  /* from the top: a green-teal darkening, two soft teal lights, a flat teal laid over the
+     photo with the "color" blend (the photo keeps its light and shade, but takes teal's hue
+     and saturation, which is what stops it reading as grey mud), the photo, a deep teal base */
+  background-image:
     linear-gradient(var(--nh-veil-extra,transparent),var(--nh-veil-extra,transparent)),
-    linear-gradient(180deg,rgba(16,38,30,.58) 0%,rgba(14,34,27,.60) 55%,rgba(12,28,22,.66) 100%),
-    var(--nh-forest,none) center top/cover no-repeat,
-    #2A3F3E}
+    linear-gradient(180deg,rgba(3,40,38,.54) 0%,rgba(3,36,34,.60) 55%,rgba(2,30,29,.68) 100%),
+    radial-gradient(70% 26% at 86% 14%,rgba(72,214,190,.26),rgba(72,214,190,0) 72%),
+    radial-gradient(60% 24% at 6% 58%,rgba(54,190,168,.18),rgba(54,190,168,0) 72%),
+    linear-gradient(#0E8479,#0E8479),
+    var(--nh-forest,none);
+  background-blend-mode:normal,normal,normal,normal,color,normal;
+  background-size:auto,auto,auto,auto,auto,cover;
+  background-position:0 0,0 0,0 0,0 0,0 0,center top;
+  background-repeat:no-repeat;
+  background-color:#0A4640}
 [data-theme="nachal"] #screen-sites{--nh-forest:url('assets/backgrounds/bg-fern-mist.webp')}
 [data-theme="nachal"] #screen-tasks{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
-[data-theme="nachal"] #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(12,30,24,.16)}
+[data-theme="nachal"] #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(2,34,32,.24)}
 [data-theme="nachal"] #screen-calendar{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
 /* ── Nachal · soft surfaces ──
    Outdoors the near-white cards glared. On Sites, Tasks, People and Calendar
@@ -723,15 +728,66 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
    and enough opacity that a card scrolled under it cannot be read through it. */
-[data-theme="nachal"]{--nh-hdr-a:.86}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-theme="nachal"]{--nh-hdr-a:.98}}
-@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-hdr-a:.99}}
+[data-theme="nachal"]{--nh-hdr-rgb:8,46,42;--nh-hdr-a:.68}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-theme="nachal"]{--nh-hdr-a:.95}}
+@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-hdr-a:.96}}
 [data-theme="nachal"] .screen-header,
 [data-theme="nachal"] .cal-header{
   padding-top:calc(env(safe-area-inset-top,0px) + 14px)!important;padding-bottom:12px!important;
-  background:rgba(var(--nh-soft-rgb),var(--nh-hdr-a))!important;
-  -webkit-backdrop-filter:blur(24px) saturate(1.25);backdrop-filter:blur(24px) saturate(1.25)}
+  background:rgba(var(--nh-hdr-rgb),var(--nh-hdr-a))!important;
+  border-bottom:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.65)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2);
+  /* a dark glass: its own text, and its own field and control colours, are light */
+  --t1:#ffffff;--t2:#E6F1EB;--t3:#D2E3DA;
+  --nh-field-bg:rgba(255,255,255,.09);--nh-field-bd:rgba(255,255,255,.28);--nh-field-ink:#ffffff;--nh-field-ph:#C9DBD1;
+  --nh-field-ring:rgba(150,230,210,.34);--nh-field-focus-bd:#9FE6D3;--nh-field-shadow:inset 0 2px 6px rgba(0,0,0,.22)}
 [data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
+/* ── Nachal · calm sites and tasks ──
+   Watercolour blobs are for the two small tags that ask for attention, "open"
+   and "stuck", and nothing else. Waiting and done are a small dot and a word.
+   The sticky header is dark milky glass with light type; its controls are
+   glass too, and the chosen one is the pale capsule the nav bar uses. */
+[data-theme="nachal"] .st-dot{--dc:#D4922C;background:none!important;box-shadow:none!important;border:0!important;
+  display:inline-flex;align-items:center;gap:7px;padding:4px 6px!important;font-weight:600;color:#3A2A08}
+[data-theme="nachal"] .st-dot::before{content:'';flex:none;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
+[data-theme="nachal"] .st-dot[data-dot="rose"]{--dc:#C8424A;color:#3A0C12}
+[data-theme="nachal"] .st-dot.st-stuck::before{display:none}
+[data-theme="nachal"] .st-dot.st-stuck{font-size:var(--fs-sm);gap:5px}
+[data-theme="nachal"] .st-dot[data-dot="ochre"]{--dc:#D4922C;color:#4A2F02}
+[data-theme="nachal"] .st-dot[data-dot="teal"]{--dc:#2FA68C;color:#0C3A30}
+/* a finished site is quieter: a fainter card and a lighter name */
+[data-theme="nachal"] #screen-sites .site-card[data-st="resolved"]:not(.is-open){background:rgba(var(--nh-soft-rgb),.66)!important}
+[data-theme="nachal"] #screen-sites .site-card[data-st="resolved"] .site-name{font-weight:600;color:var(--t2)}
+/* the task tiles: plain glass, a number and an icon, and a tiny dot beside the icon */
+[data-theme="nachal"] .nh-bk-ic{position:relative;display:inline-flex}
+[data-theme="nachal"] .nh-bk-dot{position:absolute;top:-1px;inset-inline-end:-8px;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
+[data-theme="nachal"] .nh-bk-dot[data-dot="rose"]{--dc:#F08B90}
+[data-theme="nachal"] .nh-bk-dot[data-dot="ochre"]{--dc:#EDB85A}
+
+/* header controls, all four screens */
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn:not(.site-hbtn-add),
+[data-theme="nachal"] #screen-calendar .cal-nav-btn,
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket:not([aria-pressed="true"]),
+[data-theme="nachal"] #screen-tasks .screen-header > div:last-child button:not([style*="var(--accent-soft)"]),
+[data-theme="nachal"] :is(#screen-sites) .screen-header .site-chip:not([aria-pressed="true"]),
+[data-theme="nachal"] #screen-sites .screen-header .site-region-btn:not([aria-pressed="true"]){
+  background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.24)!important;color:#EAF4EF!important;box-shadow:none!important}
+[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn-add{
+  background:linear-gradient(135deg,#5FA086,#3F7D66)!important;border:1px solid rgba(255,255,255,.3)!important;color:#fff!important}
+[data-theme="nachal"] #screen-sites .screen-header .site-hbtn[aria-pressed="true"],
+[data-theme="nachal"] #screen-sites .screen-header .site-chip[aria-pressed="true"],
+[data-theme="nachal"] #screen-sites .screen-header .site-region-btn[aria-pressed="true"],
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"],
+[data-theme="nachal"] #screen-tasks .screen-header > div:last-child button[style*="var(--accent-soft)"],
+[data-theme="nachal"] #screen-calendar .cal-view-tab.active{
+  background:#CFE6DC!important;border:1px solid transparent!important;color:#0F2E27!important;box-shadow:0 0 14px -3px rgba(150,230,210,.55)!important}
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] *{color:#0F2E27}
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="rose"]{--dc:#C8424A}
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="ochre"]{--dc:#C98A1E}
+[data-theme="nachal"] #screen-calendar .cal-view-tab:not(.active){color:#DCEAE3}
+[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket{border-radius:18px!important}
+[data-theme="nachal"] .screen-header .site-search-ic,[data-theme="nachal"] .screen-header .site-search-x{color:#D6E7DE}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -3059,7 +3115,7 @@ function rankRightNow(mood) {
   state.sites.forEach(s => {
     const d = daysStuck(s)
     if(!s.stuckSince || d < STUCK_ALERT_DAYS || s.status === 'resolved') return
-    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'alert-triangle', title:s.name, sub:tr('rn_stuck_days').replace('{n}', d) + (s.issue ? ' · ' + esc(s.issue) : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
+    items.push({kind:'site', score: 55 + Math.min(25, d * 3), icon:'alert-triangle', title:s.name, sub:stuckPhrase(d) + (s.issue ? ' · ' + esc(s.issue) : ''), color:'#b84600', go:'openSiteFromRightNow(' + jsArg(s.name) + ')'})
   })
   getEventsForDate(today).forEach(e => {
     if(!e.time) return
@@ -3162,7 +3218,7 @@ function assistantContext() {
   if(stuck.length) lines.push('אתרים תקועים: ' + stuck.map(function(s){
     const dir = !s.contractor || !s.remo || !s.year ? directoryEntryFor(s.name) : null
     const extra = [!s.contractor && dir && dir.contractor && 'קבלן: '+dir.contractor, !s.remo && dir && dir.remo && 'REMO: '+dir.remo, !s.year && dir && dir.year && 'שנה: '+dir.year].filter(Boolean).join(', ')
-    return s.name + ' (' + daysStuck(s) + ' ימים' + (s.issue ? ', ' + s.issue : '') + (extra ? ', ' + extra : '') + ')'
+    return s.name + ' (' + (daysStuck(s) < 3 ? stuckPhrase(daysStuck(s)).replace('תקוע ', '') : daysStuck(s) + ' ימים') + (s.issue ? ', ' + s.issue : '') + (extra ? ', ' + extra : '') + ')'
   }).join('; '))
   lines.push('מוקד המנהיגות השבועי שלו: "' + wf.theme + '" (' + wf.book + ') — ' + wf.text)
   if(lead && lead.improve) lines.push('מה שכתב היום שהוא רוצה לשפר כמנהיג: ' + lead.improve)
@@ -3189,7 +3245,7 @@ let briefingBusy = false, briefingError = '', briefingAutoTriedDate = null
 function briefingFacts() {
   const today = getToday(), sites = [], seen = {}
   const add = (name, why, stuck) => { if(!name || seen[name]) return; seen[name] = 1; sites.push({name, why, stuck}) }
-  priorityStuckSites().forEach(s => add(s.name, tr('rn_stuck_days').replace('{n}', daysStuck(s)) + (s.issue ? ' · ' + s.issue : ''), true))
+  priorityStuckSites().forEach(s => add(s.name, stuckPhrase(daysStuck(s)) + (s.issue ? ' · ' + s.issue : ''), true))
   getEventsForDate(today).forEach(e => { if(e.site) add(e.site, (e.time ? e.time + ' · ' : '') + e.title, false) })
   ;['now','today'].forEach(b => (state.tasks[b]||[]).forEach(t => { if(!t.done) add(t.site, t.text, false) }))
   const focus = (state.focus && (!state.focusDate || state.focusDate === today)) ? state.focus : ''
@@ -3966,7 +4022,7 @@ function renderTasks() {
   }
   const NH = currentTheme === 'nachal'
   const BCOLS = NH ? {now:NH_SOFT.rose,today:NH_SOFT.gold,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
-  const BWC = {now:'rose', today:'ochre'}
+  const BDOT = {now:'rose', today:'ochre'}
   const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
   el.innerHTML = `
@@ -3977,8 +4033,8 @@ function renderTasks() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         ${['now','today','later'].map((b,i)=>`
-          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket${taskBucket===b&&BWC[b]?' wc':''}" data-wc="${BWC[b]||''}" data-v="${i+1}" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
-            <div style="font-size:var(--fs-xl)">${[icon('zap'),icon('leaf'),icon('feather')][i]}</div>
+          <button onclick="setTaskBucket('${b}')"${NH?` class="nh-bucket" data-b="${b}" aria-pressed="${taskBucket===b}"`:''} style="padding:10px 4px;border-radius:var(--radius-md);border:1.5px solid ${taskBucket===b?BCOLS[b]:'transparent'};background:${taskBucket===b?BCOLS[b]+'18':'var(--surface)'};color:${taskBucket===b?BCOLS[b]:'var(--t2)'};cursor:pointer">
+            <div style="font-size:var(--fs-xl)">${NH && BDOT[b] && counts[b]>0 ? `<span class="nh-bk-ic">${[icon('zap'),icon('leaf'),icon('feather')][i]}<i class="nh-bk-dot" data-dot="${BDOT[b]}"></i></span>` : [icon('zap'),icon('leaf'),icon('feather')][i]}</div>
             <div style="font-size:var(--fs-base);font-weight:600;margin-top:2px">${[tr('home_stat_now'),tr('task_bucket_today'),tr('task_bucket_later')][i]}</div>
             ${counts[b]>0?`<div style="font-size:var(--fs-base);font-weight:700">${counts[b]}</div>`:''}
           </button>`).join('')}
@@ -4721,6 +4777,7 @@ function refreshSiteResults() {
 }
 function sitesResultsHtml(sites) {
   const toks = searchTokens(siteQuery)
+  siteBlobKeys = pickBlobKeys(sites)
   const filtering = toks.length || siteProvinces.length || siteFilter !== 'all'
   const dir = directoryMatches()
   const dirShown = siteFilter === 'all' ? dir : []
@@ -5082,7 +5139,7 @@ function sitesMapHtml(sites) {
   const info = selSite ? `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)">
       <div style="min-width:0">
         <div style="font-size:var(--fs-base);font-weight:700;color:var(--t1)">${icon('map-pin')} ${esc(selSite.s.name)}</div>
-        <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${STATUS_LABEL[selSite.s.status] || ''}${selSite.s.issue ? ' · ' + esc(selSite.s.issue) : ''}${selSite.s.stuckSince ? ' · תקוע ' + daysStuck(selSite.s) + ' ימים' : ''}</div>
+        <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:2px">${STATUS_LABEL[selSite.s.status] || ''}${selSite.s.issue ? ' · ' + esc(selSite.s.issue) : ''}${selSite.s.stuckSince ? ' · ' + stuckPhrase(daysStuck(selSite.s)) : ''}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <a href="${esc(mapsLinkFor(selSite.s.location))}" target="_blank" class="tag" style="text-decoration:none;color:var(--gold)">${icon('external-link')} ניווט</a>
@@ -5116,6 +5173,14 @@ const STUCK_ALERT_DAYS = 5
 let TAO_CANVAS = {ring:'#b8860b', track:'rgba(196,146,42,0.15)'}   // canvas ignores var(); refreshed by applyTheme()
 let STATUS_HEX = {open:'#ef4444',pending:'#f59e0b',resolved:'#4ade80'}   // refreshed by applyTheme(); real hex because call sites append alpha
 function daysStuck(s) { return s.stuckSince ? Math.floor((Date.now()-s.stuckSince)/86400000) : 0 }
+// "stuck N days" with the right number word: יום, יומיים, N ימים (and "1 day" in English)
+function stuckPhrase(n) {
+  if(uiLang === 'en') return n === 1 ? 'stuck 1 day' : tr('rn_stuck_days').replace('{n}', n)
+  if(n === 0) return 'תקוע מהיום'
+  if(n === 1) return 'תקוע יום'
+  if(n === 2) return 'תקוע יומיים'
+  return tr('rn_stuck_days').replace('{n}', n)
+}
 
 // A site card shows only what is needed at a glance: the name, one line of
 // where/what (province · issue, where codes like A08 live), one status tag,
@@ -5126,6 +5191,37 @@ let siteOpenKey = null, sitePickerKey = null
 const SITE_WC = {open:'rose', pending:'ochre', resolved:'teal'}
 // which of the four painted variants a site gets, stable per name
 function wcVariant(str) { let h = 0; for(const c of String(str)) h = (h * 31 + c.charCodeAt(0)) | 0; return 1 + Math.abs(h) % 4 }
+// In Nachal the watercolour blob is kept for the two states that ask for
+// attention: "open" and "stuck". An open site that is also stuck gets one blob
+// (the stuck badge); its "open" is then a plain dot and word. Waiting is a
+// small ochre dot with its word, done a soft teal one, both quiet. Other
+// themes keep the tag exactly as it was.
+// At most two blobs in one list, so a screen full of alerts stays calm: the stuck
+// sites first, then the open ones; every other alert is the dot and the word.
+let siteBlobKeys = null
+function pickBlobKeys(sites) {
+  const keys = new Set()
+  sites.filter(x => x.stuckSince).concat(sites.filter(x => !x.stuckSince && x.status === 'open'))
+    .slice(0, 2).forEach(x => keys.add(siteKey(x)))
+  return keys
+}
+function siteHasBlob(s) { return siteBlobKeys ? siteBlobKeys.has(siteKey(s)) : true }
+function siteStatusTagHtml(s, st, v, picking) {
+  const label = STATUS_LABEL[st] || esc(st)
+  const base = `class="tag tag-status-${esc(st)} site-status-tag` 
+  const common = `aria-haspopup="menu" aria-expanded="${!!picking}" aria-label="סטטוס: ${label} — לחץ לשינוי" onclick="toggleStatusPicker(this.closest('[data-key]').dataset.key)"`
+  if(currentTheme !== 'nachal') return `<button ${base} wc" data-wc="${SITE_WC[st]||'rose'}" data-v="${v}" ${common}>${label}</button>`
+  const blob = st === 'open' && !s.stuckSince && siteHasBlob(s)
+  return blob ? `<button ${base} wc" data-wc="rose" data-v="${v}" ${common}>${label}</button>`
+    : `<button ${base} st-dot" data-dot="${SITE_WC[st]||'rose'}" ${common}>${label}</button>`
+}
+function siteStatusOptHtml(s, st, v) {
+  const label = (s.status === st ? icon('check') + ' ' : '') + (STATUS_LABEL[st] || esc(st))
+  const common = `role="menuitemradio" aria-checked="${s.status===st}" onclick="pickSiteStatus(${jsArg(s.name)},'${st}')"`
+  if(currentTheme !== 'nachal' || st === 'open')
+    return `<button ${common} class="tag tag-status-${st} st-opt wc" data-wc="${SITE_WC[st]}" data-v="${1 + ((v + st.length) % 4)}">${label}</button>`
+  return `<button ${common} class="tag tag-status-${st} st-opt st-dot" data-dot="${SITE_WC[st]}">${label}</button>`
+}
 function siteCard(s, toks) {
   const col = STATUS_HEX[s.status]||'#6b6255'
   const key = siteKey(s), sel = siteSelected.includes(key)
@@ -5143,13 +5239,15 @@ function siteCard(s, toks) {
         ${s.location?`<a href="${esc(singleRouteUrl(s))}" target="_blank" rel="noopener" class="site-nav site-nav-link" aria-label="ניווט אל ${esc(s.name)}" title="ניווט">${icon('navigation')}</a>`:''}
       </div>
       <div class="site-tags" style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
-        <button class="tag tag-status-${esc(s.status)} site-status-tag wc" data-wc="${SITE_WC[s.status]||'rose'}" data-v="${v}" aria-haspopup="menu" aria-expanded="${picking}" aria-label="סטטוס: ${STATUS_LABEL[s.status]||esc(s.status)} — לחץ לשינוי" onclick="toggleStatusPicker(this.closest('[data-key]').dataset.key)">${STATUS_LABEL[s.status]||esc(s.status)}</button>
-        ${s.stuckSince?`<span class="site-stuck-badge wc" data-wc="rose" data-v="${1 + (v % 4)}" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} תקוע ${daysStuck(s)} ימים</span>`:''}
+        ${siteStatusTagHtml(s, s.status, v, picking)}
+        ${s.stuckSince ? (currentTheme === 'nachal' && !siteHasBlob(s)
+          ? `<span class="site-stuck-badge st-dot st-stuck" data-dot="rose">${icon('alert-triangle')} ${stuckPhrase(daysStuck(s))}</span>`
+          : `<span class="site-stuck-badge wc" data-wc="rose" data-v="${1 + (v % 4)}" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} ${stuckPhrase(daysStuck(s))}</span>`) : ''}
         <span class="site-more" aria-hidden="true">${icon('chevron-down')}</span>
       </div>
       ${picking ? `<div class="st-picker" role="menu" aria-label="שינוי סטטוס">
           <span class="st-picker-l">שנה ל:</span>
-          ${['open','pending','resolved'].map(st => `<button role="menuitemradio" aria-checked="${s.status===st}" class="tag tag-status-${st} st-opt wc" data-wc="${SITE_WC[st]}" data-v="${1 + ((v + st.length) % 4)}" onclick="pickSiteStatus(${jsArg(s.name)},'${st}')">${s.status===st?icon('check')+' ':''}${STATUS_LABEL[st]}</button>`).join('')}
+          ${['open','pending','resolved'].map(st => siteStatusOptHtml(s, st, v)).join('')}
         </div>` : ''}
       ${open ? siteDrawerHtml(s) : ''}
     </div>`
