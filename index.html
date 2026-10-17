@@ -793,7 +793,12 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.3),rgba(120,230,210,0) 60%),#0C5C54}
 [data-theme="nachal"] .nh-garden-t{font-size:var(--fs-base);font-weight:700}
 [data-theme="nachal"] .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
-[data-theme="nachal"] .nh-garden-b{display:inline-block;margin-top:6px;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+[data-theme="nachal"] .nh-garden-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+[data-theme="nachal"] .nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:var(--fs-sm);font-weight:700}
+[data-theme="nachal"] .nh-garden-closed{font-size:var(--fs-sm);color:#E2EFE8}
+.nh-garden-empty{display:flex;gap:12px;align-items:center;padding:12px 2px 14px;font-size:var(--fs-base);line-height:1.5;color:#E6F1EB}
+.nh-garden-empty img{width:40px;height:40px;flex:none;opacity:.9}
+[data-theme="nachal"] .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
 .nh-cairn{position:relative;height:132px;margin:4px auto 0}
 .nh-cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .nh-cairn img.new{animation:nh-settle .55s cubic-bezier(.3,1.4,.5,1) both}
@@ -810,6 +815,7 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 .nh-tile-n{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:rgba(58,97,73,.14);font-size:var(--fs-sm);font-weight:700}
 /* the two rewards made of light glow softly; drawn here, not in the image (selected by file, so the table needs no flag) */
 .nh-tile:not(.locked) img[src$="glowing-ripple.png"],#nh-fx .nh-rw img[src$="glowing-ripple.png"]{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
+.nh-tile img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{transform:scale(1.4)}
 .nh-tile:not(.locked) img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
 @media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
   /* the app's own completion ring, too, in this theme */
@@ -1873,6 +1879,9 @@ async function loadStateFromServer() {
 const TRANSLATIONS = {
   garden_title: {he:'גן הנחל', en:'River garden'},
   garden_empty: {he:'כל משימה שנסגרת מביאה טיפה לנחל', en:'Every task you close brings a drop to the river'},
+  garden_done_today: {he:'סיימתי להיום', en:'Done for today'},
+  garden_today_closed: {he:'היום נסגר ✓', en:'Today is closed ✓'},
+  garden_pond_empty: {he:'הנחל עוד שקט. כל משימה שתסגור מביאה טיפה, ושלוש משימות ביום מוסיפות אבן ראשונה לערימה.', en:'The river is still quiet. Every task you close brings a drop, and three in a day add the first stone to the pile.'},
   garden_open: {he:'פתח את הגן', en:'Open the garden'},
   garden_summary: {he:'{d} ימים נסגרו · {l} עלים', en:'{d} days closed · {l} leaves'},
   garden_kinds: {he:'מה שהנחל הביא לך · {f} מתוך {t} סוגים', en:'What the river brought you · {f} of {t} kinds'},
@@ -3134,7 +3143,7 @@ const GARDEN_RULES = {
   minAgeMs: 20000,     // a task closed sooner than this after it was created never counts
   dailyCap: 5,         // surprises a day, at most
   pAfterFirst: 0.40,   // the first valid close of the day always brings one; later ones with this chance
-  dayMinTasks: 2,      // a day is closed when today's list is empty and at least this many valid tasks were closed
+  dayMinTasks: 3,      // a day is closed once this many valid tasks were closed in it (or with "done for today")
   weekMinDays: 3       // a week (Sunday to Saturday) brings a leaf when at least this many of its days were closed
 }
 const GARDEN_KEY = 'fieldy_garden_v1'
@@ -3195,8 +3204,8 @@ let gardenChain = Promise.resolve()
 function gardenOnComplete(task) {
   if(currentTheme !== 'nachal') return
   const k = gardenRoll(task)
-  const st = navTodayStats(), d = gardenDay()
-  const closeDay = st.total > 0 && st.done === st.total && d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
+  const d = gardenDay()
+  const closeDay = d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
   if(closeDay) { d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true }
   saveGarden()
   gardenChain = gardenChain.then(async function(){
@@ -3204,6 +3213,18 @@ function gardenOnComplete(task) {
     if(k) await gardenFlyFx(rewardSrc(k), tr('garden_found').replace('{n}', rewardName(k)) + (REWARDS[k].rarity >= 2 ? ' · ' + tr('rarity_' + REWARDS[k].rarity) : ''), REWARDS[k].rarity >= 3)
     if(closeDay) { await gardenFlyFx('assets/pebbles/pebble-' + String(garden.cairn[garden.cairn.length - 1].p).padStart(2, '0') + '.png', tr('garden_day_closed')); if(currentScreen === 'home') renderHome() }
   }).catch(function(e){ console.warn('garden fx:', e) })
+}
+// "Done for today": closes the day by hand, once; a stone joins the pile
+function gardenDoneToday(e) {
+  if(e) e.stopPropagation()
+  if(currentTheme !== 'nachal') return
+  const d = gardenDay()
+  if(d.closed) return
+  d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true; saveGarden()
+  if(currentScreen === 'home') renderHome()
+  gardenChain = gardenChain.then(function(){
+    return gardenFlyFx('assets/pebbles/pebble-' + String(garden.cairn[garden.cairn.length - 1].p).padStart(2, '0') + '.png', tr('garden_day_closed'))
+  }).catch(function(err){ console.warn('garden fx:', err) })
 }
 // ── garden effects: a small layer created for the moment and removed after
 function gardenLayer() {
@@ -3270,7 +3291,9 @@ function gardenHomeHtml() {
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
     '<div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' +
     (garden.cairn.length || garden.leaves ? gardenCairnHtml() : '') +
-    '<div class="nh-garden-b">' + tr('garden_open') + '</div></div>'
+    '<div class="nh-garden-acts"><span class="nh-garden-b">' + tr('garden_open') + '</span>' +
+    (gardenDay().closed ? '<span class="nh-garden-closed">' + tr('garden_today_closed') + '</span>'
+      : '<button class="nh-garden-done" onclick="gardenDoneToday(event)">' + tr('garden_done_today') + '</button>') + '</div></div>'
   if(garden.freshStone) { garden.freshStone = false; saveGarden() }
   return html
 }
@@ -3279,7 +3302,9 @@ function showGarden() {
   openModal('<div class="nh-garden-sheet">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
     '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">' + tr('garden_kinds').replace('{f}', found).replace('{t}', ids.length) + '</div>' +
-    '<div class="nh-garden-pond"><div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div>' + gardenCairnHtml() + '</div>' +
+    '<div class="nh-garden-pond">' + (garden.cairn.length || garden.leaves
+      ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div>' + gardenCairnHtml()
+      : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>') + '</div>' +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -6119,8 +6144,10 @@ async function forceRefreshApp() {
   location.href = location.pathname + '?v=' + Date.now()
 }
 
+// the backup also carries the river garden (kept in its own localStorage key,
+// outside state, so it is never synced to the server); restore puts it back
 function exportBackup() {
-  const data = JSON.stringify(state, null, 2)
+  const data = JSON.stringify(Object.assign({}, state, {gardenBackup: garden}), null, 2)
   const blob = new Blob([data], {type:'application/json'})
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -6142,6 +6169,8 @@ function importBackup(file) {
       alert('הקובץ לא נטען — זה לא קובץ JSON תקין (' + err.message + ').\nהנתונים הנוכחיים לא שונו.')
       return
     }
+    var gardenIn = imported && typeof imported === 'object' ? imported.gardenBackup : null
+    if(imported && typeof imported === 'object') delete imported.gardenBackup
     var problems = validateState(imported)
     if(problems.length) {
       console.error('Fieldy: backup import rejected —', problems)
@@ -6151,6 +6180,8 @@ function importBackup(file) {
     if(!confirm('זה יחליף את כל הנתונים הנוכחיים באפליקציה בנתונים מהקובץ. להמשיך?')) return
     state = applyStateDefaults(imported)
     save()
+    // an older backup has no garden: the current one is kept as it is
+    if(gardenIn && gardenIn.v === 1 && gardenIn.items && typeof gardenIn.items === 'object' && Array.isArray(gardenIn.cairn)) { garden = gardenIn; saveGarden() }
     alert('הנתונים נטענו בהצלחה ✓')
     refreshBadges()
     renderCurrentScreen()
