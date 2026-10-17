@@ -733,43 +733,84 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   background:rgba(var(--nh-soft-rgb),var(--nh-hdr-a))!important;
   -webkit-backdrop-filter:blur(24px) saturate(1.25);backdrop-filter:blur(24px) saturate(1.25)}
 [data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
-/* ── Nachal · nav motion ──
-   The chosen destination is a capsule that widens with a short spring (240ms)
-   while the others narrow and their icons shrink a little. A tap makes the
-   icon hop. The tasks icon wears a thin ring: today's finished tasks over all
-   of today's, filling smoothly, with one soft glow when the day is complete.
-   Number badges scale in once, they do not blink. Reduced motion removes all
-   of it (at the end of this block). */
-[data-theme="nachal"] #nav{--nav-spring:cubic-bezier(.34,1.5,.5,1);transition:grid-template-columns 240ms var(--nav-spring)}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(1).active){grid-template-columns:1.45fr 1fr 1fr 1fr 1fr 1fr}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(2).active){grid-template-columns:1fr 1.45fr 1fr 1fr 1fr 1fr}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(3).active){grid-template-columns:1fr 1fr 1.45fr 1fr 1fr 1fr}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(4).active){grid-template-columns:1fr 1fr 1fr 1.45fr 1fr 1fr}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(5).active){grid-template-columns:1fr 1fr 1fr 1fr 1.45fr 1fr}
-[data-theme="nachal"] #nav:has(.nav-btn:nth-child(6).active){grid-template-columns:1fr 1fr 1fr 1fr 1fr 1.45fr}
-[data-theme="nachal"] .nav-btn .nav-icon{position:relative;width:20px;height:20px;transition:transform 240ms var(--nav-spring)}
-[data-theme="nachal"] .nav-btn:not(.active) .nav-icon{transform:scale(.9)}
+/* ── Nachal · nav: the glass drop ──
+   The chosen destination is marked by a drop of milky glass with a line of
+   light along its top. It slides from tab to tab on a short spring (420ms),
+   stretching a little in the direction it travels and settling with a soft
+   squash. The pressed icon sends two rings of ripple. Icons are clear dark
+   outlines; the chosen one is drawn in the river's teal. The tasks icon holds
+   water: today's finished tasks over all of today's, rising when a drop falls
+   in, with one soft glow when the day is complete. Number badges scale in
+   once when their number changes. Everything here is added only in this
+   theme; reduced motion removes all of the movement. */
+[data-theme="nachal"] .nav-btn,[data-theme="nachal"] .nav-btn.active{background:none!important;box-shadow:none!important;position:relative;z-index:1}
+[data-theme="nachal"] .nav-ind{position:absolute;z-index:0;top:7px;left:0;width:58px;height:53px;pointer-events:none;will-change:transform;
+  border-radius:50% 50% 50% 50%/58% 58% 42% 42%;
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,255,255,.26) 60%,rgba(255,255,255,.4));
+  box-shadow:inset 0 1px 0 #fff,inset 0 -8px 12px -8px rgba(24,98,84,.32),0 0 0 1px rgba(255,255,255,.55),0 7px 16px -8px rgba(8,60,50,.5);
+  transition:opacity .15s}
+[data-theme="nachal"] .nav-ind::before{content:'';position:absolute;top:4px;left:14px;right:14px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.98),rgba(255,255,255,0))}
+[data-theme="nachal"] .nav-ind.off{opacity:0}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ind{background:linear-gradient(180deg,rgba(220,242,234,.92),rgba(190,222,210,.78));box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(255,255,255,.4),0 7px 16px -8px rgba(0,0,0,.6)}
+[data-theme="nachal"] .nav-rip{position:absolute;z-index:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(14,132,121,.28);pointer-events:none;animation:nav-rip .62s ease-out forwards}
+@keyframes nav-rip{from{transform:scale(.35);opacity:.85}to{transform:scale(2.3);opacity:0}}
+/* clear, dark outlines; the chosen one in teal */
+[data-theme="nachal"] .nav-btn .nav-icon{position:relative;width:22px;height:22px;transition:transform .22s cubic-bezier(.34,1.5,.5,1)}
+[data-theme="nachal"] .nav-btn .nav-icon svg{width:22px;height:22px;stroke-width:1.9}
+[data-theme="nachal"] .nav-btn:not(.active) .nav-icon{transform:scale(.94)}
 [data-theme="nachal"] .nav-btn.active .nav-icon{transform:scale(1.06)}
-[data-theme="nachal"] .nav-btn:active .nav-icon{transform:scale(.84)}
-@keyframes nav-hop{0%{translate:0 0;scale:1}38%{translate:0 -5px;scale:1.16}100%{translate:0 0;scale:1}}
-[data-theme="nachal"] .nav-icon.hop{animation:nav-hop 220ms cubic-bezier(.3,.7,.3,1) both}
+[data-theme="nachal"] .nav-btn:active .nav-icon{transform:scale(.86)}
+[data-theme="nachal"] .nav-btn .nav-icon svg,[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:#0B1A12}
+[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:#064A40}
+[data-theme="nachal"] .nav-btn.active .nav-label{color:#0B1A12;font-weight:800}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:#064A40}
 @keyframes nav-badge-in{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 [data-theme="nachal"] .nav-badge.pop{animation:nav-badge-in 220ms cubic-bezier(.2,.9,.3,1.15) both}
-/* the ring: 30px around the 20px icon, drawn from the top and filling counter-clockwise
-   (the way Hebrew reads, and away from the number badge at the icon's upper right) */
-[data-theme="nachal"] .nav-ring{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;transform:scaleX(-1) rotate(-90deg);overflow:visible;pointer-events:none}
-[data-theme="nachal"] .nav-ring circle{fill:none;stroke-width:2.4}
-[data-theme="nachal"] .nav-ring-track{stroke:rgba(14,60,50,.30)}
-[data-theme="nachal"] .nav-ring-fill{stroke:#0D4A3D;stroke-linecap:round;transition:stroke-dashoffset 600ms cubic-bezier(.3,.7,.2,1)}
-[data-theme="nachal"] .nav-ring.empty{display:none}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ring-track{stroke:rgba(255,255,255,.26)}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ring-fill{stroke:#7FE6D1}
-@keyframes nav-ring-glow{0%{stroke-width:2.4;filter:drop-shadow(0 0 0 rgba(90,214,184,0))}45%{stroke-width:3.4;filter:drop-shadow(0 0 5px rgba(90,214,184,.95))}100%{stroke-width:2.4;filter:drop-shadow(0 0 0 rgba(90,214,184,0))}}
-[data-theme="nachal"] .nav-ring.flash .nav-ring-fill{animation:nav-ring-glow 900ms ease-in-out 1}
+/* water in the tasks icon */
+[data-theme="nachal"] .nav-water-lvl{transition:transform .6s cubic-bezier(.3,.7,.2,1)}
+[data-theme="nachal"] .nav-wave{fill:#5CC8BE;stroke:none!important;opacity:.8}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-wave{fill:#2E9E90;opacity:.75}
+[data-theme="nachal"] .nav-water-lvl.run .nav-wave{animation:nav-slosh 1.1s ease-out 1}
+@keyframes nav-slosh{from{transform:translateX(-6px)}to{transform:translateX(0)}}
+[data-theme="nachal"] .nav-icon.glow1{animation:nav-glow1 1.1s ease-in-out 1}
+@keyframes nav-glow1{0%,100%{filter:none}45%{filter:drop-shadow(0 0 6px rgba(90,214,184,.95))}}
 @media (prefers-reduced-motion:reduce){
-  [data-theme="nachal"] #nav,[data-theme="nachal"] .nav-btn .nav-icon,[data-theme="nachal"] .nav-ring-fill{transition:none!important}
-  [data-theme="nachal"] .nav-icon.hop,[data-theme="nachal"] .nav-badge.pop,[data-theme="nachal"] .nav-ring.flash .nav-ring-fill{animation:none!important}
+  [data-theme="nachal"] .nav-btn .nav-icon,[data-theme="nachal"] .nav-water-lvl,[data-theme="nachal"] .nav-ind{transition:none!important}
+  [data-theme="nachal"] .nav-rip,[data-theme="nachal"] .nav-badge.pop,[data-theme="nachal"] .nav-water-lvl.run .nav-wave,[data-theme="nachal"] .nav-icon.glow1{animation:none!important}
 }
+/* ── Nachal · river garden ── */
+#nh-fx{position:fixed;inset:0;z-index:300;pointer-events:none;overflow:hidden}
+#nh-fx .nh-drop{position:absolute;width:22px;height:32px;margin:-16px 0 0 -11px;will-change:transform}
+#nh-fx .nh-splash{position:absolute;width:26px;height:10px;margin:-5px 0 0 -13px;border-radius:50%;border:2px solid rgba(255,255,255,.9);animation:nh-splash .5s ease-out forwards}
+@keyframes nh-splash{from{transform:scale(.3);opacity:.9}to{transform:scale(1.7);opacity:0}}
+#nh-fx .nh-rw{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;will-change:transform,opacity}
+#nh-fx .nh-rw img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+#nh-fx .nh-rw.rare::before{content:'';position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(160,255,235,.8),rgba(160,255,235,0) 68%)}
+#nh-fx .nh-cap{position:absolute;transform:translate(-50%,0);padding:7px 14px;border-radius:99px;background:rgba(8,46,42,.82);color:#fff;font-size:15px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22)}
+[data-theme="nachal"] .nh-garden{margin:12px 0;padding:14px 16px 12px;border-radius:22px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.26);
+  background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.3),rgba(120,230,210,0) 60%),#0C5C54}
+[data-theme="nachal"] .nh-garden-t{font-size:var(--fs-base);font-weight:700}
+[data-theme="nachal"] .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
+[data-theme="nachal"] .nh-garden-b{display:inline-block;margin-top:6px;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+.nh-cairn{position:relative;height:132px;margin:4px auto 0}
+.nh-cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+.nh-cairn img.new{animation:nh-settle .55s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes nh-settle{from{transform:translateY(-70px) rotate(var(--rot,0deg));opacity:0}to{transform:translateY(0) rotate(var(--rot,0deg));opacity:1}}
+.nh-garden-pond{border-radius:20px;padding:12px 14px 6px;margin-bottom:12px;color:#fff;background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),#0C5C54}
+.nh-garden-pond-t{font-size:var(--fs-sm);color:#E2EFE8}
+.nh-garden-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nh-tile{border-radius:18px;padding:10px 8px;text-align:center;background:rgba(255,255,255,.66);border:1px solid rgba(74,119,96,.22);color:var(--t1)}
+.nh-tile-art{height:72px;display:grid;place-items:center}
+.nh-tile-art img{max-height:72px;max-width:90px;object-fit:contain}
+.nh-tile.locked .nh-tile-art img{filter:brightness(0);opacity:.2}
+.nh-tile b{display:block;font-size:var(--fs-base);margin-top:2px}
+.nh-tile small{display:block;font-size:var(--fs-xs);color:var(--t2);margin-top:2px}
+.nh-tile-n{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:rgba(58,97,73,.14);font-size:var(--fs-sm);font-weight:700}
+@media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
+  /* the app's own completion ring, too, in this theme */
+  [data-theme="nachal"] .success-ring{animation:none!important;display:none}}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1827,6 +1868,23 @@ async function loadStateFromServer() {
 // briefing narrative, Ask Fieldy's answers, drafted messages) — none of
 // that is translated even in English mode.
 const TRANSLATIONS = {
+  garden_title: {he:'גן הנחל', en:'River garden'},
+  garden_empty: {he:'כל משימה שנסגרת מביאה טיפה לנחל', en:'Every task you close brings a drop to the river'},
+  garden_open: {he:'פתח את הגן', en:'Open the garden'},
+  garden_summary: {he:'{d} ימים נסגרו · {l} עלים', en:'{d} days closed · {l} leaves'},
+  garden_kinds: {he:'מה שהנחל הביא לך · {f} מתוך {t} סוגים', en:'What the river brought you · {f} of {t} kinds'},
+  garden_calm: {he:'אין סטריק ואין מה להפסיד. ימים שקטים הם חלק מהנחל.', en:'No streak, nothing to lose. Quiet days are part of the river too.'},
+  garden_not_yet: {he:'עוד לא נמצא', en:'Not found yet'},
+  garden_waits: {he:'הנחל שומר לו מקום', en:'The river keeps a place for it'},
+  garden_found: {he:'נמצא: {n}', en:'Found: {n}'},
+  garden_day_closed: {he:'היום נסגר · אבן חדשה בערימה', en:'Day closed · a new stone on the pile'},
+  garden_week_closed: {he:'שבוע נסגר · עלה חדש', en:'Week closed · a new leaf'},
+  rarity_0: {he:'נפוץ', en:'common'}, rarity_1: {he:'לא שכיח', en:'uncommon'}, rarity_2: {he:'נדיר', en:'rare'}, rarity_3: {he:'נדיר מאוד', en:'very rare'},
+  rw_pebble: {he:'חלוק נחל', en:'River pebble'}, rw_leaf: {he:'עלה', en:'Leaf'},
+  rw_water_lily_bud: {he:'ניצן חבצלת מים', en:'Water lily bud'}, rw_water_lily: {he:'חבצלת מים', en:'Water lily'},
+  rw_river_fish: {he:'דג נחל', en:'River fish'}, rw_dragonfly_teal: {he:'שפירית', en:'Dragonfly'},
+  rw_koi: {he:'קוי קטן', en:'Small koi'}, rw_dragonfly_amber: {he:'שפירית ענבר', en:'Amber dragonfly'},
+  rw_frog: {he:'צפרדע', en:'Frog'}, rw_fireflies: {he:'גחליליות', en:'Fireflies'}, rw_glowing_ripple: {he:'אדווה זוהרת', en:'Glowing ripple'},
   nav_tasks_progress: {he:'{d} מתוך {t} משימות היום הושלמו', en:'{d} of {t} of today\'s tasks done'},
   nav_home: {he:'בית', en:'Home'}, nav_tasks: {he:'משימות', en:'Tasks'}, nav_sites: {he:'אתרים', en:'Sites'}, nav_people: {he:'אנשים', en:'People'}, nav_calendar: {he:'לוח', en:'Calendar'}, nav_tao: {he:'טאו', en:'Tao'},
 
@@ -2254,6 +2312,7 @@ const STATUS_LABEL = {open:'פתוח',pending:'ממתין',resolved:'נפתר'}
 const NAV_SCREENS = ['home','tasks','sites','people','calendar','tao']
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('pointerdown', () => navRipple(btn))
   btn.addEventListener('click', () => {
     const s = btn.dataset.screen
     navigateTo(s)
@@ -2288,6 +2347,7 @@ function navigateTo(screen, ctx=null) {
   
   // Show/hide nav
   document.getElementById('nav').style.display = NAV_SCREENS.includes(screen) ? 'grid' : 'none'
+  if(currentTheme === 'nachal') placeNavInd(true)
   
   currentScreen = screen
   renderCurrentScreen()
@@ -2952,12 +3012,14 @@ function refreshBadges() {
   updateNavRing()
 }
 
-// ── NAV, Nachal only: a thin ring of today's tasks on the tasks icon, a gentle
-// entrance for the number badges, and a small hop with a tap. No sound, no
-// points, no streaks. The ring is added to the page only in this theme, so the
-// other themes' markup is untouched.
-var navRingLast = null, navBadgeLast = {}
-var NAV_RING_SVG = '<svg class="nav-ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="nav-ring-track" cx="18" cy="18" r="16"/><circle class="nav-ring-fill" cx="18" cy="18" r="16" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>'
+// ── NAV, Nachal only: a sliding drop of glass marks the chosen tab, the
+// pressed icon ripples, the tasks icon holds today's water, and the number
+// badges scale in once. No sound, no points, no streaks. All of it is added to
+// the page only in this theme and removed again when the theme changes, so
+// the other themes' markup is untouched.
+var navLevelLast = null, navBadgeLast = {}, navIndX = null, navWaterHoldUntil = 0, navWaterTimer = null
+var NAV_WATER = '<g class="nav-water" clip-path="url(#nh-clip-tasks)"><g class="nav-water-lvl"><path class="nav-wave" d="M-2 3C1 1.6 3 4.4 6 3S11 1.6 14 3 19 4.4 22 3 25 1.6 26 3V30H-2Z"/></g></g>'
+var NAV_WATER_DEFS = '<defs class="nav-water-defs"><clipPath id="nh-clip-tasks"><rect x="5" y="3" width="14" height="18" rx="2"/></clipPath></defs>'
 function reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) }
 // today's tasks: the "now" and "today" lists; a finished one counts if it was
 // finished today (older finished ones are still stored for a few days)
@@ -2967,29 +3029,69 @@ function navTodayStats() {
     return !t.done || !t.completedAt || new Date(t.completedAt).toDateString() === today })
   return {done: items.filter(function(t){ return t.done }).length, total: items.length}
 }
-function updateNavRing() {
+function updateNavRing() {   // kept name: called from refreshBadges and applyTheme
   var btn = document.querySelector('.nav-btn[data-screen="tasks"]')
-  var host = btn && btn.querySelector('.nav-icon')
-  if(!host) return
-  var ring = host.querySelector('.nav-ring')
+  var svg = btn && btn.querySelector('.nav-icon svg')
+  if(!svg) return
+  var nav = document.getElementById('nav'), ind = nav.querySelector('.nav-ind')
   if(currentTheme !== 'nachal') {
-    if(ring) ring.remove()
-    btn.removeAttribute('aria-label'); navRingLast = null
+    svg.querySelectorAll('.nav-water,.nav-water-defs').forEach(function(n){ n.remove() })
+    if(ind) ind.remove()
+    btn.removeAttribute('aria-label'); navLevelLast = null; navIndX = null
     return
   }
+  if(!ind) { nav.insertAdjacentHTML('afterbegin', '<span class="nav-ind" aria-hidden="true"></span>'); placeNavInd(false) }
+  if(!svg.querySelector('.nav-water')) svg.insertAdjacentHTML('afterbegin', NAV_WATER_DEFS + NAV_WATER)
   var st = navTodayStats(), ratio = st.total ? st.done / st.total : 0
-  if(!ring) { host.insertAdjacentHTML('beforeend', NAV_RING_SVG); ring = host.querySelector('.nav-ring') }
-  ring.querySelector('.nav-ring-fill').style.strokeDashoffset = String(100 - ratio * 100)
-  ring.classList.toggle('empty', st.total === 0)
-  ring.classList.toggle('full', st.total > 0 && st.done === st.total)
   btn.setAttribute('aria-label', tr('nav_tasks') + ': ' + tr('nav_tasks_progress').replace('{d}', st.done).replace('{t}', st.total))
-  // one soft glow when the day is completed, never on load and never repeated
-  if(navRingLast !== null && navRingLast < 1 && st.total > 0 && ratio === 1 && !reducedMotion()) {
-    ring.classList.remove('flash'); void ring.getBoundingClientRect()
-    ring.classList.add('flash')
-    ring.addEventListener('animationend', function(){ ring.classList.remove('flash') }, {once: true})
+  // while a drop is falling onto the icon the water waits for it to land
+  var wait = navWaterHoldUntil - Date.now()
+  if(wait > 0) { clearTimeout(navWaterTimer); navWaterTimer = setTimeout(updateNavRing, wait + 10); return }
+  var lvl = svg.querySelector('.nav-water-lvl')
+  lvl.style.transform = 'translateY(' + ((1 - ratio) * 18).toFixed(2) + 'px)'
+  if(navLevelLast !== null && ratio > navLevelLast && !reducedMotion()) {
+    lvl.classList.remove('run'); void lvl.getBoundingClientRect(); lvl.classList.add('run')
+    lvl.addEventListener('animationend', function(){ lvl.classList.remove('run') }, {once: true})
   }
-  navRingLast = ratio
+  // one soft glow when the day is completed, never on load and never repeated
+  if(navLevelLast !== null && navLevelLast < 1 && st.total > 0 && ratio === 1 && !reducedMotion()) {
+    var ic = btn.querySelector('.nav-icon'); ic.classList.remove('glow1'); void ic.offsetWidth; ic.classList.add('glow1')
+    ic.addEventListener('animationend', function(){ ic.classList.remove('glow1') }, {once: true})
+  }
+  navLevelLast = ratio
+}
+// the drop: where the chosen tab is, and a short spring to get there
+function placeNavInd(animate) {
+  var nav = document.getElementById('nav'), ind = nav && nav.querySelector('.nav-ind')
+  if(!ind) return
+  var btn = nav.querySelector('.nav-btn.active')
+  if(!btn || nav.style.display === 'none') { ind.classList.add('off'); return }
+  ind.classList.remove('off')
+  var nr = nav.getBoundingClientRect(), br = btn.getBoundingClientRect()
+  if(!nr.width) return
+  // kept inside the bar's rounded ends
+  var x = Math.max(8, Math.min(nr.width - 66, br.left - nr.left + (br.width - 58) / 2))
+  var old = navIndX == null ? x : navIndX; navIndX = x
+  if(ind.__a) { try { ind.__a.cancel() } catch(e) {} ind.__a = null }
+  if(!animate || reducedMotion() || old === x || !ind.animate) { ind.style.transform = 'translateX(' + x + 'px)'; return }
+  var dx = x - old, k = Math.min(Math.abs(dx) / 300, .34), sx = 1 + k, sy = 1 / Math.sqrt(sx) * .98
+  ind.__a = ind.animate([
+    {transform: 'translateX(' + old + 'px) scale(1,1)', easing: 'cubic-bezier(.3,.6,.4,1)'},
+    {transform: 'translateX(' + (old + dx * .55) + 'px) scale(' + sx + ',' + sy + ')', offset: .4, easing: 'cubic-bezier(.3,.6,.4,1)'},
+    {transform: 'translateX(' + (x + dx * .05) + 'px) scale(' + (1 / Math.sqrt(sx) * 1.03) + ',1.08)', offset: .74, easing: 'ease-out'},
+    {transform: 'translateX(' + x + 'px) scale(1,1)'}
+  ], {duration: 420, fill: 'forwards'})
+  ind.__a.onfinish = function(){ ind.style.transform = 'translateX(' + x + 'px)'; try { ind.__a.cancel() } catch(e) {} ind.__a = null }
+}
+window.addEventListener('resize', function(){ navIndX = null; placeNavInd(false) })
+function navRipple(btn) {
+  if(currentTheme !== 'nachal' || reducedMotion()) return
+  var nav = document.getElementById('nav'), nr = nav.getBoundingClientRect(), ir = btn.querySelector('.nav-icon').getBoundingClientRect()
+  for(var i = 0; i < 2; i++) {
+    var r = document.createElement('span'); r.className = 'nav-rip'
+    r.style.left = (ir.left - nr.left + ir.width / 2) + 'px'; r.style.top = (ir.top - nr.top + ir.height / 2) + 'px'; r.style.animationDelay = (i * 110) + 'ms'
+    r.addEventListener('animationend', function(e){ e.target.remove() }); nav.appendChild(r)
+  }
 }
 function popNavBadge(b) {
   if(reducedMotion()) return
@@ -2997,12 +3099,192 @@ function popNavBadge(b) {
   b.addEventListener('animationend', function(){ b.classList.remove('pop') }, {once: true})
 }
 function navFeedback(btn) {
-  var ic = btn.querySelector('.nav-icon')
-  if(ic && !reducedMotion()) {
-    ic.classList.remove('hop'); void ic.offsetWidth; ic.classList.add('hop')
-    ic.addEventListener('animationend', function(){ ic.classList.remove('hop') }, {once: true})
-  }
   haptic('light')   // navigator.vibrate(10), unless haptics are switched off in Settings
+}
+
+// ── RIVER GARDEN (Nachal only) ────────────────────
+// Finishing a task drops water into the tasks icon; sometimes the river also
+// brings a small surprise, kept in a collection reachable from Home. A closed
+// day adds a stone to a pile on Home, a good week adds a leaf. Nothing here is
+// ever taken away, there are no points, sounds or streaks, and a quiet day
+// costs nothing. The collection lives in this browser (localStorage) only.
+//
+// The table is by id. Each id points at a file in assets/rewards/; the art is
+// meant to be replaced later by files with the same names (tools/cut_reward_sheet.py
+// cuts a 3x3 magenta sheet into exactly these files), with nothing else to change.
+// Weights add up to 100. Rarity is 0 common .. 3 very rare.
+const REWARDS = {
+  'pebble':          {file: 'pebble.png',          weight: 30, rarity: 0},
+  'leaf':            {file: 'leaf.png',            weight: 16, rarity: 0},
+  'water-lily-bud':  {file: 'water-lily-bud.png',  weight: 12, rarity: 1},
+  'river-fish':      {file: 'river-fish.png',      weight: 9,  rarity: 1},
+  'water-lily':      {file: 'water-lily.png',      weight: 9,  rarity: 1},
+  'dragonfly-teal':  {file: 'dragonfly-teal.png',  weight: 7,  rarity: 1},
+  'koi':             {file: 'koi.png',             weight: 6,  rarity: 2},
+  'dragonfly-amber': {file: 'dragonfly-amber.png', weight: 4,  rarity: 2},
+  'frog':            {file: 'frog.png',            weight: 4,  rarity: 2},
+  'fireflies':       {file: 'fireflies.png',       weight: 2,  rarity: 3},
+  'glowing-ripple':  {file: 'glowing-ripple.png',  weight: 1,  rarity: 3}
+}
+const REWARD_DIR = 'assets/rewards/'
+const GARDEN_RULES = {
+  minAgeMs: 20000,     // a task closed sooner than this after it was created never counts
+  dailyCap: 5,         // surprises a day, at most
+  pAfterFirst: 0.40,   // the first valid close of the day always brings one; later ones with this chance
+  dayMinTasks: 2,      // a day is closed when today's list is empty and at least this many valid tasks were closed
+  weekMinDays: 3       // a week (Sunday to Saturday) brings a leaf when at least this many of its days were closed
+}
+const GARDEN_KEY = 'fieldy_garden_v1'
+function rewardName(id) { return tr('rw_' + id.replace(/-/g, '_')) }
+function rewardSrc(id) { return REWARD_DIR + REWARDS[id].file }
+function pickReward(rnd) {
+  const ids = Object.keys(REWARDS), total = ids.reduce((n, k) => n + REWARDS[k].weight, 0)
+  let x = (rnd || Math.random)() * total
+  for(const k of ids) { x -= REWARDS[k].weight; if(x < 0) return k }
+  return ids[0]
+}
+function gardenDayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') }
+function gardenWeekKey(d) { d = new Date(d || Date.now()); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - d.getDay()); return gardenDayKey(d) }
+function gardenFresh() { return {v: 1, items: {}, cairn: [], leaves: 0, days: {}, weeks: {}} }
+let garden = (function(){
+  try { const g = JSON.parse(localStorage.getItem(GARDEN_KEY)); if(g && g.v === 1 && g.items) return g } catch(e) {}
+  return gardenFresh()
+})()
+function saveGarden() {
+  // only the last 60 days of day records are needed (for the weekly leaf)
+  const keep = gardenDayKey(new Date(Date.now() - 60 * 86400000))
+  Object.keys(garden.days).forEach(k => { if(k < keep) delete garden.days[k] })
+  try { localStorage.setItem(GARDEN_KEY, JSON.stringify(garden)) } catch(e) {}
+}
+function gardenDay(k) { k = k || gardenDayKey(); return (garden.days[k] = garden.days[k] || {rewards: 0, valid: 0, paid: [], closed: false}) }
+// when a task was created: tasks carry it in their id (m…, rq…, p… + milliseconds);
+// one without a readable time counts as old
+function taskCreatedAt(t) {
+  if(t && t.createdAt) return +new Date(t.createdAt)
+  const m = String(t && t.id || '').match(/(\d{13})/)
+  return m ? +m[1] : 0
+}
+// the rules: returns the id of the surprise, or null
+function gardenRoll(task, now) {
+  now = now || Date.now()
+  const d = gardenDay()
+  if(now - taskCreatedAt(task) < GARDEN_RULES.minAgeMs) return null      // closed straight after creating it: nothing, silently
+  if(d.paid.indexOf(String(task.id)) !== -1) return null                    // un-ticked and ticked again: nothing more
+  d.paid.push(String(task.id)); d.valid++
+  if(d.rewards >= GARDEN_RULES.dailyCap) return null
+  if(d.rewards > 0 && Math.random() >= GARDEN_RULES.pAfterFirst) return null
+  d.rewards++
+  const k = pickReward()
+  garden.items[k] = (garden.items[k] || 0) + 1
+  return k
+}
+function gardenStone() { return {p: 1 + Math.floor(Math.random() * 12), rot: Math.round(Math.random() * 26 - 13)} }
+// a week that has ended brings a leaf when enough of its days were closed
+function gardenWeekRollover() {
+  const cur = gardenWeekKey(), per = {}; let got = 0
+  Object.keys(garden.days).forEach(k => { if(garden.days[k].closed) { const w = gardenWeekKey(new Date(k + 'T00:00:00')); per[w] = (per[w] || 0) + 1 } })
+  Object.keys(per).forEach(w => { if(w < cur && !garden.weeks[w] && per[w] >= GARDEN_RULES.weekMinDays) { garden.weeks[w] = 1; garden.leaves++; got++ } })
+  if(got) saveGarden()
+  return got
+}
+// called from toggleTask when a task becomes done
+let gardenChain = Promise.resolve()
+function gardenOnComplete(task) {
+  if(currentTheme !== 'nachal') return
+  const k = gardenRoll(task)
+  const st = navTodayStats(), d = gardenDay()
+  const closeDay = st.total > 0 && st.done === st.total && d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
+  if(closeDay) { d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true }
+  saveGarden()
+  gardenChain = gardenChain.then(async function(){
+    await gardenDropFx()
+    if(k) await gardenFlyFx(rewardSrc(k), tr('garden_found').replace('{n}', rewardName(k)) + (REWARDS[k].rarity >= 2 ? ' · ' + tr('rarity_' + REWARDS[k].rarity) : ''), REWARDS[k].rarity >= 3)
+    if(closeDay) { await gardenFlyFx('assets/pebbles/pebble-' + String(garden.cairn[garden.cairn.length - 1].p).padStart(2, '0') + '.png', tr('garden_day_closed')); if(currentScreen === 'home') renderHome() }
+  }).catch(function(e){ console.warn('garden fx:', e) })
+}
+// ── garden effects: a small layer created for the moment and removed after
+function gardenLayer() {
+  let fx = document.getElementById('nh-fx')
+  if(!fx) { fx = document.createElement('div'); fx.id = 'nh-fx'; fx.setAttribute('aria-hidden', 'true'); document.body.appendChild(fx) }
+  return fx
+}
+function gardenLayerDone() { const fx = document.getElementById('nh-fx'); if(fx && !fx.children.length) fx.remove() }
+function centerOf(el) { const r = el.getBoundingClientRect(); return {x: r.left + r.width / 2, y: r.top + r.height / 2} }
+function gardenSleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+async function gardenDropFx() {
+  const ico = document.querySelector('.nav-btn[data-screen="tasks"] .nav-icon')
+  if(!ico || reducedMotion() || document.getElementById('nav').style.display === 'none') return
+  const to = centerOf(ico), fx = gardenLayer()
+  const d = document.createElement('img'); d.className = 'nh-drop'; d.alt = ''; d.src = 'assets/leaves/droplet-tear.png'
+  d.style.left = to.x + 'px'; d.style.top = (to.y - 8) + 'px'; fx.appendChild(d)
+  const a = d.animate([{transform: 'translateY(-110px) scaleY(1)', opacity: 0}, {transform: 'translateY(-96px) scaleY(1)', opacity: 1, offset: .1},
+    {transform: 'translateY(0) scaleY(1.3)', opacity: 1, offset: .9}, {transform: 'translateY(2px) scaleY(.6)', opacity: 0}], {duration: 460, easing: 'cubic-bezier(.5,0,.9,.6)'})
+  await a.finished.catch(function(){}); d.remove()
+  const sp = document.createElement('span'); sp.className = 'nh-splash'; sp.style.left = to.x + 'px'; sp.style.top = (to.y + 6) + 'px'
+  sp.addEventListener('animationend', function(){ sp.remove(); gardenLayerDone() }); fx.appendChild(sp)
+  navWaterHoldUntil = 0; updateNavRing()
+  await gardenSleep(160)
+}
+async function gardenFlyFx(src, caption, rare) {
+  const fx = gardenLayer()
+  const from = centerOf(document.querySelector('.nav-btn[data-screen="tasks"] .nav-icon') || document.body)
+  const home = centerOf(document.querySelector('.nav-btn[data-screen="home"] .nav-icon') || document.body)
+  const navShown = document.getElementById('nav').style.display !== 'none'
+  if(!navShown) { from.x = innerWidth / 2; from.y = innerHeight - 120 }
+  const el = document.createElement('div'); el.className = 'nh-rw' + (rare ? ' rare' : '')
+  el.innerHTML = '<img alt="" src="' + esc(src) + '">'
+  const cap = document.createElement('div'); cap.className = 'nh-cap'; cap.textContent = caption
+  el.style.left = from.x + 'px'; el.style.top = from.y + 'px'
+  cap.style.left = Math.max(125, Math.min(from.x, innerWidth - 125)) + 'px'; cap.style.top = (from.y - 190) + 'px'
+  fx.appendChild(el); fx.appendChild(cap)
+  if(reducedMotion()) { el.style.transform = 'translateY(-100px)'; await gardenSleep(1900); el.remove(); cap.remove(); gardenLayerDone(); return }
+  const dx = navShown ? home.x - from.x : 0, dy = navShown ? home.y - from.y : 60
+  const a = el.animate([
+    {transform: 'translate(0,0) scale(.3)', opacity: 0, easing: 'cubic-bezier(.3,1.4,.5,1)'},
+    {transform: 'translate(0,-100px) scale(1)', opacity: 1, offset: .3},
+    {transform: 'translate(0,-106px) scale(1)', opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.6)'},
+    {transform: 'translate(' + dx + 'px,' + (dy - 4) + 'px) scale(.3)', opacity: 0}], {duration: 1700})
+  cap.animate([{opacity: 0}, {opacity: 1, offset: .2}, {opacity: 1, offset: .72}, {opacity: 0}], {duration: 1700})
+  await a.finished.catch(function(){}); el.remove(); cap.remove(); gardenLayerDone()
+}
+// ── the pile of stones (Home) and the garden window
+function gardenCairnHtml() {
+  const vis = garden.cairn.slice(-10), rows = [4, 3, 2, 1], W = 170
+  let h = '', i = 0
+  rows.forEach(function(n, r){
+    for(let c = 0; c < n && i < vis.length; c++, i++) {
+      const st = vis[i], size = 50 - r * 6, x = (W - n * (size - 6)) / 2 + c * (size - 6), y = r * (size * .62)
+      const isNew = garden.freshStone && i === vis.length - 1
+      h += '<img alt="" class="' + (isNew ? 'new' : '') + '" src="assets/pebbles/pebble-' + String(st.p).padStart(2, '0') + '.png" style="width:' + size + 'px;left:' + x + 'px;bottom:' + y + 'px;--rot:' + st.rot + 'deg;transform:rotate(' + st.rot + 'deg)">'
+    }
+  })
+  for(let l = 0; l < Math.min(garden.leaves, 3); l++)
+    h += '<img alt="" src="assets/leaves/leaf-' + (l % 2 ? 'round' : 'soft') + '.png" style="width:' + (28 - l * 4) + 'px;left:' + (96 + l * 22) + 'px;bottom:' + (100 - l * 8) + 'px;transform:rotate(' + (24 + l * 22) + 'deg)">'
+  return '<div class="nh-cairn" style="width:' + W + 'px">' + h + '</div>'
+}
+function gardenHomeHtml() {
+  if(currentTheme !== 'nachal') return ''
+  const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
+    '<div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' +
+    (garden.cairn.length || garden.leaves ? gardenCairnHtml() : '') +
+    '<div class="nh-garden-b">' + tr('garden_open') + '</div></div>'
+  if(garden.freshStone) { garden.freshStone = false; saveGarden() }
+  return html
+}
+function showGarden() {
+  const ids = Object.keys(REWARDS), found = ids.filter(k => garden.items[k] > 0).length
+  openModal('<div class="nh-garden-sheet">' +
+    '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
+    '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">' + tr('garden_kinds').replace('{f}', found).replace('{t}', ids.length) + '</div>' +
+    '<div class="nh-garden-pond"><div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div>' + gardenCairnHtml() + '</div>' +
+    '<div class="nh-garden-grid">' + ids.map(function(k){
+      const n = garden.items[k] || 0
+      return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
+        '<b>' + (n ? rewardName(k) : tr('garden_not_yet')) + '</b><small>' + tr('rarity_' + REWARDS[k].rarity) + '</small>' +
+        (n ? '<span class="nh-tile-n">× ' + n + '</span>' : '<small>' + tr('garden_waits') + '</small>') + '</div>'
+    }).join('') + '</div>' +
+    '<div style="font-size:var(--fs-sm);color:var(--t2);margin:14px 2px 4px;line-height:1.5">' + tr('garden_calm') + '</div>' +
+    '<button class="btn-primary" style="margin-top:10px" onclick="closeModal()">' + tr('btn_close') + '</button></div>')
 }
 
 // ── RIGHT NOW (single-focus ranking) ──────────────
@@ -3701,6 +3983,7 @@ function renderHomeNachal() {
       </div>` : ''}
       ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
       ${rightNowNachalHtml(curMood ? curMood.mood : null)}
+      ${gardenHomeHtml()}
       <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
         <div>
           <div class="nh-peek-t">${icon('wallet')} ${tr('home_petty_cash')}</div>
@@ -4153,8 +4436,11 @@ function toggleTask(id) {
       patch.lastStreakDate = today
     }
   }
+  // in the river theme the tasks icon's water waits for the drop to land
+  if(wasUndone && currentTheme === 'nachal' && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
   setState(patch)
   if(wasUndone){
+    gardenOnComplete(wasUndone)
     playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
@@ -7095,6 +7381,7 @@ function startMeditationWithVoice(idx){
 
 // ── INIT ─────────────────────────────────────────
 applyTheme(currentTheme)
+if(currentTheme === 'nachal') gardenWeekRollover()
 applyUiLangDom()
 checkChronology()
 refreshBadges()
