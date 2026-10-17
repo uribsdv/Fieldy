@@ -808,6 +808,9 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 .nh-tile b{display:block;font-size:var(--fs-base);margin-top:2px}
 .nh-tile small{display:block;font-size:var(--fs-xs);color:var(--t2);margin-top:2px}
 .nh-tile-n{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:rgba(58,97,73,.14);font-size:var(--fs-sm);font-weight:700}
+/* the two rewards made of light glow softly; drawn here, not in the image (selected by file, so the table needs no flag) */
+.nh-tile:not(.locked) img[src$="glowing-ripple.png"],#nh-fx .nh-rw img[src$="glowing-ripple.png"]{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
+.nh-tile:not(.locked) img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
 @media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
   /* the app's own completion ring, too, in this theme */
   [data-theme="nachal"] .success-ring{animation:none!important;display:none}}
