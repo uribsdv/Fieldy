@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nachal Nav Lab</title>
+<style>
+/* Fieldy · Nachal · navigation lab (mockup, not part of the app).
+   Layout: one phone-sized stage, a teal river room behind glass surfaces, the
+   floating nav at the bottom. Two nav variants share one surface and one reward
+   system. Everything that moves is transform or opacity on a small element;
+   the only backdrop blur on the page is the nav's; two looping animations at
+   most (the light sweep on the nav, and in variant B the active icon's float). */
+:root{
+  --room:#0A4640; --room-deep:#06302C; --teal:#0E8479; --mist:#E2EEE7; --ink:#0B1A12; --ink2:#2C3E35;
+  --sage:#4A7760; --sage-deep:#3A6149; --amber:#D4922C; --rose:#C8424A; --river:#3C7FA0; --lotus:#E897B8;
+  --glass-a:.72; --glass-rgb:226,238,231;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--room-deep);color:#fff;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Hebrew","Arial Hebrew",sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#stage{position:relative;width:100%;max-width:430px;height:100%;margin:0 auto;overflow:hidden;isolation:isolate;background:var(--room)}
+@media (min-width:600px){body{display:grid;place-items:center}#stage{height:min(100%,880px);border-radius:34px;box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}}
+/* recording mode (?rec=1): a phone-sized page rendered at 2x, for crisp screen captures */
+html.rec{zoom:2}
+html.rec body{display:block}
+html.rec #stage{height:100%;border-radius:0;box-shadow:none}
+
+/* the room: the river photograph, tinted teal with the colour blend (it keeps its light and shade,
+   takes teal's hue), under a green-teal darkening */
+#room{position:absolute;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(180deg,rgba(3,40,38,.52) 0%,rgba(3,36,34,.60) 55%,rgba(2,30,29,.70) 100%),
+    radial-gradient(70% 26% at 86% 14%,rgba(72,214,190,.26),rgba(72,214,190,0) 72%),
+    radial-gradient(60% 24% at 6% 58%,rgba(54,190,168,.18),rgba(54,190,168,0) 72%),
+    linear-gradient(#0E8479,#0E8479),
+    var(--photo,none);
+  background-blend-mode:normal,normal,normal,color,normal;
+  background-size:auto,auto,auto,auto,cover;background-position:0 0,0 0,0 0,0 0,center top;background-repeat:no-repeat;background-color:#0A4640}
+
+/* top strip: which variant, and the demo sheet */
+#lab{position:absolute;z-index:50;top:max(10px,env(safe-area-inset-top,0px));inset-inline:16px;display:flex;gap:8px;align-items:center}
+#seg{flex:1;display:flex;padding:3px;border-radius:99px;background:rgba(8,46,42,.62);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+#seg button{flex:1;min-height:38px;border-radius:99px;font-size:13px;font-weight:600;color:#DCEAE3;padding:0 6px;line-height:1.15}
+#seg button[aria-pressed="true"]{background:#CFE6DC;color:#0F2E27}
+#gear{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(8,46,42,.62);border:1px solid rgba(255,255,255,.18);font-size:20px}
+
+/* screens */
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:68px 16px 150px;opacity:0;visibility:hidden;transition:opacity .18s}
+.screen.on{opacity:1;visibility:visible}
+h1{margin:0 0 4px;font-size:27px;font-weight:800;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+.sub{margin:0 0 14px;font-size:14px;color:#E1EEE8;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+.card{background:rgba(var(--glass-rgb),.78);color:var(--ink);border-radius:22px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.3);box-shadow:0 12px 26px -18px rgba(0,0,0,.6)}
+.card h2{margin:0 0 6px;font-size:17px}
+.card p{margin:0;font-size:14px;color:var(--ink2);line-height:1.5}
+.row{display:flex;align-items:center;gap:12px;min-height:52px;border-top:1px solid rgba(27,46,36,.1)}
+.row:first-of-type{border-top:0}
+.row span{flex:1;font-size:16px;color:var(--ink);font-weight:600}
+.row small{font-size:12px;color:var(--ink2)}
+.tick{width:44px;height:44px;margin-inline-start:-8px;display:grid;place-items:center;flex:none}
+.tick i{width:28px;height:28px;border-radius:50%;border:2px solid var(--sage-deep);display:grid;place-items:center;background:rgba(255,255,255,.6);transition:background .15s}
+.tick i svg{width:16px;height:16px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
+.row.done .tick i{background:var(--sage-deep)}
+.row.done .tick i svg{opacity:1}
+.row.done span{text-decoration:line-through;color:var(--ink2);font-weight:500}
+.add{display:flex;gap:8px;margin-top:10px}
+.add input{flex:1;min-height:48px;border-radius:99px;border:1px solid #5E8A72;background:rgba(255,255,255,.7);padding:0 18px;font:inherit;font-size:16px;color:var(--ink)}
+.add button{min-width:48px;min-height:48px;border-radius:99px;background:linear-gradient(135deg,#4A7760,#3A6149);color:#fff;font-weight:700;padding:0 16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:99px;background:linear-gradient(135deg,#4A7760,#3A6149);color:#fff;font-weight:700;font-size:15px}
+.btn.ghost{background:rgba(255,255,255,.7);color:var(--ink);border:1px solid rgba(74,119,96,.4)}
+.back{display:inline-flex;align-items:center;min-height:44px;gap:6px;font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+
+/* ── the nav surface: glass, a thin light line along the edge, a slow sweep of light ── */
+#nav{position:absolute;z-index:40;inset-inline:16px;bottom:max(16px,env(safe-area-inset-bottom,0px));height:67px;border-radius:99px;
+  display:grid;grid-template-columns:repeat(6,1fr);align-items:center;overflow:hidden;--lvl:0;
+  background:linear-gradient(180deg,rgba(236,246,241,calc(var(--glass-a) + .04)),rgba(214,232,224,calc(var(--glass-a) - .04)));
+  -webkit-backdrop-filter:blur(22px) saturate(1.3);backdrop-filter:blur(22px) saturate(1.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.34),inset 0 -1px 0 rgba(255,255,255,.2),0 18px 34px -14px rgba(0,0,0,.55)}
+#nav::after{content:"";position:absolute;inset:0 auto 0 0;width:36%;pointer-events:none;
+  background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.4) 50%,rgba(255,255,255,0));
+  transform:translateX(-130%) skewX(-14deg);animation:sweep 11s ease-in-out 2.5s infinite}
+@keyframes sweep{0%,62%{transform:translateX(-130%) skewX(-14deg)}100%{transform:translateX(340%) skewX(-14deg)}}
+.tab{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0}
+.ico{position:relative;width:24px;height:24px;display:block;transition:transform .22s cubic-bezier(.34,1.5,.5,1)}
+.ico svg{width:24px;height:24px;display:block;overflow:visible}
+.lb{font-size:10.5px;font-weight:500;color:var(--ink);white-space:nowrap}
+.tab[aria-current="page"] .lb{font-weight:800}
+.tab:active .ico{transform:scale(.84)}
+.badge{position:absolute;top:5px;inset-inline-start:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:#A3333D;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 1.5px rgba(255,255,255,.85)}
+.badge[hidden]{display:none}
+.badge.pop{animation:pop .24s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* the sliding indicator */
+#ind{position:absolute;z-index:1;top:7px;left:0;height:53px;border-radius:99px;pointer-events:none;will-change:transform}
+/* variant A: a drop of glass */
+.va #ind{border-radius:50% 50% 50% 50%/58% 58% 42% 42%;
+  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 9%,rgba(255,255,255,0) 30%),
+    linear-gradient(170deg,rgba(207,230,220,.95),rgba(150,198,182,.78));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -6px 10px -4px rgba(24,98,84,.35),0 6px 14px -6px rgba(8,60,50,.55),0 0 0 1px rgba(255,255,255,.55)}
+/* variant B: a milky, see-through capsule with a line of light */
+.vb #ind{border-radius:26px;
+  background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.2) 62%,rgba(255,255,255,.34));
+  box-shadow:inset 0 1px 0 #fff,inset 0 -10px 14px -10px rgba(255,255,255,.5),0 0 0 1px rgba(255,255,255,.46),0 8px 18px -8px rgba(10,70,60,.5)}
+.vb #ind::before{content:"";position:absolute;top:3px;inset-inline:16px;height:3px;border-radius:3px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95),rgba(255,255,255,0))}
+.rip{position:absolute;z-index:1;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(14,132,121,.25);pointer-events:none;animation:rip .62s ease-out forwards}
+@keyframes rip{from{transform:scale(.35);opacity:.8}to{transform:scale(2.3);opacity:0}}
+
+/* icons: A = outline, B = filled in river colours; the active one in colour */
+.ico .ia,.ico .ib{display:none}
+.va .ico .ia{display:block}
+.vb .ico .ib{display:block}
+.ia *:not(.wave){fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.ia .wave{stroke:none}
+.va .tab[aria-current="page"] .ia *:not(.wave){stroke:#0A5A4E}
+.va .tab:not([aria-current="page"]) .ico{transform:scale(.92)}
+.va .tab[aria-current="page"] .ico{transform:scale(1.06)}
+.ib{--c1:#234A41;--c2:#4A6A5F;--c3:#8EA89C}
+.ib *{transition:fill .2s,stroke .2s}
+.vb .tab[aria-current="page"] .ib{--c1:var(--a1);--c2:var(--a2);--c3:var(--a3)}
+.vb .tab[aria-current="page"] .ico{transform:translateY(-3px) scale(1.12);animation:float 3.4s ease-in-out .3s infinite alternate}
+@keyframes float{from{transform:translateY(-3px) scale(1.12)}to{transform:translateY(-5.5px) scale(1.12)}}
+.ib .f1{fill:var(--c1)}.ib .f2{fill:var(--c2)}.ib .f3{fill:var(--c3)}
+.ib .s1{fill:none;stroke:var(--c1);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+[data-tab="home"]{--a1:#17715F;--a2:#3E9A82;--a3:#D9902B}
+[data-tab="tasks"]{--a1:#14584E;--a2:#3E9A92;--a3:#0F3D36}
+[data-tab="sites"]{--a1:#2F6F93;--a2:#6FA6C2;--a3:#EAF5F8}
+[data-tab="people"]{--a1:#1F7A5F;--a2:#D9902B;--a3:#5DB59B}
+[data-tab="people"] .ib .f1{fill:var(--c1)}
+[data-tab="calendar"]{--a1:#17715F;--a2:#D9902B;--a3:#F4FAF7}
+[data-tab="tao"]{--a1:#14584E;--a2:#6FCDBB;--a3:#F4FAF7}
+
+/* the tasks icon holds water; the level is today's finished share */
+.water{transform:translateY(calc((1 - var(--lvl)) * 19px));transition:transform .6s cubic-bezier(.3,.7,.2,1)}
+.wave{fill:#2FA6A0;opacity:.9}
+.va .wave{fill:#3DB7AE;opacity:.85}
+.vb .wave{fill:#A9E8DF;opacity:1}
+.water.run .wave{animation:slosh 1.1s ease-out 1}
+@keyframes slosh{from{transform:translateX(-6px)}to{transform:translateX(0)}}
+.ico.glow1{animation:glow1 1.1s ease-in-out 1}
+@keyframes glow1{0%,100%{filter:none}45%{filter:drop-shadow(0 0 6px rgba(90,214,184,.95))}}
+#nav.full .water{transform:translateY(0)}
+
+/* the effects layer: a falling drop, a found item, a stone on its way home */
+#fx{position:absolute;inset:0;z-index:60;pointer-events:none;overflow:hidden}
+.drop{position:absolute;width:22px;height:32px;margin:-16px 0 0 -11px;will-change:transform}
+.drop img{width:100%;height:100%;display:block}
+.splash{position:absolute;width:26px;height:10px;margin:-5px 0 0 -13px;border-radius:50%;border:2px solid rgba(255,255,255,.9);animation:splash .5s ease-out forwards}
+@keyframes splash{from{transform:scale(.3);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.rw{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;will-change:transform,opacity}
+.rw>*{width:100%;height:100%;display:block;object-fit:contain}
+.rw.rare::before{content:"";position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(160,255,235,.8),rgba(160,255,235,0) 68%)}
+.cap{position:absolute;padding:6px 12px;border-radius:99px;background:rgba(8,46,42,.78);color:#fff;font-size:13px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22);transform:translate(-50%,0)}
+.rw .lt path.p{transform-origin:24px 36px;animation:openp .55s ease-out both}
+@keyframes openp{from{transform:scale(.15)}to{transform:scale(1)}}
+.rw .wg{transform-origin:28px 26px;animation:flap .14s steps(2,jump-none) infinite alternate}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+.rw .tl{transform-origin:9px 24px;animation:wag .22s ease-in-out infinite alternate}
+@keyframes wag{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+.rw .rg{transform-origin:24px 24px;animation:ringp .7s ease-out infinite}
+@keyframes ringp{from{transform:scale(.7);opacity:1}to{transform:scale(1.15);opacity:.35}}
+
+/* the garden */
+.cairn{position:relative;height:150px}
+.cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+.cairn img.new{animation:settle .55s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes settle{from{transform:translateY(-70px) rotate(var(--rot,0deg));opacity:0}to{transform:translateY(0) rotate(var(--rot,0deg));opacity:1}}
+.pond{position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;border:1px solid rgba(255,255,255,.3);
+  background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.35),rgba(120,230,210,0) 60%),#0C5C54;padding:14px 16px 6px}
+.pond .count{font-size:14px;color:#E6F1EB;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:rgba(var(--glass-rgb),.78);color:var(--ink);border-radius:20px;padding:12px 10px;text-align:center;border:1px solid rgba(255,255,255,.3)}
+.tile .art{height:76px;display:grid;place-items:center}
+.tile .art>*{max-height:72px;max-width:84px}
+.tile.locked .art>*{filter:brightness(0);opacity:.22}
+.tile b{display:block;font-size:15px;margin-top:2px}
+.tile small{display:block;font-size:12px;color:var(--ink2);margin-top:2px}
+.tile .n{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:99px;background:rgba(58,97,73,.14);font-size:13px;font-weight:700}
+.rar{font-size:11px;font-weight:700;color:#3A2A08}
+.preview{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.preview button{min-height:40px;padding:0 12px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);font-size:13px;font-weight:600}
+
+/* a finger-touch dot, only for recordings (?touch=1) */
+.touch{position:absolute;z-index:90;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.9);pointer-events:none;animation:touch .5s ease-out forwards}
+@keyframes touch{from{transform:scale(.5);opacity:1}to{transform:scale(1.25);opacity:0}}
+/* demo sheet */
+#sheet{position:absolute;z-index:70;inset:0;display:none;background:rgba(2,24,22,.55)}
+#sheet.open{display:block}
+#sheet .pane{position:absolute;inset-inline:0;bottom:0;max-height:88%;overflow-y:auto;padding:18px 16px max(22px,env(safe-area-inset-bottom,0px));border-radius:26px 26px 0 0;background:#E9F3EE;color:var(--ink)}
+#sheet h3{margin:14px 0 8px;font-size:15px}
+#sheet h3:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:44px;padding:0 14px;border-radius:99px;background:#fff;border:1px solid #9DB8AB;font-size:14px;font-weight:600;color:var(--ink)}
+.chips button[aria-pressed="true"]{background:#CFE6DC;border-color:#3A6149}
+#sheet ul{margin:6px 0 0;padding-inline-start:20px;font-size:13.5px;line-height:1.65;color:var(--ink2)}
+#sheet .stat{font-size:13px;color:var(--ink2);margin:8px 0 0}
+
+/* reduced motion: nothing moves (also when switched on in the demo sheet) */
+@media (prefers-reduced-motion:reduce){
+  #nav::after{animation:none;opacity:0}
+  .ico,.water,.screen,.tick i,.ia *,.ib *{transition:none!important}
+  .vb .tab[aria-current="page"] .ico{animation:none}
+  .badge.pop,.rip,.splash,.water.run .wave,.ico.glow1,.cairn img.new,.rw .lt path.p,.rw .wg,.rw .tl,.rw .rg{animation:none}
+}
+html.rm #nav::after{animation:none;opacity:0}
+html.rm .ico,html.rm .water,html.rm .screen,html.rm .tick i,html.rm .ia *,html.rm .ib *{transition:none!important}
+html.rm .vb .tab[aria-current="page"] .ico{animation:none}
+html.rm .badge.pop,html.rm .rip,html.rm .splash,html.rm .water.run .wave,html.rm .ico.glow1,html.rm .cairn img.new,html.rm .rw .lt path.p,html.rm .rw .wg,html.rm .rw .tl,html.rm .rw .rg{animation:none}
+/* reduced transparency, or no backdrop-filter: a dense, opaque surface */
+@media (prefers-reduced-transparency:reduce){:root{--glass-a:.97}#nav,#seg,#gear{-webkit-backdrop-filter:none;backdrop-filter:none}#nav{background:#DCE9E2}}
+html.rt{--glass-a:.97}
+html.rt #nav,html.rt #seg,html.rt #gear{-webkit-backdrop-filter:none;backdrop-filter:none}
+html.rt #nav{background:#DCE9E2}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass-a:.95}}
+</style>
+</head>
+<body>
+<div id="stage" class="va">
+  <div id="room"></div>
+
+  <div id="lab">
+    <div id="seg" role="group" aria-label="וריאנט ניווט">
+      <button id="vA" aria-pressed="true">א׳ · טיפה נוזלית</button>
+      <button id="vB" aria-pressed="false">ב׳ · אייקונים עשירים</button>
+    </div>
+    <button id="gear" aria-label="הדגמות והגדרות" aria-haspopup="dialog">⚙</button>
+  </div>
+
+  <section class="screen on" id="s-home" aria-label="בית"></section>
+  <section class="screen" id="s-tasks" aria-label="משימות"></section>
+  <section class="screen" id="s-sites" aria-label="אתרים"></section>
+  <section class="screen" id="s-people" aria-label="אנשים"></section>
+  <section class="screen" id="s-calendar" aria-label="לוח"></section>
+  <section class="screen" id="s-tao" aria-label="טאו"></section>
+  <section class="screen" id="s-garden" aria-label="גן הנחל"></section>
+
+  <nav id="nav" class="" aria-label="ניווט ראשי">
+    <span id="ind" aria-hidden="true"></span>
+  </nav>
+
+  <div id="fx" aria-hidden="true"></div>
+
+  <div id="sheet" role="dialog" aria-label="הדגמות" aria-modal="true"><div class="pane" id="pane"></div></div>
+</div>
+
+<script>
+'use strict'
+const A = '../assets/'   // asset base (the published copy uses 'assets/')
+const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)]
+const stage = $('#stage'), nav = $('#nav'), ind = $('#ind'), fx = $('#fx'), root = document.documentElement
+stage.style.setProperty('--photo', 'url(' + A + 'backgrounds/bg-water-ripple.webp)')
+const Z = () => root.classList.contains('rec') ? 2 : 1   // recording mode renders the page zoomed; rectangles come back zoomed
+const rm = () => root.classList.contains('rm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+const store = {
+  get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
+  set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} }
+}
+
+/* ───────── rules (every number here is a knob) ───────── */
+const CONFIG = {
+  minAgeMs: 20000,      // a task closed sooner than this after it was created is never rewarded
+  dailyCap: 5,          // rewards a day, at most
+  pAfterFirst: 0.40,    // the first valid close of the day always rewards; later ones with this chance
+  dayMinTasks: 2,       // a day counts as closed when its list is empty and at least this many valid tasks were closed
+  weekMinDays: 3        // a week (Sun–Sat) earns a leaf when at least this many of its days were closed
+}
+const TYPES = {
+  pebble:    {name: 'חלוק נחל',    w: 45, rar: 0},
+  leaf:      {name: 'עלה',         w: 20, rar: 1},
+  lotus:     {name: 'פרח מים',     w: 14, rar: 1},
+  dragonfly: {name: 'שפירית',      w: 10, rar: 2},
+  fish:      {name: 'דג קטן',      w: 8,  rar: 2},
+  ripple:    {name: 'אדווה זוהרת', w: 3,  rar: 3}
+}
+const RAR = ['נפוץ', 'לא שכיח', 'נדיר', 'נדיר מאוד']
+function pickWeighted(rnd) {
+  const ks = Object.keys(TYPES), total = ks.reduce((s, k) => s + TYPES[k].w, 0)
+  let x = (rnd || Math.random)() * total
+  for (const k of ks) { x -= TYPES[k].w; if (x < 0) return k }
+  return ks[0]
+}
+
+/* ───────── art ───────── */
+const ART = {
+  pebble: () => '<img alt="" src="' + A + 'pebbles/pebble-03.png">',
+  leaf: () => '<img alt="" src="' + A + 'leaves/leaf-soft.png">',
+  lotus: () => '<svg viewBox="0 0 48 48" class="lt"><ellipse cx="24" cy="38" rx="16" ry="4.2" fill="#2E8B6E" opacity=".6"/>' +
+    '<path class="p" d="M24 36C14 33 11 24 17 14C21 19 23 25 24 36Z" fill="#E897B8"/><path class="p" d="M24 36C34 33 37 24 31 14C27 19 25 25 24 36Z" fill="#E897B8"/>' +
+    '<path class="p" d="M24 36C17 31 16 20 24 9C32 20 31 31 24 36Z" fill="#F6D6E4"/><circle cx="24" cy="30" r="2.6" fill="#D4922C"/></svg>',
+  dragonfly: () => '<svg viewBox="0 0 48 48"><g class="wg"><ellipse cx="23" cy="18" rx="10" ry="3.6" transform="rotate(-14 23 18)" fill="rgba(160,228,238,.6)" stroke="#5FB7C4" stroke-width=".8"/>' +
+    '<ellipse cx="25" cy="34" rx="10" ry="3.6" transform="rotate(14 25 34)" fill="rgba(160,228,238,.6)" stroke="#5FB7C4" stroke-width=".8"/></g>' +
+    '<path d="M8 26H36" stroke="#1E6F7E" stroke-width="3.2" stroke-linecap="round"/><circle cx="38.5" cy="26" r="3.4" fill="#14586A"/><circle cx="39.6" cy="25" r="1" fill="#fff"/></svg>',
+  fish: () => '<svg viewBox="0 0 48 48"><path class="tl" d="M10 24L2 16V32Z" fill="#E58A2B"/>' +
+    '<path d="M9 24C15 13 31 13 40 24C31 35 15 35 9 24Z" fill="#F2A33A"/><path d="M14 20C20 16 28 16 34 20" stroke="rgba(255,255,255,.55)" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+    '<circle cx="33.5" cy="22.4" r="1.9" fill="#0B1A12"/><path d="M22 30C24 34 28 35 30 34" stroke="#E58A2B" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+  ripple: () => '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="4" fill="#C9FFF1"/><circle class="rg" cx="24" cy="24" r="9" fill="none" stroke="#9DF5DF" stroke-width="2.2"/>' +
+    '<circle class="rg" cx="24" cy="24" r="15" fill="none" stroke="#7FE6D1" stroke-width="1.8" style="animation-delay:.12s"/><circle cx="24" cy="24" r="20" fill="none" stroke="#5FD3BE" stroke-width="1.2" opacity=".6"/></svg>'
+}
+const ICONS = {
+  home:     {a: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+             b: '<path class="f2" d="M5 10.6V20h14v-9.4L12 5z"/><path class="s1" d="M2.8 11.4L12 3.6l9.2 7.8"/><path class="f3" d="M10 20v-5.4h4V20z"/>'},
+  tasks:    {a: '<g clip-path="url(#clipT)"><g class="water"><path class="wave" d="M-2 4C1 2.6 3 5.4 6 4S11 2.6 14 4 19 5.4 22 4 25 2.6 26 4V30H-2Z"/></g></g><rect x="5" y="4" width="14" height="17" rx="2.6"/><rect x="9" y="2.4" width="6" height="3.2" rx="1.2"/><path d="M9 11.5h6M9 15h6M9 18.4h3"/>',
+             b: '<path class="f2" d="M7.6 4h8.8A2.6 2.6 0 0 1 19 6.6v11.8A2.6 2.6 0 0 1 16.4 21H7.6A2.6 2.6 0 0 1 5 18.4V6.6A2.6 2.6 0 0 1 7.6 4z"/><g clip-path="url(#clipT)"><g class="water"><path class="wave" d="M-2 4C1 2.6 3 5.4 6 4S11 2.6 14 4 19 5.4 22 4 25 2.6 26 4V30H-2Z"/></g></g><rect class="f1" x="9" y="2.2" width="6" height="3.4" rx="1.3"/><path class="s1" d="M9 11.5h6M9 15h6M9 18.4h3" style="stroke:var(--c3)"/>'},
+  sites:    {a: '<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
+             b: '<path class="f1" d="M12 21.4s7.4-6.4 7.4-11.9A7.4 7.4 0 0 0 4.6 9.5C4.6 15 12 21.4 12 21.4z"/><circle class="f3" cx="12" cy="9.5" r="3"/>'},
+  people:   {a: '<circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.4-5.6 6.5-5.6s5.9 2 6.5 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.8.2 4.9 2 5.5 5.4"/>',
+             b: '<path class="f1" d="M2.6 20.4c.6-3.8 3.4-6 6.4-6s5.8 2.2 6.4 6z"/><circle class="f1" cx="9" cy="8" r="3.6"/><path class="f2" d="M15.6 14.4c3 .1 5.2 2.1 5.8 6h-4.6c-.2-2.4-.6-4.4-1.2-6z"/><circle class="f2" cx="17.2" cy="9" r="2.9"/>'},
+  calendar: {a: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r=".8"/>',
+             b: '<rect class="f3" x="3.5" y="5" width="17" height="15.6" rx="3.2" style="stroke:var(--c1);stroke-width:1.3"/><path class="f1" d="M3.5 8.2A3.2 3.2 0 0 1 6.7 5h10.6a3.2 3.2 0 0 1 3.2 3.2V10h-17z"/><rect class="f1" x="7.2" y="3" width="2" height="4" rx="1"/><rect class="f1" x="14.8" y="3" width="2" height="4" rx="1"/><circle class="f2" cx="12" cy="15" r="2.2"/>'},
+  tao:      {a: '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r=".9"/><circle cx="12" cy="16.5" r=".9"/>',
+             b: '<circle class="f3" cx="12" cy="12" r="9.2" style="stroke:var(--c1);stroke-width:1.3"/><path class="f1" d="M12 2.8a4.6 4.6 0 0 1 0 9.2 4.6 4.6 0 0 0 0 9.2A9.2 9.2 0 0 1 12 2.8z"/><circle class="f3" cx="12" cy="7.4" r="1.2"/><circle class="f1" cx="12" cy="16.6" r="1.2"/>'}
+}
+const TABS = [['home', 'בית'], ['tasks', 'משימות'], ['sites', 'אתרים'], ['people', 'אנשים'], ['calendar', 'לוח'], ['tao', 'טאו']]
+nav.insertAdjacentHTML('beforeend',
+  '<svg width="0" height="0" style="position:absolute"><defs><clipPath id="clipT"><path d="M7.6 4h8.8A2.6 2.6 0 0 1 19 6.6v11.8A2.6 2.6 0 0 1 16.4 21H7.6A2.6 2.6 0 0 1 5 18.4V6.6A2.6 2.6 0 0 1 7.6 4z"/></clipPath></defs></svg>' +
+  TABS.map(t => '<button class="tab" data-tab="' + t[0] + '"><span class="ico"><svg class="ia" viewBox="0 0 24 24">' + ICONS[t[0]].a + '</svg><svg class="ib" viewBox="0 0 24 24">' + ICONS[t[0]].b + '</svg></span><span class="lb">' + t[1] + '</span>' +
+    (t[0] === 'tasks' || t[0] === 'sites' || t[0] === 'people' ? '<span class="badge" id="bd-' + t[0] + '" hidden>0</span>' : '') + '</button>').join(''))
+
+/* ───────── garden (the reward store, in localStorage) ───────── */
+const KEY = 'mock_nachal_garden_v1'
+const dayKey = d => { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') }
+const weekKey = d => { d = new Date(d || Date.now()); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - d.getDay()); return dayKey(d) }   // weeks start on Sunday
+const stone = () => ({p: 1 + Math.floor(Math.random() * 12), rot: Math.round(Math.random() * 26 - 13)})
+function seedGarden() {
+  return {counts: {pebble: 7, leaf: 3, lotus: 1, dragonfly: 0, fish: 1, ripple: 0}, cairn: [stone(), stone(), stone(), stone(), stone(), stone()], leaves: 1, days: {}, weeks: {}, fresh: null}
+}
+let G = (function () { try { const g = JSON.parse(store.get(KEY)); if (g && g.counts) return g } catch (e) {} return seedGarden() })()
+const saveG = () => store.set(KEY, JSON.stringify(G))
+const dayRec = k => (G.days[k || dayKey()] = G.days[k || dayKey()] || {rewards: 0, valid: 0, done: 0, closed: false})
+// a week that has ended earns a leaf when enough of its days were closed; nothing is taken away otherwise
+function weekRollover() {
+  const cur = weekKey(); let any = false
+  const wk = {}
+  Object.keys(G.days).forEach(k => { if (G.days[k].closed) { const w = weekKey(new Date(k + 'T00:00:00')); wk[w] = (wk[w] || 0) + 1 } })
+  Object.keys(wk).forEach(w => { if (w < cur && !(G.weeks[w] && G.weeks[w].leaf) && wk[w] >= CONFIG.weekMinDays) { G.weeks[w] = {leaf: true}; G.leaves++; any = true } })
+  if (any) saveG()
+  return any
+}
+weekRollover()
+
+/* ───────── today's tasks (in memory) ───────── */
+const ago = s => Date.now() - s * 1000
+let tasks = [
+  {id: 1, t: 'להתקשר לדייב על באר קלוריה', done: false, created: ago(900)},
+  {id: 2, t: 'לבדוק גנרטור בסטה קרוז', done: false, created: ago(800)},
+  {id: 3, t: 'לשלוח דוח שבועי ל-NIA', done: false, created: ago(700)},
+  {id: 4, t: 'להזמין חלפים למשאבה A08', done: false, created: ago(600)},
+  {id: 5, t: 'לעדכן את Monday', done: false, created: ago(500)}
+]
+let nextId = 6
+const lvl = () => tasks.length ? tasks.filter(x => x.done).length / tasks.length : 0
+
+/* ───────── screens ───────── */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]))
+function cairnHtml() {
+  const rows = [4, 3, 2, 1], vis = G.cairn.slice(-10)
+  let h = '', i = 0
+  const W = 170
+  rows.forEach((n, r) => {
+    for (let c = 0; c < n && i < vis.length; c++, i++) {
+      const s = vis[i], size = 52 - r * 6, x = (W - n * (size - 6)) / 2 + c * (size - 6), y = r * (size * .62)
+      const isNew = G.fresh === G.cairn.indexOf(s) + '' || (G.fresh === 'last' && i === vis.length - 1)
+      h += '<img alt="" class="' + (isNew ? 'new' : '') + '" src="' + A + 'pebbles/pebble-' + String(s.p).padStart(2, '0') + '.png" style="width:' + size + 'px;left:' + x + 'px;bottom:' + y + 'px;--rot:' + s.rot + 'deg;transform:rotate(' + s.rot + 'deg)">'
+    }
+  })
+  for (let l = 0; l < Math.min(G.leaves, 3); l++)
+    h += '<img alt="" src="' + A + 'leaves/leaf-' + (l % 2 ? 'round' : 'soft') + '.png" style="width:' + (30 - l * 4) + 'px;left:' + (96 + l * 24) + 'px;bottom:' + (108 - l * 8) + 'px;transform:rotate(' + (24 + l * 22) + 'deg)">'
+  return '<div class="cairn" style="width:' + W + 'px;margin-inline:auto">' + h + '</div>'
+}
+function renderHome() {
+  const left = tasks.filter(x => !x.done).length, total = G.cairn.length
+  $('#s-home').innerHTML =
+    '<h1>בוקר טוב, אורי</h1><p class="sub">Region II · Cagayan Valley</p>' +
+    '<div class="pond"><p class="count">גן הנחל · ' + total + ' ימים נסגרו · ' + G.leaves + ' ' + (G.leaves === 1 ? 'עלה' : 'עלים') + '</p>' + cairnHtml() +
+    '<div style="display:flex;gap:8px;justify-content:center;padding:6px 0 8px"><button class="btn ghost" data-go="garden">פתח את הגן</button></div></div>' +
+    '<div class="card"><h2>הדבר הכי חשוב היום</h2><p>פגישה עם NIA ב-14:00 · לקחת את דוח הבאר</p></div>' +
+    '<div class="card"><h2>משימות להיום</h2><p>' + (left ? 'נשארו ' + left + ' מתוך ' + tasks.length : 'הכול סגור להיום') + '</p></div>'
+  if (G.fresh) { G.fresh = null; saveG() }
+}
+function renderTasks() {
+  const done = tasks.filter(x => x.done).length
+  $('#s-tasks').innerHTML = '<h1>משימות</h1><p class="sub">היום · ' + done + ' מתוך ' + tasks.length + '</p>' +
+    '<div class="card" style="padding:6px 16px">' + tasks.map(x => '<div class="row' + (x.done ? ' done' : '') + '" data-id="' + x.id + '"><button class="tick" aria-label="סמן כבוצע"><i><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></i></button><span>' + esc(x.t) + '</span></div>').join('') + '</div>' +
+    '<form class="add" id="addf"><input id="addt" placeholder="משימה חדשה" autocomplete="off"><button type="submit">הוסף</button></form>'
+}
+function renderStub(id, title, sub, rows) {
+  $('#s-' + id).innerHTML = '<h1>' + title + '</h1><p class="sub">' + sub + '</p><div class="card" style="padding:6px 16px">' + rows.map(r => '<div class="row"><span>' + r[0] + '</span><small>' + r[1] + '</small></div>').join('') + '</div>'
+}
+function tileHtml(k) {
+  const n = G.counts[k] || 0, T = TYPES[k]
+  return '<div class="tile' + (n ? '' : ' locked') + '" data-type="' + k + '"><div class="art">' + ART[k]() + '</div><b>' + (n ? T.name : 'עוד לא נמצא') + '</b>' +
+    '<small class="rar">' + RAR[T.rar] + '</small>' + (n ? '<span class="n">× ' + n + '</span>' : '<small>הנחל ישמור לך מקום</small>') + '</div>'
+}
+function renderGarden() {
+  const found = Object.keys(TYPES).filter(k => G.counts[k] > 0).length
+  $('#s-garden').innerHTML = '<button class="back" data-go="home">→ חזרה לבית</button><h1>גן הנחל</h1><p class="sub">מה שהנחל הביא לך · ' + found + ' מתוך ' + Object.keys(TYPES).length + ' סוגים</p>' +
+    '<div class="pond"><p class="count">' + G.cairn.length + ' ימים נסגרו · ' + G.leaves + ' ' + (G.leaves === 1 ? 'עלה' : 'עלים') + ' · הערימה רק גדלה</p>' + cairnHtml() + '</div>' +
+    '<div class="grid">' + Object.keys(TYPES).map(tileHtml).join('') + '</div>' +
+    '<p class="sub" style="margin:14px 0 6px">הדגמת האנימציות (לא משנה את האוסף):</p><div class="preview">' + Object.keys(TYPES).map(k => '<button data-prev="' + k + '">' + TYPES[k].name + '</button>').join('') + '</div>' +
+    '<p class="sub" style="margin-top:14px">אין סטריק ואין מה להפסיד. ימים שקטים הם חלק מהנחל.</p>'
+}
+
+/* ───────── navigation ───────── */
+let cur = 'home', screen = 'home', indX = null, variant = store.get('mock_nav_variant') === 'b' ? 'b' : 'a'
+const qv = new URLSearchParams(location.search).get('v'); if (qv === 'a' || qv === 'b') variant = qv
+function show(name) {
+  screen = name; $$('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + name))
+  if (name === 'home') renderHome(); if (name === 'tasks') renderTasks(); if (name === 'garden') renderGarden()
+  if (name === 'sites') renderStub('sites', 'אתרים', '3 אתרים · 2 פתוחים', [['Claveria Well', 'פתוח · תקוע 7 ימים'], ['Nambaran Deep Well', 'ממתין'], ['Santa Cruz', 'נפתר']])
+  if (name === 'people') renderStub('people', 'אנשים', '1 ממתין לתשובה', [['Dave · ASC Construction', 'ממתין'], ['Engr. Junell · NIA', ''], ['Novie', '']])
+  if (name === 'calendar') renderStub('calendar', 'אוקטובר 2026', 'היום · 2 אירועים', [['09:00 · Weekly sync', ''], ['14:00 · NIA meeting', 'Claveria Well'], ['20.10 · Liquidation deadline', '']])
+  if (name === 'tao') renderStub('tao', 'טאו', 'פרק 13 מתוך 80', [['מעדנות', ''], ['הנסתר', ''], ['הפשטות', '']])
+  $('#s-' + name).scrollTop = 0
+}
+function go(tab, quiet) {
+  const prev = cur; cur = tab
+  $$('.tab').forEach(b => { if (b.dataset.tab === tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current') })
+  show(tab); placeInd(!quiet && prev !== tab)
+}
+function indGeom(btn) {
+  const z = Z(), nr = nav.getBoundingClientRect(), br = btn.getBoundingClientRect()
+  const bw = br.width / z, w = variant === 'a' ? 60 : Math.min(84, bw + 4)
+  return {x: (br.left - nr.left) / z + (bw - w) / 2, w}
+}
+function placeInd(animate) {
+  const g = indGeom($('.tab[data-tab="' + cur + '"]'))
+  ind.style.width = g.w + 'px'
+  const old = indX == null ? g.x : indX; indX = g.x
+  if (ind.__a) { try { ind.__a.cancel() } catch (e) {} ind.__a = null }
+  if (!animate || rm() || old === g.x) { ind.style.transform = 'translateX(' + g.x + 'px)'; return }
+  const dx = g.x - old, k = Math.min(Math.abs(dx) / 300, .34)
+  const sx = variant === 'a' ? 1 + k : 1 + k * .12, sy = variant === 'a' ? 1 / Math.sqrt(sx) * .98 : 1
+  const sx2 = variant === 'a' ? 1 / Math.sqrt(sx) * 1.03 : 1 - k * .04, sy2 = variant === 'a' ? 1.08 : 1
+  ind.__a = ind.animate([
+    {transform: 'translateX(' + old + 'px) scale(1,1)', easing: 'cubic-bezier(.3,.6,.4,1)'},
+    {transform: 'translateX(' + (old + dx * .55) + 'px) scale(' + sx + ',' + sy + ')', offset: .4, easing: 'cubic-bezier(.3,.6,.4,1)'},
+    {transform: 'translateX(' + (g.x + dx * .05) + 'px) scale(' + sx2 + ',' + sy2 + ')', offset: .74, easing: 'ease-out'},
+    {transform: 'translateX(' + g.x + 'px) scale(1,1)'}
+  ], {duration: 420, fill: 'forwards'})
+  ind.__a.onfinish = () => { ind.style.transform = 'translateX(' + g.x + 'px)'; try { ind.__a.cancel() } catch (e) {} ind.__a = null }
+}
+function ripples(btn) {
+  if (rm() || variant !== 'a') return
+  const z = Z(), nr = nav.getBoundingClientRect(), ir = $('.ico', btn).getBoundingClientRect()
+  for (let i = 0; i < 2; i++) {
+    const r = document.createElement('span'); r.className = 'rip'
+    r.style.left = ((ir.left - nr.left + ir.width / 2) / z) + 'px'; r.style.top = ((ir.top - nr.top + ir.height / 2) / z) + 'px'; r.style.animationDelay = (i * 110) + 'ms'
+    r.addEventListener('animationend', () => r.remove()); nav.appendChild(r)
+  }
+}
+function setVariant(v) {
+  variant = v; store.set('mock_nav_variant', v)
+  stage.classList.toggle('va', v === 'a'); stage.classList.toggle('vb', v === 'b'); nav.className = (v === 'a' ? 'va' : 'vb') + (nav.classList.contains('full') ? ' full' : '')
+  $('#vA').setAttribute('aria-pressed', v === 'a'); $('#vB').setAttribute('aria-pressed', v === 'b')
+  indX = null; placeInd(false)
+}
+nav.addEventListener('pointerdown', e => { const b = e.target.closest('.tab'); if (b) ripples(b) })
+nav.addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return
+  if (navigator.vibrate) { try { navigator.vibrate(10) } catch (x) {} }
+  go(b.dataset.tab)
+})
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { const t = g.dataset.go; if (t === 'garden') show('garden'); else go(t) } })
+$('#vA').onclick = () => setVariant('a'); $('#vB').onclick = () => setVariant('b')
+
+/* ───────── badges ───────── */
+const badgeLast = {}
+function badges() {
+  const v = {tasks: tasks.filter(x => !x.done).length, sites: 2, people: 1}
+  Object.keys(v).forEach(k => {
+    const b = $('#bd-' + k); b.textContent = v[k]; b.hidden = v[k] === 0
+    if (v[k] > 0 && badgeLast[k] !== v[k] && !rm()) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); b.addEventListener('animationend', () => b.classList.remove('pop'), {once: true}) }
+    badgeLast[k] = v[k]
+  })
+}
+
+/* ───────── effects ───────── */
+const relc = el => { const z = Z(), r = el.getBoundingClientRect(), s = stage.getBoundingClientRect(); return {x: (r.left - s.left + r.width / 2) / z, y: (r.top - s.top + r.height / 2) / z} }
+const tasksIco = () => $('.tab[data-tab="tasks"] .ico'), homeIco = () => $('.tab[data-tab="home"] .ico')
+function setLevel() {
+  const l = lvl(); nav.style.setProperty('--lvl', l.toFixed(3))
+  nav.classList.toggle('full', tasks.length > 0 && l === 1)
+}
+async function dropToTasks() {
+  const to = relc(tasksIco())
+  if (rm()) { setLevel(); return }
+  const d = document.createElement('div'); d.className = 'drop'; d.innerHTML = '<img alt="" src="' + A + 'leaves/droplet-tear.png">'
+  d.style.left = to.x + 'px'; d.style.top = (to.y - 8) + 'px'; fx.appendChild(d)
+  const a = d.animate([{transform: 'translateY(-110px) scaleY(1)', opacity: 0}, {transform: 'translateY(-96px) scaleY(1)', opacity: 1, offset: .1}, {transform: 'translateY(0) scaleY(1.3)', opacity: 1, offset: .9}, {transform: 'translateY(2px) scaleY(.6)', opacity: 0}], {duration: 460, easing: 'cubic-bezier(.5,0,.9,.6)'})
+  await a.finished.catch(() => {}); d.remove()
+  const s = document.createElement('div'); s.className = 'splash'; s.style.left = to.x + 'px'; s.style.top = (to.y + 6) + 'px'; s.addEventListener('animationend', () => s.remove()); fx.appendChild(s)
+  $$('.water').forEach(w => { w.classList.remove('run'); void w.getBoundingClientRect(); w.classList.add('run') })
+  setLevel()
+  const ic = tasksIco(); ic.classList.remove('glow1')
+  if (nav.classList.contains('full')) { void ic.offsetWidth; ic.classList.add('glow1'); ic.addEventListener('animationend', () => ic.classList.remove('glow1'), {once: true}) }
+  await sleep(180)
+}
+async function flyItem(el, caption, rare) {
+  const from = relc(tasksIco()), home = relc(homeIco())
+  el.style.left = from.x + 'px'; el.style.top = from.y + 'px'; fx.appendChild(el)
+  const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = caption; cap.style.fontSize = '15px'
+  cap.style.left = Math.max(125, Math.min(from.x, stage.clientWidth / Z() - 125)) + 'px'; cap.style.top = (from.y - 190) + 'px'; fx.appendChild(cap)
+  if (rm()) { await sleep(1900); el.remove(); cap.remove(); return }
+  const dx = home.x - from.x, dy = home.y - from.y
+  const a = el.animate([
+    {transform: 'translate(0,0) scale(.3)', opacity: 0, easing: 'cubic-bezier(.3,1.4,.5,1)'},
+    {transform: 'translate(0,-100px) scale(1)', opacity: 1, offset: .3},
+    {transform: 'translate(0,-106px) scale(1)', opacity: 1, offset: .72, easing: 'cubic-bezier(.5,0,.8,.6)'},
+    {transform: 'translate(' + dx + 'px,' + (dy - 4) + 'px) scale(.3)', opacity: 0}
+  ], {duration: 1700})
+  cap.animate([{opacity: 0}, {opacity: 1, offset: .2}, {opacity: 1, offset: .72}, {opacity: 0}], {duration: 1700})
+  await a.finished.catch(() => {}); el.remove(); cap.remove()
+}
+const playReward = k => { const el = document.createElement('div'); el.className = 'rw' + (TYPES[k].rar >= 3 ? ' rare' : ''); el.innerHTML = ART[k](); return flyItem(el, 'נמצא: ' + TYPES[k].name + (TYPES[k].rar >= 2 ? ' · ' + RAR[TYPES[k].rar] : ''), TYPES[k].rar >= 3) }
+const playStone = (cap) => { const el = document.createElement('div'); el.className = 'rw'; el.innerHTML = ART.pebble(); return flyItem(el, cap || 'היום נסגר · אבן חדשה בערימה') }
+const playLeaf = () => { const el = document.createElement('div'); el.className = 'rw'; el.innerHTML = ART.leaf(); return flyItem(el, 'השבוע נסגר · עלה חדש') }
+let chain = Promise.resolve(); const enqueue = fn => { chain = chain.then(fn).catch(e => console.error(e)); return chain }
+
+/* ───────── the rules, applied ───────── */
+function rollReward(task, now) {
+  const d = dayRec(); now = now || Date.now()
+  if (now - task.created < CONFIG.minAgeMs) return null          // closed too soon after creation: nothing, silently
+  d.valid++
+  if (task.counted) return null                                   // un-ticked and ticked again: no second reward
+  task.counted = true
+  if (d.rewards >= CONFIG.dailyCap) return null
+  if (d.rewards > 0 && Math.random() >= CONFIG.pAfterFirst) return null
+  d.rewards++; const k = window.__force || pickWeighted(); window.__force = null
+  G.counts[k] = (G.counts[k] || 0) + 1; return k
+}
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id); if (!t) return
+  t.done = !t.done
+  renderTasks(); badges()
+  if (!t.done) { setLevel(); saveG(); return }                      // un-ticking costs nothing and takes nothing away
+  const d = dayRec(); d.done++
+  enqueue(async () => {
+    await dropToTasks()
+    const k = rollReward(t); saveG()
+    if (k) await playReward(k)
+    const open = tasks.filter(x => !x.done).length
+    if (!open && d.valid >= CONFIG.dayMinTasks && !d.closed) await closeDay(true)
+  })
+}
+async function closeDay(fly) {
+  const d = dayRec(); d.closed = true; G.cairn.push(stone()); G.fresh = 'last'; saveG()
+  if (fly) await playStone()
+  if (screen === 'home') renderHome()
+}
+async function closeWeek() { G.leaves++; saveG(); await playLeaf(); if (screen === 'home') renderHome() }
+
+/* ───────── events ───────── */
+document.addEventListener('click', e => {
+  const tk = e.target.closest('#s-tasks .tick'); if (tk) toggleTask(+tk.closest('.row').dataset.id)
+})
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'addf') return
+  e.preventDefault(); const v = $('#addt').value.trim(); if (!v) return
+  tasks.push({id: nextId++, t: v, done: false, created: Date.now()}); renderTasks(); setLevel(); badges()
+})
+
+/* ───────── demo sheet ───────── */
+function sheet() {
+  const todayRec = dayRec()
+  $('#pane').innerHTML =
+    '<h3>תן פרס עכשיו (הדגמה)</h3><div class="chips">' + Object.keys(TYPES).map(k => '<button data-give="' + k + '">' + TYPES[k].name + '</button>').join('') + '</div>' +
+    '<h3>סגירות</h3><div class="chips"><button data-act="day">סגור יום · אבן לערימה</button><button data-act="week">סגור שבוע · עלה</button></div>' +
+    '<h3>משימות</h3><div class="chips"><button data-act="fresh">הוסף משימה חדשה (גיל 0)</button><button data-act="aged">הוסף משימה ישנה</button><button data-act="undo">פתח את כל המשימות</button></div>' +
+    '<h3>נגישות (תצוגה מקדימה)</h3><div class="chips"><button id="tgRM" aria-pressed="' + root.classList.contains('rm') + '">תנועה מופחתת</button><button id="tgRT" aria-pressed="' + root.classList.contains('rt') + '">שקיפות מופחתת</button></div>' +
+    '<p class="stat" id="stat">היום: ' + todayRec.rewards + ' פרסים מתוך ' + CONFIG.dailyCap + ' · ' + todayRec.valid + ' משימות נספרו · ' + (todayRec.closed ? 'היום נסגר' : 'היום עוד פתוח') + '</p>' +
+    '<h3>הכללים</h3><ul>' +
+    '<li>הסגירה הראשונה התקפה ביום מתגמלת תמיד. אחריה, בהסתברות ' + Math.round(CONFIG.pAfterFirst * 100) + '%, ועד ' + CONFIG.dailyCap + ' ביום.</li>' +
+    '<li>משימה שנסגרה פחות מ-' + (CONFIG.minAgeMs / 1000) + ' שניות אחרי שנוצרה: בלי פרס ובלי שום הודעה. ביטול סימון וסימון חוזר: בלי פרס נוסף.</li>' +
+    '<li>משקלות: ' + Object.keys(TYPES).map(k => TYPES[k].name + ' ' + TYPES[k].w).join(' · ') + '.</li>' +
+    '<li>אבן בערימה: יום שנסגר (לפחות ' + CONFIG.dayMinTasks + ' משימות תקפות, רשימה ריקה). הערימה לא יורדת אף פעם.</li>' +
+    '<li>עלה: שבוע (א׳–ש׳) שנסגרו בו לפחות ' + CONFIG.weekMinDays + ' ימים. אין סטריק ואין עונש.</li>' +
+    '<li>הכול נשמר ב-localStorage במפתח ' + KEY + '. אין שינוי ב-worker או ב-D1.</li></ul>' +
+    '<div class="chips" style="margin-top:14px"><button data-act="reset">אפס גן (נתוני הדגמה)</button><button data-act="close">סגור</button></div>'
+}
+$('#gear').onclick = () => { sheet(); $('#sheet').classList.add('open') }
+$('#sheet').addEventListener('click', e => {
+  if (e.target.id === 'sheet') return $('#sheet').classList.remove('open')
+  const g = e.target.closest('[data-give]'), a = e.target.closest('[data-act]')
+  if (g) { $('#sheet').classList.remove('open'); window.__force = g.dataset.give; enqueue(async () => { const k = window.__force; window.__force = null; G.counts[k]++; dayRec().rewards++; saveG(); await playReward(k); if (screen === 'garden') renderGarden() }) }
+  if (a) {
+    const act = a.dataset.act
+    if (act === 'close') $('#sheet').classList.remove('open')
+    if (act === 'day') { $('#sheet').classList.remove('open'); enqueue(() => closeDay(true)) }
+    if (act === 'week') { $('#sheet').classList.remove('open'); enqueue(closeWeek) }
+    if (act === 'fresh') { tasks.push({id: nextId++, t: 'משימה חדשה ' + (nextId - 6), done: false, created: Date.now()}); setLevel(); badges(); if (screen === 'tasks') renderTasks(); sheet() }
+    if (act === 'aged') { tasks.push({id: nextId++, t: 'משימה ישנה ' + (nextId - 6), done: false, created: ago(300)}); setLevel(); badges(); if (screen === 'tasks') renderTasks(); sheet() }
+    if (act === 'undo') { tasks.forEach(x => x.done = false); setLevel(); badges(); if (screen === 'tasks') renderTasks(); sheet() }
+    if (act === 'reset') { G = seedGarden(); saveG(); show(screen); sheet() }
+  }
+  if (e.target.id === 'tgRM') { root.classList.toggle('rm'); e.target.setAttribute('aria-pressed', root.classList.contains('rm')) }
+  if (e.target.id === 'tgRT') { root.classList.toggle('rt'); e.target.setAttribute('aria-pressed', root.classList.contains('rt')) }
+})
+// previews of the reward animations, from the garden (they change nothing)
+document.addEventListener('click', e => { const b = e.target.closest('[data-prev]'); if (b) enqueue(() => playReward(b.dataset.prev)) })
+
+if (new URLSearchParams(location.search).get('rec') === '1') root.classList.add('rec')
+if (new URLSearchParams(location.search).get('touch') === '1')
+  document.addEventListener('pointerdown', e => { const s = stage.getBoundingClientRect(), t = document.createElement('div'); t.className = 'touch'; t.style.left = ((e.clientX - s.left) / Z()) + 'px'; t.style.top = ((e.clientY - s.top) / Z()) + 'px'; t.addEventListener('animationend', () => t.remove()); stage.appendChild(t) }, true)
+
+/* ───────── boot ───────── */
+function boot() {
+  setVariant(variant); go('home', true); setLevel(); badges()
+  window.addEventListener('resize', () => { indX = null; placeInd(false) })
+}
+boot()
+window.NAVLAB = {CONFIG, TYPES, get G() { return G }, set G(v) { G = v }, tasks: () => tasks, pickWeighted, rollReward, toggleTask, closeDay, closeWeek, go, show, setVariant, weekRollover, dayRec, enqueue, saveG, KEY, seedGarden, queueIdle: () => chain}
+</script>
+</body>
+</html>
