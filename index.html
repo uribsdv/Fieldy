@@ -172,12 +172,12 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
 [data-theme="nachal"]{
-  --nh-card-a:.95;--nh-nav-a:.94;
+  --nh-card-a:.95;--nh-nav-a:.70;--nh-nav-blur:22px;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.98}}
+  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.97}}
 @media (prefers-reduced-transparency:reduce){
   [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.99}}
 [data-theme="nachal"] body{background:#2A3F3E}
@@ -238,7 +238,7 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 [data-theme="nachal"] #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
   background:rgba(226,238,231,var(--nh-nav-a))!important;
-  -webkit-backdrop-filter:blur(40px) saturate(1.2);backdrop-filter:blur(40px) saturate(1.2);
+  -webkit-backdrop-filter:blur(var(--nh-nav-blur)) saturate(1.3);backdrop-filter:blur(var(--nh-nav-blur)) saturate(1.3);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
 [data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
@@ -460,12 +460,13 @@ html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box
 [data-theme="nachal"] .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
 /* the nav bar over the Tao: dark glass to match the room; the active
    destination is the same pale capsule as on every other screen */
-[data-theme="nachal"]{--nh-tao-nav-a:.92}
+[data-theme="nachal"]{--nh-tao-nav-a:.90}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   [data-theme="nachal"]{--nh-tao-nav-a:.94}}
 @media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
-  -webkit-backdrop-filter:blur(36px) saturate(1.2);backdrop-filter:blur(36px) saturate(1.2);
+  --nh-nav-blur:36px;
+  background:rgba(20,38,28,var(--nh-tao-nav-a))!important;
   background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
 [data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
@@ -732,6 +733,43 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   background:rgba(var(--nh-soft-rgb),var(--nh-hdr-a))!important;
   -webkit-backdrop-filter:blur(24px) saturate(1.25);backdrop-filter:blur(24px) saturate(1.25)}
 [data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
+/* ── Nachal · nav motion ──
+   The chosen destination is a capsule that widens with a short spring (240ms)
+   while the others narrow and their icons shrink a little. A tap makes the
+   icon hop. The tasks icon wears a thin ring: today's finished tasks over all
+   of today's, filling smoothly, with one soft glow when the day is complete.
+   Number badges scale in once, they do not blink. Reduced motion removes all
+   of it (at the end of this block). */
+[data-theme="nachal"] #nav{--nav-spring:cubic-bezier(.34,1.5,.5,1);transition:grid-template-columns 240ms var(--nav-spring)}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(1).active){grid-template-columns:1.45fr 1fr 1fr 1fr 1fr 1fr}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(2).active){grid-template-columns:1fr 1.45fr 1fr 1fr 1fr 1fr}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(3).active){grid-template-columns:1fr 1fr 1.45fr 1fr 1fr 1fr}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(4).active){grid-template-columns:1fr 1fr 1fr 1.45fr 1fr 1fr}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(5).active){grid-template-columns:1fr 1fr 1fr 1fr 1.45fr 1fr}
+[data-theme="nachal"] #nav:has(.nav-btn:nth-child(6).active){grid-template-columns:1fr 1fr 1fr 1fr 1fr 1.45fr}
+[data-theme="nachal"] .nav-btn .nav-icon{position:relative;width:20px;height:20px;transition:transform 240ms var(--nav-spring)}
+[data-theme="nachal"] .nav-btn:not(.active) .nav-icon{transform:scale(.9)}
+[data-theme="nachal"] .nav-btn.active .nav-icon{transform:scale(1.06)}
+[data-theme="nachal"] .nav-btn:active .nav-icon{transform:scale(.84)}
+@keyframes nav-hop{0%{translate:0 0;scale:1}38%{translate:0 -5px;scale:1.16}100%{translate:0 0;scale:1}}
+[data-theme="nachal"] .nav-icon.hop{animation:nav-hop 220ms cubic-bezier(.3,.7,.3,1) both}
+@keyframes nav-badge-in{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+[data-theme="nachal"] .nav-badge.pop{animation:nav-badge-in 220ms cubic-bezier(.2,.9,.3,1.15) both}
+/* the ring: 30px around the 20px icon, drawn from the top and filling counter-clockwise
+   (the way Hebrew reads, and away from the number badge at the icon's upper right) */
+[data-theme="nachal"] .nav-ring{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;transform:scaleX(-1) rotate(-90deg);overflow:visible;pointer-events:none}
+[data-theme="nachal"] .nav-ring circle{fill:none;stroke-width:2.4}
+[data-theme="nachal"] .nav-ring-track{stroke:rgba(14,60,50,.30)}
+[data-theme="nachal"] .nav-ring-fill{stroke:#0D4A3D;stroke-linecap:round;transition:stroke-dashoffset 600ms cubic-bezier(.3,.7,.2,1)}
+[data-theme="nachal"] .nav-ring.empty{display:none}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ring-track{stroke:rgba(255,255,255,.26)}
+[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ring-fill{stroke:#7FE6D1}
+@keyframes nav-ring-glow{0%{stroke-width:2.4;filter:drop-shadow(0 0 0 rgba(90,214,184,0))}45%{stroke-width:3.4;filter:drop-shadow(0 0 5px rgba(90,214,184,.95))}100%{stroke-width:2.4;filter:drop-shadow(0 0 0 rgba(90,214,184,0))}}
+[data-theme="nachal"] .nav-ring.flash .nav-ring-fill{animation:nav-ring-glow 900ms ease-in-out 1}
+@media (prefers-reduced-motion:reduce){
+  [data-theme="nachal"] #nav,[data-theme="nachal"] .nav-btn .nav-icon,[data-theme="nachal"] .nav-ring-fill{transition:none!important}
+  [data-theme="nachal"] .nav-icon.hop,[data-theme="nachal"] .nav-badge.pop,[data-theme="nachal"] .nav-ring.flash .nav-ring-fill{animation:none!important}
+}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1789,6 +1827,7 @@ async function loadStateFromServer() {
 // briefing narrative, Ask Fieldy's answers, drafted messages) — none of
 // that is translated even in English mode.
 const TRANSLATIONS = {
+  nav_tasks_progress: {he:'{d} מתוך {t} משימות היום הושלמו', en:'{d} of {t} of today\'s tasks done'},
   nav_home: {he:'בית', en:'Home'}, nav_tasks: {he:'משימות', en:'Tasks'}, nav_sites: {he:'אתרים', en:'Sites'}, nav_people: {he:'אנשים', en:'People'}, nav_calendar: {he:'לוח', en:'Calendar'}, nav_tao: {he:'טאו', en:'Tao'},
 
   settings_title: {he:'הגדרות', en:'Settings'},
@@ -2150,6 +2189,7 @@ function applyTheme(name) {
   // fixed alarm colours; only "resolved" follows the theme.
   STATUS_HEX = t.status ? Object.assign({}, t.status) : {open: THEME_TOKENS_BASE['--red'], pending: THEME_TOKENS_BASE['--amber'], resolved: t.tokens['--green-light']}
   TAO_CANVAS = {ring: t.tokens['--tao-gold3'], track: 'rgba(' + t.tokens['--tao-accent-rgb'] + ',0.15)'}
+  updateNavRing()
   // the phone's browser/status bar tint, so the chrome above the app matches it
   const meta = document.querySelector('meta[name="theme-color"]')
   if(meta) meta.setAttribute('content', t.themeColor || t.tokens['--ink'])
@@ -2217,6 +2257,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const s = btn.dataset.screen
     navigateTo(s)
+    if(currentTheme === 'nachal') navFeedback(btn)
   })
 })
 
@@ -2902,8 +2943,66 @@ function refreshBadges() {
   try { pairs.push(['calendar', getEventsForDate(getToday()).length]); } catch(e) {}
   pairs.forEach(function(pair) {
     var b = document.getElementById('badge-'+pair[0]);
-    if(b) { b.textContent=pair[1]; b.classList.toggle('hidden', pair[1]===0); }
+    if(b) {
+      b.textContent=pair[1]; b.classList.toggle('hidden', pair[1]===0);
+      if(currentTheme === 'nachal' && pair[1] > 0 && navBadgeLast[pair[0]] !== pair[1]) popNavBadge(b)
+      navBadgeLast[pair[0]] = pair[1]
+    }
   });
+  updateNavRing()
+}
+
+// ── NAV, Nachal only: a thin ring of today's tasks on the tasks icon, a gentle
+// entrance for the number badges, and a small hop with a tap. No sound, no
+// points, no streaks. The ring is added to the page only in this theme, so the
+// other themes' markup is untouched.
+var navRingLast = null, navBadgeLast = {}
+var NAV_RING_SVG = '<svg class="nav-ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="nav-ring-track" cx="18" cy="18" r="16"/><circle class="nav-ring-fill" cx="18" cy="18" r="16" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>'
+function reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) }
+// today's tasks: the "now" and "today" lists; a finished one counts if it was
+// finished today (older finished ones are still stored for a few days)
+function navTodayStats() {
+  var today = new Date().toDateString()
+  var items = state.tasks.now.concat(state.tasks.today).filter(function(t){
+    return !t.done || !t.completedAt || new Date(t.completedAt).toDateString() === today })
+  return {done: items.filter(function(t){ return t.done }).length, total: items.length}
+}
+function updateNavRing() {
+  var btn = document.querySelector('.nav-btn[data-screen="tasks"]')
+  var host = btn && btn.querySelector('.nav-icon')
+  if(!host) return
+  var ring = host.querySelector('.nav-ring')
+  if(currentTheme !== 'nachal') {
+    if(ring) ring.remove()
+    btn.removeAttribute('aria-label'); navRingLast = null
+    return
+  }
+  var st = navTodayStats(), ratio = st.total ? st.done / st.total : 0
+  if(!ring) { host.insertAdjacentHTML('beforeend', NAV_RING_SVG); ring = host.querySelector('.nav-ring') }
+  ring.querySelector('.nav-ring-fill').style.strokeDashoffset = String(100 - ratio * 100)
+  ring.classList.toggle('empty', st.total === 0)
+  ring.classList.toggle('full', st.total > 0 && st.done === st.total)
+  btn.setAttribute('aria-label', tr('nav_tasks') + ': ' + tr('nav_tasks_progress').replace('{d}', st.done).replace('{t}', st.total))
+  // one soft glow when the day is completed, never on load and never repeated
+  if(navRingLast !== null && navRingLast < 1 && st.total > 0 && ratio === 1 && !reducedMotion()) {
+    ring.classList.remove('flash'); void ring.getBoundingClientRect()
+    ring.classList.add('flash')
+    ring.addEventListener('animationend', function(){ ring.classList.remove('flash') }, {once: true})
+  }
+  navRingLast = ratio
+}
+function popNavBadge(b) {
+  if(reducedMotion()) return
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop')
+  b.addEventListener('animationend', function(){ b.classList.remove('pop') }, {once: true})
+}
+function navFeedback(btn) {
+  var ic = btn.querySelector('.nav-icon')
+  if(ic && !reducedMotion()) {
+    ic.classList.remove('hop'); void ic.offsetWidth; ic.classList.add('hop')
+    ic.addEventListener('animationend', function(){ ic.classList.remove('hop') }, {once: true})
+  }
+  haptic('light')   // navigator.vibrate(10), unless haptics are switched off in Settings
 }
 
 // ── RIGHT NOW (single-focus ranking) ──────────────
