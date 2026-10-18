@@ -4,455 +4,84 @@
 <title>נחל · איחוד</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* A mockup only: none of this is in the app yet. Each "after" phone is built
-   from the rules below, so what is shown is what the app would get:
-   one room behind every screen, one card family, one text scale, one status
-   language, and a red count only where something waits for you. */
-:root{
-  /* page around the phones */
-  --page:#0d1512;--page-ink:#E6F0EA;--page-ink2:#A9BDB2;--page-line:rgba(255,255,255,.10);
-  /* the one card family: a pale mint mist, translucent and blurred */
-  --card:rgba(230,243,235,var(--card-a));--card-a:.78;
-  --card-edge:rgba(255,255,255,.34);--card-blur:blur(18px) saturate(1.15);
-  --ink:#0B1A12;--ink2:#2C3E35;--sage-ink:#24503E;--chip:rgba(36,80,62,.12);
-  /* text written straight on the room */
-  --on:#FFFFFF;--on2:#DCEAE3;
-  /* status: three dots and one painted blob */
-  --rose:#C8424A;--rose-ink:#3A0C12;--ochre:#D4922C;--ochre-ink:#4A2F02;--teal:#2FA68C;--teal-ink:#0C3A30;
-  --nav-a:.84;--sheet-a:.96}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--card-a:.95;--nav-a:.96;--sheet-a:1}}
-@media (prefers-reduced-transparency:reduce){:root{--card-a:.98;--nav-a:.99;--sheet-a:1}}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--page:#E8EFEB;--page-ink:#0B1A12;--page-ink2:#3E4A43;--page-line:rgba(0,0,0,.10)}}
-:root[data-theme="light"]{--page:#E8EFEB;--page-ink:#0B1A12;--page-ink2:#3E4A43;--page-line:rgba(0,0,0,.10)}
+/* The unify mockup, round 2. Each "after" is a live phone (unify/phone.html)
+   built on the app's own stylesheet and nav, read from index.html at load, so
+   the glass-drop nav is main's, not a drawing of it. "Before" is a screenshot
+   of main with the same data. Needs to be served over http (it fetches
+   index.html); from file:// the phones show a note instead. */
+:root{--page:#0d1512;--ink:#E6F0EA;--ink2:#A9BDB2;--line:rgba(255,255,255,.10)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--page:#E8EFEB;--ink:#0B1A12;--ink2:#3E4A43;--line:rgba(0,0,0,.10)}}
+:root[data-theme="light"]{--page:#E8EFEB;--ink:#0B1A12;--ink2:#3E4A43;--line:rgba(0,0,0,.10)}
+:root[data-theme="dark"]{--page:#0d1512;--ink:#E6F0EA;--ink2:#A9BDB2;--line:rgba(255,255,255,.10)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:var(--page);color:var(--page-ink);padding:28px 16px 60px}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-svg.ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.14em}
-
-/* ── the page ── */
-.intro{max-width:1100px;margin:0 auto 28px}
+body{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;background:var(--page);color:var(--ink);padding:28px 16px 60px}
+.intro{max-width:1240px;margin:0 auto 28px}
 .intro h1{font-size:26px;font-weight:700;margin-bottom:6px;text-wrap:balance}
-.intro p{color:var(--page-ink2);font-size:15px;line-height:1.55;max-width:70ch}
-.intro ol{margin:14px 22px 0 0;display:grid;gap:6px;font-size:14.5px;line-height:1.5;color:var(--page-ink2);max-width:80ch}
-.intro ol b{color:var(--page-ink)}
-.row{max-width:1100px;margin:0 auto 40px;border-top:1px solid var(--page-line);padding-top:20px}
+.intro p{color:var(--ink2);font-size:15px;line-height:1.55;max-width:75ch}
+.intro ol{margin:14px 22px 0 0;display:grid;gap:6px;font-size:14.5px;line-height:1.5;color:var(--ink2);max-width:85ch}
+.intro ol b{color:var(--ink)}
+.row{max-width:1240px;margin:0 auto 40px;border-top:1px solid var(--line);padding-top:20px}
 .row h2{font-size:19px;font-weight:700;margin-bottom:4px}
-.row > p{color:var(--page-ink2);font-size:14px;line-height:1.5;margin-bottom:14px;max-width:80ch}
+.row > p{color:var(--ink2);font-size:14px;line-height:1.5;margin-bottom:14px;max-width:85ch}
 .pair{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
-.pair figure{display:flex;flex-direction:column;gap:8px}
-.pair figcaption{font-size:13px;font-weight:600;color:var(--page-ink2)}
-.before{width:390px;max-width:100%;border-radius:36px;display:block}
-/* on a phone the 390px frames are scaled to fit the 16px gutters */
-@media (max-width:430px){.ph,.before{zoom:.9}}
-@media (max-width:380px){.ph,.before{zoom:.8}}
-
-/* ── a phone, and the one room behind every screen ── */
-.ph{position:relative;width:390px;height:844px;border-radius:36px;overflow:hidden;isolation:isolate;
-  background:#0A4640;color:var(--on);box-shadow:0 20px 50px -20px rgba(0,0,0,.6);flex:none}
-.ph.tall{height:auto;min-height:844px}
-.room{position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background-image:
-    linear-gradient(180deg,rgba(3,40,38,.54) 0%,rgba(3,36,34,.60) 55%,rgba(2,30,29,.68) 100%),
-    radial-gradient(70% 26% at 86% 14%,rgba(72,214,190,.26),rgba(72,214,190,0) 72%),
-    radial-gradient(60% 24% at 6% 58%,rgba(54,190,168,.18),rgba(54,190,168,0) 72%),
-    linear-gradient(#0E8479,#0E8479),
-    url('../assets/backgrounds/bg-fern-mist.webp');
-  background-blend-mode:normal,normal,normal,color,normal;
-  background-size:auto,auto,auto,auto,390px 844px;background-position:0 0,0 0,0 0,0 0,center top;
-  background-repeat:no-repeat;background-color:#0A4640}
-.ph.tall .room{background-size:auto,auto,auto,auto,100% 100%}
-.scr{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:0 16px 132px}
-.scr::-webkit-scrollbar{display:none}
-.ph.tall .scr{position:relative;overflow:visible}
-.fade{position:absolute;left:0;right:0;bottom:0;height:112px;z-index:40;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(4,42,38,0) 0,rgba(4,42,38,.6) 30%,rgba(4,42,38,.72) 100%);
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
-
-/* ── one card family ── */
-.card{background:var(--card);-webkit-backdrop-filter:var(--card-blur);backdrop-filter:var(--card-blur);
-  border:1px solid var(--card-edge);border-radius:22px;color:var(--ink);padding:16px}
-.card + .card{margin-top:10px}
-
-/* ── one text scale: title, data, description ── */
-.t-title{font-size:15px;font-weight:700;color:var(--sage-ink);display:flex;align-items:center;gap:6px;text-wrap:balance;line-height:1.3}
-.t-data{font-size:19px;font-weight:700;color:var(--ink);line-height:1.32;text-wrap:balance}
-.t-num{font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
-.t-desc{font-size:14px;line-height:1.45;color:var(--ink2);text-wrap:pretty}
-.on .t-title{color:var(--on2)} .on .t-data{color:var(--on)} .on .t-desc{color:var(--on2)}
-.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.clamp.open{display:block;-webkit-line-clamp:unset}
-.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.more{font-size:13.5px;font-weight:600;color:var(--sage-ink);padding:6px 0 0;display:none;align-self:flex-start}
-.more.show{display:inline-block}
-
-/* ── status: a dot and a word for open, waiting and done; a painted blob only for stuck ── */
-.st{display:inline-flex;align-items:center;gap:7px;font-size:14.5px;font-weight:700;white-space:nowrap}
-.st::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc);flex:none}
-.st.open{--dc:var(--rose);color:var(--rose-ink)}
-.st.pending{--dc:var(--ochre);color:var(--ochre-ink)}
-.st.resolved{--dc:var(--teal);color:var(--teal-ink)}
-.stuck{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;color:var(--rose-ink);padding:2px 4px;white-space:nowrap}
-.stuck::before{content:'';position:absolute;inset:-3px -8px;z-index:-1;background:var(--wc,url('../assets/watercolor/wc-rose-2.webp')) center/100% 100% no-repeat}
-.stuck[data-v="1"]{--wc:url('../assets/watercolor/wc-rose-1.webp')}
-.stuck[data-v="3"]{--wc:url('../assets/watercolor/wc-rose-3.webp')}
-.stuck[data-v="4"]{--wc:url('../assets/watercolor/wc-rose-4.webp')}
-
-/* ── Home ── */
-.h1{padding:40px 2px 0}
-.h1-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.h1 .date{font-size:14px;color:var(--on2);display:flex;align-items:center;gap:6px}
-.h1 .greet{font-size:28px;font-weight:700;color:var(--on);margin:4px 0 6px;display:flex;align-items:center;gap:8px;line-height:1.2}
-.h1 .greet svg{font-size:22px}
-.h1 .stat{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:15px;color:var(--on2)}
-.h1 .stat button{color:var(--on2)} .h1 .stat b{color:var(--on);font-weight:700}
-.h1 .srv{margin-top:8px;font-size:13.5px;color:#F3D48C;display:flex;gap:6px;align-items:center}
-.h1 .srv u{text-decoration:underline;text-underline-offset:3px}
-.h1-btns{display:flex;gap:8px;flex:none}
-.rbtn{height:44px;min-width:44px;border-radius:22px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  background:rgba(236,246,240,.16);border:1px solid rgba(255,255,255,.26);color:var(--on);font-size:19px;position:relative;
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-/* WhatsApp: a 44px icon button beside settings, nothing fixed over the content */
-.rbtn.wa b{position:absolute;top:4px;left:5px;width:16px;height:16px;border-radius:50%;background:#DCEBE3;color:#0B1A12;font-size:13px;line-height:16px;font-weight:700}
-.rbtn i{position:absolute;top:6px;right:7px;width:9px;height:9px;border-radius:50%;background:#E3A857;box-shadow:0 0 0 2px #2C5A4F}
-.blk{margin-top:16px}
-.focus{display:flex;gap:12px;align-items:flex-start}
-.focus-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.tick{width:38px;height:38px;border-radius:12px;flex:none;border:2px solid var(--sage-ink);background:rgba(255,255,255,.4);color:var(--sage-ink);display:flex;align-items:center;justify-content:center;font-size:18px;margin-top:2px}
-.tick svg{opacity:.0}
-.tick:hover svg{opacity:.5}
-/* Home above the fold holds the three blocks and nothing else; the tiles start under the nav.
-   In the app this is calc(100dvh - the nav clearance). */
-.above{min-height:732px}
-.ph.tall .above{min-height:732px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-top:16px}
-.tile{min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:right;min-height:124px;padding:14px 14px 13px;margin:0!important}
-.tile .t-title svg{font-size:16px;width:28px;height:28px;padding:6px;border-radius:50%;background:var(--chip)}
-.tile .t-num{margin-top:auto}
-.tile .t-desc{font-size:13.5px}
-.tile:focus-visible,.rbtn:focus-visible,.tick:focus-visible{outline:3px solid #9FE6D3;outline-offset:2px}
-
-/* ── list screens: the dark milky header, cards, nav ── */
-.hdr{margin:0 -16px 14px;padding:22px 16px 16px;border-radius:0 0 28px 28px;background:rgba(6,50,46,.62);
-  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)}
-.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.hdr h3{font-size:24px;font-weight:700;color:var(--on)}
-.hdr-btns{display:flex;gap:8px}
-.hb{width:42px;height:42px;border-radius:50%;background:rgba(236,246,240,.14);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--on)}
-.hb.add{background:linear-gradient(135deg,#4A7760,#3A6149)}
-.search{margin-top:12px;display:flex;gap:8px}
-.search span{flex:1;height:46px;border-radius:23px;border:1px solid rgba(255,255,255,.24);background:rgba(236,246,240,.10);display:flex;align-items:center;gap:8px;padding:0 16px;color:#C7DCD2;font-size:15px}
-.search b{height:46px;border-radius:23px;border:1px solid rgba(255,255,255,.24);padding:0 16px;display:flex;align-items:center;gap:6px;font-weight:600;color:var(--on);font-size:15px}
-.chips{margin-top:10px;display:flex;gap:6px;overflow:hidden}
-.chips span{flex:none;height:36px;padding:0 12px;border-radius:18px;border:1px solid rgba(255,255,255,.24);display:flex;align-items:center;font-size:14.5px;font-weight:600;color:var(--on)}
-.chips span.on{background:#DCEBE3;color:var(--ink);border-color:transparent}
-.site{display:flex;flex-direction:column;gap:8px}
-.site-top{display:flex;gap:10px;align-items:flex-start}
-.site-top > div{flex:1;min-width:0}
-.site-name{font-size:17px;font-weight:700;line-height:1.3}
-.site-line{font-size:14.5px;color:var(--ink2);margin-top:2px}
-.navb{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--sage-ink);flex:none}
-.site-tags{display:flex;align-items:center;gap:14px}
-.site-tags .chev{margin-right:auto;color:var(--ink2);font-size:17px}
-.sec{font-size:15px;font-weight:700;color:var(--on2);margin:4px 2px 8px;display:flex;align-items:center;gap:6px}
-.person{display:flex;gap:12px;align-items:center}
-.av{width:42px;height:42px;border-radius:50%;border:2px solid var(--sage-ink);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--sage-ink);flex:none;background:rgba(255,255,255,.4)}
-.person > div{flex:1;min-width:0}
-.pname{font-size:17px;font-weight:700}
-.pacts{display:flex;gap:6px;flex:none!important}
-.pacts span{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.42);display:flex;align-items:center;justify-content:center;color:var(--sage-ink);font-size:16px}
-.pacts span.del{background:rgba(232,180,180,.55);color:#8E2A33}
-.pill-add{height:40px;padding:0 16px;border-radius:12px;background:#0B5E54;color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center}
-.bk em{display:flex;align-items:center;gap:3px;font-style:normal;font-size:17px;margin-bottom:2px}
-.bk em i{width:9px;height:9px;border-radius:50%}
-.bk span{height:78px!important}
-.ctx{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.ctx span{height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;color:var(--on);font-size:17px;font-weight:600}
-.ctx span.on{background:#DCEBE3;color:var(--ink);border-color:transparent}
-.wait{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.38);display:flex;flex-direction:column;gap:4px}
-.task{display:flex;gap:12px;align-items:flex-start}
-.task > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.tags span{font-size:13.5px;padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.45);color:var(--ink2);display:inline-flex;gap:5px;align-items:center}
-.bk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.bk span{height:62px;border-radius:18px;border:1px solid rgba(255,255,255,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600;color:var(--on);font-size:15px;line-height:1.25}
-.bk span.on{background:#DCEBE3;color:var(--ink);border-color:transparent}
-
-nav.nv{position:absolute;left:14px;right:14px;bottom:16px;z-index:50;height:68px;border-radius:34px;display:grid;grid-template-columns:repeat(6,1fr);align-items:center;padding:0 6px;
-  background:rgba(226,238,231,var(--nav-a));-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
-  border:1px solid rgba(255,255,255,.5);box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)}
-.nb{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;border-radius:22px;color:var(--ink);font-size:12.5px;font-weight:500}
-.nb svg{width:21px;height:21px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.nb.on{background:#BCD9CD;box-shadow:inset 0 0 0 1.5px #3A6149;font-weight:700}
-.nb .bd{position:absolute;top:2px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#A3333D;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(232,132,132,.7)}
-
-/* ── the detail sheet a tile opens ── */
-.scrim{position:absolute;inset:0;z-index:60;background:rgba(0,20,18,.42);opacity:0;pointer-events:none;transition:opacity .22s}
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;max-height:86%;overflow-y:auto;border-radius:28px 28px 0 0;
-  background:rgba(236,246,240,var(--sheet-a));-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);color:var(--ink);
-  padding:8px 18px 28px;transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
-.ph.sheet-on .scrim{opacity:1;pointer-events:auto}
-.ph.sheet-on .sheet{transform:none}
-@media (prefers-reduced-motion:reduce){.sheet,.scrim{transition:none}}
-.grab{width:40px;height:5px;border-radius:3px;background:rgba(11,26,18,.22);margin:0 auto 12px}
-.sh-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
-.sh-head > div{flex:1}
-.sh-x{width:38px;height:38px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--ink)}
-.sh-list{display:flex;flex-direction:column}
-.sh-row{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid rgba(11,26,18,.08)}
-.sh-row:first-child{border-top:0}
-.sh-row > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.sh-row .tick{width:30px;height:30px;border-radius:10px;margin:0;font-size:15px}
-.ol{list-style:none;counter-reset:n;display:flex;flex-direction:column;gap:2px}
-.ol li{counter-increment:n;display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid rgba(11,26,18,.08)}
-.ol li:first-child{border-top:0}
-.ol li::before{content:counter(n);flex:none;width:26px;height:26px;border-radius:50%;background:var(--chip);color:var(--sage-ink);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.ol li > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.btn{height:44px;padding:0 18px;border-radius:22px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:7px;background:var(--chip);color:var(--ink)}
-.btn.pri{background:linear-gradient(135deg,#4A7760,#3A6149);color:#fff}
-.moods{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.moods span{padding:7px 13px;border-radius:16px;background:var(--chip);font-size:14px;font-weight:600}
-.moods span.on{background:#3A6149;color:#fff}
-.bar{height:6px;border-radius:3px;background:rgba(11,26,18,.12);overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;background:#3A6149;border-radius:3px}
-.sub{font-size:13px;font-weight:700;color:var(--sage-ink);margin:16px 0 4px}
-.quote{font-size:16px;font-style:italic;line-height:1.5;color:var(--ink);text-wrap:balance}
+figure{display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;font-weight:600;color:var(--ink2)}
+.shot,iframe{width:390px;border-radius:36px;display:block;border:0;background:#0A4640;box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+iframe{height:844px}
+iframe.tall{height:1300px}
+@media (max-width:430px){.shot,iframe{zoom:.9}}
+@media (max-width:380px){.shot,iframe{zoom:.8}}
 </style></head>
 <body>
-
 <header class="intro">
-  <h1>נחל · מסמך איחוד (mockup, עדיין לא באפליקציה)</h1>
-  <p>כל טלפון "אחרי" בנוי מאותם כללים שהאפליקציה תקבל. "לפני" הוא צילום של האפליקציה הנוכחית (main), עם אותם נתונים. אפשר ללחוץ על הקוביות בבית: כל קובייה פותחת גיליון פרטים, ו"הצג עוד" פותח תיאור שנחתך.</p>
+  <h1>נחל · איחוד, סבב 2 (mockup, עדיין לא באפליקציה)</h1>
+  <p>הטלפונים מימין חיים: אפשר ללחוץ על הניווט (טיפת הזכוכית, האדוות והרטט הם הקוד של main), על המשבצות בבית ועל "הצג עוד". הצילום משמאל לכל אחד הוא main עם אותם נתונים.</p>
   <ol>
-    <li><b>סטטוס:</b> כתם צבע מים רק ל"תקוע". פתוח, ממתין ונפתר הם תמיד נקודה ומילה, בכל מסך ובכל כרטיס. כלל "עד שני כתמים" בוטל.</li>
-    <li><b>רקע אחד:</b> החדר הטורקיזי של אתרים (צילום השרכים מתחת לצעיף ירוק כהה) נמצא מאחורי כל המסכים, כולל הבית.</li>
-    <li><b>הבית:</b> שלושה בלוקים מעל הקיפול: ברכה ושורת מצב, הדבר הכי חשוב היום, והבא אחריו. מתחתם רשת של 2 קוביות בשורה. הוספתי קובייה שמינית, "עוד", שבה יושבים הציטוט, ההמלצות, "מחוץ לעבודה" ו"שאל את Fieldy", כדי שהרשת תיסגר בלי חור.</li>
-    <li><b>משפחת כרטיסים אחת:</b> ערפל מנטה שקוף למחצה. בלי כרטיס לבן-חלבי ובלי כרטיסים בטורקיז כהה או באפור כהה.</li>
-    <li><b>וואטסאפ:</b> כפתור קטן "+ וואטסאפ" ליד ההגדרות בראש הבית, וגם בגיליון "ארגן את היום". אין פס קבוע מעל הניווט.</li>
-    <li><b>טקסט:</b> שלוש רמות: כותרת, נתון ותיאור. <code>text-wrap: balance</code>, ולכל היותר 2 שורות עם "הצג עוד". מדריך הבוקר וההמלצות מסוכמים ל-3 שורות ממוספרות.</li>
-    <li><b>תגים אדומים:</b> רק על משימות. בלי תג על אתרים ועל אנשים.</li>
+    <li><b>הניווט:</b> טיפת הזכוכית של main, אותה בכל המסכים. הסגנונות, הסימון והקוד נקראים מ-index.html. השינוי היחיד הוא שהתגים האדומים נשארו רק על משימות.</li>
+    <li><b>סטטוס:</b> חרוזי זכוכית קטנים עם הבהוב אור מדי פעם, באותה רוויה: אלמוג לפתוח, ענבר רך לממתין וירקן לנפתר. "תקוע X ימים" הוא כמוסה באלמוג אחיד. המילה תמיד בצבע הדיו. אין כתמי מים, אין נקודות שטוחות ואין טקסט צהוב, כתום או חום. כך באתרים, במגירה, בבורר הסטטוס, במפה, במשימות, באנשים ובגיליונות.</li>
+    <li><b>שורת השרת:</b> שורה שקטה בצבע הדיו עם אייקון ענן, בלי פס צהוב.</li>
+    <li><b>הבית:</b> פריסת Bento מיד אחרי הברכה. "הדבר הכי חשוב היום" ו"משימות" גדולות, והשאר קטנות. לכל משבצת גוון עדין משלה מטורקיז, אזוב וחול, עם פינות מעט שונות, קצה אור דק וצל רך.</li>
+    <li><b>איורים:</b> בגן הנחל 3 חלוקים שמתמלאים. בארגן את היום טבעת התקדמות, שהיא גם ההתקדמות היומית שחזרה לבית. באתרים 3 חרוזים עם מספרים, באנשים עלים, במדריך הבוקר שמש קטנה, ובליקווידציה אייקון שקט. המספרים בפונט עגול (Varela Round). הנתון הראשי הוא מה שדורש תשומת לב, והסך הכול קטן לידו.</li>
+    <li><b>שעבר מקום:</b> בורר האנרגיה נשאר בגיליון "ארגן את היום". כפתור העלה לא חוזר. "Region II · Cagayan Valley" יורד מהבית ויעבור להגדרות.</li>
   </ol>
 </header>
 
-<section class="row" id="row-home">
-  <h2>בית, מעל הקיפול</h2>
-  <p>שלושה בלוקים בלבד. שורת המצב לוחצת אל המסכים, ואזהרת השרת היא שורה אחת בתוך בלוק הברכה, לא כרטיס נוסף.</p>
+<section class="row"><h2>בית</h2><p>הברכה, ומיד אחריה המשבצות. אין רווח ריק.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-home.webp" width="390" height="844" alt="הבית ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=home" title="הבית, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>בית, כל הדף</h2><p>שמונה משבצות. לחיצה על כל אחת פותחת גיליון פרטים.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-home-full.webp" width="390" alt="הבית ב-main, כל הדף"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe class="tall" src="unify/phone.html?s=home" title="הבית, אחרי, כל הדף" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>אתרים</h2><p>חרוז ומילה בכל כרטיס, ו"תקוע" ככמוסת אלמוג. בניווט אין תג על אתרים ועל אנשים.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-sites.webp" width="390" height="844" alt="אתרים ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=sites" title="אתרים, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>מגירת אתר</h2><p>הקישורים בצבע טורקיז כהה ולא זהב. בשינוי הסטטוס יש חרוזים, ו"בטל תקוע" באלמוג אחיד.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-drawer.webp" width="390" height="844" alt="מגירת אתר ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=sites&amp;v=drawer" title="מגירת אתר, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>בורר הסטטוס</h2><p>שלוש אפשרויות, כל אחת חרוז ומילה. הנוכחית מסומנת בווי ובקו תחתי.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-picker.webp" width="390" height="844" alt="בורר סטטוס ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=sites&amp;v=picker" title="בורר סטטוס, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>המפה</h2><p>הסיכות הן חרוזי זכוכית. לאתר תקוע יש הילה מקווקוות באלמוג, והנבחר מסומן בטבעת טורקיז ולא זהב.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-map.webp" width="390" height="844" alt="מפת אתרים ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=sites&amp;v=map" title="מפה, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>משימות</h2><p>הנקודות של "עכשיו" ו"היום" הן חרוזים, וקצה הכרטיס באלמוג.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-tasks.webp" width="390" height="844" alt="משימות ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=tasks" title="משימות, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>אנשים</h2><p>"ממתין" הוא חרוז ענבר רך ומילה בצבע הדיו. הכותרת "ממתין תשובה" כבר לא בצבע ענבר.</p>
+  <div class="pair"><figure><figcaption>לפני (main)</figcaption><img class="shot" src="unify/before-people.webp" width="390" height="844" alt="אנשים ב-main"></figure>
+  <figure><figcaption>אחרי</figcaption><iframe src="unify/phone.html?s=people" title="אנשים, אחרי" loading="lazy"></iframe></figure></div></section>
+
+<section class="row"><h2>גיליונות של הבית</h2><p>מה שנפתח מהמשבצות. אין להם מקבילה ב-main.</p>
   <div class="pair">
-    <figure><figcaption>לפני</figcaption><img class="before" src="unify/before-home.webp" alt="הבית כיום" width="390" height="844"></figure>
-    <figure><figcaption>אחרי</figcaption><div class="ph" data-screen="home" id="ph-home"></div></figure>
-  </div>
-</section>
-
-<section class="row" id="row-home-full">
-  <h2>בית, כל הדף</h2>
-  <p>מתחת לקיפול: 8 קוביות, 2 בשורה. בכל קובייה כותרת, נתון אחד ושורה אחת. לחיצה פותחת את הפרטים.</p>
-  <div class="pair">
-    <figure><figcaption>לפני</figcaption><img class="before" src="unify/before-home-full.webp" alt="הבית כיום, כל הדף" width="390" height="1280"></figure>
-    <figure><figcaption>אחרי</figcaption><div class="ph tall" data-screen="home" id="ph-home-full"></div></figure>
-  </div>
-</section>
-
-<section class="row" id="row-sheets">
-  <h2>קובייה פתוחה</h2>
-  <p>מדריך הבוקר בשלוש שורות. "הצג עוד" פותח את שורת ההרגל ואת הטקסט המלא. אותו מבנה משמש את ההמלצות שבקובייה "עוד".</p>
-  <div class="pair">
-    <figure><figcaption>מדריך הבוקר</figcaption><div class="ph" data-screen="home" data-open="brief" id="ph-brief"></div></figure>
-    <figure><figcaption>אתרים</figcaption><div class="ph" data-screen="home" data-open="sites" id="ph-sitesheet"></div></figure>
-    <figure><figcaption>עוד: ציטוט והמלצות</figcaption><div class="ph" data-screen="home" data-open="more" id="ph-more"></div></figure>
-  </div>
-</section>
-
-<section class="row" id="row-sites">
-  <h2>אתרים</h2>
-  <p>לפני: Gattaran קיבל כתם "פתוח" ו-Claveria קיבל נקודה "פתוח", לפי כמות. אחרי: כל "פתוח" הוא נקודה, ורק "תקוע" צבוע. בניווט אין תג על אתרים ועל אנשים.</p>
-  <div class="pair">
-    <figure><figcaption>לפני</figcaption><img class="before" src="unify/before-sites.webp" alt="אתרים כיום" width="390" height="844"></figure>
-    <figure><figcaption>אחרי</figcaption><div class="ph" data-screen="sites" id="ph-sites"></div></figure>
-  </div>
-</section>
-
-<section class="row" id="row-people">
-  <h2>אנשים</h2>
-  <p>"ממתין" היה כתם צבע. עכשיו הוא נקודה ומילה, כמו בכל מקום אחר.</p>
-  <div class="pair">
-    <figure><figcaption>לפני</figcaption><img class="before" src="unify/before-people.webp" alt="אנשים כיום" width="390" height="844"></figure>
-    <figure><figcaption>אחרי</figcaption><div class="ph" data-screen="people" id="ph-people"></div></figure>
-  </div>
-</section>
-
-<section class="row" id="row-tasks">
-  <h2>משימות</h2>
-  <p>החדר זהה לשאר. פס "מצב מפוזר" עובר למשפחת הכרטיסים, והתג האדום נשאר רק כאן.</p>
-  <div class="pair">
-    <figure><figcaption>לפני</figcaption><img class="before" src="unify/before-tasks.webp" alt="משימות כיום" width="390" height="844"></figure>
-    <figure><figcaption>אחרי</figcaption><div class="ph" data-screen="tasks" id="ph-tasks"></div></figure>
-  </div>
-</section>
-
-<script>
-const ICONS={"settings":"<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"5\"/><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"/><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"/><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"/><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"/><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"/><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"/><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"/>","flame":"<path d=\"M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-8 0 4-4 6-4 12 0 4 3 7 7 7z\"/>","leaf":"<path d=\"M20 4C10 4 5 9 5 17c0 1 .3 2 .7 3C13 20 20 15 20 4z\"/><path d=\"M5.7 20C9 15 13 11 17 8\"/>","target":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>","check":"<polyline points=\"20 6 9 17 4 12\"/>","alert-triangle":"<path d=\"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"/><line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/>","map-pin":"<path d=\"M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/>","users":"<path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>","clipboard":"<path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><rect x=\"8\" y=\"2\" width=\"8\" height=\"4\" rx=\"1\" ry=\"1\"/>","wallet":"<path d=\"M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-1\"/><path d=\"M16 3H6a2 2 0 0 0-2 2v2\"/><path d=\"M22 12h-5a2 2 0 0 0 0 4h5v-4z\"/>","book":"<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>","message-square":"<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/>","flower":"<path d=\"M12 20c-3 0-6-2-7-5 2-1 4-1 5 0-2-3-1-7 2-10 3 3 4 7 2 10 1-1 3-1 5 0-1 3-4 5-7 5z\"/>","calendar":"<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"/><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/>","navigation":"<polygon points=\"3 11 22 2 13 21 11 13 3 11\"/>","chevron-down":"<polyline points=\"6 9 12 15 18 9\"/>","plus":"<line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>","search":"<circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"/>","x":"<line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"/><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/>","refresh":"<polyline points=\"23 4 23 10 17 10\"/><path d=\"M20.49 15a9 9 0 1 1-2.12-9.36L23 10\"/>","file-text":"<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/>","phone":"<path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z\"/>","user":"<path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>","edit":"<path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"/>","sparkles":"<path d=\"M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z\"/><path d=\"M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/>","hourglass":"<path d=\"M6 2h12M6 22h12M7 2v4l5 6-5 6v4M17 2v4l-5 6 5 6v4\"/>","message-circle":"<path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z\"/>","droplet":"<path d=\"M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z\"/>","wind":"<path d=\"M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2\"/>","trash-2":"<polyline points=\"3 6 5 6 21 6\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/><line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\"/><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\"/>","zap":"<polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\"/>","monitor":"<rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"/><line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/>","feather":"<path d=\"M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z\"/><line x1=\"16\" y1=\"8\" x2=\"2\" y2=\"22\"/><line x1=\"17.5\" y1=\"15\" x2=\"9\" y2=\"15\"/>"};
-const ic=n=>ICONS[n]?'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+ICONS[n]+'</svg>':''
-const st=(k,w)=>`<span class="st ${k}">${w}</span>`
-const stuck=(d,v)=>`<span class="stuck" data-v="${v||2}">${ic('alert-triangle')} תקוע ${d} ימים</span>`
-const desc=(t,cls)=>`<div class="t-desc clamp ${cls||''}">${t}</div><button class="more" onclick="toggleMore(this)">הצג עוד</button>`
-
-// the nav, as in the app; only Tasks carries a count
-const NAV_SVG={
- home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
- tasks:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
- sites:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/>',
- people:'<circle cx="9" cy="8" r="3.3"/><path d="M2.5 20c.6-3.6 3.2-5.8 6.5-5.8s5.9 2.2 6.5 5.8"/><circle cx="17" cy="7" r="2.6"/><path d="M15.5 14.3c2.6.4 4.4 2.3 4.9 5.2"/>',
- calendar:'<rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/>',
- tao:'<circle cx="12" cy="12" r="8.5"/><path d="M12 4.2c3.2 2.8 3.2 12.8 0 15.6"/>'}
-const NAV_LBL={home:'בית',tasks:'משימות',sites:'אתרים',people:'אנשים',calendar:'לוח',tao:'טאו'}
-const nav=on=>`<nav class="nv" aria-label="ניווט">${Object.keys(NAV_SVG).map(k=>`<button class="nb${k===on?' on':''}"${k===on?' aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${NAV_SVG[k]}</svg>${NAV_LBL[k]}${k==='tasks'?'<span class="bd" aria-label="משימה אחת לפעולה">1</span>':''}</button>`).join('')}</nav>`
-
-// ── Home ──
-const TILES=[
- {k:'tasks',  i:'clipboard',   t:'משימות',        n:'3',      d:'1 עכשיו · 2 היום'},
- {k:'sites',  i:'map-pin',     t:'אתרים',         n:'1 תקוע', d:'2 פתוחים · 2 ממתינים'},
- {k:'people', i:'users',       t:'אנשים',         n:'1 ממתין',d:'Dave · waiver'},
- {k:'garden', i:'droplet',     t:'גן הנחל',       n:'1/3',    d:'עוד 2 לסגירת היום'},
- {k:'brief',  i:'sun',         t:'מדריך הבוקר',   n:'3',      d:'NIA ב-14:00 בראש'},
- {k:'organize',i:'wind',       t:'ארגן את היום',  n:'1/5',    d:'אנרגיה, הדבקה, סקירה'},
- {k:'cash',   i:'wallet',      t:'ליקווידציה',    n:'₱1,850', d:'2 הוצאות · אוקטובר'},
- {k:'more',   i:'sparkles',    t:'עוד',           n:'4',      d:'ציטוט, המלצות ועוד'}]
-function home(){
-  return `<div class="above"><div class="h1 on">
-      <div class="h1-row">
-        <div class="date">יום שבת, 17 באוקטובר · ${ic('flame')} 3 ימים</div>
-        <div class="h1-btns">
-          <button class="rbtn wa" aria-label="הוסף הודעות מוואטסאפ" title="הוסף הודעות מוואטסאפ">${ic('message-circle')}<b aria-hidden="true">+</b></button>
-          <button class="rbtn" aria-label="הגדרות">${ic('settings')}<i aria-hidden="true"></i></button>
-        </div>
-      </div>
-      <div class="greet">בוקר טוב, אורי ${ic('sun')}</div>
-      <div class="stat"><button><b>1</b> עכשיו</button><span aria-hidden="true">·</span><button><b>1</b> תקוע</button><span aria-hidden="true">·</span><button><b>1</b> ממתין</button></div>
-      <div class="srv">${ic('alert-triangle')} <span>אין חיבור לשרת, AI וסנכרון כבויים · <u>הגדרות</u></span></div>
-    </div>
-    <div class="card blk">
-      <div class="focus">
-        <div class="focus-txt">
-          <div class="t-title">${ic('target')} הדבר הכי חשוב היום</div>
-          <div class="t-data">פגישה עם NIA ב-14:00 — לקחת את דוח הבאר</div>
-          ${desc('לפי מדריך הבוקר: Claveria Well תקוע כבר 7 ימים על Lock Rotor A08, אז כדאי להביא את קוד התקלה ואת תמונות הלוח לפגישה, ולבקש תאריך לטכנאי.')}
-        </div>
-        <button class="tick" aria-label="סמן כבוצע">${ic('check')}</button>
-      </div>
-    </div>
-    <div class="card blk" style="margin-top:10px">
-      <div class="focus">
-        <div class="focus-txt">
-          <div class="t-title">${ic('clock')} הבא אחריו</div>
-          <div class="t-data">להתקשר לדייב על באר קלוריה</div>
-          ${desc('טלפון · Claveria Well · לשאול על ה-waiver')}
-        </div>
-        <button class="tick" aria-label="סמן כבוצע">${ic('check')}</button>
-      </div>
-    </div>
-    </div>
-    <div class="grid">${TILES.map(x=>`<button class="card tile" onclick="openSheet(this,'${x.k}')" aria-haspopup="dialog">
-        <span class="t-title">${ic(x.i)} ${x.t}</span>
-        <span class="t-num">${x.n}</span>
-        <span class="t-desc one">${x.d}</span>
-      </button>`).join('')}</div>`
-}
-
-// ── the sheets a tile opens ──
-const SHEETS={
- tasks:()=>head('משימות','3 פתוחות')+`<div class="sh-list">
-   ${[['להתקשר לדייב על באר קלוריה','עכשיו · טלפון · Claveria Well'],['לבדוק גנרטור בסנטה קרוז','היום · Santa Cruz'],['לעדכן את Dave על Nambaran','היום · עד יום שני']].map(r=>`<div class="sh-row"><button class="tick" aria-label="סמן כבוצע">${ic('check')}</button><div><div class="t-data" style="font-size:16.5px">${r[0]}</div><div class="t-desc">${r[1]}</div></div></div>`).join('')}
-   </div><div class="btns"><button class="btn pri">לכל המשימות</button></div>`,
- sites:()=>head('אתרים','1 תקוע')+`<div class="sh-list">
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">Claveria Well</div><div class="t-desc one">Cagayan · Lock Rotor A08</div><div class="site-tags" style="margin-top:4px">${st('open','פתוח')}${stuck(7,2)}</div></div></div>
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">Gattaran Well</div><div class="t-desc one">Cagayan · Low flow, check foot valve</div><div class="site-tags" style="margin-top:4px">${st('open','פתוח')}</div></div></div>
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">Nambaran Deep Well</div><div class="t-desc one">Nueva Vizcaya · Dry run protection</div><div class="site-tags" style="margin-top:4px">${st('pending','ממתין')}</div></div></div>
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">Tuao Pump</div><div class="t-desc one">Cagayan · Panel cleaning</div><div class="site-tags" style="margin-top:4px">${st('pending','ממתין')}</div></div></div>
-   </div><div class="btns"><button class="btn pri">לכל האתרים</button><button class="btn">${ic('navigation')} מסלול</button></div>`,
- people:()=>head('אנשים','1 ממתין')+`<div class="sh-list">
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">Dave · ASC Construction</div><div class="t-desc">חתימה על waiver</div><div style="margin-top:4px">${st('pending','ממתין')}</div></div></div>
-   </div><div class="t-desc" style="margin-top:8px">ועוד 7 אנשי קשר בלי משהו פתוח.</div><div class="btns"><button class="btn pri">לכל האנשים</button></div>`,
- garden:()=>head('גן הנחל','1/3')+`${desc('כל משימה שנסגרת מביאה טיפה לנחל. עוד 2 משימות והיום נסגר, ושלושה ימים סגורים בשבוע מוסיפים עלה.')}
-   <div class="bar" style="margin-top:12px"><i style="width:33%"></i></div>
-   <div class="btns"><button class="btn pri">פתח את הגן</button><button class="btn">${ic('check')} סיימתי להיום</button></div>`,
- brief:()=>head('מדריך הבוקר','3 שורות להיום')+`<ol class="ol">
-   <li><div><div class="t-data" style="font-size:16.5px">14:00 · פגישה עם NIA</div><div class="t-desc">לקחת את דוח הבאר ואת קוד A08.</div></div></li>
-   <li><div><div class="t-data" style="font-size:16.5px">Claveria Well</div><div class="t-desc">Lock Rotor A08, לתאם טכנאי.</div><div style="margin-top:3px">${stuck(7,3)}</div></div></li>
-   <li><div><div class="t-data" style="font-size:16.5px">Nambaran Deep Well</div><div class="t-desc">לעדכן את Dave ביום שני.</div></div></li>
-   </ol>
-   <div class="sub">הרגל השבוע</div>
-   ${desc('זהות לפני הרגל: לפני פעולה, לשאול "האם זו פעולה של המנהיג שאני רוצה להיות?" ולא רק "האם זה נחוץ?". חבר שרת בהגדרות כדי לקבל גם תדריך AI קצר בכל בוקר.')}
-   <div class="btns"><button class="btn pri">${ic('clipboard')} סקור משימות</button><button class="btn">${ic('refresh')} רענן</button></div>`,
- organize:()=>head('ארגן את היום','1/5 הושלמו')+`<div class="bar"><i style="width:20%"></i></div>
-   <div class="sub">איך האנרגיה עכשיו?</div>
-   <div class="moods"><span>רגוע</span><span>ממוקד</span><span class="on">מפוזר</span><span>עייף</span><span>לחוץ</span></div>
-   <div class="t-desc" style="margin-top:8px">מפוזר: שני דברים קטנים וברורים, לא יותר.</div>
-   <div class="btns"><button class="btn pri">${ic('plus')} הדבק מוואטסאפ</button><button class="btn">${ic('clipboard')} סקור משימות</button></div>`,
- cash:()=>head('ליקווידציה','₱1,850')+`<div class="sh-list">
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">דלק · ₱1,200</div><div class="t-desc">14 באוקטובר · Claveria</div></div></div>
-   <div class="sh-row"><div><div class="t-data" style="font-size:16.5px">חלקים · ₱650</div><div class="t-desc">16 באוקטובר · Santa Cruz</div></div></div>
-   </div><div class="btns"><button class="btn pri">${ic('plus')} הוסף הוצאה</button></div>`,
- more:()=>head('עוד','4')+`<div class="sub" style="margin-top:0">ציטוט</div>
-   <div class="quote">"לפעמים השינוי הגדול ביותר הוא לשנות כיוון בלי לוותר על הסיבה שבגללה התחלת."</div>
-   <div class="sub">המלצות</div>
-   <ol class="ol">
-     <li><div><div class="t-data" style="font-size:16.5px">שיחות לפני 11:00</div><div class="t-desc">בבקרים אתה סוגר יותר משימות.</div></div></li>
-     <li><div><div class="t-data" style="font-size:16.5px">באר אחת לסבב</div><div class="t-desc">שתי בארות באותו יום נגררות למחר.</div></div></li>
-     <li><div><div class="t-data" style="font-size:16.5px">לסגור את היום ב-17:00</div><div class="t-desc">"סיימתי להיום" שומר על הרצף.</div></div></li>
-   </ol>
-   <div class="btns"><button class="btn">מחוץ לעבודה</button><button class="btn">${ic('message-circle')} שאל את Fieldy</button></div>`}
-function head(t,n){return `<div class="grab" aria-hidden="true"></div><div class="sh-head"><div><div class="t-title">${t}</div><div class="t-num" style="margin-top:2px">${n}</div></div><button class="sh-x" onclick="closeSheet(this)" aria-label="סגור">${ic('x')}</button></div>`}
-
-// ── Sites ──
-function sites(){
-  const card=(n,l,tags,navOn)=>`<div class="card site"><div class="site-top"><div><div class="site-name">${n}</div><div class="site-line one">${l}</div></div>${navOn?`<span class="navb">${ic('navigation')}</span>`:''}</div><div class="site-tags">${tags}<span class="chev">${ic('chevron-down')}</span></div></div>`
-  return `<div class="hdr"><div class="hdr-top"><h3>אתרים</h3><div class="hdr-btns"><span class="hb">${ic('map-pin')}</span><span class="hb">···</span><span class="hb add">${ic('plus')}</span></div></div>
-    <div class="search"><span>${ic('search')} חיפוש אתר, קוד, קבלן</span><b>אזור ${ic('chevron-down')}</b></div>
-    <div class="chips"><span class="on">הכל</span><span>פתוחים</span><span>תקועים</span><span>ממתינים</span><span>נפתרו</span></div></div>
-    ${card('Claveria Well','Cagayan · Lock Rotor A08',st('open','פתוח')+stuck(7,2),1)}
-    ${card('Nambaran Deep Well','Nueva Vizcaya · Dry run protection',st('pending','ממתין'),1)}
-    ${card('Santa Cruz','Isabela',st('resolved','נפתר'),0)}
-    ${card('Gattaran Well','Cagayan · Low flow, check foot valve',st('open','פתוח'),1)}
-    ${card('Tuao Pump','Cagayan · Panel cleaning',st('pending','ממתין'),0)}`
-}
-// ── People ──
-function people(){
-  const acts=a=>`<div class="pacts">${a.map(x=>`<span${x==='trash-2'?' class="del"':''}>${ic(x)}</span>`).join('')}</div>`
-  return `<div class="hdr"><div class="hdr-top"><h3>אנשים</h3><div class="hdr-btns"><span class="pill-add">+ הוסף</span></div></div></div>
-    <div class="sec">${ic('hourglass')} ממתין תשובה</div>
-    <div class="card"><div class="person"><span class="av">D</span><div><div class="pname">Dave</div><div class="t-desc">ASC Construction</div></div>${acts(['message-square','trash-2','check'])}</div>
-      <div class="wait">${st('pending','ממתין')}<div class="t-desc">חתימה על waiver</div></div></div>
-    <div class="sec" style="margin-top:16px">אנשי קשר</div>
-    <div class="card"><div class="person"><span class="av">E</span><div><div class="pname">Engr. Junell</div><div class="t-desc">NIA</div></div>${acts(['message-square','trash-2'])}</div></div>
-    <div class="card"><div class="person"><span class="av">N</span><div><div class="pname">Novie</div></div>${acts(['message-square','trash-2'])}</div></div>`
-}
-// ── Tasks ──
-function tasks(){
-  return `<div class="hdr"><div class="hdr-top"><h3>משימות</h3><div class="hdr-btns"><span class="pill-add">+ הוסף</span></div></div>
-    <div class="bk"><span class="on"><em><i style="background:#C8424A"></i>${ic('zap')}</em>עכשיו<b>1</b></span><span><em><i style="background:#E3A857"></i>${ic('leaf')}</em>היום<b>2</b></span><span><em>${ic('feather')}</em>אחר כך<b>1</b></span></div>
-    <div class="ctx"><span class="on">הכל</span><span>${ic('phone')}</span><span>${ic('monitor')}</span><span>${ic('map-pin')}</span></div></div>
-    <div class="card" style="padding:12px 14px;display:flex;gap:8px;align-items:center"><span style="color:var(--sage-ink);font-size:17px">${ic('wind')}</span><div class="t-desc" style="flex:1">מצב מפוזר: שני דברים קטנים וברורים, לא יותר.</div><button class="more show" style="padding:0">הצג הכל (1)</button></div>
-    <div class="card" style="border-right:3px solid #A3333D"><div class="task"><button class="tick" style="border-color:var(--rose)" aria-label="סמן כבוצע">${ic('check')}</button><div>
-      <div class="t-data" style="font-size:17.5px">להתקשר לדייב על באר קלוריה</div><div class="t-desc">לשאול על ה-waiver</div>
-      <div class="tags"><span>${ic('map-pin')} Claveria Well</span><span>${ic('user')} אני</span><span>${ic('phone')} טלפון</span></div></div><div class="pacts" style="flex-direction:column"><span>${ic('edit')}</span><span>${ic('message-square')}</span></div></div></div>`
-}
-
-const SCREENS={home,sites,people,tasks}
-document.querySelectorAll('.ph').forEach(ph=>{
-  const s=ph.dataset.screen
-  ph.innerHTML=`<div class="room" aria-hidden="true"></div><div class="scr">${SCREENS[s]()}</div><div class="fade" aria-hidden="true"></div>${nav(s)}
-    <div class="scrim" onclick="closeSheet(this)"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="פרטים"></div>`
-  if(ph.dataset.open) openSheet(ph,ph.dataset.open)
-})
-function openSheet(el,k){const ph=el.closest('.ph');ph.querySelector('.sheet').innerHTML=SHEETS[k]();ph.classList.add('sheet-on');markClamps(ph)}
-function closeSheet(el){el.closest('.ph').classList.remove('sheet-on')}
-function toggleMore(b){const d=b.previousElementSibling;d.classList.toggle('open');b.textContent=d.classList.contains('open')?'הצג פחות':'הצג עוד'}
-// "show more" appears only under a description that really is cut
-function markClamps(root){root.querySelectorAll('.clamp').forEach(d=>{const b=d.nextElementSibling;if(b&&b.classList.contains('more'))b.classList.toggle('show',d.scrollHeight>d.clientHeight+2)})}
-markClamps(document)
-document.fonts&&document.fonts.ready.then(()=>markClamps(document))
-addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ph.sheet-on').forEach(p=>p.classList.remove('sheet-on'))})
-</script>
+    <figure><figcaption>מדריך הבוקר</figcaption><iframe src="unify/phone.html?s=home&amp;open=brief" title="גיליון מדריך הבוקר" loading="lazy"></iframe></figure>
+    <figure><figcaption>אתרים</figcaption><iframe src="unify/phone.html?s=home&amp;open=sites" title="גיליון אתרים" loading="lazy"></iframe></figure>
+    <figure><figcaption>ארגן את היום</figcaption><iframe src="unify/phone.html?s=home&amp;open=organize" title="גיליון ארגן את היום" loading="lazy"></iframe></figure>
+  </div></section>
 </body></html>
