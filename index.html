@@ -166,234 +166,234 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
    and every surface that carries text is light, so text sits either on a
    light card (the app's normal dark tokens) or on the dark page (white, set
    explicitly below) — never in between. Every rule is scoped to
-   [data-theme="nachal"], so the other three themes keep their exact pixels.
+   :is([data-theme="nachal"],[data-theme="jungle"]), so the other three themes keep their exact pixels.
    There are no photographs: the page is a gradient and four soft shapes, all
    CSS, so nothing here has to be downloaded and nothing sits behind text that
    was not measured. backdrop-filter is used on two large cards, the thin
    server strip, the search pill and the nav bar only. */
-[data-theme="nachal"]{
+:is([data-theme="nachal"],[data-theme="jungle"]){
   --nh-card-a:.95;--nh-nav-a:.70;--nh-nav-blur:22px;
   --nh-on-dark:#ffffff;--nh-on-dark2:#E6F0EA;
   --nh-sage:#4A7760;--nh-sage-deep:#3A6149;--nh-capsule:#BCD9CD}
 /* no backdrop-filter, or the device asks for less transparency: denser surfaces */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-card-a:.99;--nh-nav-a:.97}}
+  :is([data-theme="nachal"],[data-theme="jungle"]){--nh-card-a:.99;--nh-nav-a:.97}}
 @media (prefers-reduced-transparency:reduce){
-  [data-theme="nachal"]{--nh-card-a:1;--nh-nav-a:.99}}
-[data-theme="nachal"] body{background:#2A3F3E}
+  :is([data-theme="nachal"],[data-theme="jungle"]){--nh-card-a:1;--nh-nav-a:.99}}
+:is([data-theme="nachal"],[data-theme="jungle"]) body{background:#2A3F3E}
 /* the room: deep teal-green with sage light pooling at the left and teal-grey
    on the right. This reuses the page's existing atmosphere layer, so no new
    element is added for any theme. */
-[data-theme="nachal"] #bg-atmosphere{
+:is([data-theme="nachal"],[data-theme="jungle"]) #bg-atmosphere{
   background:
     radial-gradient(64% 30% at 0% 30%,rgba(126,162,100,.58),rgba(126,162,100,0) 74%),
     radial-gradient(58% 34% at 100% 44%,rgba(42,68,68,.80),rgba(42,68,68,0) 76%),
     radial-gradient(70% 20% at 0% 66%,rgba(80,112,84,.50),rgba(80,112,84,0) 76%),
     linear-gradient(168deg,#496A4F 0%,#385844 30%,#304944 62%,#2A3F3E 100%)}
-[data-theme="nachal"] #bg-atmosphere::before,
-[data-theme="nachal"] #bg-atmosphere::after{display:none}
+:is([data-theme="nachal"],[data-theme="jungle"]) #bg-atmosphere::before,
+:is([data-theme="nachal"],[data-theme="jungle"]) #bg-atmosphere::after{display:none}
 /* the four drifting blobs become three still shapes: a pale streak from the
    top, a small leaf, and a soft disc of light that the nav bar floats across */
-[data-theme="nachal"] .bg-blob{animation:none!important;opacity:1;will-change:auto;right:auto;bottom:auto}
-[data-theme="nachal"] .bg-blob-gold{width:120px;height:220px;left:calc(50% - 83px);top:-90px;border-radius:50%;
+:is([data-theme="nachal"],[data-theme="jungle"]) .bg-blob{animation:none!important;opacity:1;will-change:auto;right:auto;bottom:auto}
+:is([data-theme="nachal"],[data-theme="jungle"]) .bg-blob-gold{width:120px;height:220px;left:calc(50% - 83px);top:-90px;border-radius:50%;
   transform:rotate(8deg);filter:blur(14px);
   background:linear-gradient(180deg,rgba(168,200,182,.34),rgba(168,200,182,0))}
-[data-theme="nachal"] .bg-blob-teal{width:50px;height:46px;left:calc(50% - 145px);top:84px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .bg-blob-teal{width:50px;height:46px;left:calc(50% - 145px);top:84px;
   border-radius:62% 38% 70% 30% / 58% 44% 56% 42%;transform:rotate(-24deg);filter:blur(1.5px);
   background:linear-gradient(150deg,#6F9170,#4C6B50);opacity:.9}
-[data-theme="nachal"] .bg-blob-terracotta{width:230px;height:200px;left:calc(50% - 135px);top:auto;bottom:-70px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .bg-blob-terracotta{width:230px;height:200px;left:calc(50% - 135px);top:auto;bottom:-70px;
   border-radius:50%;filter:blur(3px);
   background:radial-gradient(circle at 46% 38%,rgba(172,196,160,.9),rgba(150,182,140,.55) 70%)}
-[data-theme="nachal"] .bg-blob-purple{display:none}
+:is([data-theme="nachal"],[data-theme="jungle"]) .bg-blob-purple{display:none}
 /* text written straight on the page is white; anything on a light surface
    goes back to the app's dark tokens */
-[data-theme="nachal"] .screen{color:var(--nh-on-dark)}
-[data-theme="nachal"] .card,
-[data-theme="nachal"] .accordion,
-[data-theme="nachal"] .modal,
-[data-theme="nachal"] .screen-header,
-[data-theme="nachal"] .cal-header,
-[data-theme="nachal"] .ev-card,
-[data-theme="nachal"] .form-input,
-[data-theme="nachal"] .form-select{color:var(--t1)}
-[data-theme="nachal"] .empty{color:var(--nh-on-dark2)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen{color:var(--nh-on-dark)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .card,
+:is([data-theme="nachal"],[data-theme="jungle"]) .accordion,
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal,
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header,
+:is([data-theme="nachal"],[data-theme="jungle"]) .cal-header,
+:is([data-theme="nachal"],[data-theme="jungle"]) .ev-card,
+:is([data-theme="nachal"],[data-theme="jungle"]) .form-input,
+:is([data-theme="nachal"],[data-theme="jungle"]) .form-select{color:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .empty{color:var(--nh-on-dark2)}
 /* mint-white cards: near-opaque, large radius, the weight inside the glass
    rather than a slab of shadow beneath it */
-[data-theme="nachal"] .card{
+:is([data-theme="nachal"],[data-theme="jungle"]) .card{
   background:rgba(240,248,243,var(--nh-card-a))!important;
   border-radius:22px;
   box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
-[data-theme="nachal"] .card:not([style*="border"]){border:1px solid rgba(255,255,255,.4)}
-[data-theme="nachal"] .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-[data-theme="nachal"] .accordion[data-acc="nh-more"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) .card:not([style*="border"]){border:1px solid rgba(255,255,255,.4)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .card.glass{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .accordion[data-acc="nh-more"]{
   background:rgba(240,248,243,var(--nh-card-a));border:1px solid rgba(255,255,255,.4);border-radius:22px;
   padding:14px 16px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
 /* screen headers (tasks, sites, people, calendar) become a light sheet */
-[data-theme="nachal"] .screen-header,
-[data-theme="nachal"] .cal-header{
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header,
+:is([data-theme="nachal"],[data-theme="jungle"]) .cal-header{
   background:rgba(240,248,243,var(--nh-card-a))!important;border-bottom:none!important;
   border-radius:0 0 26px 26px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55)}
 /* the floating nav capsule: frosted, with the active destination as a pale
    capsule that holds its icon and its label together */
-[data-theme="nachal"] #nav{
+:is([data-theme="nachal"],[data-theme="jungle"]) #nav{
   width:calc(100% - 28px);max-width:402px;bottom:16px;padding:6px 4px;border-radius:99px;align-items:center;
   background:rgba(226,238,231,var(--nh-nav-a))!important;
   -webkit-backdrop-filter:blur(var(--nh-nav-blur)) saturate(1.3);backdrop-filter:blur(var(--nh-nav-blur)) saturate(1.3);
   border:1px solid rgba(255,255,255,.5)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.55)!important}
-[data-theme="nachal"] .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
-[data-theme="nachal"] .nav-label{color:var(--t1);font-weight:500}
-[data-theme="nachal"] .nav-btn .nav-icon svg,
-[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:var(--t1)}
-[data-theme="nachal"] .nav-btn.active{background:var(--nh-capsule);box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
-[data-theme="nachal"] .nav-btn.active .nav-label{color:var(--t1);font-weight:700}
-[data-theme="nachal"] .nav-btn.active::after{display:none}
-[data-theme="nachal"] .nav-badge{top:3px;right:calc(50% - 20px);background:#A3333D;box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(232,132,132,.7)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn{padding:8px 2px;border-radius:22px;gap:3px;justify-content:center}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-label{color:var(--t1);font-weight:500}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn .nav-icon svg,
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active{background:var(--nh-capsule);box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-label{color:var(--t1);font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active::after{display:none}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-badge{top:3px;right:calc(50% - 20px);background:#A3333D;box-shadow:0 0 0 1.5px rgba(255,255,255,.85),0 0 10px rgba(232,132,132,.7)}
 
 /* on every screen but Home (which has its own) and the Tao, whatever scrolls
    past the bottom is blurred and dimmed around the floating capsule, so card
    text never shows beside it or in the strip beneath it */
-[data-theme="nachal"] .screen:not(#screen-home):not(#screen-tao)::after{
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen:not(#screen-home):not(#screen-tao)::after{
   content:'';position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:50;pointer-events:none;
   width:100%;max-width:430px;height:112px;
   background:linear-gradient(to bottom,rgba(30,48,42,0) 0,rgba(30,48,42,.6) 30%,rgba(30,48,42,.7) 100%);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
 /* over the four teal screens the zone is teal too */
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::after{
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::after{
   background:linear-gradient(to bottom,rgba(4,42,38,0) 0,rgba(4,42,38,.6) 30%,rgba(4,42,38,.72) 100%)}
 /* the bar that explains why the list is shortened for the current mood is an
    inline-tinted strip; on this page it needs a light ground to be read */
-[data-theme="nachal"] div:has(> .right-now-toggle){
+:is([data-theme="nachal"],[data-theme="jungle"]) div:has(> .right-now-toggle){
   background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(206,170,84,.9)!important;color:var(--t2)!important;
   box-shadow:0 0 16px -4px rgba(246,214,140,.7)}
 /* the mood tip is tinted with the mood's own colour; on this page it needs a
    light ground to be read, and keeps its coloured edge */
-[data-theme="nachal"] .nh-mood > div:not(.card){background:rgba(240,248,243,var(--nh-card-a))!important;color:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood > div:not(.card){background:rgba(240,248,243,var(--nh-card-a))!important;color:var(--t1)}
 /* two screens whose body sits straight on the page get a light sheet: the
    month/week/year grid, and the paste-and-organise form */
-[data-theme="nachal"] #screen-calendar > div:nth-child(2){
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar > div:nth-child(2){
   background:rgba(240,248,243,var(--nh-card-a));margin:12px 12px 0;border-radius:22px;padding:6px 0 8px;color:var(--t1);
   box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
-[data-theme="nachal"] #screen-input > div{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-input > div{
   background:rgba(240,248,243,var(--nh-card-a));border-radius:0 0 26px 26px;color:var(--t1);
   box-shadow:0 14px 30px -18px rgba(0,0,0,.55)}
 /* the primary button and the calendar's "today", in the page's own sage */
-[data-theme="nachal"] .btn-primary{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
-[data-theme="nachal"] .cal-day.today .cal-dn{color:var(--gold-deep)}
-[data-theme="nachal"] .cal-view-tab.active{color:var(--gold-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .btn-primary{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
+:is([data-theme="nachal"],[data-theme="jungle"]) .cal-day.today .cal-dn{color:var(--gold-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .cal-view-tab.active{color:var(--gold-deep)}
 /* buttons that carry white text on the accent gradient: the gradient's light
    end is too pale for white type, so they use the page's sage like the primary action */
-[data-theme="nachal"] [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{
   background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))!important}
 /* the "no server" message on the organise screen is amber text; on a light
    sheet it takes a darker amber */
-[data-theme="nachal"] #screen-input [style*="color:var(--amber)"]{color:#7E5205!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-input [style*="color:var(--amber)"]{color:#7E5205!important}
 /* labels written straight on the page (a section heading between cards) take
    the light tokens; every light surface puts the dark tokens back, so text on
    a card is unchanged */
-[data-theme="nachal"] .screen:not(#screen-input) > div[style*="padding"] > div:not([class]):not([style*="background"]):not([style*="border"]){
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen:not(#screen-input) > div[style*="padding"] > div:not([class]):not([style*="background"]):not([style*="border"]){
   --t1:#ffffff;--t2:#E6F0EA;--t3:#E6F0EA}
-[data-theme="nachal"] .card,[data-theme="nachal"] .accordion,[data-theme="nachal"] .modal,
-[data-theme="nachal"] .screen-header,[data-theme="nachal"] .cal-header,[data-theme="nachal"] .ev-card,
-[data-theme="nachal"] [style*="background:var(--surface"],[data-theme="nachal"] [style*="background:var(--accent-soft"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) .card,:is([data-theme="nachal"],[data-theme="jungle"]) .accordion,:is([data-theme="nachal"],[data-theme="jungle"]) .modal,
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header,:is([data-theme="nachal"],[data-theme="jungle"]) .cal-header,:is([data-theme="nachal"],[data-theme="jungle"]) .ev-card,
+:is([data-theme="nachal"],[data-theme="jungle"]) [style*="background:var(--surface"],:is([data-theme="nachal"],[data-theme="jungle"]) [style*="background:var(--accent-soft"]{
   --t1:#0B1A12;--t2:#34473D;--t3:#4A5A52}
 /* the mood panel colours its text with the mood's own hue. Those hues are the
    app's meaning colours and stay as they are everywhere else; inside this one
    panel they are darkened to read on a light ground */
-[data-theme="nachal"] .nh-mood [style*="color:#ef4444"]{color:#B42B2B!important}
-[data-theme="nachal"] .nh-mood [style*="color:#f59e0b"],
-[data-theme="nachal"] .nh-mood [style*="color:#e8940c"]{color:#7E5205!important}
-[data-theme="nachal"] .nh-mood [style*="color:#1a8f7a"]{color:#10675A!important}
-[data-theme="nachal"] .nh-mood [style*="background:#f59e0b;"],
-[data-theme="nachal"] .nh-mood [style*="background:#e8940c;"]{background:#7E5205!important}
-[data-theme="nachal"] .nh-mood [style*="background:#ef4444;"]{background:#B42B2B!important}
-[data-theme="nachal"] .nh-mood [style*="background:#1a8f7a;"]{background:#10675A!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="color:#ef4444"]{color:#B42B2B!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="color:#f59e0b"],
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="color:#e8940c"]{color:#7E5205!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="color:#1a8f7a"]{color:#10675A!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="background:#f59e0b;"],
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="background:#e8940c;"]{background:#7E5205!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="background:#ef4444;"]{background:#B42B2B!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood [style*="background:#1a8f7a;"]{background:#10675A!important}
 /* ── Nachal home ── */
-[data-theme="nachal"] .nh{padding:44px 20px var(--nh-clear)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh{padding:44px 20px var(--nh-clear)}
 /* The nav bar (66px, 16px up) and the primary action above it (50px, 12px up)
    take the bottom 144px of the screen. The page keeps 24px more than that clear
    below its last item, and scroll-padding makes anything scrolled to (focus,
    scrollIntoView, an anchor) stop above them rather than under them. */
-[data-theme="nachal"]{--nh-clear:168px}
-[data-theme="nachal"] #screen-home{padding-bottom:0;scroll-padding-bottom:var(--nh-clear)}
+:is([data-theme="nachal"],[data-theme="jungle"]){--nh-clear:168px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-home{padding-bottom:0;scroll-padding-bottom:var(--nh-clear)}
 /* behind the capsule and the bar, whatever scrolls past is blurred and dimmed
    instead of showing in the strip between them */
-[data-theme="nachal"] .nh-wa-zone{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:89;pointer-events:none;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-wa-zone{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:89;pointer-events:none;
   width:100%;max-width:430px;height:166px;
   background:linear-gradient(to bottom,rgba(42,63,62,0) 0,rgba(42,63,62,.62) 26%,rgba(42,63,62,.62) 100%);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 24%);mask-image:linear-gradient(to bottom,transparent 0,#000 24%)}
-[data-theme="nachal"] .nh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-[data-theme="nachal"] .nh-date{font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:2px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
-[data-theme="nachal"] .nh-greet{font-size:28px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(4,14,10,.6),0 0 18px rgba(4,14,10,.4)}
-[data-theme="nachal"] .nh-greet .ic{width:.62em;height:.62em}
-[data-theme="nachal"] .nh-region{font-size:var(--fs-md);color:var(--nh-on-dark2);margin-top:3px;text-shadow:0 1px 3px rgba(4,14,10,.7)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-date{font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:2px;text-shadow:0 1px 3px rgba(4,14,10,.55)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-greet{font-size:28px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(4,14,10,.6),0 0 18px rgba(4,14,10,.4)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-greet .ic{width:.62em;height:.62em}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-region{font-size:var(--fs-md);color:var(--nh-on-dark2);margin-top:3px;text-shadow:0 1px 3px rgba(4,14,10,.7)}
 /* three counts as one quiet line; each is still a button that opens its
    screen, with a 44px target made from padding the line does not show */
-[data-theme="nachal"] .nh-stats{display:flex;align-items:center;margin:-4px 0;font-size:var(--fs-md);font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(4,14,10,.6)}
-[data-theme="nachal"] .nh-stats button{color:#fff;font-size:inherit;padding:14px 6px;text-shadow:inherit}
-[data-theme="nachal"] .nh-stats b{font-weight:800;font-size:var(--fs-base)}
-[data-theme="nachal"] .nh-stats s{text-decoration:none;opacity:.55}
-[data-theme="nachal"] .nh-gear{position:relative;width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-stats{display:flex;align-items:center;margin:-4px 0;font-size:var(--fs-md);font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-stats button{color:#fff;font-size:inherit;padding:14px 6px;text-shadow:inherit}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-stats b{font-weight:800;font-size:var(--fs-base)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-stats s{text-decoration:none;opacity:.55}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-gear{position:relative;width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;
   color:#fff;font-size:20px;background:rgba(12,32,24,.32);border:1px solid rgba(255,255,255,.24)}
-[data-theme="nachal"] .nh-gear u{position:absolute;top:4px;right:4px;width:11px;height:11px;border-radius:50%;background:#C78A4B;border:2px solid #3A5B4A}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-gear u{position:absolute;top:4px;right:4px;width:11px;height:11px;border-radius:50%;background:#C78A4B;border:2px solid #3A5B4A}
 /* the server-needed banner, as a thin strip with an amber edge. It exists only
    while there is no connection, exactly as before. */
-[data-theme="nachal"] .nh-strip{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:8px 14px;border-radius:16px;cursor:pointer;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-strip{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:8px 14px;border-radius:16px;cursor:pointer;
   background:rgba(10,26,20,.52);border:1px solid rgba(232,166,52,.85);color:#fff;font-size:var(--fs-sm);line-height:1.45;
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-[data-theme="nachal"] .nh-strip b{color:#FFD58A}
-[data-theme="nachal"] .nh-strip-i{color:#FFC862;flex:none;display:flex;margin-top:1px}
-[data-theme="nachal"] .nh-tools{display:flex;gap:12px;align-items:center;margin-top:14px}
-[data-theme="nachal"] .nh-ask{flex:1;height:50px;border-radius:99px;display:flex;align-items:center;gap:10px;padding:0 18px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-strip b{color:#FFD58A}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-strip-i{color:#FFC862;flex:none;display:flex;margin-top:1px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-tools{display:flex;gap:12px;align-items:center;margin-top:14px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-ask{flex:1;height:50px;border-radius:99px;display:flex;align-items:center;gap:10px;padding:0 18px;
   background:rgba(10,26,20,.34);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:15px;
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-[data-theme="nachal"] .nh-calm{position:relative;width:50px;height:50px;flex:none;display:grid;place-items:center;color:#fff;font-size:22px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-calm{position:relative;width:50px;height:50px;flex:none;display:grid;place-items:center;color:#fff;font-size:22px;
   border-radius:60% 40% 55% 45% / 50% 60% 40% 50%;background:linear-gradient(150deg,#6F8F63,#4B6C44);
   box-shadow:0 10px 18px -8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25)}
-[data-theme="nachal"] .nh-calm.on{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
-[data-theme="nachal"] .nh-calm u{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;border:2px solid #3A5B4A}
-[data-theme="nachal"] .nh-mood{margin-top:2px}
-[data-theme="nachal"] .nh-prog{margin-top:14px}
-[data-theme="nachal"] .nh-prog-row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:6px;text-shadow:0 1px 3px rgba(4,14,10,.5)}
-[data-theme="nachal"] .nh-prog-row b{color:#fff}
-[data-theme="nachal"] .nh-prog-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
-[data-theme="nachal"] .nh-prog-bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
-[data-theme="nachal"] .nh #daily-briefing{margin-top:0;border:1px solid rgba(255,255,255,.4)!important;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-calm.on{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-calm u{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;border:2px solid #3A5B4A}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood{margin-top:2px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog{margin-top:14px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:6px;text-shadow:0 1px 3px rgba(4,14,10,.5)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row b{color:#fff}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-bar i{display:block;height:100%;border-radius:99px;background:#BFE3CC}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh #daily-briefing{margin-top:0;border:1px solid rgba(255,255,255,.4)!important;
   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 /* section headings: large bold white type over a feathered wash with no edge */
-[data-theme="nachal"] .nh-sec{position:relative;margin:22px 2px 11px;padding:4px 2px;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;text-shadow:0 1px 4px rgba(2,16,13,.7)}
-[data-theme="nachal"] .nh-sec .ic{width:.8em;height:.8em}
-[data-theme="nachal"] .nh-sec::before{content:'';position:absolute;top:-26px;bottom:-26px;right:-64px;left:-10px;z-index:-1;pointer-events:none;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-sec{position:relative;margin:22px 2px 11px;padding:4px 2px;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.2px;text-shadow:0 1px 4px rgba(2,16,13,.7)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-sec .ic{width:.8em;height:.8em}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-sec::before{content:'';position:absolute;top:-26px;bottom:-26px;right:-64px;left:-10px;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse 46% 56% at 66% 50%,rgba(5,24,18,.55) 0%,rgba(5,24,18,.46) 42%,rgba(5,24,18,.2) 72%,rgba(5,24,18,0) 100%)}
-[data-theme="nachal"] .nh{isolation:isolate}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh{isolation:isolate}
 /* the quote of the day at the top, as a light card like the others */
-[data-theme="nachal"] .nh-quote{margin-top:14px}
-[data-theme="nachal"] .nh-quote > div{background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.4)!important;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-quote{margin-top:14px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-quote > div{background:rgba(240,248,243,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.4)!important;
   border-radius:22px!important;margin-bottom:0!important;padding:14px 18px!important;
   box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.7)}
-[data-theme="nachal"] .nh-list{padding:6px 16px}
-[data-theme="nachal"] .nh-row{display:flex;align-items:center;gap:8px;min-height:48px}
-[data-theme="nachal"] .nh-row[role="button"]{cursor:pointer}
-[data-theme="nachal"] .nh-row + .nh-row{border-top:1px solid rgba(27,46,36,.09)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-list{padding:6px 16px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-row{display:flex;align-items:center;gap:8px;min-height:48px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-row[role="button"]{cursor:pointer}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-row + .nh-row{border-top:1px solid rgba(27,46,36,.09)}
 /* the tick is drawn at 28px and clicked at 44px */
-[data-theme="nachal"] .nh-tick{width:44px;height:44px;flex:none;display:grid;place-items:center;margin-inline-start:-8px}
-[data-theme="nachal"] .nh-tick span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-tick{width:44px;height:44px;flex:none;display:grid;place-items:center;margin-inline-start:-8px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-tick span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
   background:#BCD8CC;color:#1F4030;font-size:15px;box-shadow:inset 0 0 0 1.5px var(--nh-sage-deep)}
-[data-theme="nachal"] .nh-kind{width:28px;height:28px;flex:none;display:grid;place-items:center;font-size:17px}
-[data-theme="nachal"] .nh-rt{flex:1;min-width:0;padding:6px 0}
-[data-theme="nachal"] .nh-rt1{font-size:var(--fs-lg);font-weight:600;color:var(--t1);line-height:1.35}
-[data-theme="nachal"] .nh-row.first .nh-rt1{font-size:16px;font-weight:700}
-[data-theme="nachal"] .nh-rt2{font-size:var(--fs-sm);color:var(--t3);margin-top:2px;line-height:1.4}
-[data-theme="nachal"] .nh-peek{margin:12px 0;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:22px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-kind{width:28px;height:28px;flex:none;display:grid;place-items:center;font-size:17px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-rt{flex:1;min-width:0;padding:6px 0}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-rt1{font-size:var(--fs-lg);font-weight:600;color:var(--t1);line-height:1.35}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-row.first .nh-rt1{font-size:16px;font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-rt2{font-size:var(--fs-sm);color:var(--t3);margin-top:2px;line-height:1.4}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-peek{margin:12px 0;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:22px;
   background:rgba(22,40,34,.34);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-[data-theme="nachal"] .nh-peek-t{font-size:var(--fs-base);font-weight:700}
-[data-theme="nachal"] .nh-peek-s{font-size:var(--fs-sm);color:var(--nh-on-dark2);margin-top:2px}
-[data-theme="nachal"] .nh-peek-n{font-size:var(--fs-2xl);font-weight:800}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-peek-t{font-size:var(--fs-base);font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-peek-s{font-size:var(--fs-sm);color:var(--nh-on-dark2);margin-top:2px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-peek-n{font-size:var(--fs-2xl);font-weight:800}
 /* the one primary action of the app, above the nav bar */
-[data-theme="nachal"] .nh-wa{position:fixed;left:50%;transform:translateX(-50%);bottom:94px;z-index:90;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-wa{position:fixed;left:50%;transform:translateX(-50%);bottom:94px;z-index:90;
   width:calc(100% - 40px);max-width:390px;height:50px;border-radius:99px;
   color:#fff;font-size:var(--fs-xl);font-weight:600;background:linear-gradient(135deg,#4A7760,#3A6149);
   border:1px solid rgba(255,255,255,.35);box-shadow:0 14px 28px -12px rgba(0,0,0,.55)}
@@ -404,78 +404,78 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
    under the nav bar — the wrapper used to end 120px above it and the page's
    light colour showed in the strip. Cards are dark glass; two of them blur
    what is behind them, the rest are translucent only. */
-[data-theme="nachal"] #screen-tao{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao{
   background:
     radial-gradient(75% 34% at 50% 0%,rgba(61,191,174,.22),rgba(61,191,174,0) 72%),
     linear-gradient(180deg,var(--tao-bg2) 0%,var(--tao-bg) 100%)!important}
-[data-theme="nachal"] #screen-tao::before{display:none}
-[data-theme="nachal"] #screen-tao > div[style*="min-height:100%"]{background:transparent!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao::before{display:none}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao > div[style*="min-height:100%"]{background:transparent!important}
 /* one soft fern in the top corner, outside the text, behind everything */
-[data-theme="nachal"] #screen-tao::after{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao::after{
   content:'';position:fixed;left:calc(50% - 215px);top:-18px;width:150px;height:190px;z-index:0;pointer-events:none;
   background:url('assets/leaves/fern-curve.png') center/contain no-repeat;
   opacity:.2;filter:blur(2.5px);transform:rotate(-14deg)}
 /* the big cards: the Tao chapter and the panels */
-[data-theme="nachal"] #screen-tao div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]{
   background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:28px!important;
   padding:22px!important;line-height:1.5;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 28px rgba(255,255,255,.025)}
-[data-theme="nachal"] #screen-tao .tao-glass{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-glass{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 /* list cards: meditations and talk scenarios */
-[data-theme="nachal"] #screen-tao [id^="med-btn-"],
-[data-theme="nachal"] #screen-tao .talk-scenario-btn{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao [id^="med-btn-"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .talk-scenario-btn{
   background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px!important;
   padding:16px 18px!important;line-height:1.5;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 22px rgba(255,255,255,.02)}
 /* tiles inside a panel, the weekly-focus link and the tab switcher */
-[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid"][style*="padding:12px 14px"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao div[style*="background:var(--tao-bg2);border:1px solid"][style*="padding:12px 14px"]{
   background:rgba(255,255,255,.05)!important;border-radius:20px!important;padding:14px 16px!important;line-height:1.5}
-[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border:1px solid var(--tao-line)"]{border-color:rgba(255,255,255,.10)!important}
-[data-theme="nachal"] #screen-tao button.tao-subnav-btn[style*="background:var(--tao-bg2)"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao div[style*="background:var(--tao-bg2);border:1px solid var(--tao-line)"]{border-color:rgba(255,255,255,.10)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao button.tao-subnav-btn[style*="background:var(--tao-bg2)"]{
   background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:20px!important}
-[data-theme="nachal"] #screen-tao div[style*="background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao div[style*="background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px"]{
   background:rgba(20,38,28,.6)!important;border:1px solid rgba(255,255,255,.10);border-radius:22px!important;padding:5px!important}
-[data-theme="nachal"] #screen-tao .tao-subnav-btn{border-radius:17px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-subnav-btn{border-radius:17px!important}
 /* small controls and fields: translucent, with the same hairline */
-[data-theme="nachal"] #screen-tao button[style*="background:var(--tao-panel)"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao button[style*="background:var(--tao-panel)"]{
   background:rgba(20,38,28,.6)!important;border-color:rgba(255,255,255,.14)!important}
 /* buttons that carry dark text on the accent: the accent's lighter end, not a gradient that starts dark */
-[data-theme="nachal"] #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao [style*="linear-gradient(135deg,var(--gold),var(--gold2))"]{background:var(--gold2)!important}
 /* the Leadership tab: the quote, the weekly focus and the tool it links to
    read as one thread, a soft line of the room's teal light running from the
    quote card into the focus card and along the edge of the linked tool. Same
    cards, same colours; only the gap between them becomes the connection. */
-[data-theme="nachal"] #screen-tao .tao-thread{margin-bottom:16px}
-[data-theme="nachal"] #screen-tao .tao-thread > div{position:relative;margin-bottom:0!important}
-[data-theme="nachal"] #screen-tao .tao-thread > div + div{margin-top:26px!important}
-[data-theme="nachal"] #screen-tao .tao-thread > div + div::before{content:'';position:absolute;left:50%;top:-27px;width:2px;height:26px;transform:translateX(-50%);
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread{margin-bottom:16px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div{position:relative;margin-bottom:0!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div + div{margin-top:26px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div + div::before{content:'';position:absolute;left:50%;top:-27px;width:2px;height:26px;transform:translateX(-50%);
   background:linear-gradient(rgba(111,224,204,.25),rgba(111,224,204,.8) 50%,rgba(111,224,204,.25));box-shadow:0 0 8px rgba(111,224,204,.55);pointer-events:none}
-[data-theme="nachal"] #screen-tao .tao-thread > div::after{content:'';position:absolute;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div::after{content:'';position:absolute;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;
   background:#8FE8D6;box-shadow:0 0 0 3px rgba(111,224,204,.18),0 0 10px rgba(111,224,204,.8);pointer-events:none}
-[data-theme="nachal"] #screen-tao .tao-thread > div:first-child::after{bottom:-5px}
-[data-theme="nachal"] #screen-tao .tao-thread > div + div::after{top:-5px}
-[data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{border-color:rgba(111,224,204,.42)!important;
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div:first-child::after{bottom:-5px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread > div + div::after{top:-5px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread .tao-subnav-btn{border-color:rgba(111,224,204,.42)!important;
   box-shadow:inset -3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
-html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box-shadow:inset 3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
+html[dir="ltr"]:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao .tao-thread .tao-subnav-btn{box-shadow:inset 3px 0 0 rgba(111,224,204,.75),0 0 16px -6px rgba(111,224,204,.7)}
 /* the meditation sheet is dark too, so its text and its ring read */
-[data-theme="nachal"] .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
-[data-theme="nachal"] .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
-[data-theme="nachal"] .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(#med-circle){background:var(--tao-bg2)!important;color:var(--tao-t1);border-top:1px solid rgba(255,255,255,.12)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(#med-circle) .med-timer{color:var(--tao-t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(#med-circle) .med-circle{border-color:var(--tao-gold3)}
 /* the nav bar over the Tao: dark glass to match the room; the active
    destination is the same pale capsule as on every other screen */
-[data-theme="nachal"]{--nh-tao-nav-a:.90}
+:is([data-theme="nachal"],[data-theme="jungle"]){--nh-tao-nav-a:.90}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-tao-nav-a:.94}}
-@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-tao-nav-a:.97}}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) #nav{
+  :is([data-theme="nachal"],[data-theme="jungle"]){--nh-tao-nav-a:.94}}
+@media (prefers-reduced-transparency:reduce){:is([data-theme="nachal"],[data-theme="jungle"]){--nh-tao-nav-a:.97}}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) #nav{
   --nh-nav-blur:36px;
   background:rgba(20,38,28,var(--nh-tao-nav-a))!important;
   background:rgba(20,38,28,var(--nh-tao-nav-a))!important;border:1px solid rgba(255,255,255,.14)!important;
   box-shadow:0 18px 34px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.10)!important}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn .nav-icon svg{stroke:#E4EFE8}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-label{color:var(--t1)}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-label{color:#E4EFE8}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-btn .nav-icon svg{stroke:#E4EFE8}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-label{color:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:var(--t1)}
 /* ── Nachal · fields ───────────────────────────────
    Every text field, textarea, select and search box in this theme is a soft,
    rounded glass shape instead of a square one: a full capsule for a single
@@ -484,44 +484,44 @@ html[dir="ltr"][data-theme="nachal"] #screen-tao .tao-thread .tao-subnav-btn{box
    field with a sage edge; the dark Tao room gets a faint white one. Focus is
    a soft ring in the theme's accent drawn with box-shadow, so the field never
    changes size or moves the page. */
-html[data-theme="nachal"]{
+html:is([data-theme="nachal"],[data-theme="jungle"]){
   --nh-field-bg:rgba(238,247,241,.62);--nh-field-bd:#5E8A72;--nh-field-ink:var(--t1);--nh-field-ph:#566A5E;
   --nh-field-ring:rgba(var(--accent-rgb),.30);--nh-field-focus-bd:var(--gold);
   --nh-field-shadow:inset 0 1px 3px rgba(20,50,36,.10);
   --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2334473D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
-html[data-theme="nachal"] #screen-tao{
+html:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tao{
   --nh-field-bg:rgba(255,255,255,.06);--nh-field-bd:rgba(255,255,255,.14);--nh-field-ink:var(--tao-t1);--nh-field-ph:#93AA9C;
   --nh-field-ring:rgba(111,224,204,.32);--nh-field-focus-bd:var(--tao-gold);
   --nh-field-shadow:inset 0 2px 6px rgba(0,0,0,.28);
   --nh-chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C0DACC' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
-html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]),
-html[data-theme="nachal"] textarea,
-html[data-theme="nachal"] select{
+html:is([data-theme="nachal"],[data-theme="jungle"]) input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]),
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea,
+html:is([data-theme="nachal"],[data-theme="jungle"]) select{
   box-sizing:border-box;min-height:52px;padding:14px 20px!important;line-height:1.4;
   border-radius:999px!important;
   background-color:var(--nh-field-bg)!important;border:1px solid var(--nh-field-bd)!important;
   color:var(--nh-field-ink)!important;box-shadow:var(--nh-field-shadow);outline:none;
   transition:box-shadow .15s ease,border-color .15s ease}
-html[data-theme="nachal"] textarea{border-radius:24px!important;padding:14px 18px!important}
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea{border-radius:24px!important;padding:14px 18px!important}
 /* the lead-in fields were 44px; the floor is 52 */
-html[data-theme="nachal"] textarea[style*="min-height:44px"]{min-height:52px!important}
-html[data-theme="nachal"] select{
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea[style*="min-height:44px"]{min-height:52px!important}
+html:is([data-theme="nachal"],[data-theme="jungle"]) select{
   -webkit-appearance:none;appearance:none;padding:14px 20px 14px 46px!important;
   background-image:var(--nh-chev)!important;background-repeat:no-repeat!important;
   background-position:left 18px center!important;background-size:14px!important}
-html[dir="ltr"][data-theme="nachal"] select{padding:14px 46px 14px 20px!important;background-position:right 18px center!important}
-html[data-theme="nachal"] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]):focus,
-html[data-theme="nachal"] textarea:focus,
-html[data-theme="nachal"] select:focus{
+html[dir="ltr"]:is([data-theme="nachal"],[data-theme="jungle"]) select{padding:14px 46px 14px 20px!important;background-position:right 18px center!important}
+html:is([data-theme="nachal"],[data-theme="jungle"]) input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=button]):not([type=submit]):not([type=reset]):not([type=hidden]):not([type=image]):focus,
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea:focus,
+html:is([data-theme="nachal"],[data-theme="jungle"]) select:focus{
   border-color:var(--nh-field-focus-bd)!important;outline:none;
   box-shadow:0 0 0 3px var(--nh-field-ring),var(--nh-field-shadow)}
-html[data-theme="nachal"] input::placeholder,
-html[data-theme="nachal"] textarea::placeholder{color:var(--nh-field-ph);opacity:1}
-html[data-theme="nachal"] input:disabled,
-html[data-theme="nachal"] textarea:disabled,
-html[data-theme="nachal"] select:disabled{opacity:.6}
+html:is([data-theme="nachal"],[data-theme="jungle"]) input::placeholder,
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea::placeholder{color:var(--nh-field-ph);opacity:1}
+html:is([data-theme="nachal"],[data-theme="jungle"]) input:disabled,
+html:is([data-theme="nachal"],[data-theme="jungle"]) textarea:disabled,
+html:is([data-theme="nachal"],[data-theme="jungle"]) select:disabled{opacity:.6}
 @media (prefers-reduced-motion:reduce){
-  html[data-theme="nachal"] input,html[data-theme="nachal"] textarea,html[data-theme="nachal"] select{transition:none}}
+  html:is([data-theme="nachal"],[data-theme="jungle"]) input,html:is([data-theme="nachal"],[data-theme="jungle"]) textarea,html:is([data-theme="nachal"],[data-theme="jungle"]) select{transition:none}}
 /* ── Nachal · the fairy-forest glow (sites, tasks and shared parts) ──
    The cards stay the same mint-white glass; what changes is the light around
    them. A soft mint/teal halo sits outside each card, a faint gradient edge
@@ -532,75 +532,75 @@ html[data-theme="nachal"] select:disabled{opacity:.6}
    light card as before, so its contrast is unchanged; status words are deep
    inks on pale fills (5.1:1 or more). Nothing moves except the stuck badge,
    which breathes once every seven seconds, and not at all for reduced motion. */
-[data-theme="nachal"]{
+:is([data-theme="nachal"],[data-theme="jungle"]){
   --nh-glow-mint:120,206,186;--nh-glow-teal:86,205,190;--nh-glow-lav:190,176,246;--nh-glow-gold:240,200,120;--nh-glow-rose:232,132,132;
   --nh-rose:#A3333D;--nh-rose-soft:#F6DEDD;--nh-gold-ink:#85590C;--nh-gold-soft:#F5E6C6;
   --nh-lav:#574A8F;--nh-lav-soft:#E7E1F7;--nh-mint-ink:#1B6E5C;--nh-mint-soft:#D3EFE6;
   --nh-card-solid:#EEF6F1}
 /* cards on these two screens: a thin light line of one hue, a soft drop shadow, no halo
    and no bright top rim (the old inset highlight read as a pale stripe on a card's top edge) */
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks) .card{
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks) .card{
   box-shadow:0 12px 26px -18px rgba(0,0,0,.6)}
-[data-theme="nachal"] #screen-sites .site-card{border:1px solid rgba(255,255,255,.30)!important}
-[data-theme="nachal"] #screen-sites .site-card.is-selected{box-shadow:0 0 0 3px rgba(150,230,210,.28),0 12px 26px -18px rgba(0,0,0,.6)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-card{border:1px solid rgba(255,255,255,.30)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-card.is-selected{box-shadow:0 0 0 3px rgba(150,230,210,.28),0 12px 26px -18px rgba(0,0,0,.6)}
 /* status words: a deep ink on a pale fill, with a halo of the same family */
-[data-theme="nachal"] .tag-status-open{background:var(--nh-rose-soft);color:var(--nh-rose);box-shadow:0 0 12px -2px rgba(var(--nh-glow-rose),.8)}
-[data-theme="nachal"] .tag-status-pending{background:var(--nh-gold-soft);color:var(--nh-gold-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-gold),.85)}
-[data-theme="nachal"] .tag-status-resolved{background:var(--nh-mint-soft);color:var(--nh-mint-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-mint),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .tag-status-open{background:var(--nh-rose-soft);color:var(--nh-rose);box-shadow:0 0 12px -2px rgba(var(--nh-glow-rose),.8)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .tag-status-pending{background:var(--nh-gold-soft);color:var(--nh-gold-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-gold),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .tag-status-resolved{background:var(--nh-mint-soft);color:var(--nh-mint-ink);box-shadow:0 0 12px -2px rgba(var(--nh-glow-mint),.85)}
 /* the three status buttons on a site: quiet glass until chosen, then the status's own glow */
-[data-theme="nachal"] #screen-sites .site-st{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st{
   background:rgba(255,255,255,.6)!important;color:var(--t2)!important;border:1px solid rgba(74,119,96,.26)!important;
   border-radius:14px!important;min-height:40px}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"]{font-weight:700}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="open"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"]{font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="open"]{
   background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{
   background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{
   background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
-[data-theme="nachal"] #screen-sites .site-stuck-btn{background:rgba(255,255,255,.6)!important;border:1px solid rgba(74,119,96,.26)!important;border-radius:14px!important;color:var(--t2)!important}
-[data-theme="nachal"] #screen-sites .site-stuck-btn[aria-pressed="true"]{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-stuck-btn{background:rgba(255,255,255,.6)!important;border:1px solid rgba(74,119,96,.26)!important;border-radius:14px!important;color:var(--t2)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-stuck-btn[aria-pressed="true"]{
   background:var(--nh-rose-soft)!important;border-color:rgba(126,48,96,.5)!important;color:var(--nh-rose)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
-[data-theme="nachal"] .site-stuck-badge{box-shadow:0 0 12px -1px rgba(var(--nh-glow-rose),.8);animation:nh-breathe 7s ease-in-out infinite}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-stuck-badge{box-shadow:0 0 12px -1px rgba(var(--nh-glow-rose),.8);animation:nh-breathe 7s ease-in-out infinite}
 @keyframes nh-breathe{0%,100%{box-shadow:0 0 9px -2px rgba(236,168,212,.55)}50%{box-shadow:0 0 18px 0 rgba(236,168,212,.95)}}
-@media (prefers-reduced-motion:reduce){[data-theme="nachal"] .site-stuck-badge{animation:none}}
+@media (prefers-reduced-motion:reduce){:is([data-theme="nachal"],[data-theme="jungle"]) .site-stuck-badge{animation:none}}
 /* tasks: the time buckets and the priority ticks in the same soft hues */
-[data-theme="nachal"] #screen-tasks .nh-bucket{border-radius:18px!important}
-[data-theme="nachal"] #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-soft-ctl)!important;box-shadow:0 0 16px -4px rgba(var(--nh-glow-teal),.7)}
-[data-theme="nachal"] #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
-[data-theme="nachal"] #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
-[data-theme="nachal"] #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-bucket{border-radius:18px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-bucket[aria-pressed="true"]{background:var(--nh-soft-ctl)!important;box-shadow:0 0 16px -4px rgba(var(--nh-glow-teal),.7)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-check{border-radius:9px!important;box-shadow:0 0 10px -2px rgba(var(--nh-glow-gold),.8)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-check[data-pri="red"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-rose),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-check[data-pri="green"]{box-shadow:0 0 10px -2px rgba(var(--nh-glow-mint),.85)}
 /* ── Nachal · site search ── */
-html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
-[data-theme="nachal"] .site-search-ic{inset-inline-start:18px}
-[data-theme="nachal"] .site-chip{min-height:40px;border-radius:99px!important}
-[data-theme="nachal"] .site-chip:not([aria-pressed="true"]){background:rgba(255,255,255,.62)!important;border-color:rgba(74,119,96,.24)!important}
-[data-theme="nachal"] .site-chip[aria-pressed="true"]{box-shadow:0 0 14px -3px rgba(var(--nh-glow-teal),.8)}
-[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="open"]{background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
-[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="stuck"]{background:var(--stuck)!important;color:#fff!important;box-shadow:0 0 14px -1px rgba(var(--nh-glow-rose),.85)}
-[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="pending"]{background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
-[data-theme="nachal"] .site-chip[aria-pressed="true"][data-f="resolved"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
-[data-theme="nachal"] .site-region-btn{min-height:52px;padding:0 16px!important}
-[data-theme="nachal"] .site-region-btn[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
-[data-theme="nachal"] .region-box{border-color:var(--nh-sage-deep);border-radius:9px}
-[data-theme="nachal"] .region-row[aria-checked="true"] .region-box{background:var(--nh-sage-deep)}
-[data-theme="nachal"] mark.hl{background:rgba(246,214,140,.75);box-shadow:0 0 8px rgba(246,214,140,.55)}
-[data-theme="nachal"] .site-count,[data-theme="nachal"] .site-dir-head{text-shadow:0 1px 3px rgba(4,14,10,.6)}
+html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 44px 14px 40px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-search-ic{inset-inline-start:18px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip{min-height:40px;border-radius:99px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip:not([aria-pressed="true"]){background:rgba(255,255,255,.62)!important;border-color:rgba(74,119,96,.24)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip[aria-pressed="true"]{box-shadow:0 0 14px -3px rgba(var(--nh-glow-teal),.8)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip[aria-pressed="true"][data-f="open"]{background:var(--nh-rose-soft)!important;color:var(--nh-rose)!important;border-color:rgba(142,58,104,.38)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-rose),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip[aria-pressed="true"][data-f="stuck"]{background:var(--stuck)!important;color:#fff!important;box-shadow:0 0 14px -1px rgba(var(--nh-glow-rose),.85)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip[aria-pressed="true"][data-f="pending"]{background:var(--nh-gold-soft)!important;color:var(--nh-gold-ink)!important;border-color:rgba(118,86,8,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-gold),.9)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip[aria-pressed="true"][data-f="resolved"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-mint),.9)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-region-btn{min-height:52px;padding:0 16px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-region-btn[aria-pressed="true"]{background:var(--nh-lav-soft)!important;color:var(--nh-lav)!important;border-color:rgba(87,74,143,.34)!important;box-shadow:0 0 14px -2px rgba(var(--nh-glow-lav),.9)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .region-box{border-color:var(--nh-sage-deep);border-radius:9px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .region-row[aria-checked="true"] .region-box{background:var(--nh-sage-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) mark.hl{background:rgba(246,214,140,.75);box-shadow:0 0 8px rgba(246,214,140,.55)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-count,:is([data-theme="nachal"],[data-theme="jungle"]) .site-dir-head{text-shadow:0 1px 3px rgba(4,14,10,.6)}
 /* ── Nachal · selecting sites ── */
-[data-theme="nachal"] .site-check span{border-color:var(--nh-sage-deep);border-radius:9px;background:rgba(255,255,255,.75);box-shadow:0 0 10px -2px rgba(var(--nh-glow-teal),.8)}
-[data-theme="nachal"] .site-check[aria-checked="true"] span{background:var(--nh-sage-deep);color:#fff}
-[data-theme="nachal"] #screen-sites .card.is-selected{outline:2px solid var(--nh-sage-deep);outline-offset:-1px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-check span{border-color:var(--nh-sage-deep);border-radius:9px;background:rgba(255,255,255,.75);box-shadow:0 0 10px -2px rgba(var(--nh-glow-teal),.8)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-check[aria-checked="true"] span{background:var(--nh-sage-deep);color:#fff}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .card.is-selected{outline:2px solid var(--nh-sage-deep);outline-offset:-1px;
   box-shadow:0 0 0 4px rgba(var(--nh-glow-teal),.28),0 0 30px -4px rgba(var(--nh-glow-teal),.7),0 14px 30px -18px rgba(0,0,0,.55)}
-[data-theme="nachal"] .site-selbar{border-radius:99px;background:rgba(240,248,243,.9);border:1px solid rgba(255,255,255,.5);
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-selbar{border-radius:99px;background:rgba(240,248,243,.9);border:1px solid rgba(255,255,255,.5);
   -webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);
   box-shadow:0 0 26px -6px rgba(var(--nh-glow-teal),.65),0 18px 34px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.6)}
-[data-theme="nachal"] .site-selbar-go{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep));border-radius:99px}
-[data-theme="nachal"] .site-selbar-x{background:rgba(255,255,255,.7);border:1px solid rgba(74,119,96,.26);border-radius:99px;color:var(--t2)}
-[data-theme="nachal"] .site-tool-btn{background:rgba(240,248,243,.92)!important;border:1px solid rgba(255,255,255,.4);box-shadow:0 0 14px -4px rgba(var(--nh-glow-teal),.7)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-selbar-go{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep));border-radius:99px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-selbar-x{background:rgba(255,255,255,.7);border:1px solid rgba(74,119,96,.26);border-radius:99px;color:var(--t2)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-tool-btn{background:rgba(240,248,243,.92)!important;border:1px solid rgba(255,255,255,.4);box-shadow:0 0 14px -4px rgba(var(--nh-glow-teal),.7)}
 /* amber section labels written straight on the dark page (People's "waiting
    for a reply") take a pale gold that reads there; the deep gold token is for
    light surfaces */
-[data-theme="nachal"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:#F3D78E!important;text-shadow:0 1px 3px rgba(4,14,10,.6)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:#F3D78E!important;text-shadow:0 1px 3px rgba(4,14,10,.6)}
 /* ── Nachal · the forest behind Sites, Tasks, People and Calendar ──
    The first version of this theme had these photographs at 20–25% under a
    mask that showed them only in a band mid-screen; v2 replaced them with the
@@ -608,8 +608,8 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    under a dark green veil so the white headings written on the page and the
    translucent cards above them stay readable. Home and the Tao keep their own
    rooms. */
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar){isolation:isolate}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar){isolation:isolate}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{
   content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:-1;pointer-events:none;
   /* from the top: a green-teal darkening, two soft teal lights, a flat teal laid over the
      photo with the "color" blend (the photo keeps its light and shade, but takes teal's hue
@@ -626,10 +626,10 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   background-position:0 0,0 0,0 0,0 0,0 0,center top;
   background-repeat:no-repeat;
   background-color:#0A4640}
-[data-theme="nachal"] #screen-sites{--nh-forest:url('assets/backgrounds/bg-fern-mist.webp')}
-[data-theme="nachal"] #screen-tasks{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
-[data-theme="nachal"] #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(2,34,32,.24)}
-[data-theme="nachal"] #screen-calendar{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites{--nh-forest:url('assets/backgrounds/bg-fern-mist.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-people{--nh-forest:url('assets/backgrounds/bg-river-light.webp');--nh-veil-extra:rgba(2,34,32,.24)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar{--nh-forest:url('assets/backgrounds/bg-water-ripple.webp')}
 /* ── Nachal · soft surfaces ──
    Outdoors the near-white cards glared. On Sites, Tasks, People and Calendar
    every light surface (cards, the sticky header, the search field, chips, the
@@ -637,7 +637,7 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    blurred, so the forest behind shows through softly. One set of variables
    holds it. The text tokens inside these surfaces are a step darker, so
    status words, names and notes stay at AA on the translucent fill. */
-[data-theme="nachal"]{
+:is([data-theme="nachal"],[data-theme="jungle"]){
   --nh-soft-rgb:230,243,235;--nh-soft-a:.75;--nh-soft-strong-a:.86;
   --nh-soft:rgba(var(--nh-soft-rgb),var(--nh-soft-a));
   --nh-soft-strong:rgba(var(--nh-soft-rgb),var(--nh-soft-strong-a));
@@ -645,42 +645,42 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   --nh-soft-edge:rgba(255,255,255,.34);
   --nh-soft-blur:blur(18px) saturate(1.15)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  [data-theme="nachal"]{--nh-soft-a:.95;--nh-soft-strong-a:.97;--nh-soft-ctl:rgba(236,246,240,.95)}}
+  :is([data-theme="nachal"],[data-theme="jungle"]){--nh-soft-a:.95;--nh-soft-strong-a:.97;--nh-soft-ctl:rgba(236,246,240,.95)}}
 @media (prefers-reduced-transparency:reduce){
-  [data-theme="nachal"]{--nh-soft-a:.98;--nh-soft-strong-a:.99;--nh-soft-ctl:rgb(236,246,240)}}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card,
-[data-theme="nachal"] #screen-calendar .ev-card,
-[data-theme="nachal"] #screen-calendar > div:nth-child(2){
+  :is([data-theme="nachal"],[data-theme="jungle"]){--nh-soft-a:.98;--nh-soft-strong-a:.99;--nh-soft-ctl:rgb(236,246,240)}}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card,
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .ev-card,
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar > div:nth-child(2){
   background:var(--nh-soft)!important;-webkit-backdrop-filter:var(--nh-soft-blur);backdrop-filter:var(--nh-soft-blur)}
-[data-theme="nachal"] :is(#screen-tasks,#screen-people,#screen-calendar) .card:not([style*="border"]){border:1px solid var(--nh-soft-edge)}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) :is(.card,.screen-header,.cal-header,.ev-card),
-[data-theme="nachal"] #screen-calendar > div:nth-child(2){--t2:#2C3E35;--t3:#33433B}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-tasks,#screen-people,#screen-calendar) .card:not([style*="border"]){border:1px solid var(--nh-soft-edge)}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) :is(.card,.screen-header,.cal-header,.ev-card),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar > div:nth-child(2){--t2:#2C3E35;--t3:#33433B}
 /* controls on those surfaces: a lighter mist, never white */
-[data-theme="nachal"] .site-chip:not([aria-pressed="true"]),
-[data-theme="nachal"] .site-region-btn:not([aria-pressed="true"]),
-[data-theme="nachal"] #screen-sites .site-st,
-[data-theme="nachal"] #screen-sites .site-stuck-btn:not([aria-pressed="true"]),
-[data-theme="nachal"] #screen-tasks .nh-bucket:not([aria-pressed="true"]),
-[data-theme="nachal"] #screen-tasks .screen-header button[style*="background:var(--surface)"]{background:var(--nh-soft-ctl)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-chip:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-region-btn:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st,
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-stuck-btn:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-bucket:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header button[style*="background:var(--surface)"]{background:var(--nh-soft-ctl)!important}
 /* tags tinted with a little alpha would darken on a translucent card; here they get their own pale fills */
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-person{background:#E4DFEE}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-context{background:#DCE8D6}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-site{background:#DCEBE6}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-person{background:#E4DFEE}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-context{background:#DCE8D6}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .tag-site{background:#DCEBE6}
 /* the calendar's days of the next/previous month stay quieter than this month's, but legible */
-[data-theme="nachal"] #screen-calendar .cal-day.other-month .cal-dn{color:#3A4942}
-[data-theme="nachal"] #screen-calendar .week-dnum:not(.today){color:var(--t1)}
-[data-theme="nachal"] #screen-calendar .week-dnum.today{color:var(--gold-deep)}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="open"]{background:var(--nh-rose-soft)!important}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{background:var(--nh-gold-soft)!important}
-[data-theme="nachal"] #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{background:var(--nh-mint-soft)!important}
-[data-theme="nachal"] .site-tool-btn{background:rgba(var(--nh-soft-rgb),.82)!important}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card button[style*="background:var(--blue-soft)"]{background:var(--nh-soft-ctl)!important}
-[data-theme="nachal"] .site-selbar{background:var(--nh-soft-strong)}
-[data-theme="nachal"] #screen-people button[data-act="clear"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.3)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .cal-day.other-month .cal-dn{color:#3A4942}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .week-dnum:not(.today){color:var(--t1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .week-dnum.today{color:var(--gold-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="open"]{background:var(--nh-rose-soft)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="pending"]{background:var(--nh-gold-soft)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-st[aria-pressed="true"][data-st="resolved"]{background:var(--nh-mint-soft)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-tool-btn{background:rgba(var(--nh-soft-rgb),.82)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .card button[style*="background:var(--blue-soft)"]{background:var(--nh-soft-ctl)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-selbar{background:var(--nh-soft-strong)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-people button[data-act="clear"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important;border-color:rgba(38,94,68,.3)!important}
 /* the region and route sheets: frosted, the same mist */
-[data-theme="nachal"] .modal:has(.region-sheet),
-[data-theme="nachal"] .modal:has(.route-list),
-[data-theme="nachal"] .modal:has(.route-missing){background:var(--nh-soft-strong)!important;
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(.region-sheet),
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(.route-list),
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(.route-missing){background:var(--nh-soft-strong)!important;
   -webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2);border-top:1px solid rgba(255,255,255,.45)!important}
 /* ── Nachal · watercolour status ──
    The status tags (open, waiting, done), "stuck X days", the quick status
@@ -691,49 +691,49 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    word with an irregular edge that spills a little past it. The word is a
    dark ink of the same family, 4.5:1 or more against the darkest part of the
    blob it sits on. Other chips (year, contractor, links) stay soft capsules. */
-[data-theme="nachal"] .wc{position:relative;isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;animation:none!important;font-weight:700}
-[data-theme="nachal"] .wc::before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;background:var(--wc) center/100% 100% no-repeat}
-[data-theme="nachal"] .wc[data-wc="rose"]{color:#3A0C12!important}
-[data-theme="nachal"] .wc[data-wc="ochre"]{color:#4A2F02!important}
-[data-theme="nachal"] .wc[data-wc="teal"]{color:#0C3A30!important}
-[data-theme="nachal"] .wc svg{stroke:currentColor}
-[data-theme="nachal"] .wc[data-wc="rose"][data-v="1"]{--wc:url('assets/watercolor/wc-rose-1.webp')}
-[data-theme="nachal"] .wc[data-wc="rose"][data-v="2"]{--wc:url('assets/watercolor/wc-rose-2.webp')}
-[data-theme="nachal"] .wc[data-wc="rose"][data-v="3"]{--wc:url('assets/watercolor/wc-rose-3.webp')}
-[data-theme="nachal"] .wc[data-wc="rose"][data-v="4"]{--wc:url('assets/watercolor/wc-rose-4.webp')}
-[data-theme="nachal"] .wc[data-wc="ochre"][data-v="1"]{--wc:url('assets/watercolor/wc-ochre-1.webp')}
-[data-theme="nachal"] .wc[data-wc="ochre"][data-v="2"]{--wc:url('assets/watercolor/wc-ochre-2.webp')}
-[data-theme="nachal"] .wc[data-wc="ochre"][data-v="3"]{--wc:url('assets/watercolor/wc-ochre-3.webp')}
-[data-theme="nachal"] .wc[data-wc="ochre"][data-v="4"]{--wc:url('assets/watercolor/wc-ochre-4.webp')}
-[data-theme="nachal"] .wc[data-wc="teal"][data-v="1"]{--wc:url('assets/watercolor/wc-teal-1.webp')}
-[data-theme="nachal"] .wc[data-wc="teal"][data-v="2"]{--wc:url('assets/watercolor/wc-teal-2.webp')}
-[data-theme="nachal"] .wc[data-wc="teal"][data-v="3"]{--wc:url('assets/watercolor/wc-teal-3.webp')}
-[data-theme="nachal"] .wc[data-wc="teal"][data-v="4"]{--wc:url('assets/watercolor/wc-teal-4.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc{position:relative;isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;animation:none!important;font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc::before{content:'';position:absolute;inset:-3px -8px;z-index:-1;pointer-events:none;background:var(--wc) center/100% 100% no-repeat}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="rose"]{color:#3A0C12!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="ochre"]{color:#4A2F02!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="teal"]{color:#0C3A30!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc svg{stroke:currentColor}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="rose"][data-v="1"]{--wc:url('assets/watercolor/wc-rose-1.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="rose"][data-v="2"]{--wc:url('assets/watercolor/wc-rose-2.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="rose"][data-v="3"]{--wc:url('assets/watercolor/wc-rose-3.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="rose"][data-v="4"]{--wc:url('assets/watercolor/wc-rose-4.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="ochre"][data-v="1"]{--wc:url('assets/watercolor/wc-ochre-1.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="ochre"][data-v="2"]{--wc:url('assets/watercolor/wc-ochre-2.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="ochre"][data-v="3"]{--wc:url('assets/watercolor/wc-ochre-3.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="ochre"][data-v="4"]{--wc:url('assets/watercolor/wc-ochre-4.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="teal"][data-v="1"]{--wc:url('assets/watercolor/wc-teal-1.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="teal"][data-v="2"]{--wc:url('assets/watercolor/wc-teal-2.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="teal"][data-v="3"]{--wc:url('assets/watercolor/wc-teal-3.webp')}
+:is([data-theme="nachal"],[data-theme="jungle"]) .wc[data-wc="teal"][data-v="4"]{--wc:url('assets/watercolor/wc-teal-4.webp')}
 /* the active task section is a large tile: its blob stays inside it */
-[data-theme="nachal"] #screen-tasks .nh-bucket.wc::before{inset:10px 8px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .nh-bucket.wc::before{inset:10px 8px}
 /* ── Nachal · the compact site card ── */
-[data-theme="nachal"] .site-nav{background:var(--nh-soft-ctl);border:1px solid rgba(74,119,96,.26);color:var(--nh-sage-deep)}
-[data-theme="nachal"] .st-picker{background:rgba(var(--nh-soft-rgb),.8);border:1px solid var(--nh-soft-edge)}
-[data-theme="nachal"] .site-drawer{border-top-color:rgba(27,46,36,.14)!important}
-[data-theme="nachal"] #screen-sites .site-act{border-radius:14px!important}
-[data-theme="nachal"] #screen-sites .site-act[data-act="draft"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-nav{background:var(--nh-soft-ctl);border:1px solid rgba(74,119,96,.26);color:var(--nh-sage-deep)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-picker{background:rgba(var(--nh-soft-rgb),.8);border:1px solid var(--nh-soft-edge)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-drawer{border-top-color:rgba(27,46,36,.14)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-act{border-radius:14px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-act[data-act="draft"]{background:var(--nh-mint-soft)!important;color:var(--nh-mint-ink)!important}
 /* ── Nachal · the compact sites header ── */
-[data-theme="nachal"] #screen-sites .screen-header{padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:10px!important}
-[data-theme="nachal"] .site-hbtn:not(.site-hbtn-add){background:var(--nh-soft-ctl)!important;border:1px solid rgba(74,119,96,.26)!important}
-[data-theme="nachal"] .site-hbtn-add{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
-[data-theme="nachal"] #screen-sites .site-search-row{margin-bottom:6px}
-[data-theme="nachal"] #screen-sites .site-chip{min-height:36px;padding:5px 10px!important}
-[data-theme="nachal"] #screen-sites .site-chips{padding-top:1px;padding-bottom:1px}
-[data-theme="nachal"] .modal:has(.sites-menu){background:var(--nh-soft-strong)!important;-webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .screen-header{padding-top:calc(env(safe-area-inset-top,0px) + 10px)!important;padding-bottom:10px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-hbtn:not(.site-hbtn-add){background:var(--nh-soft-ctl)!important;border:1px solid rgba(74,119,96,.26)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .site-hbtn-add{background:linear-gradient(135deg,var(--nh-sage),var(--nh-sage-deep))}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-search-row{margin-bottom:6px}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-chip{min-height:36px;padding:5px 10px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-chips{padding-top:1px;padding-bottom:1px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .modal:has(.sites-menu){background:var(--nh-soft-strong)!important;-webkit-backdrop-filter:blur(26px) saturate(1.2);backdrop-filter:blur(26px) saturate(1.2)}
 /* ── Nachal · screen headers ──
    The title, buttons and filters start right under the status bar (its safe
    area plus 14px) instead of 48px down, and the sticky sheet is frosted: blur
    and enough opacity that a card scrolled under it cannot be read through it. */
-[data-theme="nachal"]{--nh-hdr-rgb:8,46,42;--nh-hdr-a:.68}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){[data-theme="nachal"]{--nh-hdr-a:.95}}
-@media (prefers-reduced-transparency:reduce){[data-theme="nachal"]{--nh-hdr-a:.96}}
-[data-theme="nachal"] .screen-header,
-[data-theme="nachal"] .cal-header{
+:is([data-theme="nachal"],[data-theme="jungle"]){--nh-hdr-rgb:8,46,42;--nh-hdr-a:.68}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:is([data-theme="nachal"],[data-theme="jungle"]){--nh-hdr-a:.95}}
+@media (prefers-reduced-transparency:reduce){:is([data-theme="nachal"],[data-theme="jungle"]){--nh-hdr-a:.96}}
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header,
+:is([data-theme="nachal"],[data-theme="jungle"]) .cal-header{
   padding-top:calc(env(safe-area-inset-top,0px) + 14px)!important;padding-bottom:12px!important;
   background:rgba(var(--nh-hdr-rgb),var(--nh-hdr-a))!important;
   border-bottom:1px solid rgba(255,255,255,.16)!important;
@@ -743,52 +743,52 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
   --t1:#ffffff;--t2:#E6F1EB;--t3:#D2E3DA;
   --nh-field-bg:rgba(255,255,255,.09);--nh-field-bd:rgba(255,255,255,.28);--nh-field-ink:#ffffff;--nh-field-ph:#C9DBD1;
   --nh-field-ring:rgba(150,230,210,.34);--nh-field-focus-bd:#9FE6D3;--nh-field-shadow:inset 0 2px 6px rgba(0,0,0,.22)}
-[data-theme="nachal"] .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header > div:first-child[style*="margin-bottom:12px"]{margin-bottom:10px!important}
 /* ── Nachal · calm sites and tasks ──
    Watercolour blobs are for the two small tags that ask for attention, "open"
    and "stuck", and nothing else. Waiting and done are a small dot and a word.
    The sticky header is dark milky glass with light type; its controls are
    glass too, and the chosen one is the pale capsule the nav bar uses. */
-[data-theme="nachal"] .st-dot{--dc:#D4922C;background:none!important;box-shadow:none!important;border:0!important;
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot{--dc:#D4922C;background:none!important;box-shadow:none!important;border:0!important;
   display:inline-flex;align-items:center;gap:7px;padding:4px 6px!important;font-weight:600;color:#3A2A08}
-[data-theme="nachal"] .st-dot::before{content:'';flex:none;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
-[data-theme="nachal"] .st-dot[data-dot="rose"]{--dc:#C8424A;color:#3A0C12}
-[data-theme="nachal"] .st-dot.st-stuck::before{display:none}
-[data-theme="nachal"] .st-dot.st-stuck{font-size:var(--fs-sm);gap:5px}
-[data-theme="nachal"] .st-dot[data-dot="ochre"]{--dc:#D4922C;color:#4A2F02}
-[data-theme="nachal"] .st-dot[data-dot="teal"]{--dc:#2FA68C;color:#0C3A30}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot::before{content:'';flex:none;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot[data-dot="rose"]{--dc:#C8424A;color:#3A0C12}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot.st-stuck::before{display:none}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot.st-stuck{font-size:var(--fs-sm);gap:5px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot[data-dot="ochre"]{--dc:#D4922C;color:#4A2F02}
+:is([data-theme="nachal"],[data-theme="jungle"]) .st-dot[data-dot="teal"]{--dc:#2FA68C;color:#0C3A30}
 /* a finished site is quieter: a fainter card and a lighter name */
-[data-theme="nachal"] #screen-sites .site-card[data-st="resolved"]:not(.is-open){background:rgba(var(--nh-soft-rgb),.66)!important}
-[data-theme="nachal"] #screen-sites .site-card[data-st="resolved"] .site-name{font-weight:600;color:var(--t2)}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-card[data-st="resolved"]:not(.is-open){background:rgba(var(--nh-soft-rgb),.66)!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .site-card[data-st="resolved"] .site-name{font-weight:600;color:var(--t2)}
 /* the task tiles: plain glass, a number and an icon, and a tiny dot beside the icon */
-[data-theme="nachal"] .nh-bk-ic{position:relative;display:inline-flex}
-[data-theme="nachal"] .nh-bk-dot{position:absolute;top:-1px;inset-inline-end:-8px;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
-[data-theme="nachal"] .nh-bk-dot[data-dot="rose"]{--dc:#F08B90}
-[data-theme="nachal"] .nh-bk-dot[data-dot="ochre"]{--dc:#EDB85A}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-bk-ic{position:relative;display:inline-flex}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-bk-dot{position:absolute;top:-1px;inset-inline-end:-8px;width:9px;height:9px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px -1px var(--dc)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-bk-dot[data-dot="rose"]{--dc:#F08B90}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-bk-dot[data-dot="ochre"]{--dc:#EDB85A}
 
 /* header controls, all four screens */
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn:not(.site-hbtn-add),
-[data-theme="nachal"] #screen-calendar .cal-nav-btn,
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket:not([aria-pressed="true"]),
-[data-theme="nachal"] #screen-tasks .screen-header > div:last-child button:not([style*="var(--accent-soft)"]),
-[data-theme="nachal"] :is(#screen-sites) .screen-header .site-chip:not([aria-pressed="true"]),
-[data-theme="nachal"] #screen-sites .screen-header .site-region-btn:not([aria-pressed="true"]){
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn:not(.site-hbtn-add),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .cal-nav-btn,
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header > div:last-child button:not([style*="var(--accent-soft)"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites) .screen-header .site-chip:not([aria-pressed="true"]),
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .screen-header .site-region-btn:not([aria-pressed="true"]){
   background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.24)!important;color:#EAF4EF!important;box-shadow:none!important}
-[data-theme="nachal"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn-add{
+:is([data-theme="nachal"],[data-theme="jungle"]) :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar) .screen-header .site-hbtn-add{
   background:linear-gradient(135deg,#5FA086,#3F7D66)!important;border:1px solid rgba(255,255,255,.3)!important;color:#fff!important}
-[data-theme="nachal"] #screen-sites .screen-header .site-hbtn[aria-pressed="true"],
-[data-theme="nachal"] #screen-sites .screen-header .site-chip[aria-pressed="true"],
-[data-theme="nachal"] #screen-sites .screen-header .site-region-btn[aria-pressed="true"],
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"],
-[data-theme="nachal"] #screen-tasks .screen-header > div:last-child button[style*="var(--accent-soft)"],
-[data-theme="nachal"] #screen-calendar .cal-view-tab.active{
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .screen-header .site-hbtn[aria-pressed="true"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .screen-header .site-chip[aria-pressed="true"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-sites .screen-header .site-region-btn[aria-pressed="true"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket[aria-pressed="true"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header > div:last-child button[style*="var(--accent-soft)"],
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .cal-view-tab.active{
   background:#CFE6DC!important;border:1px solid transparent!important;color:#0F2E27!important;box-shadow:0 0 14px -3px rgba(150,230,210,.55)!important}
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] *{color:#0F2E27}
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="rose"]{--dc:#C8424A}
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="ochre"]{--dc:#C98A1E}
-[data-theme="nachal"] #screen-calendar .cal-view-tab:not(.active){color:#DCEAE3}
-[data-theme="nachal"] #screen-tasks .screen-header .nh-bucket{border-radius:18px!important}
-[data-theme="nachal"] .screen-header .site-search-ic,[data-theme="nachal"] .screen-header .site-search-x{color:#D6E7DE}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] *{color:#0F2E27}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="rose"]{--dc:#C8424A}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot="ochre"]{--dc:#C98A1E}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-calendar .cal-view-tab:not(.active){color:#DCEAE3}
+:is([data-theme="nachal"],[data-theme="jungle"]) #screen-tasks .screen-header .nh-bucket{border-radius:18px!important}
+:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header .site-search-ic,:is([data-theme="nachal"],[data-theme="jungle"]) .screen-header .site-search-x{color:#D6E7DE}
 /* ── Nachal · nav: the glass drop ──
    The chosen destination is marked by a drop of milky glass with a line of
    light along its top. It slides from tab to tab on a short spring (420ms),
@@ -799,42 +799,42 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
    in, with one soft glow when the day is complete. Number badges scale in
    once when their number changes. Everything here is added only in this
    theme; reduced motion removes all of the movement. */
-[data-theme="nachal"] .nav-btn,[data-theme="nachal"] .nav-btn.active{background:none!important;box-shadow:none!important;position:relative;z-index:1}
-[data-theme="nachal"] .nav-ind{position:absolute;z-index:0;top:7px;left:0;width:58px;height:53px;pointer-events:none;will-change:transform;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active{background:none!important;box-shadow:none!important;position:relative;z-index:1}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-ind{position:absolute;z-index:0;top:7px;left:0;width:58px;height:53px;pointer-events:none;will-change:transform;
   border-radius:50% 50% 50% 50%/58% 58% 42% 42%;
   background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,255,255,.26) 60%,rgba(255,255,255,.4));
   box-shadow:inset 0 1px 0 #fff,inset 0 -8px 12px -8px rgba(24,98,84,.32),0 0 0 1px rgba(255,255,255,.55),0 7px 16px -8px rgba(8,60,50,.5);
   transition:opacity .15s}
-[data-theme="nachal"] .nav-ind::before{content:'';position:absolute;top:4px;left:14px;right:14px;height:3px;border-radius:3px;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-ind::before{content:'';position:absolute;top:4px;left:14px;right:14px;height:3px;border-radius:3px;
   background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.98),rgba(255,255,255,0))}
-[data-theme="nachal"] .nav-ind.off{opacity:0}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-ind{background:linear-gradient(180deg,rgba(220,242,234,.92),rgba(190,222,210,.78));box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(255,255,255,.4),0 7px 16px -8px rgba(0,0,0,.6)}
-[data-theme="nachal"] .nav-rip{position:absolute;z-index:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-ind.off{opacity:0}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-ind{background:linear-gradient(180deg,rgba(220,242,234,.92),rgba(190,222,210,.78));box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(255,255,255,.4),0 7px 16px -8px rgba(0,0,0,.6)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-rip{position:absolute;z-index:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
   border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(14,132,121,.28);pointer-events:none;animation:nav-rip .62s ease-out forwards}
 @keyframes nav-rip{from{transform:scale(.35);opacity:.85}to{transform:scale(2.3);opacity:0}}
 /* clear, dark outlines; the chosen one in teal */
-[data-theme="nachal"] .nav-btn .nav-icon{position:relative;width:22px;height:22px;transition:transform .22s cubic-bezier(.34,1.5,.5,1)}
-[data-theme="nachal"] .nav-btn .nav-icon svg{width:22px;height:22px;stroke-width:1.9}
-[data-theme="nachal"] .nav-btn:not(.active) .nav-icon{transform:scale(.94)}
-[data-theme="nachal"] .nav-btn.active .nav-icon{transform:scale(1.06)}
-[data-theme="nachal"] .nav-btn:active .nav-icon{transform:scale(.86)}
-[data-theme="nachal"] .nav-btn .nav-icon svg,[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:#0B1A12}
-[data-theme="nachal"] .nav-btn.active .nav-icon svg{stroke:#064A40}
-[data-theme="nachal"] .nav-btn.active .nav-label{color:#0B1A12;font-weight:800}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:#064A40}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn .nav-icon{position:relative;width:22px;height:22px;transition:transform .22s cubic-bezier(.34,1.5,.5,1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn .nav-icon svg{width:22px;height:22px;stroke-width:1.9}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn:not(.active) .nav-icon{transform:scale(.94)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-icon{transform:scale(1.06)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn:active .nav-icon{transform:scale(.86)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn .nav-icon svg,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-icon svg{stroke:#0B1A12}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-icon svg{stroke:#064A40}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn.active .nav-label{color:#0B1A12;font-weight:800}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-btn.active .nav-icon svg{stroke:#064A40}
 @keyframes nav-badge-in{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-[data-theme="nachal"] .nav-badge.pop{animation:nav-badge-in 220ms cubic-bezier(.2,.9,.3,1.15) both}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-badge.pop{animation:nav-badge-in 220ms cubic-bezier(.2,.9,.3,1.15) both}
 /* water in the tasks icon */
-[data-theme="nachal"] .nav-water-lvl{transition:transform .6s cubic-bezier(.3,.7,.2,1)}
-[data-theme="nachal"] .nav-wave{fill:#5CC8BE;stroke:none!important;opacity:.8}
-[data-theme="nachal"] body:has(#screen-tao:not(.hidden)) .nav-wave{fill:#2E9E90;opacity:.75}
-[data-theme="nachal"] .nav-water-lvl.run .nav-wave{animation:nav-slosh 1.1s ease-out 1}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-water-lvl{transition:transform .6s cubic-bezier(.3,.7,.2,1)}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-wave{fill:#5CC8BE;stroke:none!important;opacity:.8}
+:is([data-theme="nachal"],[data-theme="jungle"]) body:has(#screen-tao:not(.hidden)) .nav-wave{fill:#2E9E90;opacity:.75}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-water-lvl.run .nav-wave{animation:nav-slosh 1.1s ease-out 1}
 @keyframes nav-slosh{from{transform:translateX(-6px)}to{transform:translateX(0)}}
-[data-theme="nachal"] .nav-icon.glow1{animation:nav-glow1 1.1s ease-in-out 1}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nav-icon.glow1{animation:nav-glow1 1.1s ease-in-out 1}
 @keyframes nav-glow1{0%,100%{filter:none}45%{filter:drop-shadow(0 0 6px rgba(90,214,184,.95))}}
 @media (prefers-reduced-motion:reduce){
-  [data-theme="nachal"] .nav-btn .nav-icon,[data-theme="nachal"] .nav-water-lvl,[data-theme="nachal"] .nav-ind{transition:none!important}
-  [data-theme="nachal"] .nav-rip,[data-theme="nachal"] .nav-badge.pop,[data-theme="nachal"] .nav-water-lvl.run .nav-wave,[data-theme="nachal"] .nav-icon.glow1{animation:none!important}
+  :is([data-theme="nachal"],[data-theme="jungle"]) .nav-btn .nav-icon,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-water-lvl,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-ind{transition:none!important}
+  :is([data-theme="nachal"],[data-theme="jungle"]) .nav-rip,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-badge.pop,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-water-lvl.run .nav-wave,:is([data-theme="nachal"],[data-theme="jungle"]) .nav-icon.glow1{animation:none!important}
 }
 /* ── Nachal · river garden ── */
 #nh-fx{position:fixed;inset:0;z-index:300;pointer-events:none;overflow:hidden}
@@ -845,16 +845,16 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 #nh-fx .nh-rw img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
 #nh-fx .nh-rw.rare::before{content:'';position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(160,255,235,.8),rgba(160,255,235,0) 68%)}
 #nh-fx .nh-cap{position:absolute;transform:translate(-50%,0);padding:7px 14px;border-radius:99px;background:rgba(8,46,42,.82);color:#fff;font-size:15px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22)}
-[data-theme="nachal"] .nh-garden{margin:12px 0;padding:14px 16px 12px;border-radius:22px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.26);
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden{margin:12px 0;padding:14px 16px 12px;border-radius:22px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.26);
   background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.3),rgba(120,230,210,0) 60%),#0C5C54}
-[data-theme="nachal"] .nh-garden-t{font-size:var(--fs-base);font-weight:700}
-[data-theme="nachal"] .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
-[data-theme="nachal"] .nh-garden-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
-[data-theme="nachal"] .nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:var(--fs-sm);font-weight:700}
-[data-theme="nachal"] .nh-garden-closed{font-size:var(--fs-sm);color:#E2EFE8}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t{font-size:var(--fs-base);font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:var(--fs-sm);font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-closed{font-size:var(--fs-sm);color:#E2EFE8}
 .nh-garden-empty{display:flex;gap:12px;align-items:center;padding:12px 2px 14px;font-size:var(--fs-base);line-height:1.5;color:#E6F1EB}
 .nh-garden-empty img{width:40px;height:40px;flex:none;opacity:.9}
-[data-theme="nachal"] .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
 .nh-cairn{position:relative;height:132px;margin:4px auto 0}
 .nh-cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .nh-cairn img.new{animation:nh-settle .55s cubic-bezier(.3,1.4,.5,1) both}
@@ -875,7 +875,122 @@ html[data-theme="nachal"] #site-search{padding:14px 44px 14px 40px!important}
 .nh-tile:not(.locked) img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
 @media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
   /* the app's own completion ring, too, in this theme */
-  [data-theme="nachal"] .success-ring{animation:none!important;display:none}}
+  :is([data-theme="nachal"],[data-theme="jungle"]) .success-ring{animation:none!important;display:none}}
+/* ── Enchanted jungle ──
+   Built on Nachal (every Nachal rule above also matches the jungle, and the
+   nav is untouched), then dressed here: a deep olive-jungle room on every
+   screen, light glass cards, a flowering progress vine under the greeting,
+   and botanical climbers at a few corners and edges. Their fairy-forest glow
+   is a drop-shadow around the drawing only (mint for leaves, warm gold for
+   hoya and star flowers), with a few still golden sparkles that breathe
+   slowly when motion is allowed. Climbers never take pointer events, never
+   sit on text or buttons, and there are at most two on a screen. Status is a
+   small glass bead (coral, soft amber, jade) beside an ink word; "stuck" is
+   an even coral capsule. The task tick is a leaf. No new backdrop-filter. */
+[data-theme="jungle"]{--nh-hdr-rgb:16,38,24;--nh-soft-rgb:236,243,230;--nh-soft-a:.8;
+  --jg-mint:rgba(170,255,220,.55);--jg-gold:rgba(255,225,150,.6);
+  --coral-1:hsl(6 64% 76%);--coral-2:hsl(6 52% 54%);--amber-1:hsl(38 64% 76%);--amber-2:hsl(38 52% 50%);--jade-1:hsl(162 52% 72%);--jade-2:hsl(162 52% 36%)}
+[data-theme="jungle"] body{background:#1B2C20}
+[data-theme="jungle"] #bg-atmosphere{background:
+  radial-gradient(64% 30% at 0% 26%,rgba(132,164,96,.40),rgba(132,164,96,0) 74%),
+  radial-gradient(60% 34% at 100% 50%,rgba(18,40,26,.75),rgba(18,40,26,0) 76%),
+  radial-gradient(70% 22% at 8% 72%,rgba(84,118,78,.34),rgba(84,118,78,0) 76%),
+  linear-gradient(168deg,#3D5C42 0%,#2F4E37 30%,#243E2D 62%,#1A2F23 100%)}
+[data-theme="jungle"] .bg-blob{display:none}
+/* one room: the list screens drop Nachal's teal photographs and show the same jungle */
+[data-theme="jungle"] :is(#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::before{display:none}
+[data-theme="jungle"] #screen-home{padding-bottom:120px}
+[data-theme="jungle"] :is(#screen-home,#screen-sites,#screen-tasks,#screen-people,#screen-calendar)::after{
+  content:'';position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:50;pointer-events:none;width:100%;max-width:430px;height:112px;
+  background:linear-gradient(to bottom,rgba(20,38,26,0) 0,rgba(20,38,26,.6) 30%,rgba(20,38,26,.74) 100%);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
+
+/* climbers */
+[data-theme="jungle"] .jg-vine{position:absolute;z-index:2;pointer-events:none}
+[data-theme="jungle"] .jg-vine b{position:absolute;inset:0;background:center/contain no-repeat}
+[data-theme="jungle"] .jg-mint b{filter:drop-shadow(0 0 8px var(--jg-mint))}
+[data-theme="jungle"] .jg-gold b{filter:drop-shadow(0 0 8px var(--jg-gold))}
+[data-theme="jungle"] :is(.jg-vine i,.jg-spark){position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
+  background:#FFE9AE;box-shadow:0 0 5px 1px rgba(255,218,130,.75);opacity:.55;animation:jg-twinkle 5s ease-in-out infinite}
+[data-theme="jungle"] .jg-spark{margin:-2px -2px 0 0}
+@keyframes jg-twinkle{0%,100%{opacity:.3}50%{opacity:1}}
+/* the progress vine */
+[data-theme="jungle"] .jg-branch{display:flex;align-items:center;gap:10px;margin-top:20px;height:36px}
+[data-theme="jungle"] .jg-branch-n{flex:none;min-width:30px;font-size:15px;font-weight:700;color:#fff;text-align:center;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+[data-theme="jungle"] .jg-branch-v{position:relative;flex:1;height:36px;background:url('assets/vines/thin/thin-divider-long.webp') center/100% 100% no-repeat;
+  filter:drop-shadow(0 0 6px rgba(255,225,150,.22))}
+[data-theme="jungle"] .jg-star{position:absolute;top:50%;width:24px;height:23px;margin:-12px -12px 0 0;background:url('assets/vines/thin/star-flower.webp') center/contain no-repeat;
+  opacity:.42;filter:saturate(.4) brightness(1.08)}
+[data-theme="jungle"] .jg-star.on{opacity:1;filter:drop-shadow(0 0 7px var(--jg-gold)) drop-shadow(0 0 2px rgba(255,238,196,.9))}
+[data-theme="jungle"] .jg-star.new{animation:jg-light .4s ease-out}
+@keyframes jg-light{from{opacity:.42;transform:scale(.72)}60%{opacity:1;transform:scale(1.2)}to{transform:scale(1)}}
+[data-theme="jungle"] .jg-branch.all .jg-branch-v{animation:jg-all 1.4s ease-in-out 1}
+@keyframes jg-all{0%,100%{filter:drop-shadow(0 0 6px rgba(255,225,150,.22))}45%{filter:drop-shadow(0 0 12px rgba(255,225,150,.85))}}
+/* Home */
+[data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
+[data-theme="jungle"] .jg-btns{display:flex;gap:8px;flex:none}
+[data-theme="jungle"] .jg-wa em{position:absolute;top:3px;left:4px;width:15px;height:15px;border-radius:50%;background:#E3EFE0;color:#0C1A0F;font:700 12px/15px system-ui;font-style:normal;text-align:center}
+[data-theme="jungle"] .jg-srv{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:var(--fs-sm);color:var(--nh-on-dark2);cursor:pointer}
+[data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
+[data-theme="jungle"] .jg-home .nh-tools{margin-top:16px}
+[data-theme="jungle"] .jg-home .nh-sec{margin-top:24px}
+/* climbers on cards: the card is the anchor (its wrapper lets the drawing
+   reach past its edge); each climber sits in the card's padding or outside
+   it, so text and buttons are never under one */
+[data-theme="jungle"] .vd-host{position:relative;overflow:visible!important}
+[data-theme="jungle"] .vine-deco{position:absolute;inset:0;pointer-events:none;z-index:2}
+[data-theme="jungle"] .vd-corner{top:-14px;left:-14px;width:96px;height:98px}
+[data-theme="jungle"] .vd-hoya{top:-44px;left:30px;width:40px;height:58px}
+[data-theme="jungle"] .vd-host-corner-hoya{padding-top:34px!important}
+[data-theme="jungle"] .vd-edge{left:-14px;top:16px;width:28px;height:170px}
+[data-theme="jungle"] .vd-fern{left:-12px;bottom:-18px;width:112px;height:56px}
+[data-theme="jungle"] .vd-fern b{inset:auto;left:50%;top:50%;width:56px;height:112px;transform:translate(-50%,-50%) rotate(90deg) scaleX(-1)}
+[data-theme="jungle"] .vd-pothos{left:-16px;top:62px;width:32px;height:82px}
+[data-theme="jungle"] .vd-side{right:-17px;top:8px;width:26px;height:84px}
+/* status: a glass bead and an ink word */
+[data-theme="jungle"] .st-dot{color:var(--t1)}
+[data-theme="jungle"] .st-dot[data-dot]{color:var(--t1)}
+[data-theme="jungle"] .st-dot::before,[data-theme="jungle"] .nh-bk-dot{--b1:var(--coral-1);--b2:var(--coral-2);width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 11%,rgba(255,255,255,.4) 24%,rgba(255,255,255,0) 42%),radial-gradient(circle at 50% 70%,var(--b1),var(--b2) 80%);
+  box-shadow:inset 0 -1.5px 2px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.7),0 2px 6px -1px var(--b2)}
+[data-theme="jungle"] .st-dot[data-dot="ochre"]::before,[data-theme="jungle"] .nh-bk-dot[data-dot="ochre"]{--b1:var(--amber-1);--b2:var(--amber-2)}
+[data-theme="jungle"] .st-dot[data-dot="teal"]::before{--b1:var(--jade-1);--b2:var(--jade-2)}
+[data-theme="jungle"] #screen-tasks .screen-header .nh-bucket[aria-pressed="true"] .nh-bk-dot[data-dot]{--dc:initial}
+[data-theme="jungle"] .st-dot.st-stuck{height:26px;padding:0 10px!important;border-radius:13px;font-weight:700;color:var(--t1);
+  background:linear-gradient(180deg,hsl(6 72% 89%),hsl(6 64% 82%))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px hsla(6,52%,54%,.42)!important}
+/* the garden and petty-cash cards join the light glass family */
+[data-theme="jungle"] :is(.nh-garden,.nh-peek){background:rgba(240,246,236,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.5)!important;color:var(--t1)!important}
+[data-theme="jungle"] :is(.nh-garden-t span,.nh-garden-closed,.nh-peek-s){color:var(--t2)!important}
+[data-theme="jungle"] .nh-garden-done{background:rgba(255,255,255,.6)!important;border-color:rgba(45,102,52,.45)!important;color:var(--t1)!important}
+[data-theme="jungle"] .nh-garden-b{background:var(--gold)!important;color:#fff!important}
+[data-theme="jungle"] .nh-garden-empty{color:var(--t2)}
+/* no amber or brown ink left: the warm headings and notes Nachal tints gold become the room's light ink, or the card's */
+[data-theme="jungle"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:var(--nh-on-dark2)!important}
+[data-theme="jungle"] #screen-input [style*="color:var(--amber)"]{color:var(--t2)!important}
+[data-theme="jungle"] div:has(> .right-now-toggle){border-color:rgba(62,122,76,.45)!important;box-shadow:0 0 14px -6px rgba(170,255,220,.6)!important}
+[data-theme="jungle"] .nh-kind{color:var(--gold)!important}
+[data-theme="jungle"] .nh-kind[style*="b84600"]{color:hsl(6 52% 46%)!important}
+/* the nav stays Nachal's to the pixel: its ink is pinned to Nachal's */
+[data-theme="jungle"] #nav{--t1:#0B1A12;--t2:#34473D;--t3:#4A5A52;color:#0B1A12}
+@media (prefers-reduced-motion:reduce){
+  [data-theme="jungle"] :is(.jg-vine i,.jg-spark,.jg-star.new,.jg-branch.all .jg-branch-v){animation:none!important}
+  [data-theme="jungle"] :is(.jg-vine i,.jg-spark){opacity:.8}}
+/* the jungle's nav: its own drawings at 26px in a finer line, and the chosen
+   tab marked by a warm amber disc with a soft glow (it still springs from tab
+   to tab like the drop); badges and the bar itself are Nachal's */
+[data-theme="jungle"] .nav-btn .nav-icon svg{width:26px;height:26px;margin:-2px;overflow:visible}
+[data-theme="jungle"] .nav-btn .nav-icon svg{stroke-width:1.7}
+[data-theme="jungle"] .nav-btn.active .nav-icon svg{stroke:#0B1A12}
+[data-theme="jungle"] .nav-ind,[data-theme="jungle"] body:has(#screen-tao:not(.hidden)) .nav-ind{top:4px;width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 40% 30%,#F4D6B4,#DFAD7C 64%,#CB9262);
+  box-shadow:0 0 18px 5px rgba(232,176,118,.5),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -6px 10px -6px rgba(110,62,24,.35)}
+[data-theme="jungle"] .nav-ind::before{display:none}
+[data-theme="jungle"] .nav-wave{fill:#3FB8A4;opacity:1}
+/* the tick is a leaf: outlined while open, filled when done */
+[data-theme="jungle"] .nh-tick span,[data-theme="jungle"] #screen-tasks .nh-check{border-radius:100% 0 100% 0!important;box-shadow:none!important}
+[data-theme="jungle"] .nh-tick span{width:26px;height:26px;border:2px solid #3E7A4C;background:rgba(255,255,255,.55);color:transparent}
+[data-theme="jungle"] #screen-tasks .nh-check{border-width:2px!important}
 /* Console Palette — warm cream + amber accent (light, reading-app inspired) */
 :root{
   --ink:#f6efdb;--ink2:#fdf9ee;--ink3:#ffffff;
@@ -1980,6 +2095,12 @@ const TRANSLATIONS = {
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
   home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
   home_more: {he:'עוד', en:'More'},
+  jg_flow: {he:'המשך הזרימה', en:'Keep the flow'},
+  jg_more_hint: {he:'ציטוט היום, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote of the day, insights, outside work, Ask Fieldy'},
+  settings_jungle_branch: {he:'ענף התקדמות מתחת לברכה', en:'Progress vine under the greeting'},
+  settings_jungle_people: {he:'אייקון אנשים בניווט', en:'People icon in the nav'},
+  settings_jungle_people_roots: {he:'דמויות עם שורשים', en:'Figures with roots'},
+  settings_jungle_people_sprout: {he:'נבט בין שני אנשים', en:'A sprout between two people'},
   home_more_hint: {he:'תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Insights, outside work, ask Fieldy'},
   home_focus_heading: {he:'הדבר הכי חשוב היום', en:'The most important thing today'},
   home_briefing_title: {he:'תדריך הבוקר', en:"Morning briefing"},
@@ -2287,6 +2408,32 @@ const THEMES = {
     '--tao-line2':'#223A2B', '--tao-t1':'#E3F3EA', '--tao-t1b':'#C0DACC', '--tao-t2':'#9ABBA9', '--tao-t3':'#7F9F8E',
     '--tao-gold':'#6FE0CC', '--tao-gold2':'#3DBFAE', '--tao-gold3':'#2E9E90', '--tao-ink':'#8FDCC8',
     '--tao-accent-rgb':'61,191,174', '--tao-bg-rgb':'10,21,15', '--tao-panel-rgb':'15,32,24'
+  }},
+  // Enchanted jungle: Nachal's layout and its glass-drop nav, in a deep olive-
+  // jungle green, with botanical climbers at a few corners and a fairy-forest
+  // glow drawn in code. Its tokens are Nachal's with the teal moved to jungle
+  // green, every one of them distinct from the other themes'. Status is a glass
+  // bead (coral, soft amber, jade) and the warm alarm inks are replaced so no
+  // amber or brown text is left.
+  jungle: {label:"ג'ונגל קסום", labelEn:'Enchanted jungle', themeColor:'#1E3524',
+    alarm:{'--red':'#A3473C', '--red-dark':'#7A2E26', '--red-soft':'#F7E1DC', '--stuck':'#A3473C', '--stuck-soft':'#F6DEDA',
+      '--orange':'#3E5A44', '--amber':'#3E5A44', '--amber-line':'#B9D3BE'},
+    status:{open:'#C7584B', pending:'#C2933D', resolved:'#2C8C6F'},
+    tokens:{
+    '--gold':'#2D6634', '--gold2':'#6FB57A', '--gold-deep':'#16371C', '--ink':'#E8F0E4',
+    '--surface-2':'#bfdec6', '--surface-3':'#e1f2e5', '--surface-input':'#ebf5ee', '--accent-soft':'#caead2',
+    '--accent-line':'#8fdda3', '--t1':'#0C1A0F', '--t2':'#33463A', '--t3':'#495A4E',
+    '--t4':'#83a38b', '--t5':'#b0d4b9', '--line':'rgba(27,55,35,.11)', '--border':'rgba(27,55,35,.17)',
+    '--green':'#5A5F1C', '--green-rgb':'90,95,28', '--green-light':'#7cd687', '--green-light-rgb':'124,214,135',
+    '--green-ink':'#585E1B', '--purple':'#73457A', '--purple-rgb':'115,69,122', '--blue':'#33607F',
+    '--blue-soft':'#ebf2ec', '--blue-line':'#c9dacc', '--tile-a1':'#73652A', '--tile-a2':'#655822',
+    '--tile-a-label':'#E2EED6', '--tile-b1':'#24533A', '--tile-b2':'#1A4630', '--tile-b-label':'#D6EFDF',
+    '--tile-c1':'#3A2F4F', '--tile-c2':'#2D2440', '--tile-c-label':'#E6DDF2', '--cta1':'#2F6B39',
+    '--cta2':'#27592F', '--progress-track':'#daebdd', '--accent-rgb':'45,102,52', '--tao-bg':'#0b140c',
+    '--tao-bg2':'#0f1b11', '--tao-panel':'#111e13', '--tao-panel2':'#162418', '--tao-line':'#1d2e1f',
+    '--tao-line2':'#243827', '--tao-t1':'#e4f2e6', '--tao-t1b':'#c2d8c6', '--tao-t2':'#9db8a1',
+    '--tao-t3':'#829c86', '--tao-gold':'#79d68e', '--tao-gold2':'#49b361', '--tao-gold3':'#38944d',
+    '--tao-ink':'#96d5a3', '--tao-accent-rgb':'73,179,97', '--tao-bg-rgb':'11,20,12', '--tao-panel-rgb':'17,30,19'
   }}
 }
 // The accent-only presets this replaced. Nobody should land on a theme that no
@@ -2296,6 +2443,8 @@ let currentTheme = (function(){
   const saved = localStorage.getItem('fieldy_theme') || 'original'
   return THEMES[saved] ? saved : (THEME_ALIASES[saved] || 'original')
 })()
+// Nachal and the jungle share a layout, the nav and the garden; the jungle adds its own Home and dressing.
+function nachalLike() { return currentTheme === 'nachal' || currentTheme === 'jungle' }
 function applyTheme(name) {
   const t = THEMES[name] || THEMES[THEME_ALIASES[name]] || THEMES.original
   currentTheme = THEMES[name] ? name : (THEME_ALIASES[name] || 'original')
@@ -2384,7 +2533,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const s = btn.dataset.screen
     navigateTo(s)
-    if(currentTheme === 'nachal') navFeedback(btn)
+    if(nachalLike()) navFeedback(btn)
   })
 })
 
@@ -2415,7 +2564,7 @@ function navigateTo(screen, ctx=null) {
   
   // Show/hide nav
   document.getElementById('nav').style.display = NAV_SCREENS.includes(screen) ? 'grid' : 'none'
-  if(currentTheme === 'nachal') placeNavInd(true)
+  if(nachalLike()) placeNavInd(true)
   
   currentScreen = screen
   renderCurrentScreen()
@@ -2784,7 +2933,7 @@ function renderTaoChapter(el, idx) {
   if(taoMode==='lead') {
     // Nachal joins the quote, the weekly focus and its linked tool with one thread
     var pair = quoteHtml + weekHtml
-    if(currentTheme === 'nachal' && quoteHtml && weekHtml) pair = '<div class="tao-thread">' + pair + '</div>'
+    if(nachalLike() && quoteHtml && weekHtml) pair = '<div class="tao-thread">' + pair + '</div>'
     modeContentHtml = pair + leadHtml + sinekHtml;
   } else if(taoMode==='adhd') {
     modeContentHtml = adhdHtml;
@@ -2883,7 +3032,7 @@ function renderTaoChapter(el, idx) {
   });
 
   // Nachal blurs what is behind two of the big cards and no more
-  if(currentTheme === 'nachal') el.querySelectorAll('div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]').forEach(function(c, i){ if(i < 2) c.classList.add('tao-glass') });
+  if(nachalLike()) el.querySelectorAll('div[style*="linear-gradient(135deg,var(--tao-panel),var(--tao-panel2))"]').forEach(function(c, i){ if(i < 2) c.classList.add('tao-glass') });
   el.scrollTop = 0;
   if(taoMode==='tao') playWater();
 }
@@ -3060,6 +3209,7 @@ function renderCurrentScreen() {
     case 'action': renderAction(); break
     case 'settings': renderSettings(); break
   }
+  jungleDress(currentScreen)
 }
 
 // ── BADGES ───────────────────────────────────────
@@ -3073,7 +3223,7 @@ function refreshBadges() {
     var b = document.getElementById('badge-'+pair[0]);
     if(b) {
       b.textContent=pair[1]; b.classList.toggle('hidden', pair[1]===0);
-      if(currentTheme === 'nachal' && pair[1] > 0 && navBadgeLast[pair[0]] !== pair[1]) popNavBadge(b)
+      if(nachalLike() && pair[1] > 0 && navBadgeLast[pair[0]] !== pair[1]) popNavBadge(b)
       navBadgeLast[pair[0]] = pair[1]
     }
   });
@@ -3097,19 +3247,51 @@ function navTodayStats() {
     return !t.done || !t.completedAt || new Date(t.completedAt).toDateString() === today })
   return {done: items.filter(function(t){ return t.done }).length, total: items.length}
 }
+// The jungle's own nav icons, drawn to Uri's reference as single hand-drawn
+// strokes (viewBox 24, round ends, currentColor, no fill): a roof with
+// upturned eaves, a double spiral, a sun, three figures with roots (or the
+// sprout between two people, chosen in Settings), a veined leaf, a thin yin-yang.
+// They replace the drawings only in the jungle; the buttons, labels, badges
+// and the bar stay Nachal's, and leaving the theme puts the original back.
+const JG_NAV_ICONS = {
+  home: '<path d="M1.4 12.4c1.4.7 2.7.5 3.9-.4 2.5-1.9 4.7-4.6 6.7-7.8 2 3.2 4.2 5.9 6.7 7.8 1.2.9 2.5 1.1 3.9.4"/><path d="M7.6 12.6c-.3 2.5-.2 5 .2 7.5"/><path d="M16.4 12.6c.3 2.5.2 5-.2 7.5"/>',
+  tasks: '<path d="M15.16 5.85L15.02 5.86L14.87 5.88L14.73 5.92L14.58 5.98L14.44 6.06L14.31 6.17L14.18 6.29L14.07 6.44L13.98 6.6L13.9 6.77L13.85 6.96L13.82 7.17L13.82 7.38L13.84 7.59L13.89 7.8L13.96 8.02L14.07 8.22L14.2 8.42L14.36 8.6L14.55 8.77L14.76 8.92L14.99 9.04L15.24 9.13L15.5 9.2L15.78 9.23L16.06 9.23L16.35 9.2L16.63 9.13L16.92 9.02L17.19 8.88L17.45 8.7L17.68 8.49L17.9 8.24L18.09 7.97L18.24 7.67L18.36 7.35L18.45 7.02L18.49 6.66L18.49 6.3L18.45 5.94L18.36 5.58L18.23 5.23L18.05 4.89L17.83 4.57L17.57 4.27L17.28 4L16.94 3.77L16.58 3.57L16.19 3.42L15.78 3.31L15.36 3.25L14.92 3.25L14.48 3.29L14.05 3.39L13.62 3.54L13.21 3.74L12.82 4L12.46 4.3L12.13 4.65L11.85 5.04L11.61 5.46L11.42 5.92L11.28 6.4L11.2 6.9C11.2 10.7 13 12.6 13 16.8L12.92 17.33L12.77 17.85L12.57 18.34L12.31 18.79L12 19.21L11.66 19.58L11.27 19.9L10.85 20.18L10.41 20.4L9.96 20.56L9.49 20.66L9.02 20.71L8.55 20.71L8.1 20.64L7.66 20.53L7.24 20.37L6.85 20.16L6.5 19.91L6.18 19.62L5.9 19.3L5.66 18.96L5.47 18.59L5.33 18.21L5.24 17.83L5.19 17.44L5.19 17.05L5.24 16.68L5.33 16.31L5.46 15.97L5.62 15.65L5.82 15.36L6.05 15.1L6.31 14.87L6.59 14.68L6.88 14.52L7.18 14.41L7.49 14.33L7.8 14.29L8.1 14.29L8.4 14.33L8.68 14.39L8.95 14.5L9.2 14.63L9.43 14.78L9.63 14.96L9.8 15.16L9.94 15.37L10.06 15.6L10.14 15.82L10.2 16.06L10.22 16.29L10.21 16.51L10.18 16.73L10.13 16.94L10.05 17.13L9.95 17.3L9.83 17.46L9.69 17.59L9.55 17.71L9.4 17.8L9.24 17.87L9.08 17.91L8.92 17.94L8.77 17.94"/>',
+  sites: '<path d="M12 6.9c2.9-.1 5.2 2.2 5.1 5.1 0 2.9-2.3 5.2-5.2 5.1-2.8 0-5.1-2.3-5-5.2.1-2.8 2.3-5 5.1-5z"/><path d="M12 1.6v3M12 19.4v3M1.6 12h3M19.4 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1"/>',
+  people: '<circle cx="12" cy="4.4" r="2.1"/><path d="M10.4 7.4c-.9 1.9-1.2 4-1 6.1M13.6 7.4c.9 1.9 1.2 4 1 6.1M9.4 13.5c-.7 1.7-1.7 3-2.8 4.1M12 12.4v8.4M14.6 13.5c.7 1.7 1.7 3 2.8 4.1M10.8 14.4c-.2 1.8-.6 3.5-1.3 5M13.2 14.4c.2 1.8.6 3.5 1.3 5"/><circle cx="5" cy="6.6" r="1.7"/><path d="M3.8 9c-.7 1.5-.9 3.1-.8 4.7M6.2 9c.7 1.5.9 3.1.8 4.7M3 13.7c-.4 1.3-1 2.3-1.6 3.1M5 12.8v5.4M7 13.7c.4 1.3 1 2.3 1.4 3"/><circle cx="19" cy="6.6" r="1.7"/><path d="M20.2 9c.7 1.5.9 3.1.8 4.7M17.8 9c-.7 1.5-.9 3.1-.8 4.7M21 13.7c.4 1.3 1 2.3 1.6 3.1M19 12.8v5.4M17 13.7c-.4 1.3-1 2.3-1.4 3"/>',
+  "people-sprout": '<circle cx="6.6" cy="9.4" r="2.7"/><path d="M1.9 20.2c.2-3.2 2.2-5.3 4.7-5.3s4.5 2.1 4.7 5.3"/><circle cx="18" cy="11.3" r="2.1"/><path d="M14.4 20.2c.1-2.5 1.6-4.2 3.6-4.2s3.5 1.7 3.6 4.2"/><path d="M12.4 18.4c-.1-2.6-.1-5 .2-7.4"/><path d="M12.6 11.2c-.3-1.9-1.9-3.1-3.8-3 .2 1.9 1.8 3.2 3.8 3z"/><path d="M12.6 10.6c.5-2 2.3-3.2 4.3-2.9-.4 2-2.2 3.2-4.3 2.9z"/>',
+  calendar: '<path d="M5.4 18.6C4.2 10.6 9.4 3.9 20.6 3.4c.8 10.6-6 16.3-15.2 15.2z"/><path d="M2.6 21.4c4.7-4.7 9.6-9.6 14.8-14.8"/><path d="M8.3 15.7l-.6-3.5M8.3 15.7l3.5.5M11 13l-.3-4M11 13l4 .3M13.8 10.2l0-3.6M13.8 10.2l3.6.1"/>',
+  tao: '<path d="M12 2.9c5 0 9.1 4.1 9.1 9.1s-4.1 9.1-9.1 9.1-9.1-4.1-9.1-9.1S7 2.9 12 2.9z"/><path d="M12 2.9c2.5 0 4.5 2 4.5 4.6S14.5 12 12 12s-4.5 2-4.5 4.5 2 4.6 4.5 4.6"/><circle cx="12" cy="7.5" r=".8"/><circle cx="12" cy="16.5" r=".8"/>'
+}
+const JG_SPIRAL = 'M15.16 5.85L15.02 5.86L14.87 5.88L14.73 5.92L14.58 5.98L14.44 6.06L14.31 6.17L14.18 6.29L14.07 6.44L13.98 6.6L13.9 6.77L13.85 6.96L13.82 7.17L13.82 7.38L13.84 7.59L13.89 7.8L13.96 8.02L14.07 8.22L14.2 8.42L14.36 8.6L14.55 8.77L14.76 8.92L14.99 9.04L15.24 9.13L15.5 9.2L15.78 9.23L16.06 9.23L16.35 9.2L16.63 9.13L16.92 9.02L17.19 8.88L17.45 8.7L17.68 8.49L17.9 8.24L18.09 7.97L18.24 7.67L18.36 7.35L18.45 7.02L18.49 6.66L18.49 6.3L18.45 5.94L18.36 5.58L18.23 5.23L18.05 4.89L17.83 4.57L17.57 4.27L17.28 4L16.94 3.77L16.58 3.57L16.19 3.42L15.78 3.31L15.36 3.25L14.92 3.25L14.48 3.29L14.05 3.39L13.62 3.54L13.21 3.74L12.82 4L12.46 4.3L12.13 4.65L11.85 5.04L11.61 5.46L11.42 5.92L11.28 6.4L11.2 6.9C11.2 10.7 13 12.6 13 16.8L12.92 17.33L12.77 17.85L12.57 18.34L12.31 18.79L12 19.21L11.66 19.58L11.27 19.9L10.85 20.18L10.41 20.4L9.96 20.56L9.49 20.66L9.02 20.71L8.55 20.71L8.1 20.64L7.66 20.53L7.24 20.37L6.85 20.16L6.5 19.91L6.18 19.62L5.9 19.3L5.66 18.96L5.47 18.59L5.33 18.21L5.24 17.83L5.19 17.44L5.19 17.05L5.24 16.68L5.33 16.31L5.46 15.97L5.62 15.65L5.82 15.36L6.05 15.1L6.31 14.87L6.59 14.68L6.88 14.52L7.18 14.41L7.49 14.33L7.8 14.29L8.1 14.29L8.4 14.33L8.68 14.39L8.95 14.5L9.2 14.63L9.43 14.78L9.63 14.96L9.8 15.16L9.94 15.37L10.06 15.6L10.14 15.82L10.2 16.06L10.22 16.29L10.21 16.51L10.18 16.73L10.13 16.94L10.05 17.13L9.95 17.3L9.83 17.46L9.69 17.59L9.55 17.71L9.4 17.8L9.24 17.87L9.08 17.91L8.92 17.94L8.77 17.94'
+const JG_WATER_DEFS = '<defs class="nav-water-defs"><mask id="jg-mask-tasks" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><path d="' + JG_SPIRAL + '" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></mask></defs>'
+const JG_WATER = '<g class="nav-water" mask="url(#jg-mask-tasks)"><g class="nav-water-lvl"><path class="nav-wave" d="M-2 3C1 1.6 3 4.4 6 3S11 1.6 14 3 19 4.4 22 3 25 1.6 26 3V30H-2Z"/></g></g>'
+const NAV_ICON_ORIG = {}
+function jgPeopleIcon() { return localStorage.getItem('fieldy_jungle_people') === 'sprout' ? 'people-sprout' : 'people' }
+function setJgPeopleIcon(v) { try { localStorage.setItem('fieldy_jungle_people', v) } catch(e) {} jgNavIcons(true); updateNavRing(); renderCurrentScreen() }
+function jgNavIcons(force) {
+  document.querySelectorAll('#nav .nav-btn').forEach(function(btn) {
+    var k = btn.dataset.screen, svg = btn.querySelector('.nav-icon svg'); if(!svg) return
+    if(!(k in NAV_ICON_ORIG)) { var c = svg.cloneNode(true); c.querySelectorAll('.nav-water,.nav-water-defs').forEach(function(n){ n.remove() }); NAV_ICON_ORIG[k] = c.innerHTML }
+    var want = currentTheme === 'jungle' ? (k === 'people' ? jgPeopleIcon() : k) : null
+    if((svg.dataset.jg || null) === want && !force) return
+    svg.innerHTML = want ? JG_NAV_ICONS[want] : NAV_ICON_ORIG[k]
+    if(want) svg.dataset.jg = want; else delete svg.dataset.jg
+  })
+}
 function updateNavRing() {   // kept name: called from refreshBadges and applyTheme
+  jgNavIcons()
   var btn = document.querySelector('.nav-btn[data-screen="tasks"]')
   var svg = btn && btn.querySelector('.nav-icon svg')
   if(!svg) return
   var nav = document.getElementById('nav'), ind = nav.querySelector('.nav-ind')
-  if(currentTheme !== 'nachal') {
+  if(!nachalLike()) {
     svg.querySelectorAll('.nav-water,.nav-water-defs').forEach(function(n){ n.remove() })
     if(ind) ind.remove()
     btn.removeAttribute('aria-label'); navLevelLast = null; navIndX = null
     return
   }
   if(!ind) { nav.insertAdjacentHTML('afterbegin', '<span class="nav-ind" aria-hidden="true"></span>'); placeNavInd(false) }
-  if(!svg.querySelector('.nav-water')) svg.insertAdjacentHTML('afterbegin', NAV_WATER_DEFS + NAV_WATER)
+  if(!svg.querySelector('.nav-water')) { if(currentTheme === 'jungle') svg.insertAdjacentHTML('beforeend', JG_WATER_DEFS + JG_WATER); else svg.insertAdjacentHTML('afterbegin', NAV_WATER_DEFS + NAV_WATER) }
   var st = navTodayStats(), ratio = st.total ? st.done / st.total : 0
   btn.setAttribute('aria-label', tr('nav_tasks') + ': ' + tr('nav_tasks_progress').replace('{d}', st.done).replace('{t}', st.total))
   // while a drop is falling onto the icon the water waits for it to land
@@ -3153,7 +3335,7 @@ function placeNavInd(animate) {
 }
 window.addEventListener('resize', function(){ navIndX = null; placeNavInd(false) })
 function navRipple(btn) {
-  if(currentTheme !== 'nachal' || reducedMotion()) return
+  if(!nachalLike() || reducedMotion()) return
   var nav = document.getElementById('nav'), nr = nav.getBoundingClientRect(), ir = btn.querySelector('.nav-icon').getBoundingClientRect()
   for(var i = 0; i < 2; i++) {
     var r = document.createElement('span'); r.className = 'nav-rip'
@@ -3258,7 +3440,7 @@ function gardenWeekRollover() {
 // called from toggleTask when a task becomes done
 let gardenChain = Promise.resolve()
 function gardenOnComplete(task) {
-  if(currentTheme !== 'nachal') return
+  if(!nachalLike()) return
   const k = gardenRoll(task)
   const d = gardenDay()
   const closeDay = d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
@@ -3273,7 +3455,7 @@ function gardenOnComplete(task) {
 // "Done for today": closes the day by hand, once; a stone joins the pile
 function gardenDoneToday(e) {
   if(e) e.stopPropagation()
-  if(currentTheme !== 'nachal') return
+  if(!nachalLike()) return
   const d = gardenDay()
   if(d.closed) return
   d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true; saveGarden()
@@ -3343,7 +3525,7 @@ function gardenCairnHtml() {
   return '<div class="nh-cairn" style="width:' + W + 'px">' + h + '</div>'
 }
 function gardenHomeHtml() {
-  if(currentTheme !== 'nachal') return ''
+  if(!nachalLike()) return ''
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
     '<div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' +
     (garden.cairn.length || garden.leaves ? gardenCairnHtml() : '') +
@@ -3904,7 +4086,8 @@ function askFieldyHtml() {
 }
 
 function renderHome() {
-  if(currentTheme === 'nachal') { renderHomeNachal(); return }
+  if(currentTheme === 'jungle') { renderHomeJungle(); return }
+  if(nachalLike()) { renderHomeNachal(); return }
   const el = document.getElementById('screen-home')
   const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
   const done = all.filter(t=>t.done).length
@@ -4000,7 +4183,7 @@ function toggleMoodPanel() { moodPanelOpen = !moodPanelOpen; if(currentScreen ==
 // Right-now list, as rows with a small tick. Same ranking, same limit, same
 // mood bar, same completeFromFocus() — only tasks have a done state, so only
 // they get a tick; a focus line, a stuck site or an event shows its own icon.
-function rightNowNachalHtml(mood) {
+function rightNowNachalHtml(mood, heading) {
   const all = rankRightNow(mood)
   if(!all.length) return ''
   const limit = moodLimit(mood)
@@ -4017,7 +4200,7 @@ function rightNowNachalHtml(mood) {
   }
   const bar = limit ? moodLimitBarHtml(mood, hidden, 'margin:6px 0 0') : ''
   const more = (!limit && hidden > 0) ? `<div class="nh-rt2" style="padding:6px 2px 0">${tr('rn_more').replace('{n}', hidden)}</div>` : ''
-  return `<div class="nh-sec">${icon('target')} ${tr('rn_title')}</div>
+  return `<div class="nh-sec">${heading || icon('target') + ' ' + tr('rn_title')}</div>
     <div class="card glass nh-list">${shown.map((it, i) => row(it, i === 0)).join('')}${bar}${more}</div>`
 }
 
@@ -4083,6 +4266,129 @@ function renderHomeNachal() {
     <div class="nh-wa-zone" aria-hidden="true"></div>
     <button class="nh-wa" onclick="navigateTo('input')">${tr('home_add_whatsapp')}</button>
   `
+}
+
+// ── JUNGLE HOME ──────────────────────────────────
+// The enchanted-jungle Home has every part of the Nachal Home, in the same
+// order, with three changes of place: the progress bar becomes a flowering
+// vine right under the greeting, with "organise the day" and the mood leaf
+// straight after it; the WhatsApp capsule becomes a small button beside
+// settings; and the quote of the day moves into the closed "more" row.
+// Climbers grow only on cards (see vineDeco), never float in empty space.
+let jgLitLast = null
+function jgBranchOn() { return localStorage.getItem('fieldy_jungle_branch') !== '0' }
+function setJgBranch(on) { try { localStorage.setItem('fieldy_jungle_branch', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
+// the day's tasks as star flowers on a thin vine (the same count as Nachal's
+// progress bar): lit when done, pale while left; at most five flowers, so a
+// longer list lights them in proportion
+function jgBranchHtml(done, total) {
+  const n = Math.min(total, 5)
+  const lit = total ? (total <= 5 ? done : Math.round(done / total * 5)) : 0
+  const fresh = jgLitLast !== null && lit > jgLitLast && !reducedMotion()
+  const celebrate = fresh && total > 0 && done === total
+  const stars = Array.from({length: n}, (_, i) => {
+    const on = i < lit, x = n === 1 ? 50 : 8 + i * (84 / (n - 1))
+    return `<i class="jg-star${on ? ' on' : ''}${on && fresh && i >= jgLitLast ? ' new' : ''}" style="right:${x.toFixed(1)}%"></i>`
+  }).join('')
+  jgLitLast = lit
+  return `<div class="jg-branch${celebrate ? ' all' : ''}" role="img" aria-label="${tr('home_progress')}: ${done}/${total}">
+      <span class="jg-branch-n" aria-hidden="true">${done}/${total}</span>
+      <span class="jg-branch-v" aria-hidden="true">${stars}<i class="jg-spark" style="right:22%;top:18%"></i><i class="jg-spark" style="right:47%;top:70%;animation-delay:1.3s"></i><i class="jg-spark" style="right:73%;top:12%;animation-delay:2.4s"></i><i class="jg-spark" style="right:91%;top:64%;animation-delay:3.1s"></i></span>
+    </div>`
+}
+function renderHomeJungle() {
+  const el = document.getElementById('screen-home')
+  const all = [...state.tasks.now,...state.tasks.today,...state.tasks.later]
+  const done = all.filter(t=>t.done).length
+  const total = all.length
+  const curMood = getCurrentMood()
+  const moodDef = curMood ? MOOD_LIB[curMood.mood] : null
+  const nowCount = state.tasks.now.filter(t=>!t.done).length
+  const openSites = state.sites.filter(s=>s.status==='open'||s.status==='pending').length
+  const pendingPeople = state.people.filter(p=>p.pending).length
+  const pct = total ? Math.round((done/total)*100) : 0
+  const moodPatterns = getMoodPatterns()
+  const offline = !serverConfigured()
+
+  ensureDailyBriefing()
+  el.innerHTML = `
+    <div class="nh jg-home">
+      <div class="nh-top">
+        <div class="nh-head">
+          <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
+          <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-region">Region II · Cagayan Valley</div>
+          <div class="nh-stats">
+            <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
+            <button onclick="navigateTo('sites')"><b>${openSites}</b> ${tr('home_stat_sites')}</button><s>·</s>
+            <button onclick="navigateTo('people')"><b>${pendingPeople}</b> ${tr('home_stat_pending')}</button>
+          </div>
+        </div>
+        <div class="jg-btns">
+          <button class="nh-gear jg-wa" onclick="navigateTo('input')" aria-label="${tr('home_add_whatsapp')}" title="${tr('home_add_whatsapp')}">${icon('message-circle')}<em aria-hidden="true">+</em></button>
+          <button class="nh-gear" onclick="navigateTo('settings')" aria-label="${tr('settings_title')}">${icon('settings')}${offline ? '<u></u>' : ''}</button>
+        </div>
+      </div>
+      ${offline ? `<div class="jg-srv" onclick="navigateTo('settings')" role="button" tabindex="0">${icon('cloud')} <span><b>${tr('home_server_needed_title')}</b> · ${tr('home_server_needed_body')}</span></div>` : ''}
+      ${total > 0 ? (jgBranchOn() ? jgBranchHtml(done, total) : `<div class="nh-prog">
+        <div class="nh-prog-row"><span>${tr('home_progress')}</span><b>${done}/${total}</b></div>
+        <div class="nh-prog-bar"><i style="width:${pct}%"></i></div>
+      </div>`) : ''}
+      <div class="nh-tools">
+        <button class="nh-ask" onclick="navigateTo('input')">${icon('search')}<span>${tr('home_ask_organize')}</span></button>
+        <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
+      </div>
+      ${moodPanelOpen ? `<div class="nh-mood">${moodPickerHtml(curMood)}${moodTipHtml(curMood, moodDef)}</div>` : ''}
+      ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
+      ${rightNowNachalHtml(curMood ? curMood.mood : null, tr('jg_flow'))}
+      ${gardenHomeHtml()}
+      <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
+        <div>
+          <div class="nh-peek-t">${icon('wallet')} ${tr('home_petty_cash')}</div>
+          <div class="nh-peek-s">${tr('home_petty_cash_month').replace('{m}', currentMonthKey()).replace('{n}', pettyCashThisMonth().length)}</div>
+        </div>
+        <div class="nh-peek-n">₱${pettyCashMonthTotal().toLocaleString()}</div>
+      </div>
+      ${total===0&&!state.focus?`<div class="card">${emptyHtml(icon('clipboard'), tr('home_empty_start'), 'padding:24px 0')}</div>`:''}
+      ${accordionHtml('nh-more', {title:tr('home_more'), hint:tr('jg_more_hint')}, function(){
+        return ((function(){ var q = quotePanelHtml(); return q ? `<div class="nh-quote">${q}</div>` : '' })())
+          + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
+      }, 'margin-top:20px')}
+    </div>`
+}
+// A climber that grows on a card: anchored to one of its corners or edges and
+// reaching 8–16px past it, inside the card's own wrapper (overflow visible),
+// with the glow on the drawing only and a few still golden sparkles. One per
+// card, at most two on a screen, and only on these cards:
+//   Home: the briefing (a thin corner and a hoya cluster, warm gold) and the
+//         flow list (a thin vertical edge, mint);
+//   Tasks: the first task card (a fern from the bottom corner, mint);
+//   People: the first "waiting for an answer" card (pothos hanging from the side, mint);
+//   Sites: the first site card (a side vine along the edge, mint).
+const VINE_DECO = {
+  'corner-hoya': [['thin/thin-corner', 'gold', 'vd-corner', [[12, 14], [34, 8], [10, 40]]], ['large/hoya', 'gold', 'vd-hoya', [[38, 46], [62, 60], [48, 22]]]],
+  'edge':        [['thin/thin-vertical', 'mint', 'vd-edge', [[50, 18], [42, 52], [56, 80]]]],
+  'fern':        [['large/fern', 'mint', 'vd-fern', [[40, 30], [58, 58], [36, 78]]]],
+  'pothos':      [['large/pothos-fixed', 'mint', 'vd-pothos', [[44, 26], [60, 54], [40, 82]]]],
+  'side':        [['large/side-vine', 'mint', 'vd-side', [[46, 22], [58, 50], [40, 78], [54, 92]]]]
+}
+function vineDeco(kind) {
+  return `<span class="vine-deco vd-k-${kind}" aria-hidden="true">${VINE_DECO[kind].map(([file, tone, cls, sparks]) =>
+    `<span class="jg-vine jg-${tone} ${cls}"><b style="background-image:url('assets/vines/${file}.webp')"></b>${
+      sparks.map((p, i) => `<i style="left:${p[0]}%;top:${p[1]}%;animation-delay:${(i * 1.1).toFixed(1)}s"></i>`).join('')}</span>`).join('')}</span>`
+}
+function decorateCard(card, kind) {
+  if(!card || card.querySelector(':scope > .vine-deco')) return
+  card.classList.add('vd-host', 'vd-host-' + kind)
+  card.insertAdjacentHTML('afterbegin', vineDeco(kind))
+}
+function jungleDress(screen) {
+  if(currentTheme !== 'jungle') return
+  const el = document.getElementById('screen-' + screen); if(!el) return
+  if(screen === 'home') { decorateCard(el.querySelector('#daily-briefing'), 'corner-hoya'); decorateCard(el.querySelector('.nh-list'), 'edge') }
+  if(screen === 'tasks') { const c = el.querySelector('.nh-check'); decorateCard(c && c.closest('.card'), 'fern') }
+  if(screen === 'people' && state.people.some(p => p.pending)) decorateCard(el.querySelector('.card'), 'pothos')
+  if(screen === 'sites') decorateCard(el.querySelector('.site-card'), 'side')
 }
 
 // ── INPUT ────────────────────────────────────────
@@ -4430,8 +4736,8 @@ function renderTasks() {
       if(undone.length > limit || tasks.length > undone.length) { hiddenByMood = tasks.length - Math.min(limit, undone.length); tasks = undone.slice(0, limit) }
     }
   }
-  const NH = currentTheme === 'nachal'
-  const BCOLS = NH ? {now:NH_SOFT.rose,today:NH_SOFT.gold,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
+  const NH = nachalLike()
+  const BCOLS = currentTheme === 'jungle' ? {now:'#9E4136',today:'#3E5A44',later:'#495A4E'} : NH ? {now:NH_SOFT.rose,today:NH_SOFT.gold,later:NH_SOFT.neutral} : {now:'#ef4444',today:'#f59e0b',later:'#6b6255'}
   const BDOT = {now:'rose', today:'ochre'}
   const CTX = [['all',tr('btn_all')],['phone',icon('phone')],['office',icon('monitor')],['site',icon('map-pin')]]
 
@@ -4465,8 +4771,8 @@ function renderTasks() {
 function setTaskContextFilter(v) { taskContextFilter=v; renderTasks() }
 
 function taskCard(t) {
-  const NH = currentTheme === 'nachal'
-  const colors = NH ? {red:NH_SOFT.rose,orange:NH_SOFT.gold,green:NH_SOFT.mint} : {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
+  const NH = nachalLike()
+  const colors = currentTheme === 'jungle' ? {red:'#B4544A',orange:'#B98A3A',green:'#2C8C6F'} : NH ? {red:NH_SOFT.rose,orange:NH_SOFT.gold,green:NH_SOFT.mint} : {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
   const c = colors[t.color] || colors.orange
   const overdue = isOverdue(t)
   return `
@@ -4521,7 +4827,7 @@ function toggleTask(id) {
     }
   }
   // in the river theme the tasks icon's water waits for the drop to land
-  if(wasUndone && currentTheme === 'nachal' && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
+  if(wasUndone && nachalLike() && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
   setState(patch)
   if(wasUndone){
     gardenOnComplete(wasUndone)
@@ -5187,6 +5493,7 @@ function refreshSiteResults() {
   const b = document.getElementById('sites-selbar'); if(b) b.innerHTML = siteSelBarHtml()
   const el = document.getElementById('screen-sites'); if(el) el.toggleAttribute('data-selecting', siteSelectMode)
   positionSiteSelBar()
+  jungleDress('sites')
 }
 function sitesResultsHtml(sites) {
   const toks = searchTokens(siteQuery)
@@ -5543,6 +5850,7 @@ function sitesMapHtml(sites) {
       ${sel ? `<circle cx="${x}" cy="${y}" r="12" fill="none" stroke="var(--gold)" stroke-width="2"/>` : ''}
       <circle cx="${x}" cy="${y}" r="9" fill="var(--surface)"/>
       <circle cx="${x}" cy="${y}" r="7" fill="${col}"/>
+      ${currentTheme === 'jungle' ? `<circle cx="${(+x) - 2.4}" cy="${(+y) - 2.6}" r="2.2" fill="#fff" opacity=".85"/>` : ''}
       ${s.stuckSince ? `<circle cx="${(+x) + 7}" cy="${(+y) - 7}" r="4" fill="var(--stuck)" stroke="var(--surface)" stroke-width="1.5"/>` : ''}
       <text x="${x}" y="${(+y) + 22}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--t1)" stroke="var(--surface-3)" stroke-width="3" paint-order="stroke" style="font-family:inherit">${esc(s.name)}</text>
       <title>${esc(s.name)} · ${STATUS_LABEL[s.status] || esc(s.status)}${s.issue ? ' · ' + esc(s.issue) : ''}</title>
@@ -5623,15 +5931,15 @@ function siteStatusTagHtml(s, st, v, picking) {
   const label = STATUS_LABEL[st] || esc(st)
   const base = `class="tag tag-status-${esc(st)} site-status-tag` 
   const common = `aria-haspopup="menu" aria-expanded="${!!picking}" aria-label="סטטוס: ${label} — לחץ לשינוי" onclick="toggleStatusPicker(this.closest('[data-key]').dataset.key)"`
-  if(currentTheme !== 'nachal') return `<button ${base} wc" data-wc="${SITE_WC[st]||'rose'}" data-v="${v}" ${common}>${label}</button>`
-  const blob = st === 'open' && !s.stuckSince && siteHasBlob(s)
+  if(!nachalLike()) return `<button ${base} wc" data-wc="${SITE_WC[st]||'rose'}" data-v="${v}" ${common}>${label}</button>`
+  const blob = currentTheme === 'nachal' && st === 'open' && !s.stuckSince && siteHasBlob(s)
   return blob ? `<button ${base} wc" data-wc="rose" data-v="${v}" ${common}>${label}</button>`
     : `<button ${base} st-dot" data-dot="${SITE_WC[st]||'rose'}" ${common}>${label}</button>`
 }
 function siteStatusOptHtml(s, st, v) {
   const label = (s.status === st ? icon('check') + ' ' : '') + (STATUS_LABEL[st] || esc(st))
   const common = `role="menuitemradio" aria-checked="${s.status===st}" onclick="pickSiteStatus(${jsArg(s.name)},'${st}')"`
-  if(currentTheme !== 'nachal' || st === 'open')
+  if(!nachalLike() || (st === 'open' && currentTheme === 'nachal'))
     return `<button ${common} class="tag tag-status-${st} st-opt wc" data-wc="${SITE_WC[st]}" data-v="${1 + ((v + st.length) % 4)}">${label}</button>`
   return `<button ${common} class="tag tag-status-${st} st-opt st-dot" data-dot="${SITE_WC[st]}">${label}</button>`
 }
@@ -5653,7 +5961,7 @@ function siteCard(s, toks) {
       </div>
       <div class="site-tags" style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
         ${siteStatusTagHtml(s, s.status, v, picking)}
-        ${s.stuckSince ? (currentTheme === 'nachal' && !siteHasBlob(s)
+        ${s.stuckSince ? (nachalLike() && (currentTheme === 'jungle' || !siteHasBlob(s))
           ? `<span class="site-stuck-badge st-dot st-stuck" data-dot="rose">${icon('alert-triangle')} ${stuckPhrase(daysStuck(s))}</span>`
           : `<span class="site-stuck-badge wc" data-wc="rose" data-v="${1 + (v % 4)}" style="background:var(--stuck);color:#fff;font-size:var(--fs-xs);font-weight:700;border-radius:var(--radius-pill);padding:3px 9px;flex-shrink:0">${icon('alert-triangle')} ${stuckPhrase(daysStuck(s))}</span>`) : ''}
         <span class="site-more" aria-hidden="true">${icon('chevron-down')}</span>
@@ -5992,8 +6300,8 @@ function renderPeople() {
 }
 
 function personCard(p) {
-  const NH = currentTheme === 'nachal'
-  const rc = NH ? ({engineer:'var(--gold)',contractor:NH_SOFT.gold,nia:'#1F6E66',other:NH_SOFT.neutral}[p.role]||NH_SOFT.neutral)
+  const NH = nachalLike()
+  const rc = currentTheme === 'jungle' ? ({engineer:'var(--gold)',contractor:'#5A4E7A',nia:'#2C6B5E',other:'#495A4E'}[p.role]||'#495A4E') : NH ? ({engineer:'var(--gold)',contractor:NH_SOFT.gold,nia:'#1F6E66',other:NH_SOFT.neutral}[p.role]||NH_SOFT.neutral)
     : ({engineer:'var(--gold)',contractor:'#f59e0b',nia:'var(--gold2)',other:'#6b6255'}[p.role]||'#6b6255')
   return `
     <div class="card" style="border:1px solid ${p.pending?(NH?'#76560833':'#f59e0b33'):'transparent'};margin-bottom:8px">
@@ -6012,7 +6320,7 @@ function personCard(p) {
         </div>
       </div>
       ${p.pending?`<div style="margin-top:10px;padding:8px 10px;background:${NH?'var(--nh-soft-ctl)':'#f59e0b11'};border-radius:var(--radius-sm);border:1px solid ${NH?'#76560833':'#f59e0b22'}">
-        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${NH?`<span class="wc" data-wc="ochre" data-v="2">${icon('hourglass')} ממתין</span>`:`${icon('hourglass')} ממתין`}</div>
+        <div style="font-size:var(--fs-base);color:var(--amber);font-weight:700;margin-bottom:3px">${currentTheme === 'jungle' ? `<span class="st-dot" data-dot="ochre">ממתין</span>` : NH?`<span class="wc" data-wc="ochre" data-v="2">${icon('hourglass')} ממתין</span>`:`${icon('hourglass')} ממתין`}</div>
         <div style="font-size:var(--fs-base);color:var(--t2);line-height:1.5">${esc(p.pending)}</div>
       </div>`:''}
     </div>`
@@ -6146,6 +6454,10 @@ function renderSettings() {
               <div style="font-size:var(--fs-sm);font-weight:600;color:${on?accent:'var(--t2)'}">${esc(uiLang==='en' ? th.labelEn : th.label)}</div>
             </button>`}).join('')}
         </div>
+        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:var(--fs-base);color:var(--t1)">${tr('settings_jungle_people')}
+          ${['people','people-sprout'].map(v=>`<button onclick="setJgPeopleIcon('${v==='people'?'roots':'sprout'}')" aria-pressed="${jgPeopleIcon()===v}" aria-label="${tr(v==='people'?'settings_jungle_people_roots':'settings_jungle_people_sprout')}" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:2px solid ${jgPeopleIcon()===v?'var(--gold)':'var(--line)'};background:var(--surface)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${JG_NAV_ICONS[v]}</svg></button>`).join('')}
+        </div>` : ''}
       </div>
       <div class="card" style="margin-bottom:14px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:4px">${icon('volume-2')} ${tr('settings_feedback_title')}</div>
@@ -7513,7 +7825,7 @@ function startMeditationWithVoice(idx){
 
 // ── INIT ─────────────────────────────────────────
 applyTheme(currentTheme)
-if(currentTheme === 'nachal') gardenWeekRollover()
+if(nachalLike()) gardenWeekRollover()
 applyUiLangDom()
 checkChronology()
 refreshBadges()
