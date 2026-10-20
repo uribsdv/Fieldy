@@ -845,22 +845,49 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 #nh-fx .nh-rw img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
 #nh-fx .nh-rw.rare::before{content:'';position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(160,255,235,.8),rgba(160,255,235,0) 68%)}
 #nh-fx .nh-cap{position:absolute;transform:translate(-50%,0);padding:7px 14px;border-radius:99px;background:rgba(8,46,42,.82);color:#fff;font-size:15px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22)}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden{margin:12px 0;padding:14px 16px 12px;border-radius:22px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.26);
-  background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.3),rgba(120,230,210,0) 60%),#0C5C54}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t{font-size:var(--fs-base);font-weight:700}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:var(--fs-sm);font-weight:700}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-closed{font-size:var(--fs-sm);color:#E2EFE8}
-.nh-garden-empty{display:flex;gap:12px;align-items:center;padding:12px 2px 14px;font-size:var(--fs-base);line-height:1.5;color:#E6F1EB}
-.nh-garden-empty img{width:40px;height:40px;flex:none;opacity:.9}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+/* the garden card: the current painting fills it (cover, rounded), a dark gradient above and below keeps the title and the buttons readable */
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden{position:relative;overflow:hidden;margin:12px 0;height:310px;border-radius:24px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.3);
+  background:#0C3F38;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 14px 28px -16px rgba(0,0,0,.6)}
+.gs-win{position:absolute;inset:0;z-index:0;overflow:hidden}
+.gs{position:relative;width:100%;aspect-ratio:var(--ar)}
+.gs-win .gs{position:absolute;left:0;top:50%;transform:translateY(calc(var(--focal) * -100%))}
+.gs-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gs-old{animation:gs-out .6s ease both}
+.gs-new{animation:gs-in .6s ease both}
+@keyframes gs-in{from{opacity:0}to{opacity:1}}
+@keyframes gs-out{from{opacity:1}to{opacity:0}}
+.gs-it{position:absolute;pointer-events:none}
+.gs-it img{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.gs-glowing-ripple img{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
+.gs-fireflies img{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
+@keyframes gs-hover{50%{translate:0 -3px}}
+@keyframes gs-drift{50%{translate:3px 0}}
+@keyframes gs-glow{50%{opacity:.72}}
+.gs-dragonfly-teal img,.gs-dragonfly-amber img{animation:gs-hover 3.6s ease-in-out infinite}
+.gs-koi img,.gs-river-fish img{animation:gs-drift 7s ease-in-out infinite}
+.gs-fireflies img,.gs-glowing-ripple img{animation:gs-glow 4.5s ease-in-out infinite}
+.nh-garden-top{position:relative;z-index:2;padding:12px 16px 30px;background:linear-gradient(to bottom,rgba(4,26,22,.7),rgba(4,26,22,0))}
+.nh-garden-t{font-size:var(--fs-base);font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.nh-garden-t span{font-weight:400;color:#E8F3EC;margin-inline-start:6px}
+.gs-grew{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:99px;background:rgba(236,246,240,.94);color:#0B1A12;font-size:var(--fs-sm);font-weight:700;animation:gs-grew 4.2s ease both}
+@keyframes gs-grew{0%{opacity:0;transform:translateY(-4px)}10%,82%{opacity:1;transform:none}100%{opacity:0}}
+.nh-garden-pile{position:absolute;z-index:2;left:8px;bottom:56px;transform:scale(.62);transform-origin:left bottom;pointer-events:none}
+.nh-garden-acts{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:34px 16px 14px;background:linear-gradient(to top,rgba(4,26,22,.88) 30%,rgba(4,26,22,0))}
+.nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(6,30,25,.78);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:var(--fs-sm);font-weight:700}
+.nh-garden-closed{font-size:var(--fs-sm);color:#F0F8F3;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.nh-garden-empty{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(4,26,22,.74);font-size:var(--fs-base);line-height:1.5;color:#F0F8F3}
+.nh-garden-empty img{width:36px;height:36px;flex:none;opacity:.9}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.92);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
 .nh-cairn{position:relative;height:132px;margin:4px auto 0}
 .nh-cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .nh-cairn img.new{animation:nh-settle .55s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes nh-settle{from{transform:translateY(-70px) rotate(var(--rot,0deg));opacity:0}to{transform:translateY(0) rotate(var(--rot,0deg));opacity:1}}
-.nh-garden-pond{border-radius:20px;padding:12px 14px 6px;margin-bottom:12px;color:#fff;background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),#0C5C54}
-.nh-garden-pond-t{font-size:var(--fs-sm);color:#E2EFE8}
+.nh-garden-pond{position:relative;overflow:hidden;border-radius:20px;margin-bottom:12px;color:#fff;background:#0C3F38}
+.nh-garden-pond .gs{max-height:64vh;margin:0 auto;width:min(100%,calc(64vh * var(--ar)))}
+.nh-garden-pond-t{position:absolute;top:10px;left:12px;font-size:var(--fs-sm);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);background:rgba(4,26,22,.5);padding:3px 10px;border-radius:99px}
+.nh-garden-pond .nh-garden-pile{left:6px;bottom:10px;transform:scale(.78)}
+.nh-garden-pond .gs-grew{position:absolute;top:10px;right:12px;margin:0}
+.nh-garden-pond .nh-garden-empty{position:absolute;left:12px;right:12px;bottom:12px}
 .nh-garden-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .nh-tile{border-radius:18px;padding:10px 8px;text-align:center;background:rgba(255,255,255,.66);border:1px solid rgba(74,119,96,.22);color:var(--t1)}
 .nh-tile-art{height:72px;display:grid;place-items:center}
@@ -873,7 +900,7 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 .nh-tile:not(.locked) img[src$="glowing-ripple.png"],#nh-fx .nh-rw img[src$="glowing-ripple.png"]{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
 .nh-tile img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{transform:scale(1.4)}
 .nh-tile:not(.locked) img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
-@media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
+@media (prefers-reduced-motion:reduce){.gs-it img,.gs-old,.gs-new{animation:none!important}.gs-old{display:none}#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
   /* the app's own completion ring, too, in this theme */
   :is([data-theme="nachal"],[data-theme="jungle"]) .success-ring{animation:none!important;display:none}}
 /* ── Enchanted jungle ──
@@ -907,11 +934,7 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
 
 /* climbers */
-[data-theme="jungle"] .jg-vine{position:absolute;z-index:2;pointer-events:none}
-[data-theme="jungle"] .jg-vine b{position:absolute;inset:0;background:center/contain no-repeat}
-[data-theme="jungle"] .jg-mint b{filter:drop-shadow(0 0 8px var(--jg-mint))}
-[data-theme="jungle"] .jg-gold b{filter:drop-shadow(0 0 8px var(--jg-gold))}
-[data-theme="jungle"] :is(.jg-vine i,.jg-spark){position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
+[data-theme="jungle"] .jg-spark{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
   background:#FFE9AE;box-shadow:0 0 5px 1px rgba(255,218,130,.75);opacity:.55;animation:jg-twinkle 5s ease-in-out infinite}
 [data-theme="jungle"] .jg-spark{margin:-2px -2px 0 0}
 @keyframes jg-twinkle{0%,100%{opacity:.3}50%{opacity:1}}
@@ -935,19 +958,49 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
 [data-theme="jungle"] .jg-home .nh-tools{margin-top:16px}
 [data-theme="jungle"] .jg-home .nh-sec{margin-top:24px}
-/* climbers on cards: the card is the anchor (its wrapper lets the drawing
-   reach past its edge); each climber sits in the card's padding or outside
-   it, so text and buttons are never under one */
+/* the plant in the corner of the briefing card, as it was: a thin corner vine and a hoya cluster, golden glow, a few sparkles */
+[data-theme="jungle"] .jgc-host{position:relative;overflow:visible!important}
+[data-theme="jungle"] .jg-corner{position:absolute;inset:0;pointer-events:none;z-index:2}
+[data-theme="jungle"] .jgc{position:absolute;z-index:2;pointer-events:none}
+[data-theme="jungle"] .jgc b{position:absolute;inset:0;background:center/contain no-repeat;filter:drop-shadow(0 0 8px var(--jg-gold))}
+[data-theme="jungle"] .jgc i{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
+  background:#FFE9AE;box-shadow:0 0 5px 1px rgba(255,218,130,.75);opacity:.55;animation:jg-twinkle 5s ease-in-out infinite}
+[data-theme="jungle"] .jgc-corner{top:-14px;left:-14px;width:96px;height:98px}
+[data-theme="jungle"] .jgc-hoya{top:-44px;left:30px;width:40px;height:58px}
+/* climbers on cards. Those from main: a corner or side of one card, as they were. The card is the anchor (its wrapper lets the drawing
+   reach past its edge); each climber sits in the card's padding or outside it, so text and buttons are never under one. The glow is a
+   drop-shadow on the img itself; the sparkles are the small still gold ones. */
 [data-theme="jungle"] .vd-host{position:relative;overflow:visible!important}
 [data-theme="jungle"] .vine-deco{position:absolute;inset:0;pointer-events:none;z-index:2}
-[data-theme="jungle"] .vd-corner{top:-14px;left:-14px;width:96px;height:98px}
-[data-theme="jungle"] .vd-hoya{top:-44px;left:30px;width:40px;height:58px}
-[data-theme="jungle"] .vd-host-corner-hoya{padding-top:34px!important}
+[data-theme="jungle"] .jg-vine{position:absolute;z-index:2;pointer-events:none}
+[data-theme="jungle"] .jg-vine img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
+[data-theme="jungle"] .jg-mint img{filter:drop-shadow(0 0 8px var(--jg-mint))}
+[data-theme="jungle"] .jg-gold img{filter:drop-shadow(0 0 8px var(--jg-gold))}
+[data-theme="jungle"] .jg-vine i{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
+  background:#FFE9AE;box-shadow:0 0 5px 1px rgba(255,218,130,.75);opacity:.55;animation:jg-twinkle 5s ease-in-out infinite}
 [data-theme="jungle"] .vd-edge{left:-14px;top:16px;width:28px;height:170px}
 [data-theme="jungle"] .vd-fern{left:-12px;bottom:-18px;width:112px;height:56px}
-[data-theme="jungle"] .vd-fern b{inset:auto;left:50%;top:50%;width:56px;height:112px;transform:translate(-50%,-50%) rotate(90deg) scaleX(-1)}
+[data-theme="jungle"] .vd-fern img{inset:auto;left:50%;top:50%;width:56px;height:112px;transform:translate(-50%,-50%) rotate(90deg) scaleX(-1)}
 [data-theme="jungle"] .vd-pothos{left:-16px;top:62px;width:32px;height:82px}
 [data-theme="jungle"] .vd-side{right:-17px;top:8px;width:26px;height:84px}
+/* the climbers added on the other main cards: wrapped round the frame, half in the margin, half over the card's free padding.
+   The box clips (the screen's edge cuts the drawing off) and fades the top in so the vine starts out of the card's edge. */
+[data-theme="jungle"] .vn{position:absolute;pointer-events:none;overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 22px);mask-image:linear-gradient(to bottom,transparent 0,#000 22px)}
+[data-theme="jungle"] .vn img{position:absolute;top:0;display:block;image-rendering:auto;user-select:none;-webkit-user-drag:none}
+/* the glow is a drop-shadow on the drawing itself: no box, no background, no gradient behind it */
+[data-theme="jungle"] .vn-mint img{filter:drop-shadow(0 0 6px var(--jg-mint))}
+[data-theme="jungle"] .vn-gold img{filter:drop-shadow(0 0 6px var(--jg-gold))}
+[data-theme="jungle"] .vn i{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;opacity:.22;
+  animation:vn-spark 8s ease-in-out infinite;animation-delay:calc(var(--t) * 2.4s)}
+[data-theme="jungle"] .vn-mint i{background:#E2FFF2;box-shadow:0 0 5px 1px rgba(170,255,220,.85)}
+[data-theme="jungle"] .vn-gold i{background:#FFF1C8;box-shadow:0 0 5px 1px rgba(255,222,140,.85)}
+@keyframes vn-spark{0%,34%,100%{opacity:.22;transform:scale(.7)}14%{opacity:1;transform:scale(1.35)}}
+[data-theme="jungle"] .vn.vn-wave i{animation:vn-wave 1.4s ease-out 1 both;animation-delay:calc(var(--t) * .85s)}
+@keyframes vn-wave{0%{opacity:.22;transform:scale(.7)}35%{opacity:1;transform:scale(2.1)}100%{opacity:.22;transform:scale(.7)}}
+[data-theme="jungle"] .vn.vn-wave img{animation:vn-glow 1.4s ease-out 1}
+@keyframes vn-glow{35%{filter:drop-shadow(0 0 11px var(--jg-gold))}}
+[data-theme="jungle"] .vn.vn-off i{animation-play-state:paused}
 /* status: a glass bead and an ink word */
 [data-theme="jungle"] .st-dot{color:var(--t1)}
 [data-theme="jungle"] .st-dot[data-dot]{color:var(--t1)}
@@ -960,11 +1013,8 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .st-dot.st-stuck{height:26px;padding:0 10px!important;border-radius:13px;font-weight:700;color:var(--t1);
   background:linear-gradient(180deg,hsl(6 72% 89%),hsl(6 64% 82%))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px hsla(6,52%,54%,.42)!important}
 /* the garden and petty-cash cards join the light glass family */
-[data-theme="jungle"] :is(.nh-garden,.nh-peek){background:rgba(240,246,236,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.5)!important;color:var(--t1)!important}
-[data-theme="jungle"] :is(.nh-garden-t span,.nh-garden-closed,.nh-peek-s){color:var(--t2)!important}
-[data-theme="jungle"] .nh-garden-done{background:rgba(255,255,255,.6)!important;border-color:rgba(45,102,52,.45)!important;color:var(--t1)!important}
-[data-theme="jungle"] .nh-garden-b{background:var(--gold)!important;color:#fff!important}
-[data-theme="jungle"] .nh-garden-empty{color:var(--t2)}
+[data-theme="jungle"] .nh-peek{background:rgba(240,246,236,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.5)!important;color:var(--t1)!important}
+[data-theme="jungle"] .nh-peek-s{color:var(--t2)!important}
 /* no amber or brown ink left: the warm headings and notes Nachal tints gold become the room's light ink, or the card's */
 [data-theme="jungle"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:var(--nh-on-dark2)!important}
 [data-theme="jungle"] #screen-input [style*="color:var(--amber)"]{color:var(--t2)!important}
@@ -974,8 +1024,8 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 /* the nav stays Nachal's to the pixel: its ink is pinned to Nachal's */
 [data-theme="jungle"] #nav{--t1:#0B1A12;--t2:#34473D;--t3:#4A5A52;color:#0B1A12}
 @media (prefers-reduced-motion:reduce){
-  [data-theme="jungle"] :is(.jg-vine i,.jg-spark,.jg-star.new,.jg-branch.all .jg-branch-v){animation:none!important}
-  [data-theme="jungle"] :is(.jg-vine i,.jg-spark){opacity:.8}}
+  [data-theme="jungle"] :is(.jg-spark,.jg-star.new,.jg-branch.all .jg-branch-v,.vn i,.vn img,.jgc i,.jg-vine i){animation:none!important}
+  [data-theme="jungle"] :is(.jg-spark,.vn i,.jgc i,.jg-vine i){opacity:.8}}
 /* the jungle's nav: its own drawings at 26px in a finer line, and the chosen
    tab marked by a warm amber disc with a soft glow (it still springs from tab
    to tab like the drop); badges and the bar itself are Nachal's */
@@ -987,6 +1037,37 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
   box-shadow:0 0 18px 5px rgba(232,176,118,.5),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -6px 10px -6px rgba(110,62,24,.35)}
 [data-theme="jungle"] .nav-ind::before{display:none}
 [data-theme="jungle"] #badge-tasks{right:calc(50% - 25px)}
+/* the gnome's card: him in the start corner, a speech bubble, dots, and the briefing's own buttons below */
+[data-theme="jungle"] .gn-card{padding:14px 14px 12px}
+[data-theme="jungle"] .gn-row{display:flex;gap:10px;align-items:flex-end}
+[data-theme="jungle"] .gn-stage{position:relative;flex:none;width:124px;height:118px;animation:gn-breathe 4s ease-in-out infinite}
+[data-theme="jungle"] .gn-img{position:absolute;display:block;transform-origin:50% 100%;animation:gn-sway 6.5s ease-in-out infinite;filter:drop-shadow(0 3px 3px rgba(20,40,20,.28))}
+[data-theme="jungle"] .gn-orb{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,226,140,.85) 0,rgba(255,206,100,.4) 38%,rgba(255,200,90,0) 70%);mix-blend-mode:screen;animation:gn-glint 2.8s ease-in-out infinite}
+@keyframes gn-breathe{50%{transform:translateY(-2px)}}
+@keyframes gn-sway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}}
+@keyframes gn-glint{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+[data-theme="jungle"] .gn-card.gn-off :is(.gn-stage,.gn-img,.gn-orb){animation-play-state:paused}
+[data-theme="jungle"] .gn-card.asleep :is(.gn-stage,.gn-img){animation-duration:7s}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] :is(.gn-stage,.gn-img,.gn-orb){animation:none!important}[data-theme="jungle"] .gn-orb{opacity:.7}}
+[data-theme="jungle"] .gn-say{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-bottom:4px}
+[data-theme="jungle"] .gn-bubble{position:relative;min-height:74px;padding:10px 12px;border-radius:18px 18px 18px 6px;background:rgba(255,255,255,.72);border:1px solid rgba(45,102,52,.22);
+  box-shadow:0 6px 14px -10px rgba(10,40,20,.5);display:flex;flex-direction:column;justify-content:center;gap:3px}
+[data-theme="jungle"] .gn-bubble::after{content:'';position:absolute;right:-7px;bottom:12px;width:12px;height:12px;background:inherit;border-inline-end:1px solid rgba(45,102,52,.22);border-top:1px solid rgba(45,102,52,.22);transform:rotate(45deg) skew(8deg,8deg);border-radius:0 3px 0 0;display:none}
+[data-theme="jungle"] .gn-bubble[role="button"]{cursor:pointer}
+[data-theme="jungle"] .gn-k{font-size:12.5px;font-weight:700;color:var(--gold);line-height:1.2}
+[data-theme="jungle"] .gn-t{font-size:15px;font-weight:600;line-height:1.35;color:var(--t1);text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+[data-theme="jungle"] .gn-edit{position:absolute;bottom:22px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
+[data-theme="jungle"] .gn-dots{display:flex;gap:6px;justify-content:center}
+[data-theme="jungle"] .gn-dots i{width:7px;height:7px;border-radius:50%;background:rgba(45,102,52,.28)}
+[data-theme="jungle"] .gn-dots i.on{background:var(--gold);box-shadow:0 0 6px rgba(111,181,122,.8)}
+[data-theme="jungle"] .gn-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+[data-theme="jungle"] .gn-btn{min-height:40px;padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.55);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-sm);font-weight:700;display:inline-flex;align-items:center;gap:6px}
+[data-theme="jungle"] .gn-btn.hot{background:var(--gold);border-color:transparent;color:#fff}
+[data-theme="jungle"] .gn-btn:disabled{opacity:.6}
+[data-theme="jungle"] .gn-full{margin-top:10px}
+[data-theme="jungle"] .gn-full #daily-briefing{margin-bottom:10px!important}
+[data-theme="jungle"] .gn-close{margin-bottom:6px}
 /* the tick is a leaf: outlined while open, filled when done */
 [data-theme="jungle"] .nh-tick span,[data-theme="jungle"] #screen-tasks .nh-check{border-radius:100% 0 100% 0!important;box-shadow:none!important}
 [data-theme="jungle"] .nh-tick span{width:26px;height:26px;border:2px solid #3E7A4C;background:rgba(255,255,255,.55);color:transparent}
@@ -2056,6 +2137,11 @@ const TRANSLATIONS = {
   garden_open: {he:'פתח את הגן', en:'Open the garden'},
   garden_summary: {he:'{d} ימים נסגרו · {l} עלים', en:'{d} days closed · {l} leaves'},
   garden_kinds: {he:'מה שהנחל הביא לך · {f} מתוך {t} סוגים', en:'What the river brought you · {f} of {t} kinds'},
+  garden_grew: {he:'הגן גדל', en:'The garden grew'},
+  garden_stage_1: {he:'בריכה שמשית', en:'Sunny pond'},
+  garden_stage_2: {he:'יער קסום', en:'Fairy forest'},
+  garden_stage_3: {he:"ג'ונגל", en:'Jungle'},
+  garden_stage_4: {he:"ג'ונגל עמוק", en:'Deep jungle'},
   garden_calm: {he:'אין סטריק ואין מה להפסיד. ימים שקטים הם חלק מהנחל.', en:'No streak, nothing to lose. Quiet days are part of the river too.'},
   garden_not_yet: {he:'עוד לא נמצא', en:'Not found yet'},
   garden_waits: {he:'הנחל שומר לו מקום', en:'The river keeps a place for it'},
@@ -2095,6 +2181,19 @@ const TRANSLATIONS = {
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
   home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
   home_more: {he:'עוד', en:'More'},
+  gn_k_focus: {he:'משהו אחד חשוב היום', en:'One thing that matters today'},
+  gn_k_site: {he:'כדאי להציץ', en:'Worth a look'},
+  gn_k_habit: {he:'הרגל השבוע', en:"This week's habit"},
+  gn_k_ai: {he:'תובנה', en:'A thought'},
+  gn_more: {he:'ספר לי עוד', en:'Tell me more'},
+  gn_less: {he:'סגור את התדריך', en:'Close the briefing'},
+  gn_next: {he:'הבא', en:'Next'},
+  gn_done: {he:'היום הושלם. נחמד לעצור ולנשום.', en:'The day is done. A good moment to pause and breathe.'},
+  gn_night: {he:'ZZZ… ננוח עכשיו. מחר בבוקר אספר.', en:"ZZZ… resting now. I'll tell you in the morning."},
+  gn_nothing: {he:'אין מה לספר כרגע. אפשר לנוח.', en:'Nothing to tell right now. Time to rest.'},
+  gn_busy: {he:'רגע, אני כותב את התדריך…', en:"One moment, I'm writing the briefing…"},
+  gn_focus_add: {he:'מה הדבר החשוב היום? אפשר לכתוב כאן', en:"What matters today? You can write it here"},
+  settings_jungle_gnome: {he:'שדון מספר את התדריך', en:'A gnome tells the briefing'},
   jg_flow: {he:'המשך הזרימה', en:'Keep the flow'},
   jg_more_hint: {he:'ציטוט היום, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote of the day, insights, outside work, Ask Fieldy'},
   settings_jungle_branch: {he:'ענף התקדמות מתחת לברכה', en:'Progress vine under the greeting'},
@@ -2446,6 +2545,7 @@ let currentTheme = (function(){
 // Nachal and the jungle share a layout, the nav and the garden; the jungle adds its own Home and dressing.
 function nachalLike() { return currentTheme === 'nachal' || currentTheme === 'jungle' }
 function applyTheme(name) {
+  if(name !== 'jungle') document.querySelectorAll('.vn').forEach(v => v.remove())
   const t = THEMES[name] || THEMES[THEME_ALIASES[name]] || THEMES.original
   currentTheme = THEMES[name] ? name : (THEME_ALIASES[name] || 'original')
   try { localStorage.setItem('fieldy_theme', currentTheme) } catch(e) {}
@@ -3511,6 +3611,67 @@ async function gardenFlyFx(src, caption, rare) {
   cap.animate([{opacity: 0}, {opacity: 1, offset: .2}, {opacity: 1, offset: .72}, {opacity: 0}], {duration: 1700})
   await a.finished.catch(function(){}); el.remove(); cap.remove(); gardenLayerDone()
 }
+// ── the garden fills in ──
+// The garden is a painting that grows with the collection. Its stage follows
+// how many different kinds of the 11 have been found (0-2 a sunny pond, 3-5 a
+// fairy forest, 6-8 a jungle, 9-11 the deep jungle with its gate). Each found
+// kind is drawn on the painting as a sprite in a fixed place for that stage
+// (GARDEN_SCENES, in percent of the painting); a kind not yet found is not on
+// the painting, only a silhouette in the collection list below. The paintings
+// are deliberately empty of those creatures. A stage change cross-fades once.
+// Debug: ?gardenStage=1..4 and ?items=pebble,leaf,... (or items=all) draw any
+// stage with any items for screenshots; nothing is saved while they are used.
+const GARDEN_BBOX = {"dragonfly-amber":[256,256,46,67,209,187],"dragonfly-teal":[256,256,27,63,229,193],"fireflies":[256,256,79,83,174,172],"frog":[256,256,48,69,207,188],"glowing-ripple":[256,256,33,78,222,176],"koi":[256,256,62,74,192,182],"leaf":[512,512,165,127,347,384],"pebble":[512,512,148,136,364,376],"river-fish":[256,256,44,91,212,163],"water-lily-bud":[256,256,61,71,194,184],"water-lily":[256,256,25,57,231,199]}
+// x, y: where the centre of the visible drawing sits, w: its visible width, all in % of the painting;
+// op: opacity (creatures under the water)
+const GARDEN_SCENES = {
+  1: {src: 'stage1-sunny-pond.webp', ar: 720/1288, focal: .55, slots: {
+    'pebble': {x: 25, y: 56.5, w: 8}, 'leaf': {x: 72, y: 72, w: 9}, 'water-lily-bud': {x: 36, y: 52, w: 11}, 'water-lily': {x: 62, y: 48, w: 17},
+    'river-fish': {x: 44, y: 60, w: 14, op: .55}, 'koi': {x: 66, y: 58, w: 20, op: .6}, 'dragonfly-teal': {x: 30, y: 37, w: 15}, 'dragonfly-amber': {x: 70, y: 36, w: 14},
+    'frog': {x: 87, y: 48, w: 12}, 'fireflies': {x: 50, y: 33, w: 22}, 'glowing-ripple': {x: 50, y: 53, w: 30}}},
+  2: {src: 'stage2-fairy-forest.webp', ar: 720/1288, focal: .55, slots: {
+    'pebble': {x: 20, y: 59, w: 8}, 'leaf': {x: 60, y: 72, w: 9}, 'water-lily-bud': {x: 34, y: 50, w: 11}, 'water-lily': {x: 64, y: 47, w: 17},
+    'river-fish': {x: 40, y: 58, w: 14, op: .55}, 'koi': {x: 62, y: 57, w: 20, op: .6}, 'dragonfly-teal': {x: 28, y: 40, w: 15}, 'dragonfly-amber': {x: 72, y: 39, w: 14},
+    'frog': {x: 86, y: 57, w: 12}, 'fireflies': {x: 46, y: 36, w: 22}, 'glowing-ripple': {x: 50, y: 52, w: 30}}},
+  3: {src: 'stage3-jungle.webp', ar: 720/1288, focal: .56, slots: {
+    'pebble': {x: 24, y: 58.5, w: 8}, 'leaf': {x: 45, y: 87, w: 9}, 'water-lily-bud': {x: 38, y: 49, w: 11}, 'water-lily': {x: 60, y: 57, w: 16},
+    'river-fish': {x: 45, y: 67, w: 14, op: .55}, 'koi': {x: 63, y: 71, w: 20, op: .6}, 'dragonfly-teal': {x: 30, y: 44, w: 15}, 'dragonfly-amber': {x: 72, y: 44, w: 14},
+    'frog': {x: 88, y: 59, w: 12}, 'fireflies': {x: 46, y: 29, w: 20}, 'glowing-ripple': {x: 52, y: 57, w: 30}}},
+  4: {src: 'stage4-deep-jungle.webp', ar: 720/1558, focal: .5, slots: {
+    'pebble': {x: 22, y: 56, w: 8}, 'leaf': {x: 55, y: 86, w: 9}, 'water-lily-bud': {x: 38, y: 47, w: 11}, 'water-lily': {x: 62, y: 52, w: 16},
+    'river-fish': {x: 42, y: 66, w: 14, op: .5}, 'koi': {x: 64, y: 62, w: 20, op: .55}, 'dragonfly-teal': {x: 30, y: 41, w: 15}, 'dragonfly-amber': {x: 70, y: 40, w: 14},
+    'frog': {x: 86, y: 47, w: 11}, 'fireflies': {x: 50, y: 34, w: 20}, 'glowing-ripple': {x: 50, y: 56, w: 30}}}
+}
+const GARDEN_DEBUG = (function(){
+  try {
+    const q = new URLSearchParams(location.search), st = parseInt(q.get('gardenStage'), 10), it = q.get('items')
+    if(!(st >= 1 && st <= 4) && it === null) return null
+    return {stage: st >= 1 && st <= 4 ? st : 0, items: it === null ? null : (it === 'all' ? Object.keys(REWARDS) : it.split(',').filter(k => REWARDS[k]))}
+  } catch(e) { return null }
+})()
+function gardenFound() { return GARDEN_DEBUG && GARDEN_DEBUG.items ? GARDEN_DEBUG.items : Object.keys(REWARDS).filter(k => garden.items[k] > 0) }
+function gardenStageOf(n) { return n <= 2 ? 1 : n <= 5 ? 2 : n <= 8 ? 3 : 4 }
+function gardenStage() { return GARDEN_DEBUG && GARDEN_DEBUG.stage ? GARDEN_DEBUG.stage : gardenStageOf(gardenFound().length) }
+function gardenSceneHtml(stage, prevStage) {
+  const sc = GARDEN_SCENES[stage], found = gardenFound()
+  const items = found.filter(k => sc.slots[k]).map(function(k) {
+    const sl = sc.slots[k], b = GARDEN_BBOX[k], fw = (b[4] - b[2]) / b[0], dx = ((b[2] + b[4]) / 2 - b[0] / 2) / b[0] * 100, dy = ((b[3] + b[5]) / 2 - b[1] / 2) / b[1] * 100
+    return '<span class="gs-it gs-' + k + '" style="left:' + sl.x + '%;top:' + sl.y + '%;width:' + (sl.w / fw).toFixed(2) + '%;transform:translate(' + (-50 - dx).toFixed(2) + '%,' + (-50 - dy).toFixed(2) + '%)"><img alt="" src="' + rewardSrc(k) + '"' + (sl.op ? ' style="opacity:' + sl.op + '"' : '') + '></span>'
+  }).join('')
+  return '<div class="gs" data-stage="' + stage + '" style="--ar:' + sc.ar.toFixed(4) + ';--focal:' + sc.focal + '">' +
+    (prevStage ? '<img class="gs-bg gs-old" alt="" src="assets/garden/' + GARDEN_SCENES[prevStage].src + '">' : '') +
+    '<img class="gs-bg' + (prevStage ? ' gs-new' : '') + '" alt="" src="assets/garden/' + sc.src + '">' + items + '</div>'
+}
+// the scene to show now, and whether it just grew since the person last saw it.
+// The stage last seen is kept in the garden record (stageShown); an older record
+// without it just takes the current stage, so nothing animates the first time.
+function gardenSceneNow() {
+  const now = gardenStage(), seen = garden.stageShown
+  const grew = !GARDEN_DEBUG && seen !== undefined && now > seen
+  if(!GARDEN_DEBUG && seen !== now) { garden.stageShown = now; saveGarden() }
+  return {stage: now, prev: grew ? seen : 0, grew}
+}
+function gardenGrewHtml(sc) { return sc.grew ? '<div class="gs-grew" role="status">' + tr('garden_grew') + ' · ' + tr('garden_stage_' + sc.stage) + '</div>' : '' }
 // ── the pile of stones (Home) and the garden window
 function gardenCairnHtml() {
   const vis = garden.cairn.slice(-10), rows = [4, 3, 2, 1], W = 170
@@ -3528,9 +3689,11 @@ function gardenCairnHtml() {
 }
 function gardenHomeHtml() {
   if(!nachalLike()) return ''
+  const sc = gardenSceneNow()
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
-    '<div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' +
-    (garden.cairn.length || garden.leaves ? gardenCairnHtml() : '') +
+    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev) + '</div>' +
+    '<div class="nh-garden-top"><div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' + gardenGrewHtml(sc) + '</div>' +
+    (garden.cairn.length || garden.leaves ? '<div class="nh-garden-pile">' + gardenCairnHtml() + '</div>' : '') +
     '<div class="nh-garden-acts"><span class="nh-garden-b">' + tr('garden_open') + '</span>' +
     (gardenDay().closed ? '<span class="nh-garden-closed">' + tr('garden_today_closed') + '</span>'
       : '<button class="nh-garden-done" onclick="gardenDoneToday(event)">' + tr('garden_done_today') + '</button>') + '</div></div>'
@@ -3538,13 +3701,13 @@ function gardenHomeHtml() {
   return html
 }
 function showGarden() {
-  const ids = Object.keys(REWARDS), found = ids.filter(k => garden.items[k] > 0).length
+  const ids = Object.keys(REWARDS), found = gardenFound().length, sc = gardenSceneNow()
   openModal('<div class="nh-garden-sheet">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
     '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">' + tr('garden_kinds').replace('{f}', found).replace('{t}', ids.length) + '</div>' +
-    '<div class="nh-garden-pond">' + (garden.cairn.length || garden.leaves
-      ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div>' + gardenCairnHtml()
-      : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>') + '</div>' +
+    '<div class="nh-garden-pond">' + gardenSceneHtml(sc.stage, sc.prev) + gardenGrewHtml(sc) + (garden.cairn.length || garden.leaves
+      ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
+      : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -4276,7 +4439,7 @@ function renderHomeNachal() {
 // vine right under the greeting, with "organise the day" and the mood leaf
 // straight after it; the WhatsApp capsule becomes a small button beside
 // settings; and the quote of the day moves into the closed "more" row.
-// Climbers grow only on cards (see vineDeco), never float in empty space.
+// Vines grow between cards (see jungleVines), never float in empty space.
 let jgLitLast = null
 function jgBranchOn() { return localStorage.getItem('fieldy_jungle_branch') !== '0' }
 function setJgBranch(on) { try { localStorage.setItem('fieldy_jungle_branch', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
@@ -4341,7 +4504,7 @@ function renderHomeJungle() {
         <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
       </div>
       ${moodPanelOpen ? `<div class="nh-mood">${moodPickerHtml(curMood)}${moodTipHtml(curMood, moodDef)}</div>` : ''}
-      ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
+      ${gnomeOn() ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + gnomeSlotHtml() : (function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
       ${rightNowNachalHtml(curMood ? curMood.mood : null, tr('jg_flow'))}
       ${gardenHomeHtml()}
       <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
@@ -4357,40 +4520,292 @@ function renderHomeJungle() {
           + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
       }, 'margin-top:20px')}
     </div>`
+  gnomeAfterRender(); jungleDress('home')
 }
-// A climber that grows on a card: anchored to one of its corners or edges and
-// reaching 8–16px past it, inside the card's own wrapper (overflow visible),
-// with the glow on the drawing only and a few still golden sparkles. One per
-// card, at most two on a screen, and only on these cards:
-//   Home: the briefing (a thin corner and a hoya cluster, warm gold) and the
-//         flow list (a thin vertical edge, mint);
-//   Tasks: the first task card (a fern from the bottom corner, mint);
-//   People: the first "waiting for an answer" card (pothos hanging from the side, mint);
-//   Sites: the first site card (a side vine along the edge, mint).
+// ── THE GNOME (jungle): tells the morning briefing ──
+// In the jungle Home a small leaf-robed gnome stands in the corner of the
+// briefing card and tells it one bubble at a time, at most two lines each:
+// the most important thing, a site or two, the week's habit, the AI note.
+// Tapping the bubble brings the next; small dots show where you are; "tell me
+// more" opens the full briefing, exactly as it was (its own card, with
+// "review tasks" and "refresh" in it). "Review tasks", "refresh", editing the
+// focus line and the server note all stay (see the table in the commit
+// message). He waves once on the first visit of the day, reads while telling,
+// points at a site, thinks while the briefing is written, is glad when the
+// day is complete, sleeps after 22:00 or when there is nothing to tell.
+// Calm motion only, and none off-screen or with reduced motion. A switch in
+// Settings turns him off and the briefing is the card it used to be.
+// Alignment table: [width, height, hat-top y, foot y, head-centre x, staff-glow x, y], in the file's pixels.
+const GN_TAB = {"stand":[120,251,0,250,58.5,61,158],"stand-blink":[119,250,0,250,57.4,59,159],"idle-halfclosed":[148,247,0,247,78.6,13,89],"wave":[182,248,1,247,93.2,28,85],"wave-low":[201,229,0,229,91.3,14,79],"wave-mid":[185,229,0,229,91.7,8,76],"wave-high":[254,248,3,246,103.8,12,89],"read":[163,245,1,241,88.5,24,79],"point":[138,248,2,247,62.5,null,null],"think":[135,229,1,228,61.9,125,77],"joy":[163,229,0,226,80.4,null,null],"sleep":[265,230,0,199,116.2,null,null],"portrait":[168,233,1,231,83.5,null,null],"portrait-blink":[245,222,4,222,87.8,null,null]}
+const GN_SIZE = {w: 124, h: 118, body: 100}          // the stage, and the height of a standing body in it
+const GN_SCALE = {sleep: .8, portrait: .84, 'portrait-blink': .84}
+const GN_BLINK = {stand: 'stand-blink', wave: 'idle-halfclosed', portrait: 'portrait-blink'}
+let gnIdx = 0, gnFull = false, gnVisible = true, gnBlinkTimer = null, gnObs = null, gnGreet = null, gnWaved = false
+const GN_DEBUG = (function(){ try { const q = new URLSearchParams(location.search); return {hour: q.has('gnomeHour') ? +q.get('gnomeHour') : null, idx: q.has('gnomeIdx') ? +q.get('gnomeIdx') : null, pose: q.get('gnomePose'), greet: q.get('gnomeGreet') === '1'} } catch(e) { return {} } })()
+function gnomeOn() { return currentTheme === 'jungle' && localStorage.getItem('fieldy_jungle_gnome') !== '0' }
+function setGnome(on) { try { localStorage.setItem('fieldy_jungle_gnome', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
+function gnHour() { return GN_DEBUG.hour !== null && GN_DEBUG.hour !== undefined ? GN_DEBUG.hour : new Date().getHours() }
+function gnPoseHtml(key, extra) {
+  const t = GN_TAB[key], k = GN_SIZE.body * (GN_SCALE[key] || 1) / (t[3] - t[2]), w = t[0] * k, h = t[1] * k
+  const left = GN_SIZE.w / 2 - t[4] * k, top = GN_SIZE.h - 3 - t[3] * k
+  const sub = ['wave-low', 'wave-mid', 'wave-high', 'idle-halfclosed', 'portrait-blink', 'stand-blink'].indexOf(key) >= 0 ? 'frames' : 'poses'
+  const orb = t[5] != null && key !== 'sleep' ? '<i class="gn-orb" style="left:' + (left + t[5] * k).toFixed(1) + 'px;top:' + (top + t[6] * k).toFixed(1) + 'px"></i>' : ''
+  return '<img class="gn-img" alt="" data-pose="' + key + '" src="assets/gnome/' + sub + '/' + key + '.webp" style="left:' + left.toFixed(1) + 'px;top:' + top.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px">' + orb
+}
+function gnomeWaveToday() { const d = gardenDayKey(); if(localStorage.getItem('fieldy_gnome_wave') === d) return false; try { localStorage.setItem('fieldy_gnome_wave', d) } catch(e) {} return true }
+// what he has to say, in order; each: {kind, label, text, pose, edit}
+function gnItems(greet) {
+  const f = briefingFacts(), items = [], all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later]
+  const cached = (state.briefing && state.briefing.date === getToday() && state.briefing.text) ? state.briefing.text : ''
+  const doneAll = all.length > 0 && all.every(t => t.done)
+  if(greet) items.push({kind: 'greet', label: '', text: tr('home_greeting') + '.', pose: 'wave'})
+  if(doneAll) items.push({kind: 'done', label: '', text: tr('gn_done'), pose: 'joy'})
+  if(f.focus) items.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
+  else items.push({kind: 'focus', label: tr('gn_k_focus'), text: tr('gn_focus_add'), pose: 'stand', edit: true})
+  f.sites.slice(0, 2).forEach(s => items.push({kind: 'site', label: tr('gn_k_site'), text: s.name + ' · ' + s.why, pose: 'point'}))
+  if(f.lead && f.lead.theme) items.push({kind: 'habit', label: tr('gn_k_habit'), text: f.lead.theme + (String(f.lead.text || '').length <= 34 ? ' · ' + f.lead.text : ''), pose: 'read'})
+  if(cached) items.push({kind: 'ai', label: tr('gn_k_ai'), text: (cached.replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s/)[0]), pose: 'read'})
+  return items
+}
+function gnomeCardHtml() {
+  const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
+  if(gnGreet === null) gnGreet = GN_DEBUG.greet || ((GN_DEBUG.idx === null || GN_DEBUG.idx === undefined) && gnomeWaveToday())
+  const greet = gnGreet
+  const empty = !briefingHasContent(f)
+  let items = gnItems(greet && !night && !empty), item, pose, label = '', text, portrait = false
+  const wave = items.length && items[0].kind === 'greet' && !gnWaved
+  if(GN_DEBUG.idx !== null && GN_DEBUG.idx !== undefined) gnIdx = GN_DEBUG.idx
+  if(gnIdx >= items.length) gnIdx = 0
+  item = items[gnIdx] || {kind: 'none'}
+  if(briefingBusy) { pose = 'think'; text = tr('gn_busy') }
+  else if(briefingError) { pose = 'portrait'; text = tr('home_briefing_error_prefix') + ' ' + briefingError; portrait = true }
+  else if(night) { pose = 'sleep'; text = tr('gn_night') }
+  else if(empty) { pose = 'sleep'; text = tr('gn_nothing') }
+  else { pose = item.pose; label = item.label; text = item.text }
+  if(GN_DEBUG.pose && GN_TAB[GN_DEBUG.pose]) pose = GN_DEBUG.pose
+  const today = getToday(), reviewedToday = state.taskReviewedDate === today
+  const dots = items.length > 1 && !night && !empty && !briefingBusy ? '<div class="gn-dots" aria-hidden="true">' + items.map((_, i) => '<i' + (i === gnIdx ? ' class="on"' : '') + '></i>').join('') + '</div>' : ''
+  const bubbleTag = items.length > 1 && !night && !empty && !briefingBusy ? ' role="button" tabindex="0" aria-label="' + tr('gn_next') + '" onclick="gnNext()" onkeydown="if(event.key===\'Enter\')gnNext()"' : ''
+  const buttons = `<div class="gn-acts">
+      <button class="gn-btn" onclick="toggleGnFull()" aria-expanded="${gnFull}">${tr('gn_more')}</button>
+      <button id="task-review-toggle-btn" class="gn-btn${reviewedToday || taskReviewOpen ? '' : ' hot'}" onclick="toggleTaskReview()">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
+      ${serverConfigured() ? `<button id="briefing-refresh-btn" class="gn-btn" onclick="refreshBriefing()" ${briefingBusy ? 'disabled' : ''}>${icon('refresh')} ${briefingBusy ? tr('home_briefing_writing') : tr('home_briefing_refresh')}</button>` : ''}
+    </div>`
+  return `<div class="card gn-card${night || pose === 'sleep' ? ' asleep' : ''}" id="jg-gnome" data-pose="${pose}" data-kind="${item.kind}" data-wave="${wave && !reducedMotion() ? 1 : 0}">
+      <div class="gn-row">
+        <div class="gn-stage" aria-hidden="true">${gnPoseHtml(pose)}</div>
+        <div class="gn-say">
+          <div class="gn-bubble"${bubbleTag}>
+            ${label ? `<div class="gn-k">${label}</div>` : ''}
+            <div class="gn-t" aria-live="polite">${esc(text)}</div>
+          </div>
+          ${item.edit && !night && !empty ? `<button class="gn-edit" onclick="toggleFocusEdit(event)" aria-label="${tr('home_focus_add')}">${icon('edit')}</button>` : ''}
+          ${dots}
+        </div>
+      </div>
+      ${focusEditOpen && !gnFull ? `<div style="display:flex;gap:8px;margin-top:10px" onclick="event.stopPropagation()">
+        <input id="focus-edit-input" class="form-input" style="margin-bottom:0;flex:1" value="${esc(state.focus||'')}" placeholder="${tr('home_focus_placeholder')}"/>
+        <button onclick="saveFocusEdit(event)" class="jg-ok" aria-label="${tr('btn_save')}">${icon('check')}</button></div>` : ''}
+      ${gnFull ? '' : buttons}
+      ${taskReviewOpen && !gnFull ? taskReviewHtml() : ''}
+    </div>`
+}
+// the whole briefing slot: the gnome card, and under it the full briefing when asked for
+function gnomeSlotHtml() {
+  const full = gnFull ? dailyBriefingHtml() : ''
+  return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
+}
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); if(el.dataset.kind === 'greet') gnGreet = false; else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
+// motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
+function gnomeSet(img, key) { const t = GN_TAB[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
+function gnomeAfterRender() {
+  const card = document.getElementById('jg-gnome'); if(!card) return
+  if(gnObs) gnObs.disconnect()
+  if(window.IntersectionObserver) { gnObs = new IntersectionObserver(function(es){ gnVisible = es[0].isIntersecting; card.classList.toggle('gn-off', !gnVisible) }, {threshold: .1}); gnObs.observe(card) }
+  const img = card.querySelector('.gn-img')
+  if(card.dataset.wave === '1' && img && !reducedMotion()) {
+    card.dataset.wave = '0'; gnWaved = true; const base = card.dataset.pose, seq = ['wave-low', 'wave-mid', 'wave-high', 'wave-mid', 'wave-high', 'wave-mid', 'wave-low'];
+    seq.forEach(function(k, i){ setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, k) }, 250 + i * 190) })
+    setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, base) }, 250 + seq.length * 190)
+  }
+  clearTimeout(gnBlinkTimer)
+  const blink = function() {
+    gnBlinkTimer = setTimeout(function() {
+      const c = document.getElementById('jg-gnome'), im = c && c.querySelector('.gn-img')
+      if(c && im && gnVisible && !reducedMotion() && GN_BLINK[im.dataset.pose] && !c.classList.contains('asleep')) { const p = im.dataset.pose; gnomeSet(im, GN_BLINK[p]); setTimeout(function(){ if(im.isConnected) gnomeSet(im, p) }, 140) }
+      if(document.getElementById('jg-gnome')) blink()
+    }, 5000 + Math.random() * 3000)
+  }
+  blink()
+}
+
+// ── VINES BETWEEN THE CARDS (jungle) ──
+// A vine grows out from behind one card, hangs through a window opened in the
+// gap and lies over the top of the card below. The layering does it: every
+// card in a run gets a z-index one step lower than the card above, and the
+// vine sits between two of them, so it is hidden behind the upper card (its
+// cut end never shows) and drawn in front of the lower one; nothing wraps a
+// card and nothing sits behind a vine.
+// Size: every vine is drawn at exactly half the size of its file, so the file
+// holds twice the pixels the layout needs (a 3x phone gets 1.5x of them, never
+// less), nothing is enlarged and no filter blurs it. That puts the hanging
+// ── CLIMBERS ON CARDS (jungle) ──
+// Climbers grow on cards only: never on the bare page and never between two cards.
+// Two kinds. The ones from main (VINE_DECO): fixed to a corner or side of one card, as they were,
+// at their old size and place. And a few more (jungleExtras): on the main cards of each screen, one
+// to a card, small to medium, on the left and right in turn and of different kinds, wrapped round
+// the card's frame: part of the drawing in the margin, part over the card's own padding. The padding
+// part is measured, so nothing readable or touchable is under one (its box keeps 4px away from every
+// text line, icon and control); the edge of the screen cuts off what is out of view. At most three on
+// a screen counting the corner plant. The glow is a drop-shadow on the img itself; sparkles ride its
+// centre line, a slow wave of light runs down it every 8s while it is on screen, and finishing a task
+// sends one quicker wave down the nearest one. Static with reduced motion.
+// Line table: for each drawing, points along its centre line [position along, across] as fractions.
+const VN = {"fern":{"d":"hanging","w":125,"h":280,"tone":"mint","line":[[0.036,0.501],[0.107,0.486],[0.179,0.511],[0.25,0.514],[0.321,0.498],[0.393,0.542],[0.464,0.546],[0.536,0.555],[0.607,0.532],[0.679,0.504],[0.75,0.479],[0.821,0.473],[0.893,0.474],[0.964,0.482]]},"hoya":{"d":"hanging","w":124,"h":264,"tone":"gold","line":[[0.034,0.492],[0.104,0.487],[0.176,0.478],[0.248,0.485],[0.32,0.527],[0.392,0.493],[0.464,0.494],[0.534,0.564],[0.604,0.487],[0.676,0.348],[0.748,0.374],[0.82,0.498],[0.892,0.563],[0.964,0.428]]},"pothos":{"d":"hanging","w":124,"h":281,"tone":"mint","line":[[0.036,0.517],[0.107,0.488],[0.178,0.493],[0.249,0.537],[0.32,0.468],[0.391,0.521],[0.463,0.489],[0.534,0.555],[0.605,0.46],[0.676,0.56],[0.747,0.437],[0.819,0.509],[0.89,0.483],[0.963,0.46]]},"star-flower":{"d":"hanging","w":124,"h":278,"tone":"gold","line":[[0.034,0.525],[0.104,0.522],[0.176,0.584],[0.248,0.475],[0.32,0.635],[0.392,0.582],[0.464,0.545],[0.534,0.617],[0.604,0.554],[0.676,0.46],[0.748,0.485],[0.82,0.498],[0.892,0.517],[0.964,0.519]]},"string-hearts":{"d":"hanging","w":81,"h":264,"tone":"mint","line":[[0.034,0.499],[0.104,0.479],[0.176,0.489],[0.248,0.494],[0.32,0.418],[0.392,0.486],[0.464,0.547],[0.534,0.433],[0.604,0.479],[0.676,0.407],[0.748,0.581],[0.82,0.44],[0.892,0.398],[0.964,0.503]]}}
+const VN_ORDER = {home: ['pothos', 'string-hearts', 'hoya', 'fern', 'star-flower'], tasks: ['hoya', 'string-hearts', 'pothos', 'fern', 'star-flower'],
+  people: ['string-hearts', 'fern', 'hoya', 'pothos', 'star-flower'], sites: ['pothos', 'string-hearts', 'hoya', 'fern', 'star-flower']}
+const VN_SCALES = [.5, .55, .6]   // small to medium, never under half the file
+const VN_PAD = 14                 // room on the inner side for the glow (the box clips at its edge, not at the drawing)
+const VN_AIR = 4                  // how far the drawing's box keeps from any text, icon or control
+const VN_MAX = 3                  // on a screen, the corner plant and the climbers from main included
+let vnObs = null, vnRO = null, vnLast = 0
+function vnSrc(k) { return 'assets/vines/hanging/' + k + '.webp' }
+// side 'l'|'r'; box {x, y, v, w, h}: x is the box's outer edge (the screen's edge), v how much of the drawing shows,
+// w x h the drawing's size. The box is v + VN_PAD wide and clips: the screen's edge cuts the drawing off on the outside.
+function vnHtml(k, side, box, z) {
+  const t = VN[k], P = VN_PAD, bw = box.v + P, il = side === 'l' ? box.v - box.w : P
+  const n = Math.max(3, Math.round(box.h * .036))
+  const at = f => { const L = t.line; let i = 0; while(i < L.length - 1 && L[i + 1][0] < f) i++; const a = L[i], b = L[Math.min(i + 1, L.length - 1)], u = b[0] === a[0] ? 0 : Math.max(0, Math.min(1, (f - a[0]) / (b[0] - a[0]))); return a[1] + (b[1] - a[1]) * u }
+  let sp = ''
+  for(let i = 0; i < n; i++) { const f = (i + .5) / n, x = Math.max(3, Math.min(bw - 3, il + at(f) * box.w)); sp += '<i style="left:' + x.toFixed(1) + 'px;top:' + (f * box.h).toFixed(1) + 'px;--t:' + f.toFixed(2) + '"></i>' }
+  return '<span class="vn vn-' + t.tone + ' vn-' + side + '" aria-hidden="true" data-vine="' + k + '" data-side="' + side + '" style="left:' + box.x.toFixed(1) + 'px;top:' + box.y.toFixed(1) + 'px;width:' + bw.toFixed(1) + 'px;height:' + box.h.toFixed(1) + 'px;z-index:' + z + '"><img alt="" draggable="false" style="left:' + il.toFixed(1) + 'px;width:' + box.w.toFixed(1) + 'px;height:' + box.h.toFixed(1) + 'px" src="' + vnSrc(k) + '">' + sp + '</span>'
+}
+// the rectangles of everything readable or touchable inside root (text lines, controls, icons, pictures)
+function vnContent(root, skip) {
+  const out = [], push = r => { if(r.width > 0.5 && r.height > 0.5) out.push(r) }
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let n; while((n = w.nextNode())) { if(!n.textContent.trim() || (skip && skip(n.parentElement))) continue; const rg = document.createRange(); rg.selectNodeContents(n); Array.prototype.forEach.call(rg.getClientRects(), push) }
+  root.querySelectorAll('button,a,input,select,textarea,svg,img,.nh-tick,.nh-check').forEach(e => { if(!(skip && skip(e)) && !e.closest('.vn')) push(e.getBoundingClientRect()) })
+  return out
+}
+function vnClear(el) {
+  el.querySelectorAll('.vn').forEach(v => v.remove())
+  el.querySelectorAll('[data-vn]').forEach(c => { c.style.zIndex = ''; c.classList.remove('vn-card'); delete c.dataset.vn })
+}
+// ── the climbers from main: a corner or side of one card, as they were (see the list below for where)
 const VINE_DECO = {
-  'corner-hoya': [['thin/thin-corner', 'gold', 'vd-corner', [[12, 14], [34, 8], [10, 40]]], ['large/hoya', 'gold', 'vd-hoya', [[38, 46], [62, 60], [48, 22]]]],
-  'edge':        [['thin/thin-vertical', 'mint', 'vd-edge', [[50, 18], [42, 52], [56, 80]]]],
-  'fern':        [['large/fern', 'mint', 'vd-fern', [[40, 30], [58, 58], [36, 78]]]],
-  'pothos':      [['large/pothos-fixed', 'mint', 'vd-pothos', [[44, 26], [60, 54], [40, 82]]]],
-  'side':        [['large/side-vine', 'mint', 'vd-side', [[46, 22], [58, 50], [40, 78], [54, 92]]]]
+  'edge':   [['thin/thin-vertical', 'mint', 'vd-edge', [[50, 18], [42, 52], [56, 80]]]],
+  'fern':   [['large/fern', 'mint', 'vd-fern', [[40, 30], [58, 58], [36, 78]]]],
+  'pothos': [['large/pothos-fixed', 'mint', 'vd-pothos', [[44, 26], [60, 54], [40, 82]]]],
+  'side':   [['large/side-vine', 'mint', 'vd-side', [[46, 22], [58, 50], [40, 78], [54, 92]]]]
 }
 function vineDeco(kind) {
   return `<span class="vine-deco vd-k-${kind}" aria-hidden="true">${VINE_DECO[kind].map(([file, tone, cls, sparks]) =>
-    `<span class="jg-vine jg-${tone} ${cls}"><b style="background-image:url('assets/vines/${file}.webp')"></b>${
+    `<span class="jg-vine jg-${tone} ${cls}"><img alt="" draggable="false" src="assets/vines/${file}.webp">${
       sparks.map((p, i) => `<i style="left:${p[0]}%;top:${p[1]}%;animation-delay:${(i * 1.1).toFixed(1)}s"></i>`).join('')}</span>`).join('')}</span>`
 }
 function decorateCard(card, kind) {
-  if(!card || card.querySelector(':scope > .vine-deco')) return
+  if(!card || card.querySelector(':scope > .vine-deco')) return false
   card.classList.add('vd-host', 'vd-host-' + kind)
   card.insertAdjacentHTML('afterbegin', vineDeco(kind))
+  return true
+}
+// which cards a screen has: its container and the cards in order, and the one that carries a climber from main
+function vnScreen(screen) {
+  const el = document.getElementById('screen-' + screen); if(!el) return null
+  let container = null, cards = [], main = null, kind = null, extraFrom = []
+  if(screen === 'home') { container = el.querySelector('.jg-home'); if(container) { const list = container.querySelector('.nh-list'); main = list; kind = 'edge'; cards = [container.querySelector('#jg-gnome, #daily-briefing'), list, container.querySelector('.nh-garden'), container.querySelector('.nh-peek')].filter(Boolean); extraFrom = cards.filter(c => c !== list) } }
+  else if(screen === 'tasks') { const c0 = el.querySelector('.nh-check'); const card0 = c0 && c0.closest('.card'); if(card0) { container = card0.parentElement; main = card0; kind = 'fern'; cards = [...container.children].filter(c => c.matches('.card')).filter(c => c.querySelector('.nh-check')); extraFrom = cards.filter(c => c !== card0) } }
+  else if(screen === 'people') { const c0 = el.querySelector(':scope > div .card'); if(c0) { container = c0.parentElement; cards = [...container.children].filter(c => c.matches('.card')); main = state.people.some(p => p.pending) ? cards[0] : null; kind = 'pothos'; extraFrom = cards.filter(c => c !== main) } }
+  else if(screen === 'sites') { container = el.querySelector('#sites-results'); if(container) { cards = [...container.querySelectorAll(':scope > .site-card')]; main = cards[0]; kind = 'side'; extraFrom = cards.filter(c => c !== main) } }
+  return container && cards.length ? {el, container, cards, main, kind, extraFrom} : null
+}
+// where on card C a climber fits on one side: the drawing's top y, how much of it lies over the card's padding (ins) and how
+// much shows (v); null if nothing fits. rects are everything readable or touchable, relative to the container.
+function vnFit(C, side, w, h, margin, rects, wrap) {
+  for(let y = C.t - 6; y <= C.b - 24; y += 4) {
+    let depth = Infinity
+    for(const q of rects) { if(q.b < y - 2 || q.t > y + h + 2) continue
+      const near = side === 'l' ? q.l < C.l + 70 : q.r > C.r - 70; if(!near) continue
+      const d = side === 'l' ? q.l - C.l : C.r - q.r; if(d < depth) depth = d }
+    const ins = Math.max(0, Math.min(depth - VN_AIR, w * .45)), v = Math.min(w, margin + ins)
+    if((wrap ? ins >= 6 : true) && v / w >= .38 && v >= 22) return {y, ins, v}
+  }
+  return null
+}
+function jungleExtras(S, screen) {
+  const {container, el} = S, sr = el.getBoundingClientRect(), cr = container.getBoundingClientRect()
+  const rel = r => ({l: r.left - cr.left, r: r.right - cr.left, t: r.top - cr.top, b: r.bottom - cr.top})
+  const skip = e => !!e.closest('.vn')
+  const rects = vnContent(container, skip).map(rel)
+  container.querySelectorAll('.jgc, .jg-corner .jgc').forEach(e => rects.push(rel(e.getBoundingClientRect())))
+  const have = container.querySelectorAll('.vine-deco .jg-vine').length + container.querySelectorAll('.jg-corner').length
+  let budget = VN_MAX - have; if(budget <= 0) return
+  // one to a card; on lists, not on neighbours (every other card, counting from the one that carries a climber from main)
+  const idx = S.cards, bearers = S.main ? [idx.indexOf(S.main)] : []
+  const order = VN_ORDER[screen]
+  let side = screen === 'sites' ? 'l' : 'r', n = 0
+  const placed = [], html = [], used = new Set([...container.querySelectorAll('.vn')].map(v => v.dataset.vine))
+  for(const c of S.extraFrom) {
+    if(budget <= 0) break
+    const j = idx.indexOf(c); if(screen !== 'home' && bearers.some(b => Math.abs(b - j) < 2)) continue
+    const C = rel(c.getBoundingClientRect()); let got = null
+    for(const wrap of [true, false]) { if(got) break
+      for(const sd of [side, side === 'l' ? 'r' : 'l']) { if(got) break
+        const margin = sd === 'l' ? C.l - (sr.left - cr.left) : (sr.right - cr.left) - C.r
+        for(let o = 0; o < order.length && !got; o++) { const k = order[(n + o) % order.length]; if(used.has(k)) continue
+          for(const s of VN_SCALES) { const t = VN[k], w = t.w * s, h = t.h * s
+            const f = vnFit(C, sd, w, h, margin, rects.concat(placed.filter(p => p.side === sd).map(p => p.rect)), wrap)
+            if(f) { got = {k, sd, w, h, f, margin}; break } } } } }
+    if(!got) continue
+    const {k, sd, w, h, f} = got
+    const x = sd === 'l' ? sr.left - cr.left : C.r - f.ins - VN_PAD
+    placed.push({side: sd, rect: {l: sd === 'l' ? sr.left - cr.left : C.r - f.ins, r: sd === 'l' ? C.l + f.ins : sr.right - cr.left, t: f.y, b: f.y + h}})
+    html.push(vnHtml(k, sd, {x, y: f.y, v: f.v, w, h}, 300)); budget--; n++; used.add(k); bearers.push(j); side = sd === 'l' ? 'r' : 'l'
+  }
+  if(html.length) container.insertAdjacentHTML('beforeend', html.join(''))
+}
+function jungleVines(screen) {
+  const S0 = vnScreen(screen)
+  const el = document.getElementById('screen-' + screen); if(!el) return
+  vnClear(el)
+  if(currentTheme !== 'jungle' || !S0) return
+  const S = S0
+  if(getComputedStyle(S.container).position === 'static') S.container.style.position = 'relative'
+  S.container.style.isolation = 'isolate'
+  if(S.main && S.kind) decorateCard(S.main, S.kind)
+  jungleExtras(S, screen)
+  vnWatch(S.container, screen)
+}
+// on screen: the slow wave runs; off screen it pauses. A resize re-places the vines.
+function vnWatch(container, screen, animating) {
+  const vs = container.querySelectorAll('.vn')
+  if(window.IntersectionObserver) { if(!vnObs) vnObs = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('vn-off', !e.isIntersecting)), {threshold: .05}); vs.forEach(v => vnObs.observe(v)) }
+  if(window.ResizeObserver) { if(vnRO) vnRO.disconnect(); vnRO = new ResizeObserver(() => { if(Date.now() - vnLast < 900) return; vnLast = Date.now(); requestAnimationFrame(() => { if(currentScreen === screen) jungleVines(screen) }) }); vnRO.observe(container) }
+  vnLast = Date.now() + (animating ? 300 : 0)
+}
+// one quicker wave of light down the vine nearest the middle of the screen
+function vnWave(el) {
+  if(reducedMotion()) return
+  const vs = [...el.querySelectorAll('.vn')]; if(!vs.length) return
+  const mid = innerHeight / 2, v = vs.sort((a, b) => Math.abs(a.getBoundingClientRect().top - mid) - Math.abs(b.getBoundingClientRect().top - mid))[0]
+  v.classList.remove('vn-wave'); void v.offsetWidth; v.classList.add('vn-wave'); setTimeout(() => v.classList.remove('vn-wave'), 1800)
+}
+// ── the plant in the corner of the briefing card (the one Uri keeps from before): a thin corner vine and a hoya
+// cluster, golden glow and sparkles, fixed to the card's top-left corner and reaching a little beyond it.
+function jgCornerHtml() {
+  const part = (file, cls, sp) => '<span class="jgc ' + cls + '"><b style="background-image:url(\'assets/vines/' + file + '.webp\')"></b>' + sp.map((p, i) => '<i style="left:' + p[0] + '%;top:' + p[1] + '%;animation-delay:' + (i * 1.1).toFixed(1) + 's"></i>').join('') + '</span>'
+  return '<span class="jg-corner" aria-hidden="true">' + part('thin/thin-corner', 'jgc-corner', [[12, 14], [34, 8], [10, 40]]) + part('large/hoya', 'jgc-hoya', [[38, 46], [62, 60], [48, 22]]) + '</span>'
+}
+function jgCorner(card) {
+  if(!card || card.querySelector(':scope > .jg-corner')) return
+  card.classList.add('jgc-host'); card.insertAdjacentHTML('afterbegin', jgCornerHtml())
 }
 function jungleDress(screen) {
   if(currentTheme !== 'jungle') return
-  const el = document.getElementById('screen-' + screen); if(!el) return
-  if(screen === 'home') { decorateCard(el.querySelector('#daily-briefing'), 'corner-hoya'); decorateCard(el.querySelector('.nh-list'), 'edge') }
-  if(screen === 'tasks') { const c = el.querySelector('.nh-check'); decorateCard(c && c.closest('.card'), 'fern') }
-  if(screen === 'people' && state.people.some(p => p.pending)) decorateCard(el.querySelector('.card'), 'pothos')
-  if(screen === 'sites') decorateCard(el.querySelector('.site-card'), 'side')
+  if(screen === 'home') jgCorner(document.querySelector('#screen-home #jg-gnome, #screen-home #daily-briefing'))
+  jungleVines(screen)
 }
 
 // ── INPUT ────────────────────────────────────────
@@ -4832,6 +5247,7 @@ function toggleTask(id) {
   if(wasUndone && nachalLike() && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
   setState(patch)
   if(wasUndone){
+    if(currentTheme === 'jungle') { const sc = document.getElementById('screen-' + currentScreen); if(sc) vnWave(sc) }
     gardenOnComplete(wasUndone)
     playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
@@ -6456,7 +6872,8 @@ function renderSettings() {
               <div style="font-size:var(--fs-sm);font-weight:600;color:${on?accent:'var(--t2)'}">${esc(uiLang==='en' ? th.labelEn : th.label)}</div>
             </button>`}).join('')}
         </div>
-        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
+        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-gnome" ${gnomeOn()?'checked':''} onchange="setGnome(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_gnome')}</label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
         <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:var(--fs-base);color:var(--t1)">${tr('settings_jungle_people')}
           ${['people','people-sprout'].map(v=>`<button onclick="setJgPeopleIcon('${v==='people'?'roots':'sprout'}')" aria-pressed="${jgPeopleIcon()===v}" aria-label="${tr(v==='people'?'settings_jungle_people_roots':'settings_jungle_people_sprout')}" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:2px solid ${jgPeopleIcon()===v?'var(--gold)':'var(--line)'};background:var(--surface)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${JG_NAV_ICONS[v]}</svg></button>`).join('')}
         </div>` : ''}
