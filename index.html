@@ -845,22 +845,49 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 #nh-fx .nh-rw img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
 #nh-fx .nh-rw.rare::before{content:'';position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(160,255,235,.8),rgba(160,255,235,0) 68%)}
 #nh-fx .nh-cap{position:absolute;transform:translate(-50%,0);padding:7px 14px;border-radius:99px;background:rgba(8,46,42,.82);color:#fff;font-size:15px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22)}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden{margin:12px 0;padding:14px 16px 12px;border-radius:22px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.26);
-  background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),radial-gradient(circle at 70% 30%,rgba(120,230,210,.3),rgba(120,230,210,0) 60%),#0C5C54}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t{font-size:var(--fs-base);font-weight:700}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-t span{font-weight:400;color:#E2EFE8;margin-inline-start:6px}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:var(--fs-sm);font-weight:700}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-closed{font-size:var(--fs-sm);color:#E2EFE8}
-.nh-garden-empty{display:flex;gap:12px;align-items:center;padding:12px 2px 14px;font-size:var(--fs-base);line-height:1.5;color:#E6F1EB}
-.nh-garden-empty img{width:40px;height:40px;flex:none;opacity:.9}
-:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.88);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+/* the garden card: the current painting fills it (cover, rounded), a dark gradient above and below keeps the title and the buttons readable */
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden{position:relative;overflow:hidden;margin:12px 0;height:310px;border-radius:24px;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.3);
+  background:#0C3F38;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 14px 28px -16px rgba(0,0,0,.6)}
+.gs-win{position:absolute;inset:0;z-index:0;overflow:hidden}
+.gs{position:relative;width:100%;aspect-ratio:var(--ar)}
+.gs-win .gs{position:absolute;left:0;top:50%;transform:translateY(calc(var(--focal) * -100%))}
+.gs-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gs-old{animation:gs-out .6s ease both}
+.gs-new{animation:gs-in .6s ease both}
+@keyframes gs-in{from{opacity:0}to{opacity:1}}
+@keyframes gs-out{from{opacity:1}to{opacity:0}}
+.gs-it{position:absolute;pointer-events:none}
+.gs-it img{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.gs-glowing-ripple img{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
+.gs-fireflies img{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
+@keyframes gs-hover{50%{translate:0 -3px}}
+@keyframes gs-drift{50%{translate:3px 0}}
+@keyframes gs-glow{50%{opacity:.72}}
+.gs-dragonfly-teal img,.gs-dragonfly-amber img{animation:gs-hover 3.6s ease-in-out infinite}
+.gs-koi img,.gs-river-fish img{animation:gs-drift 7s ease-in-out infinite}
+.gs-fireflies img,.gs-glowing-ripple img{animation:gs-glow 4.5s ease-in-out infinite}
+.nh-garden-top{position:relative;z-index:2;padding:12px 16px 30px;background:linear-gradient(to bottom,rgba(4,26,22,.7),rgba(4,26,22,0))}
+.nh-garden-t{font-size:var(--fs-base);font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.nh-garden-t span{font-weight:400;color:#E8F3EC;margin-inline-start:6px}
+.gs-grew{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:99px;background:rgba(236,246,240,.94);color:#0B1A12;font-size:var(--fs-sm);font-weight:700;animation:gs-grew 4.2s ease both}
+@keyframes gs-grew{0%{opacity:0;transform:translateY(-4px)}10%,82%{opacity:1;transform:none}100%{opacity:0}}
+.nh-garden-pile{position:absolute;z-index:2;left:8px;bottom:56px;transform:scale(.62);transform-origin:left bottom;pointer-events:none}
+.nh-garden-acts{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:34px 16px 14px;background:linear-gradient(to top,rgba(4,26,22,.88) 30%,rgba(4,26,22,0))}
+.nh-garden-done{min-height:40px;padding:8px 16px;border-radius:99px;background:rgba(6,30,25,.78);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:var(--fs-sm);font-weight:700}
+.nh-garden-closed{font-size:var(--fs-sm);color:#F0F8F3;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.nh-garden-empty{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(4,26,22,.74);font-size:var(--fs-base);line-height:1.5;color:#F0F8F3}
+.nh-garden-empty img{width:36px;height:36px;flex:none;opacity:.9}
+:is([data-theme="nachal"],[data-theme="jungle"]) .nh-garden-b{display:inline-block;padding:8px 16px;border-radius:99px;background:rgba(226,240,232,.92);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
 .nh-cairn{position:relative;height:132px;margin:4px auto 0}
 .nh-cairn img{position:absolute;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
 .nh-cairn img.new{animation:nh-settle .55s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes nh-settle{from{transform:translateY(-70px) rotate(var(--rot,0deg));opacity:0}to{transform:translateY(0) rotate(var(--rot,0deg));opacity:1}}
-.nh-garden-pond{border-radius:20px;padding:12px 14px 6px;margin-bottom:12px;color:#fff;background:linear-gradient(180deg,rgba(3,40,38,.3),rgba(3,36,34,.55)),#0C5C54}
-.nh-garden-pond-t{font-size:var(--fs-sm);color:#E2EFE8}
+.nh-garden-pond{position:relative;overflow:hidden;border-radius:20px;margin-bottom:12px;color:#fff;background:#0C3F38}
+.nh-garden-pond .gs{max-height:64vh;margin:0 auto;width:min(100%,calc(64vh * var(--ar)))}
+.nh-garden-pond-t{position:absolute;top:10px;left:12px;font-size:var(--fs-sm);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);background:rgba(4,26,22,.5);padding:3px 10px;border-radius:99px}
+.nh-garden-pond .nh-garden-pile{left:6px;bottom:10px;transform:scale(.78)}
+.nh-garden-pond .gs-grew{position:absolute;top:10px;right:12px;margin:0}
+.nh-garden-pond .nh-garden-empty{position:absolute;left:12px;right:12px;bottom:12px}
 .nh-garden-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .nh-tile{border-radius:18px;padding:10px 8px;text-align:center;background:rgba(255,255,255,.66);border:1px solid rgba(74,119,96,.22);color:var(--t1)}
 .nh-tile-art{height:72px;display:grid;place-items:center}
@@ -873,7 +900,7 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 .nh-tile:not(.locked) img[src$="glowing-ripple.png"],#nh-fx .nh-rw img[src$="glowing-ripple.png"]{filter:drop-shadow(0 0 6px rgba(150,240,225,.9)) drop-shadow(0 0 16px rgba(120,230,215,.55))}
 .nh-tile img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{transform:scale(1.4)}
 .nh-tile:not(.locked) img[src$="fireflies.png"],#nh-fx .nh-rw img[src$="fireflies.png"]{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 12px rgba(255,200,90,.6))}
-@media (prefers-reduced-motion:reduce){#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
+@media (prefers-reduced-motion:reduce){.gs-it img,.gs-old,.gs-new{animation:none!important}.gs-old{display:none}#nh-fx .nh-splash,.nh-cairn img.new{animation:none}
   /* the app's own completion ring, too, in this theme */
   :is([data-theme="nachal"],[data-theme="jungle"]) .success-ring{animation:none!important;display:none}}
 /* ── Enchanted jungle ──
@@ -960,11 +987,8 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .st-dot.st-stuck{height:26px;padding:0 10px!important;border-radius:13px;font-weight:700;color:var(--t1);
   background:linear-gradient(180deg,hsl(6 72% 89%),hsl(6 64% 82%))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px hsla(6,52%,54%,.42)!important}
 /* the garden and petty-cash cards join the light glass family */
-[data-theme="jungle"] :is(.nh-garden,.nh-peek){background:rgba(240,246,236,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.5)!important;color:var(--t1)!important}
-[data-theme="jungle"] :is(.nh-garden-t span,.nh-garden-closed,.nh-peek-s){color:var(--t2)!important}
-[data-theme="jungle"] .nh-garden-done{background:rgba(255,255,255,.6)!important;border-color:rgba(45,102,52,.45)!important;color:var(--t1)!important}
-[data-theme="jungle"] .nh-garden-b{background:var(--gold)!important;color:#fff!important}
-[data-theme="jungle"] .nh-garden-empty{color:var(--t2)}
+[data-theme="jungle"] .nh-peek{background:rgba(240,246,236,var(--nh-card-a))!important;border:1px solid rgba(255,255,255,.5)!important;color:var(--t1)!important}
+[data-theme="jungle"] .nh-peek-s{color:var(--t2)!important}
 /* no amber or brown ink left: the warm headings and notes Nachal tints gold become the room's light ink, or the card's */
 [data-theme="jungle"] .screen > div[style*="padding"] > div[style*="color:var(--amber)"]{color:var(--nh-on-dark2)!important}
 [data-theme="jungle"] #screen-input [style*="color:var(--amber)"]{color:var(--t2)!important}
@@ -2056,6 +2080,11 @@ const TRANSLATIONS = {
   garden_open: {he:'פתח את הגן', en:'Open the garden'},
   garden_summary: {he:'{d} ימים נסגרו · {l} עלים', en:'{d} days closed · {l} leaves'},
   garden_kinds: {he:'מה שהנחל הביא לך · {f} מתוך {t} סוגים', en:'What the river brought you · {f} of {t} kinds'},
+  garden_grew: {he:'הגן גדל', en:'The garden grew'},
+  garden_stage_1: {he:'בריכה שמשית', en:'Sunny pond'},
+  garden_stage_2: {he:'יער קסום', en:'Fairy forest'},
+  garden_stage_3: {he:"ג'ונגל", en:'Jungle'},
+  garden_stage_4: {he:"ג'ונגל עמוק", en:'Deep jungle'},
   garden_calm: {he:'אין סטריק ואין מה להפסיד. ימים שקטים הם חלק מהנחל.', en:'No streak, nothing to lose. Quiet days are part of the river too.'},
   garden_not_yet: {he:'עוד לא נמצא', en:'Not found yet'},
   garden_waits: {he:'הנחל שומר לו מקום', en:'The river keeps a place for it'},
@@ -3511,6 +3540,67 @@ async function gardenFlyFx(src, caption, rare) {
   cap.animate([{opacity: 0}, {opacity: 1, offset: .2}, {opacity: 1, offset: .72}, {opacity: 0}], {duration: 1700})
   await a.finished.catch(function(){}); el.remove(); cap.remove(); gardenLayerDone()
 }
+// ── the garden fills in ──
+// The garden is a painting that grows with the collection. Its stage follows
+// how many different kinds of the 11 have been found (0-2 a sunny pond, 3-5 a
+// fairy forest, 6-8 a jungle, 9-11 the deep jungle with its gate). Each found
+// kind is drawn on the painting as a sprite in a fixed place for that stage
+// (GARDEN_SCENES, in percent of the painting); a kind not yet found is not on
+// the painting, only a silhouette in the collection list below. The paintings
+// are deliberately empty of those creatures. A stage change cross-fades once.
+// Debug: ?gardenStage=1..4 and ?items=pebble,leaf,... (or items=all) draw any
+// stage with any items for screenshots; nothing is saved while they are used.
+const GARDEN_BBOX = {"dragonfly-amber":[256,256,46,67,209,187],"dragonfly-teal":[256,256,27,63,229,193],"fireflies":[256,256,79,83,174,172],"frog":[256,256,48,69,207,188],"glowing-ripple":[256,256,33,78,222,176],"koi":[256,256,62,74,192,182],"leaf":[512,512,165,127,347,384],"pebble":[512,512,148,136,364,376],"river-fish":[256,256,44,91,212,163],"water-lily-bud":[256,256,61,71,194,184],"water-lily":[256,256,25,57,231,199]}
+// x, y: where the centre of the visible drawing sits, w: its visible width, all in % of the painting;
+// op: opacity (creatures under the water)
+const GARDEN_SCENES = {
+  1: {src: 'stage1-sunny-pond.webp', ar: 720/1288, focal: .55, slots: {
+    'pebble': {x: 25, y: 56.5, w: 8}, 'leaf': {x: 72, y: 72, w: 9}, 'water-lily-bud': {x: 36, y: 52, w: 11}, 'water-lily': {x: 62, y: 48, w: 17},
+    'river-fish': {x: 44, y: 60, w: 14, op: .55}, 'koi': {x: 66, y: 58, w: 20, op: .6}, 'dragonfly-teal': {x: 30, y: 37, w: 15}, 'dragonfly-amber': {x: 70, y: 36, w: 14},
+    'frog': {x: 87, y: 48, w: 12}, 'fireflies': {x: 50, y: 33, w: 22}, 'glowing-ripple': {x: 50, y: 53, w: 30}}},
+  2: {src: 'stage2-fairy-forest.webp', ar: 720/1288, focal: .55, slots: {
+    'pebble': {x: 20, y: 59, w: 8}, 'leaf': {x: 60, y: 72, w: 9}, 'water-lily-bud': {x: 34, y: 50, w: 11}, 'water-lily': {x: 64, y: 47, w: 17},
+    'river-fish': {x: 40, y: 58, w: 14, op: .55}, 'koi': {x: 62, y: 57, w: 20, op: .6}, 'dragonfly-teal': {x: 28, y: 40, w: 15}, 'dragonfly-amber': {x: 72, y: 39, w: 14},
+    'frog': {x: 86, y: 57, w: 12}, 'fireflies': {x: 46, y: 36, w: 22}, 'glowing-ripple': {x: 50, y: 52, w: 30}}},
+  3: {src: 'stage3-jungle.webp', ar: 720/1288, focal: .56, slots: {
+    'pebble': {x: 24, y: 58.5, w: 8}, 'leaf': {x: 45, y: 87, w: 9}, 'water-lily-bud': {x: 38, y: 49, w: 11}, 'water-lily': {x: 60, y: 57, w: 16},
+    'river-fish': {x: 45, y: 67, w: 14, op: .55}, 'koi': {x: 63, y: 71, w: 20, op: .6}, 'dragonfly-teal': {x: 30, y: 44, w: 15}, 'dragonfly-amber': {x: 72, y: 44, w: 14},
+    'frog': {x: 88, y: 59, w: 12}, 'fireflies': {x: 46, y: 29, w: 20}, 'glowing-ripple': {x: 52, y: 57, w: 30}}},
+  4: {src: 'stage4-deep-jungle.webp', ar: 720/1558, focal: .5, slots: {
+    'pebble': {x: 22, y: 56, w: 8}, 'leaf': {x: 55, y: 86, w: 9}, 'water-lily-bud': {x: 38, y: 47, w: 11}, 'water-lily': {x: 62, y: 52, w: 16},
+    'river-fish': {x: 42, y: 66, w: 14, op: .5}, 'koi': {x: 64, y: 62, w: 20, op: .55}, 'dragonfly-teal': {x: 30, y: 41, w: 15}, 'dragonfly-amber': {x: 70, y: 40, w: 14},
+    'frog': {x: 86, y: 47, w: 11}, 'fireflies': {x: 50, y: 34, w: 20}, 'glowing-ripple': {x: 50, y: 56, w: 30}}}
+}
+const GARDEN_DEBUG = (function(){
+  try {
+    const q = new URLSearchParams(location.search), st = parseInt(q.get('gardenStage'), 10), it = q.get('items')
+    if(!(st >= 1 && st <= 4) && it === null) return null
+    return {stage: st >= 1 && st <= 4 ? st : 0, items: it === null ? null : (it === 'all' ? Object.keys(REWARDS) : it.split(',').filter(k => REWARDS[k]))}
+  } catch(e) { return null }
+})()
+function gardenFound() { return GARDEN_DEBUG && GARDEN_DEBUG.items ? GARDEN_DEBUG.items : Object.keys(REWARDS).filter(k => garden.items[k] > 0) }
+function gardenStageOf(n) { return n <= 2 ? 1 : n <= 5 ? 2 : n <= 8 ? 3 : 4 }
+function gardenStage() { return GARDEN_DEBUG && GARDEN_DEBUG.stage ? GARDEN_DEBUG.stage : gardenStageOf(gardenFound().length) }
+function gardenSceneHtml(stage, prevStage) {
+  const sc = GARDEN_SCENES[stage], found = gardenFound()
+  const items = found.filter(k => sc.slots[k]).map(function(k) {
+    const sl = sc.slots[k], b = GARDEN_BBOX[k], fw = (b[4] - b[2]) / b[0], dx = ((b[2] + b[4]) / 2 - b[0] / 2) / b[0] * 100, dy = ((b[3] + b[5]) / 2 - b[1] / 2) / b[1] * 100
+    return '<span class="gs-it gs-' + k + '" style="left:' + sl.x + '%;top:' + sl.y + '%;width:' + (sl.w / fw).toFixed(2) + '%;transform:translate(' + (-50 - dx).toFixed(2) + '%,' + (-50 - dy).toFixed(2) + '%)"><img alt="" src="' + rewardSrc(k) + '"' + (sl.op ? ' style="opacity:' + sl.op + '"' : '') + '></span>'
+  }).join('')
+  return '<div class="gs" data-stage="' + stage + '" style="--ar:' + sc.ar.toFixed(4) + ';--focal:' + sc.focal + '">' +
+    (prevStage ? '<img class="gs-bg gs-old" alt="" src="assets/garden/' + GARDEN_SCENES[prevStage].src + '">' : '') +
+    '<img class="gs-bg' + (prevStage ? ' gs-new' : '') + '" alt="" src="assets/garden/' + sc.src + '">' + items + '</div>'
+}
+// the scene to show now, and whether it just grew since the person last saw it.
+// The stage last seen is kept in the garden record (stageShown); an older record
+// without it just takes the current stage, so nothing animates the first time.
+function gardenSceneNow() {
+  const now = gardenStage(), seen = garden.stageShown
+  const grew = !GARDEN_DEBUG && seen !== undefined && now > seen
+  if(!GARDEN_DEBUG && seen !== now) { garden.stageShown = now; saveGarden() }
+  return {stage: now, prev: grew ? seen : 0, grew}
+}
+function gardenGrewHtml(sc) { return sc.grew ? '<div class="gs-grew" role="status">' + tr('garden_grew') + ' · ' + tr('garden_stage_' + sc.stage) + '</div>' : '' }
 // ── the pile of stones (Home) and the garden window
 function gardenCairnHtml() {
   const vis = garden.cairn.slice(-10), rows = [4, 3, 2, 1], W = 170
@@ -3528,9 +3618,11 @@ function gardenCairnHtml() {
 }
 function gardenHomeHtml() {
   if(!nachalLike()) return ''
+  const sc = gardenSceneNow()
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
-    '<div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' +
-    (garden.cairn.length || garden.leaves ? gardenCairnHtml() : '') +
+    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev) + '</div>' +
+    '<div class="nh-garden-top"><div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' + gardenGrewHtml(sc) + '</div>' +
+    (garden.cairn.length || garden.leaves ? '<div class="nh-garden-pile">' + gardenCairnHtml() + '</div>' : '') +
     '<div class="nh-garden-acts"><span class="nh-garden-b">' + tr('garden_open') + '</span>' +
     (gardenDay().closed ? '<span class="nh-garden-closed">' + tr('garden_today_closed') + '</span>'
       : '<button class="nh-garden-done" onclick="gardenDoneToday(event)">' + tr('garden_done_today') + '</button>') + '</div></div>'
@@ -3538,13 +3630,13 @@ function gardenHomeHtml() {
   return html
 }
 function showGarden() {
-  const ids = Object.keys(REWARDS), found = ids.filter(k => garden.items[k] > 0).length
+  const ids = Object.keys(REWARDS), found = gardenFound().length, sc = gardenSceneNow()
   openModal('<div class="nh-garden-sheet">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
     '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">' + tr('garden_kinds').replace('{f}', found).replace('{t}', ids.length) + '</div>' +
-    '<div class="nh-garden-pond">' + (garden.cairn.length || garden.leaves
-      ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div>' + gardenCairnHtml()
-      : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>') + '</div>' +
+    '<div class="nh-garden-pond">' + gardenSceneHtml(sc.stage, sc.prev) + gardenGrewHtml(sc) + (garden.cairn.length || garden.leaves
+      ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
+      : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
