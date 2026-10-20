@@ -1011,6 +1011,37 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
   box-shadow:0 0 18px 5px rgba(232,176,118,.5),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -6px 10px -6px rgba(110,62,24,.35)}
 [data-theme="jungle"] .nav-ind::before{display:none}
 [data-theme="jungle"] #badge-tasks{right:calc(50% - 25px)}
+/* the gnome's card: him in the start corner, a speech bubble, dots, and the briefing's own buttons below */
+[data-theme="jungle"] .gn-card{padding:14px 14px 12px}
+[data-theme="jungle"] .gn-row{display:flex;gap:10px;align-items:flex-end}
+[data-theme="jungle"] .gn-stage{position:relative;flex:none;width:124px;height:118px;animation:gn-breathe 4s ease-in-out infinite}
+[data-theme="jungle"] .gn-img{position:absolute;display:block;transform-origin:50% 100%;animation:gn-sway 6.5s ease-in-out infinite;filter:drop-shadow(0 3px 3px rgba(20,40,20,.28))}
+[data-theme="jungle"] .gn-orb{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,226,140,.85) 0,rgba(255,206,100,.4) 38%,rgba(255,200,90,0) 70%);mix-blend-mode:screen;animation:gn-glint 2.8s ease-in-out infinite}
+@keyframes gn-breathe{50%{transform:translateY(-2px)}}
+@keyframes gn-sway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}}
+@keyframes gn-glint{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+[data-theme="jungle"] .gn-card.gn-off :is(.gn-stage,.gn-img,.gn-orb){animation-play-state:paused}
+[data-theme="jungle"] .gn-card.asleep :is(.gn-stage,.gn-img){animation-duration:7s}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] :is(.gn-stage,.gn-img,.gn-orb){animation:none!important}[data-theme="jungle"] .gn-orb{opacity:.7}}
+[data-theme="jungle"] .gn-say{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-bottom:4px}
+[data-theme="jungle"] .gn-bubble{position:relative;min-height:74px;padding:10px 12px;border-radius:18px 18px 18px 6px;background:rgba(255,255,255,.72);border:1px solid rgba(45,102,52,.22);
+  box-shadow:0 6px 14px -10px rgba(10,40,20,.5);display:flex;flex-direction:column;justify-content:center;gap:3px}
+[data-theme="jungle"] .gn-bubble::after{content:'';position:absolute;right:-7px;bottom:12px;width:12px;height:12px;background:inherit;border-inline-end:1px solid rgba(45,102,52,.22);border-top:1px solid rgba(45,102,52,.22);transform:rotate(45deg) skew(8deg,8deg);border-radius:0 3px 0 0;display:none}
+[data-theme="jungle"] .gn-bubble[role="button"]{cursor:pointer}
+[data-theme="jungle"] .gn-k{font-size:12.5px;font-weight:700;color:var(--gold);line-height:1.2}
+[data-theme="jungle"] .gn-t{font-size:15px;font-weight:600;line-height:1.35;color:var(--t1);text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+[data-theme="jungle"] .gn-edit{position:absolute;top:-6px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
+[data-theme="jungle"] .gn-dots{display:flex;gap:6px;justify-content:center}
+[data-theme="jungle"] .gn-dots i{width:7px;height:7px;border-radius:50%;background:rgba(45,102,52,.28)}
+[data-theme="jungle"] .gn-dots i.on{background:var(--gold);box-shadow:0 0 6px rgba(111,181,122,.8)}
+[data-theme="jungle"] .gn-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+[data-theme="jungle"] .gn-btn{min-height:40px;padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.55);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-sm);font-weight:700;display:inline-flex;align-items:center;gap:6px}
+[data-theme="jungle"] .gn-btn.hot{background:var(--gold);border-color:transparent;color:#fff}
+[data-theme="jungle"] .gn-btn:disabled{opacity:.6}
+[data-theme="jungle"] .gn-full{margin-top:10px}
+[data-theme="jungle"] .gn-full #daily-briefing{margin-bottom:10px!important}
+[data-theme="jungle"] .gn-close{margin-bottom:6px}
 /* the tick is a leaf: outlined while open, filled when done */
 [data-theme="jungle"] .nh-tick span,[data-theme="jungle"] #screen-tasks .nh-check{border-radius:100% 0 100% 0!important;box-shadow:none!important}
 [data-theme="jungle"] .nh-tick span{width:26px;height:26px;border:2px solid #3E7A4C;background:rgba(255,255,255,.55);color:transparent}
@@ -2124,6 +2155,19 @@ const TRANSLATIONS = {
   home_ask_fieldy_btn: {he:'שאל', en:'Ask'},
   home_ask_organize: {he:'ארגן את היום…', en:'Organise my day…'},
   home_more: {he:'עוד', en:'More'},
+  gn_k_focus: {he:'משהו אחד חשוב היום', en:'One thing that matters today'},
+  gn_k_site: {he:'כדאי להציץ', en:'Worth a look'},
+  gn_k_habit: {he:'הרגל השבוע', en:"This week's habit"},
+  gn_k_ai: {he:'תובנה', en:'A thought'},
+  gn_more: {he:'ספר לי עוד', en:'Tell me more'},
+  gn_less: {he:'סגור את התדריך', en:'Close the briefing'},
+  gn_next: {he:'הבא', en:'Next'},
+  gn_done: {he:'היום הושלם. נחמד לעצור ולנשום.', en:'The day is done. A good moment to pause and breathe.'},
+  gn_night: {he:'ZZZ… ננוח עכשיו. מחר בבוקר אספר.', en:"ZZZ… resting now. I'll tell you in the morning."},
+  gn_nothing: {he:'אין מה לספר כרגע. אפשר לנוח.', en:'Nothing to tell right now. Time to rest.'},
+  gn_busy: {he:'רגע, אני כותב את התדריך…', en:"One moment, I'm writing the briefing…"},
+  gn_focus_add: {he:'מה הדבר החשוב היום? אפשר לכתוב כאן', en:"What matters today? You can write it here"},
+  settings_jungle_gnome: {he:'שדון מספר את התדריך', en:'A gnome tells the briefing'},
   jg_flow: {he:'המשך הזרימה', en:'Keep the flow'},
   jg_more_hint: {he:'ציטוט היום, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote of the day, insights, outside work, Ask Fieldy'},
   settings_jungle_branch: {he:'ענף התקדמות מתחת לברכה', en:'Progress vine under the greeting'},
@@ -4433,7 +4477,7 @@ function renderHomeJungle() {
         <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
       </div>
       ${moodPanelOpen ? `<div class="nh-mood">${moodPickerHtml(curMood)}${moodTipHtml(curMood, moodDef)}</div>` : ''}
-      ${(function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
+      ${gnomeOn() ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + gnomeSlotHtml() : (function(){ var b = dailyBriefingHtml(); return b ? `<div class="nh-sec">${tr('home_focus_heading')}</div>` + b : '' })()}
       ${rightNowNachalHtml(curMood ? curMood.mood : null, tr('jg_flow'))}
       ${gardenHomeHtml()}
       <div class="nh-peek" onclick="showPettyCashModal()" role="button" tabindex="0">
@@ -4449,7 +4493,126 @@ function renderHomeJungle() {
           + insightsAccordionHtml(moodPatterns) + outsideWorkHtml() + askFieldyHtml()
       }, 'margin-top:20px')}
     </div>`
+  gnomeAfterRender(); jungleDress('home')
 }
+// ── THE GNOME (jungle): tells the morning briefing ──
+// In the jungle Home a small leaf-robed gnome stands in the corner of the
+// briefing card and tells it one bubble at a time, at most two lines each:
+// the most important thing, a site or two, the week's habit, the AI note.
+// Tapping the bubble brings the next; small dots show where you are; "tell me
+// more" opens the full briefing, exactly as it was (its own card, with
+// "review tasks" and "refresh" in it). "Review tasks", "refresh", editing the
+// focus line and the server note all stay (see the table in the commit
+// message). He waves once on the first visit of the day, reads while telling,
+// points at a site, thinks while the briefing is written, is glad when the
+// day is complete, sleeps after 22:00 or when there is nothing to tell.
+// Calm motion only, and none off-screen or with reduced motion. A switch in
+// Settings turns him off and the briefing is the card it used to be.
+// Alignment table: [width, height, hat-top y, foot y, head-centre x, staff-glow x, y], in the file's pixels.
+const GN_TAB = {"stand":[120,251,0,250,58.5,61,158],"stand-blink":[119,250,0,250,57.4,59,159],"idle-halfclosed":[148,247,0,247,78.6,13,89],"wave":[182,248,1,247,93.2,28,85],"wave-low":[201,229,0,229,91.3,14,79],"wave-mid":[185,229,0,229,91.7,8,76],"wave-high":[254,248,3,246,103.8,12,89],"read":[163,245,1,241,88.5,24,79],"point":[138,248,2,247,62.5,null,null],"think":[135,229,1,228,61.9,125,77],"joy":[163,229,0,226,80.4,null,null],"sleep":[265,230,0,199,116.2,null,null],"portrait":[168,233,1,231,83.5,null,null],"portrait-blink":[245,222,4,222,87.8,null,null]}
+const GN_SIZE = {w: 124, h: 118, body: 100}          // the stage, and the height of a standing body in it
+const GN_SCALE = {sleep: .8, portrait: .84, 'portrait-blink': .84}
+const GN_BLINK = {stand: 'stand-blink', wave: 'idle-halfclosed', portrait: 'portrait-blink'}
+let gnIdx = 0, gnFull = false, gnVisible = true, gnBlinkTimer = null, gnObs = null, gnGreet = null, gnWaved = false
+const GN_DEBUG = (function(){ try { const q = new URLSearchParams(location.search); return {hour: q.has('gnomeHour') ? +q.get('gnomeHour') : null, idx: q.has('gnomeIdx') ? +q.get('gnomeIdx') : null, pose: q.get('gnomePose'), greet: q.get('gnomeGreet') === '1'} } catch(e) { return {} } })()
+function gnomeOn() { return currentTheme === 'jungle' && localStorage.getItem('fieldy_jungle_gnome') !== '0' }
+function setGnome(on) { try { localStorage.setItem('fieldy_jungle_gnome', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
+function gnHour() { return GN_DEBUG.hour !== null && GN_DEBUG.hour !== undefined ? GN_DEBUG.hour : new Date().getHours() }
+function gnPoseHtml(key, extra) {
+  const t = GN_TAB[key], k = GN_SIZE.body * (GN_SCALE[key] || 1) / (t[3] - t[2]), w = t[0] * k, h = t[1] * k
+  const left = GN_SIZE.w / 2 - t[4] * k, top = GN_SIZE.h - 3 - t[3] * k
+  const sub = ['wave-low', 'wave-mid', 'wave-high', 'idle-halfclosed', 'portrait-blink', 'stand-blink'].indexOf(key) >= 0 ? 'frames' : 'poses'
+  const orb = t[5] != null && key !== 'sleep' ? '<i class="gn-orb" style="left:' + (left + t[5] * k).toFixed(1) + 'px;top:' + (top + t[6] * k).toFixed(1) + 'px"></i>' : ''
+  return '<img class="gn-img" alt="" data-pose="' + key + '" src="assets/gnome/' + sub + '/' + key + '.webp" style="left:' + left.toFixed(1) + 'px;top:' + top.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px">' + orb
+}
+function gnomeWaveToday() { const d = gardenDayKey(); if(localStorage.getItem('fieldy_gnome_wave') === d) return false; try { localStorage.setItem('fieldy_gnome_wave', d) } catch(e) {} return true }
+// what he has to say, in order; each: {kind, label, text, pose, edit}
+function gnItems(greet) {
+  const f = briefingFacts(), items = [], all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later]
+  const cached = (state.briefing && state.briefing.date === getToday() && state.briefing.text) ? state.briefing.text : ''
+  const doneAll = all.length > 0 && all.every(t => t.done)
+  if(greet) items.push({kind: 'greet', label: '', text: tr('home_greeting') + '.', pose: 'wave'})
+  if(doneAll) items.push({kind: 'done', label: '', text: tr('gn_done'), pose: 'joy'})
+  if(f.focus) items.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
+  else items.push({kind: 'focus', label: tr('gn_k_focus'), text: tr('gn_focus_add'), pose: 'stand', edit: true})
+  f.sites.slice(0, 2).forEach(s => items.push({kind: 'site', label: tr('gn_k_site'), text: s.name + ' · ' + s.why, pose: 'point'}))
+  if(f.lead && f.lead.theme) items.push({kind: 'habit', label: tr('gn_k_habit'), text: f.lead.theme + (String(f.lead.text || '').length <= 34 ? ' · ' + f.lead.text : ''), pose: 'read'})
+  if(cached) items.push({kind: 'ai', label: tr('gn_k_ai'), text: (cached.replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s/)[0]), pose: 'read'})
+  return items
+}
+function gnomeCardHtml() {
+  const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
+  if(gnGreet === null) gnGreet = GN_DEBUG.greet || ((GN_DEBUG.idx === null || GN_DEBUG.idx === undefined) && gnomeWaveToday())
+  const greet = gnGreet
+  const empty = !briefingHasContent(f)
+  let items = gnItems(greet && !night && !empty), item, pose, label = '', text, portrait = false
+  const wave = items.length && items[0].kind === 'greet' && !gnWaved
+  if(GN_DEBUG.idx !== null && GN_DEBUG.idx !== undefined) gnIdx = GN_DEBUG.idx
+  if(gnIdx >= items.length) gnIdx = 0
+  item = items[gnIdx] || {kind: 'none'}
+  if(briefingBusy) { pose = 'think'; text = tr('gn_busy') }
+  else if(briefingError) { pose = 'portrait'; text = tr('home_briefing_error_prefix') + ' ' + briefingError; portrait = true }
+  else if(night) { pose = 'sleep'; text = tr('gn_night') }
+  else if(empty) { pose = 'sleep'; text = tr('gn_nothing') }
+  else { pose = item.pose; label = item.label; text = item.text }
+  if(GN_DEBUG.pose && GN_TAB[GN_DEBUG.pose]) pose = GN_DEBUG.pose
+  const today = getToday(), reviewedToday = state.taskReviewedDate === today
+  const dots = items.length > 1 && !night && !empty && !briefingBusy ? '<div class="gn-dots" aria-hidden="true">' + items.map((_, i) => '<i' + (i === gnIdx ? ' class="on"' : '') + '></i>').join('') + '</div>' : ''
+  const bubbleTag = items.length > 1 && !night && !empty && !briefingBusy ? ' role="button" tabindex="0" aria-label="' + tr('gn_next') + '" onclick="gnNext()" onkeydown="if(event.key===\'Enter\')gnNext()"' : ''
+  const buttons = `<div class="gn-acts">
+      <button class="gn-btn" onclick="toggleGnFull()" aria-expanded="${gnFull}">${tr('gn_more')}</button>
+      <button id="task-review-toggle-btn" class="gn-btn${reviewedToday || taskReviewOpen ? '' : ' hot'}" onclick="toggleTaskReview()">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
+      ${serverConfigured() ? `<button id="briefing-refresh-btn" class="gn-btn" onclick="refreshBriefing()" ${briefingBusy ? 'disabled' : ''}>${icon('refresh')} ${briefingBusy ? tr('home_briefing_writing') : tr('home_briefing_refresh')}</button>` : ''}
+    </div>`
+  return `<div class="card gn-card${night || pose === 'sleep' ? ' asleep' : ''}" id="jg-gnome" data-pose="${pose}" data-kind="${item.kind}" data-wave="${wave && !reducedMotion() ? 1 : 0}">
+      <div class="gn-row">
+        <div class="gn-stage" aria-hidden="true">${gnPoseHtml(pose)}</div>
+        <div class="gn-say">
+          <div class="gn-bubble"${bubbleTag}>
+            ${label ? `<div class="gn-k">${label}</div>` : ''}
+            <div class="gn-t" aria-live="polite">${esc(text)}</div>
+          </div>
+          ${item.edit && !night && !empty ? `<button class="gn-edit" onclick="toggleFocusEdit(event)" aria-label="${tr('home_focus_add')}">${icon('edit')}</button>` : ''}
+          ${dots}
+        </div>
+      </div>
+      ${focusEditOpen && !gnFull ? `<div style="display:flex;gap:8px;margin-top:10px" onclick="event.stopPropagation()">
+        <input id="focus-edit-input" class="form-input" style="margin-bottom:0;flex:1" value="${esc(state.focus||'')}" placeholder="${tr('home_focus_placeholder')}"/>
+        <button onclick="saveFocusEdit(event)" class="jg-ok" aria-label="${tr('btn_save')}">${icon('check')}</button></div>` : ''}
+      ${gnFull ? '' : buttons}
+      ${taskReviewOpen && !gnFull ? taskReviewHtml() : ''}
+    </div>`
+}
+// the whole briefing slot: the gnome card, and under it the full briefing when asked for
+function gnomeSlotHtml() {
+  const full = gnFull ? dailyBriefingHtml() : ''
+  return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
+}
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); if(el.dataset.kind === 'greet') gnGreet = false; else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender() }
+function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
+// motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
+function gnomeSet(img, key) { const t = GN_TAB[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
+function gnomeAfterRender() {
+  const card = document.getElementById('jg-gnome'); if(!card) return
+  if(gnObs) gnObs.disconnect()
+  if(window.IntersectionObserver) { gnObs = new IntersectionObserver(function(es){ gnVisible = es[0].isIntersecting; card.classList.toggle('gn-off', !gnVisible) }, {threshold: .1}); gnObs.observe(card) }
+  const img = card.querySelector('.gn-img')
+  if(card.dataset.wave === '1' && img && !reducedMotion()) {
+    card.dataset.wave = '0'; gnWaved = true; const base = card.dataset.pose, seq = ['wave-low', 'wave-mid', 'wave-high', 'wave-mid', 'wave-high', 'wave-mid', 'wave-low'];
+    seq.forEach(function(k, i){ setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, k) }, 250 + i * 190) })
+    setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, base) }, 250 + seq.length * 190)
+  }
+  clearTimeout(gnBlinkTimer)
+  const blink = function() {
+    gnBlinkTimer = setTimeout(function() {
+      const c = document.getElementById('jg-gnome'), im = c && c.querySelector('.gn-img')
+      if(c && im && gnVisible && !reducedMotion() && GN_BLINK[im.dataset.pose] && !c.classList.contains('asleep')) { const p = im.dataset.pose; gnomeSet(im, GN_BLINK[p]); setTimeout(function(){ if(im.isConnected) gnomeSet(im, p) }, 140) }
+      if(document.getElementById('jg-gnome')) blink()
+    }, 5000 + Math.random() * 3000)
+  }
+  blink()
+}
+
 // A climber that grows on a card: anchored to one of its corners or edges and
 // reaching 8–16px past it, inside the card's own wrapper (overflow visible),
 // with the glow on the drawing only and a few still golden sparkles. One per
@@ -4479,7 +4642,7 @@ function decorateCard(card, kind) {
 function jungleDress(screen) {
   if(currentTheme !== 'jungle') return
   const el = document.getElementById('screen-' + screen); if(!el) return
-  if(screen === 'home') { decorateCard(el.querySelector('#daily-briefing'), 'corner-hoya'); decorateCard(el.querySelector('.nh-list'), 'edge') }
+  if(screen === 'home') { decorateCard(el.querySelector('#jg-gnome, #daily-briefing'), 'corner-hoya'); decorateCard(el.querySelector('.nh-list'), 'edge') }
   if(screen === 'tasks') { const c = el.querySelector('.nh-check'); decorateCard(c && c.closest('.card'), 'fern') }
   if(screen === 'people' && state.people.some(p => p.pending)) decorateCard(el.querySelector('.card'), 'pothos')
   if(screen === 'sites') decorateCard(el.querySelector('.site-card'), 'side')
@@ -6548,7 +6711,8 @@ function renderSettings() {
               <div style="font-size:var(--fs-sm);font-weight:600;color:${on?accent:'var(--t2)'}">${esc(uiLang==='en' ? th.labelEn : th.label)}</div>
             </button>`}).join('')}
         </div>
-        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
+        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-gnome" ${gnomeOn()?'checked':''} onchange="setGnome(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_gnome')}</label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
         <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:var(--fs-base);color:var(--t1)">${tr('settings_jungle_people')}
           ${['people','people-sprout'].map(v=>`<button onclick="setJgPeopleIcon('${v==='people'?'roots':'sprout'}')" aria-pressed="${jgPeopleIcon()===v}" aria-label="${tr(v==='people'?'settings_jungle_people_roots':'settings_jungle_people_sprout')}" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:2px solid ${jgPeopleIcon()===v?'var(--gold)':'var(--line)'};background:var(--surface)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${JG_NAV_ICONS[v]}</svg></button>`).join('')}
         </div>` : ''}
