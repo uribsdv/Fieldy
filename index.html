@@ -934,11 +934,7 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
 
 /* climbers */
-[data-theme="jungle"] .jg-vine{position:absolute;z-index:2;pointer-events:none}
-[data-theme="jungle"] .jg-vine b{position:absolute;inset:0;background:center/contain no-repeat}
-[data-theme="jungle"] .jg-mint b{filter:drop-shadow(0 0 8px var(--jg-mint))}
-[data-theme="jungle"] .jg-gold b{filter:drop-shadow(0 0 8px var(--jg-gold))}
-[data-theme="jungle"] :is(.jg-vine i,.jg-spark){position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
+[data-theme="jungle"] .jg-spark{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;pointer-events:none;
   background:#FFE9AE;box-shadow:0 0 5px 1px rgba(255,218,130,.75);opacity:.55;animation:jg-twinkle 5s ease-in-out infinite}
 [data-theme="jungle"] .jg-spark{margin:-2px -2px 0 0}
 @keyframes jg-twinkle{0%,100%{opacity:.3}50%{opacity:1}}
@@ -962,19 +958,25 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
 [data-theme="jungle"] .jg-home .nh-tools{margin-top:16px}
 [data-theme="jungle"] .jg-home .nh-sec{margin-top:24px}
-/* climbers on cards: the card is the anchor (its wrapper lets the drawing
-   reach past its edge); each climber sits in the card's padding or outside
-   it, so text and buttons are never under one */
-[data-theme="jungle"] .vd-host{position:relative;overflow:visible!important}
-[data-theme="jungle"] .vine-deco{position:absolute;inset:0;pointer-events:none;z-index:2}
-[data-theme="jungle"] .vd-corner{top:-14px;left:-14px;width:96px;height:98px}
-[data-theme="jungle"] .vd-hoya{top:-44px;left:30px;width:40px;height:58px}
-[data-theme="jungle"] .vd-host-corner-hoya{padding-top:34px!important}
-[data-theme="jungle"] .vd-edge{left:-14px;top:16px;width:28px;height:170px}
-[data-theme="jungle"] .vd-fern{left:-12px;bottom:-18px;width:112px;height:56px}
-[data-theme="jungle"] .vd-fern b{inset:auto;left:50%;top:50%;width:56px;height:112px;transform:translate(-50%,-50%) rotate(90deg) scaleX(-1)}
-[data-theme="jungle"] .vd-pothos{left:-16px;top:62px;width:32px;height:82px}
-[data-theme="jungle"] .vd-side{right:-17px;top:8px;width:26px;height:84px}
+/* vines between cards: hidden behind the card above (it is higher in the stack), drawn over the top of the card below.
+   The glow is on the drawing alone; sparkles ride its centre line; the wave of light is the sparkles lighting one after another. */
+[data-theme="jungle"] .vn-card{position:relative}
+[data-theme="jungle"] .vn{position:absolute;pointer-events:none}
+[data-theme="jungle"] .vn b{position:absolute;inset:0;background:center/100% 100% no-repeat}
+/* the part behind the card above is not drawn at all (a translucent card would show it): the vine starts at that card's lower edge */
+[data-theme="jungle"] .vn b{-webkit-mask-image:linear-gradient(to bottom,transparent calc(var(--hide) - 2px),#000 calc(var(--hide) + 5px));mask-image:linear-gradient(to bottom,transparent calc(var(--hide) - 2px),#000 calc(var(--hide) + 5px))}
+[data-theme="jungle"] .vn-mint b{filter:drop-shadow(0 0 6px var(--jg-mint))}
+[data-theme="jungle"] .vn-gold b{filter:drop-shadow(0 0 6px var(--jg-gold))}
+[data-theme="jungle"] .vn i{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;opacity:.22;
+  animation:vn-spark 8s ease-in-out infinite;animation-delay:calc(var(--t) * 2.4s)}
+[data-theme="jungle"] .vn-mint i{background:#E2FFF2;box-shadow:0 0 5px 1px rgba(170,255,220,.85)}
+[data-theme="jungle"] .vn-gold i{background:#FFF1C8;box-shadow:0 0 5px 1px rgba(255,222,140,.85)}
+@keyframes vn-spark{0%,34%,100%{opacity:.22;transform:scale(.7)}14%{opacity:1;transform:scale(1.35)}}
+[data-theme="jungle"] .vn.vn-wave i{animation:vn-wave 1.4s ease-out 1 both;animation-delay:calc(var(--t) * .85s)}
+@keyframes vn-wave{0%{opacity:.22;transform:scale(.7)}35%{opacity:1;transform:scale(2.1)}100%{opacity:.22;transform:scale(.7)}}
+[data-theme="jungle"] .vn.vn-wave b{animation:vn-glow 1.4s ease-out 1}
+@keyframes vn-glow{35%{filter:drop-shadow(0 0 11px var(--jg-gold))}}
+[data-theme="jungle"] .vn.vn-off i{animation-play-state:paused}
 /* status: a glass bead and an ink word */
 [data-theme="jungle"] .st-dot{color:var(--t1)}
 [data-theme="jungle"] .st-dot[data-dot]{color:var(--t1)}
@@ -998,8 +1000,8 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 /* the nav stays Nachal's to the pixel: its ink is pinned to Nachal's */
 [data-theme="jungle"] #nav{--t1:#0B1A12;--t2:#34473D;--t3:#4A5A52;color:#0B1A12}
 @media (prefers-reduced-motion:reduce){
-  [data-theme="jungle"] :is(.jg-vine i,.jg-spark,.jg-star.new,.jg-branch.all .jg-branch-v){animation:none!important}
-  [data-theme="jungle"] :is(.jg-vine i,.jg-spark){opacity:.8}}
+  [data-theme="jungle"] :is(.jg-spark,.jg-star.new,.jg-branch.all .jg-branch-v,.vn i,.vn b){animation:none!important}
+  [data-theme="jungle"] :is(.jg-spark,.vn i){opacity:.8}}
 /* the jungle's nav: its own drawings at 26px in a finer line, and the chosen
    tab marked by a warm amber disc with a soft glow (it still springs from tab
    to tab like the drop); badges and the bar itself are Nachal's */
@@ -2519,6 +2521,7 @@ let currentTheme = (function(){
 // Nachal and the jungle share a layout, the nav and the garden; the jungle adds its own Home and dressing.
 function nachalLike() { return currentTheme === 'nachal' || currentTheme === 'jungle' }
 function applyTheme(name) {
+  if(name !== 'jungle') document.querySelectorAll('.vn').forEach(v => v.remove())
   const t = THEMES[name] || THEMES[THEME_ALIASES[name]] || THEMES.original
   currentTheme = THEMES[name] ? name : (THEME_ALIASES[name] || 'original')
   try { localStorage.setItem('fieldy_theme', currentTheme) } catch(e) {}
@@ -4412,7 +4415,7 @@ function renderHomeNachal() {
 // vine right under the greeting, with "organise the day" and the mood leaf
 // straight after it; the WhatsApp capsule becomes a small button beside
 // settings; and the quote of the day moves into the closed "more" row.
-// Climbers grow only on cards (see vineDeco), never float in empty space.
+// Vines grow between cards (see jungleVines), never float in empty space.
 let jgLitLast = null
 function jgBranchOn() { return localStorage.getItem('fieldy_jungle_branch') !== '0' }
 function setJgBranch(on) { try { localStorage.setItem('fieldy_jungle_branch', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
@@ -4613,40 +4616,121 @@ function gnomeAfterRender() {
   blink()
 }
 
-// A climber that grows on a card: anchored to one of its corners or edges and
-// reaching 8–16px past it, inside the card's own wrapper (overflow visible),
-// with the glow on the drawing only and a few still golden sparkles. One per
-// card, at most two on a screen, and only on these cards:
-//   Home: the briefing (a thin corner and a hoya cluster, warm gold) and the
-//         flow list (a thin vertical edge, mint);
-//   Tasks: the first task card (a fern from the bottom corner, mint);
-//   People: the first "waiting for an answer" card (pothos hanging from the side, mint);
-//   Sites: the first site card (a side vine along the edge, mint).
-const VINE_DECO = {
-  'corner-hoya': [['thin/thin-corner', 'gold', 'vd-corner', [[12, 14], [34, 8], [10, 40]]], ['large/hoya', 'gold', 'vd-hoya', [[38, 46], [62, 60], [48, 22]]]],
-  'edge':        [['thin/thin-vertical', 'mint', 'vd-edge', [[50, 18], [42, 52], [56, 80]]]],
-  'fern':        [['large/fern', 'mint', 'vd-fern', [[40, 30], [58, 58], [36, 78]]]],
-  'pothos':      [['large/pothos-fixed', 'mint', 'vd-pothos', [[44, 26], [60, 54], [40, 82]]]],
-  'side':        [['large/side-vine', 'mint', 'vd-side', [[46, 22], [58, 50], [40, 78], [54, 92]]]]
+// ── VINES BETWEEN THE CARDS (jungle) ──
+// A vine grows out from behind one card, hangs through the gap and over the
+// top of the card below. The layering does it: every card in a run gets a
+// z-index one step lower than the card above, and the vine sits between two
+// of them, so it is hidden behind the upper card (its cut end never shows)
+// and drawn in front of the lower one. No wrapper is added around any card.
+// Where it lands is measured, not guessed: the vine is placed only where no
+// text, icon or control lies under it, and shortened or moved sideways until
+// that is true; if no place is free there is no vine. At most two to a
+// screen, alternating (a hanging vine, then a garland across the next gap),
+// never on every gap. The glow is a drop-shadow on the drawing only; golden
+// or mint sparkles sit along the vine's own centre line, and a slow wave of
+// light runs down it every 8 seconds while it is on screen. Finishing a task
+// sends one quicker wave down the nearest vine. Static with reduced motion.
+// Line table: for each drawing, points along its centre line [position along, across] as fractions.
+const VN = {"fern":{"d":"hanging","w":125,"h":280,"tone":"mint","line":[[0.036,0.501],[0.107,0.486],[0.179,0.511],[0.25,0.514],[0.321,0.498],[0.393,0.542],[0.464,0.546],[0.536,0.555],[0.607,0.532],[0.679,0.504],[0.75,0.479],[0.821,0.473],[0.893,0.474],[0.964,0.482]]},"hoya":{"d":"hanging","w":124,"h":264,"tone":"gold","line":[[0.034,0.492],[0.104,0.487],[0.176,0.478],[0.248,0.485],[0.32,0.527],[0.392,0.493],[0.464,0.494],[0.534,0.564],[0.604,0.487],[0.676,0.348],[0.748,0.374],[0.82,0.498],[0.892,0.563],[0.964,0.428]]},"ivy":{"d":"hanging","w":124,"h":269,"tone":"mint","line":[[0.035,0.479],[0.106,0.467],[0.177,0.491],[0.247,0.538],[0.32,0.516],[0.392,0.572],[0.463,0.509],[0.533,0.568],[0.604,0.484],[0.677,0.576],[0.749,0.528],[0.82,0.448],[0.89,0.484],[0.963,0.444]]},"pothos":{"d":"hanging","w":124,"h":281,"tone":"mint","line":[[0.036,0.517],[0.107,0.488],[0.178,0.493],[0.249,0.537],[0.32,0.468],[0.391,0.521],[0.463,0.489],[0.534,0.555],[0.605,0.46],[0.676,0.56],[0.747,0.437],[0.819,0.509],[0.89,0.483],[0.963,0.46]]},"star-flower":{"d":"hanging","w":124,"h":278,"tone":"gold","line":[[0.034,0.525],[0.104,0.522],[0.176,0.584],[0.248,0.475],[0.32,0.635],[0.392,0.582],[0.464,0.545],[0.534,0.617],[0.604,0.554],[0.676,0.46],[0.748,0.485],[0.82,0.498],[0.892,0.517],[0.964,0.519]]},"string-hearts":{"d":"hanging","w":81,"h":264,"tone":"mint","line":[[0.034,0.499],[0.104,0.479],[0.176,0.489],[0.248,0.494],[0.32,0.418],[0.392,0.486],[0.464,0.547],[0.534,0.433],[0.604,0.479],[0.676,0.407],[0.748,0.581],[0.82,0.44],[0.892,0.398],[0.964,0.503]]},"garland-fern-hoya":{"d":"garlands","w":461,"h":143,"tone":"gold","line":[[0.035,0.309],[0.105,0.407],[0.177,0.51],[0.248,0.519],[0.32,0.545],[0.392,0.518],[0.463,0.472],[0.535,0.557],[0.606,0.569],[0.678,0.53],[0.749,0.477],[0.821,0.511],[0.893,0.401],[0.964,0.306]]},"garland-ivy":{"d":"garlands","w":460,"h":94,"tone":"mint","line":[[0.035,0.33],[0.105,0.458],[0.177,0.556],[0.249,0.658],[0.321,0.726],[0.392,0.767],[0.464,0.811],[0.535,0.765],[0.605,0.788],[0.677,0.749],[0.749,0.705],[0.821,0.592],[0.892,0.501],[0.964,0.302]]},"garland-pothos":{"d":"garlands","w":460,"h":112,"tone":"mint","line":[[0.035,0.291],[0.105,0.401],[0.177,0.495],[0.249,0.535],[0.321,0.656],[0.392,0.638],[0.464,0.661],[0.535,0.694],[0.605,0.659],[0.677,0.604],[0.749,0.547],[0.821,0.512],[0.892,0.421],[0.964,0.271]]},"garland-stars":{"d":"garlands","w":441,"h":68,"tone":"gold","line":[[0.035,0.203],[0.107,0.524],[0.178,0.58],[0.249,0.616],[0.321,0.815],[0.392,0.839],[0.464,0.806],[0.535,0.658],[0.607,0.88],[0.678,0.795],[0.749,0.716],[0.821,0.619],[0.892,0.486],[0.964,0.185]]},"hoya-hanging":{"d":"tall-hanging","w":137,"h":820,"tone":"gold","line":[[0.035,0.52],[0.107,0.621],[0.178,0.612],[0.249,0.574],[0.321,0.357],[0.392,0.374],[0.464,0.481],[0.535,0.437],[0.607,0.605],[0.678,0.622],[0.749,0.628],[0.821,0.518],[0.892,0.531],[0.964,0.52]]},"ivy-hanging":{"d":"tall-hanging","w":130,"h":829,"tone":"mint","line":[[0.036,0.594],[0.107,0.635],[0.178,0.548],[0.249,0.616],[0.321,0.421],[0.393,0.322],[0.464,0.329],[0.535,0.505],[0.606,0.62],[0.678,0.742],[0.75,0.69],[0.821,0.539],[0.892,0.548],[0.964,0.584]]},"pothos-hanging":{"d":"tall-hanging","w":155,"h":821,"tone":"mint","line":[[0.035,0.417],[0.107,0.443],[0.178,0.486],[0.249,0.405],[0.321,0.49],[0.392,0.287],[0.463,0.387],[0.535,0.434],[0.607,0.51],[0.678,0.665],[0.75,0.601],[0.821,0.407],[0.892,0.444],[0.964,0.499]]},"star-thin-hanging":{"d":"tall-hanging","w":82,"h":851,"tone":"gold","line":[[0.035,0.442],[0.106,0.457],[0.178,0.663],[0.25,0.62],[0.321,0.294],[0.392,0.253],[0.464,0.421],[0.535,0.617],[0.607,0.762],[0.678,0.737],[0.749,0.517],[0.821,0.374],[0.892,0.522],[0.964,0.583]]}}
+// the hanging vine and the garland for each screen; the thin tall drawings where a thin vine suits (Tasks, People), the other family as a fallback
+const VN_PICK = {home: ['pothos', 'garland-ivy'], tasks: ['hoya-hanging', 'garland-pothos'], people: ['ivy-hanging', 'garland-stars'], sites: ['fern', 'garland-ivy']}
+const VN_ALT = {home: 'ivy', tasks: 'hoya', people: 'pothos-hanging', sites: 'star-thin-hanging'}
+const VN_HIDE = 22        // how far a vine reaches up behind the card it hangs from, px
+let vnObs = null, vnRO = null, vnLast = 0
+function vnSrc(k) { return 'assets/vines/' + VN[k].d + '/' + k + '.webp' }
+function vnHtml(k, g, z, hide) {
+  const t = VN[k], horiz = t.d === 'garlands', long = horiz ? g.w : g.h, n = Math.max(3, Math.round(long * (horiz ? 0.012 : 0.036)))
+  const at = (f) => { const L = t.line; if(!L.length) return [f, .5]; let i = 0; while(i < L.length - 1 && L[i + 1][0] < f) i++; const a = L[i], b = L[Math.min(i + 1, L.length - 1)], u = b[0] === a[0] ? 0 : Math.max(0, Math.min(1, (f - a[0]) / (b[0] - a[0]))); return [f, a[1] + (b[1] - a[1]) * u] }
+  let sp = ''
+  for(let i = 0; i < n; i++) { const f = (i + .5) / n, p = at(f), x = horiz ? f : p[1], y = horiz ? p[1] : f; sp += '<i style="left:' + (x * 100).toFixed(1) + '%;top:' + (y * 100).toFixed(1) + '%;--t:' + f.toFixed(2) + '"></i>' }
+  return '<span class="vn vn-' + t.tone + '" aria-hidden="true" style="left:' + g.x.toFixed(1) + 'px;top:' + g.y.toFixed(1) + 'px;width:' + g.w.toFixed(1) + 'px;height:' + g.h.toFixed(1) + 'px;z-index:' + z + ';--hide:' + hide + 'px"><b style="background-image:url(\'' + vnSrc(k) + '\')"></b>' + sp + '</span>'
 }
-function vineDeco(kind) {
-  return `<span class="vine-deco vd-k-${kind}" aria-hidden="true">${VINE_DECO[kind].map(([file, tone, cls, sparks]) =>
-    `<span class="jg-vine jg-${tone} ${cls}"><b style="background-image:url('assets/vines/${file}.webp')"></b>${
-      sparks.map((p, i) => `<i style="left:${p[0]}%;top:${p[1]}%;animation-delay:${(i * 1.1).toFixed(1)}s"></i>`).join('')}</span>`).join('')}</span>`
+// the rectangles of everything readable or touchable inside root (text lines, controls, icons, pictures)
+function vnContent(root, skip) {
+  const out = [], push = r => { if(r.width > 0.5 && r.height > 0.5) out.push(r) }
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let n; while((n = w.nextNode())) { if(!n.textContent.trim() || (skip && skip(n.parentElement))) continue; const rg = document.createRange(); rg.selectNodeContents(n); Array.prototype.forEach.call(rg.getClientRects(), push) }
+  root.querySelectorAll('button,a,input,select,textarea,svg,img,[role="button"],.nh-tick,.nh-check').forEach(e => { if(!(skip && skip(e)) && !e.closest('.vn')) push(e.getBoundingClientRect()) })
+  return out
 }
-function decorateCard(card, kind) {
-  if(!card || card.querySelector(':scope > .vine-deco')) return
-  card.classList.add('vd-host', 'vd-host-' + kind)
-  card.insertAdjacentHTML('afterbegin', vineDeco(kind))
+function vnClear(el) {
+  el.querySelectorAll('.vn').forEach(v => v.remove())
+  el.querySelectorAll('[data-vn]').forEach(c => { c.style.zIndex = ''; if(c.dataset.vnm !== undefined) { c.style.marginBottom = c.dataset.vnm; delete c.dataset.vnm } c.classList.remove('vn-card'); delete c.dataset.vn })
 }
-function jungleDress(screen) {
-  if(currentTheme !== 'jungle') return
+function jungleVines(screen) {
   const el = document.getElementById('screen-' + screen); if(!el) return
-  if(screen === 'home') { decorateCard(el.querySelector('#jg-gnome, #daily-briefing'), 'corner-hoya'); decorateCard(el.querySelector('.nh-list'), 'edge') }
-  if(screen === 'tasks') { const c = el.querySelector('.nh-check'); decorateCard(c && c.closest('.card'), 'fern') }
-  if(screen === 'people' && state.people.some(p => p.pending)) decorateCard(el.querySelector('.card'), 'pothos')
-  if(screen === 'sites') decorateCard(el.querySelector('.site-card'), 'side')
+  vnClear(el)
+  if(currentTheme !== 'jungle') return
+  let container, cards, sel
+  if(screen === 'home') { container = el.querySelector('.jg-home'); cards = container ? [container.querySelector('#jg-gnome, #daily-briefing'), container.querySelector('.nh-list'), container.querySelector('.nh-garden'), container.querySelector('.nh-peek')] : [] }
+  else if(screen === 'tasks') { container = el.querySelector('.card .nh-check') ? el.querySelector('.card .nh-check').closest('.card').parentElement : null; cards = container ? [...container.children].filter(c => c.matches('.card, div:has(> .right-now-toggle)')) : [] }
+  else if(screen === 'people') { const c0 = el.querySelector(':scope > div .card'); container = c0 ? c0.parentElement : null; cards = container ? [...container.children].filter(c => c.matches('.card')) : [] }
+  else if(screen === 'sites') { container = el.querySelector('#sites-results'); cards = container ? [...container.querySelectorAll(':scope > .site-card')] : [] }
+  else return
+  cards = cards.filter(Boolean); if(!container || cards.length < 2) return
+  // pairs: consecutive cards, a hanging vine on the first gap, a garland on the next, never more than two
+  const plan = [], seq = ['hang', 'garland']
+  for(let i = 0; i + 1 < cards.length && plan.length < 2; i += (plan.length ? 1 : 1)) {
+    if(plan.length === 1 && i < plan[0].i + 2) continue   // not on every gap: skip one
+    plan.push({i, A: cards[i], B: cards[i + 1], kind: seq[plan.length]})
+  }
+  if(!plan.length) return
+  if(getComputedStyle(container).position === 'static') container.style.position = 'relative'
+  container.style.isolation = 'isolate'
+  // open the gaps a vine grows through, then measure once
+  plan.forEach(p => { const A = p.A; A.dataset.vnm = A.style.marginBottom; const need = p.kind === 'garland' ? 38 : 30; const gap = p.B.getBoundingClientRect().top - A.getBoundingClientRect().bottom; if(gap < need) A.style.marginBottom = (parseFloat(getComputedStyle(A).marginBottom) + (need - gap)).toFixed(0) + 'px' })
+  cards.forEach((c, j) => { c.dataset.vn = '1'; c.classList.add('vn-card'); c.style.zIndex = String(100 - 4 * j) })
+  const cr = container.getBoundingClientRect(), rel = r => ({l: r.left - cr.left, r: r.right - cr.left, t: r.top - cr.top, b: r.bottom - cr.top})
+  const html = []
+  plan.forEach(function(p) {
+    const a = rel(p.A.getBoundingClientRect()), b = rel(p.B.getBoundingClientRect()), gap = b.t - a.b, j = cards.indexOf(p.A)
+    if(window.__vnDebug) window.__vnDebug.push({screen, kind: p.kind, gap: Math.round(gap)})
+    if(gap > 90 || gap < 0) return
+    const inA = a.r - a.l, free = function(box) {   // nothing readable or touchable under box (a little air around it)
+      const pad = 8, vpad = 2, hit = (r) => { const q = rel(r); return q.r > box.l - pad && q.l < box.r + pad && q.b > box.t - vpad && q.t < box.b + vpad }
+      const skip = e => e.closest('.vn')
+      const inGap = []; let s = p.A.nextElementSibling; while(s && s !== p.B && !s.contains(p.B)) { inGap.push(s); s = s.nextElementSibling }
+      return !inGap.some(g => vnContent(g, skip).some(hit)) && !vnContent(p.B, skip).some(hit)
+    }
+    const z = 98 - 4 * j
+    if(p.kind === 'hang') {
+      for(const k of [VN_PICK[screen][0], VN_ALT[screen]]) {
+        const t = VN[k], xs = [a.l + .14 * inA, a.r - .14 * inA, a.l + .5 * inA, a.l + .3 * inA, a.l + .7 * inA]
+        const overs = [60, 48, 36, 28, 20, 12, 0]
+        for(const over of overs) {
+          if(over === 0 && gap < 24) continue
+          const L = VN_HIDE + gap + over, w = Math.max(14, Math.min(62, t.w * L / t.h)), h = w * t.h / t.w
+          for(const x of xs) { const box = {l: x - w / 2, r: x + w / 2, t: a.b - VN_HIDE, b: a.b - VN_HIDE + h}
+            if(free({l: box.l, r: box.r, t: a.b, b: box.b})) { html.push(vnHtml(k, {x: box.l, y: box.t, w, h}, z, VN_HIDE)); return } }
+        }
+      }
+    } else {
+      const k = VN_PICK[screen][1], t = VN[k]
+      for(const W of [inA - 20, inA - 70, inA - 130]) {
+        if(W < 160) break
+        const h = W * t.h / t.w, x = a.l + (inA - W) / 2, box = {l: x, r: x + W, t: a.b - 10, b: a.b - 10 + h}
+        if(free({l: box.l, r: box.r, t: a.b, b: box.b})) { html.push(vnHtml(k, {x, y: box.t, w: W, h}, z, 10)); return }
+      }
+    }
+  })
+  container.insertAdjacentHTML('beforeend', html.join(''))
+  vnWatch(el, container, screen)
 }
+// on screen: the slow wave runs; off screen it pauses. A resize re-places the vines.
+function vnWatch(el, container, screen) {
+  const vs = container.querySelectorAll('.vn')
+  if(window.IntersectionObserver) { if(!vnObs) vnObs = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('vn-off', !e.isIntersecting)), {threshold: .05}); vs.forEach(v => vnObs.observe(v)) }
+  if(window.ResizeObserver) { if(vnRO) vnRO.disconnect(); vnRO = new ResizeObserver(() => { if(Date.now() - vnLast < 150) return; vnLast = Date.now(); requestAnimationFrame(() => { if(currentScreen === screen) jungleVines(screen) }) }); vnRO.observe(container) }
+  vnLast = Date.now()
+}
+// one quicker wave of light down the vine nearest the middle of the screen
+function vnWave(el) {
+  if(reducedMotion()) return
+  const vs = [...el.querySelectorAll('.vn')]; if(!vs.length) return
+  const mid = innerHeight / 2, v = vs.sort((a, b) => Math.abs(a.getBoundingClientRect().top - mid) - Math.abs(b.getBoundingClientRect().top - mid))[0]
+  v.classList.remove('vn-wave'); void v.offsetWidth; v.classList.add('vn-wave'); setTimeout(() => v.classList.remove('vn-wave'), 1800)
+}
+function jungleDress(screen) { if(currentTheme === 'jungle') jungleVines(screen) }
 
 // ── INPUT ────────────────────────────────────────
 const PREVIEW_GROUPS = [
@@ -5087,6 +5171,7 @@ function toggleTask(id) {
   if(wasUndone && nachalLike() && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
   setState(patch)
   if(wasUndone){
+    if(currentTheme === 'jungle') { const sc = document.getElementById('screen-' + currentScreen); if(sc) vnWave(sc) }
     gardenOnComplete(wasUndone)
     playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
