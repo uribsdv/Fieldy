@@ -1087,6 +1087,12 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 @keyframes gn-heart{0%,100%{opacity:.7;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}
 [data-theme="jungle"] .gn-card.gn-off .gn-heart{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){[data-theme="jungle"] .gn-heart{animation:none}}
+/* the fishing line: light, thin, with a faint dark edge so it reads on the pale card; it swings a little from the tip of the staff */
+[data-theme="jungle"] .gn-line{position:absolute;overflow:visible;pointer-events:none;transform-origin:50% 100%;animation:gn-sway 6.5s ease-in-out infinite;filter:drop-shadow(0 0 .7px rgba(25,55,45,.85))}
+[data-theme="jungle"] .gn-line-g{transform-box:view-box;transform-origin:234px 38px;animation:gn-line-sway 5s ease-in-out infinite}
+@keyframes gn-line-sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+[data-theme="jungle"] .gn-card.gn-off :is(.gn-line,.gn-line-g){animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] :is(.gn-line,.gn-line-g){animation:none!important}}
 [data-theme="jungle"] .gn-edit{position:absolute;bottom:22px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
 [data-theme="jungle"] .gn-dots{display:flex;gap:6px;justify-content:center}
 [data-theme="jungle"] .gn-dots i{width:7px;height:7px;border-radius:50%;background:rgba(45,102,52,.28)}
@@ -4607,7 +4613,10 @@ function gnHour() { return GN_DEBUG.hour !== null && GN_DEBUG.hour !== undefined
 function gnPoseHtml(key, extra) {
   if(LK_POSE[key]) {   // Loki's own twelve: one scale for all, head centred, bottom of the file on the foot line
     const t = LK_POSE[key], w = t[0] * LK_K, h = t[1] * LK_K, left = GN_SIZE.w / 2 - t[2] * LK_K, top = GN_SIZE.h - 3 - h
-    return '<img class="gn-img lk-img" alt="" data-pose="' + key + '" src="assets/gnome/loki/' + key + '.png" style="left:' + left.toFixed(1) + 'px;top:' + top.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px">'
+    const box = 'left:' + left.toFixed(1) + 'px;top:' + top.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px'
+    // the fishing line did not survive in the drawing: it is drawn here, a thin light line with a small hook from the tip of the staff to the water, swaying gently
+    const line = key === 'fishing' ? '<svg class="gn-line" aria-hidden="true" viewBox="0 0 279 262" style="' + box + '"><g class="gn-line-g"><path d="M234 38 L234 239 M234 239 v7 q0 7 -5 6 q-3 -1 -3 -4" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></g></svg>' : ''
+    return '<img class="gn-img lk-img" alt="" data-pose="' + key + '" src="assets/gnome/loki/' + key + '.png" style="' + box + '">' + line
   }
   const t = GN_TAB[key], k = GN_SIZE.body * (GN_SCALE[key] || 1) / (t[3] - t[2]), w = t[0] * k, h = t[1] * k
   const left = GN_SIZE.w / 2 - t[4] * k, top = GN_SIZE.h - 3 - t[3] * k
@@ -4622,7 +4631,9 @@ function gnItems(greet) {
   const cached = (state.briefing && state.briefing.date === getToday() && state.briefing.text) ? state.briefing.text : ''
   const doneAll = all.length > 0 && all.every(t => t.done)
   const L = lokiOpenGet(f, gnHour())
-  if(greet) items.push(lokiItem('greet', lokiPick('greet'), 'wave'))
+  if(L.away) items.push(L.away)
+  else if(greet) items.push(L.greet || (L.greet = lokiItem('greet', lokiPick('greet'), 'wave')))
+  if(L.recall && !doneAll) items.push(L.recall)
   if(L.char && !doneAll) items.push(L.char)
   if(L.wisdom && !doneAll) items.push(L.wisdom)
   if(doneAll) items.push(lokiItem('done', lokiPick('dayDone'), 'joy'))
@@ -4685,7 +4696,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } } else if(el.dataset.kind === 'greet') gnGreet = false; else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) lokiOpen.away = null; else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -4744,6 +4755,9 @@ const LOKI = {
     good: ['אני רואה את הזוהר. תשמור אותו, ונשתמש בו על משהו קשה.', 'איזה יופי. אני רושם שהיום הזה קרה.']
   },
   hug: ['בלי קסם. רק חיבוק.', 'קיבלת. נשאר איתך.'],
+  away: ['אה! לא ציפיתי לך. (ציפיתי.)'],
+  // a moment the two of them shared, told at most once a week (the lines are Loki's own; {x} {site} {date} come from the app)
+  recall: {best: 'זוכר את היום עם {x} משימות? עברנו אותו. גם את זה נעבור.', unstuck: '{site} היה תקוע {x} ימים, ואז נפתח. אני עדיין מספר על זה לצבים.', first: 'היום הראשון שלנו היה {date}. היית נראה עייף. גם אני.'},
   hardStreak: 'אני שדון, אבל יש בני אדם שאוהבים אותך. אולי תתקשר לאחד מהם?',
   // "just here": nothing to do, nothing to explain; p = the pose it is told in
   here: [{t: 'סתם. רציתי להגיד שאני פה.', p: 'listen'}, {t: 'אל תתייחס אליי. אני רק עובר.', p: 'laugh'}, {t: 'לא צריך כלום. שמעתי שמישהו עבד קשה.', p: 'listen'}, {t: 'נשימה אחת. עמוק. יופי. חזרנו.', p: 'listen'}, {t: 'אני כאן. תמשיך, אני רק מחזיק את היער.', p: 'laugh'}]
@@ -4813,18 +4827,80 @@ function lokiOnTaskDone(left) {
   if(!gnomeOn() || currentScreen !== 'home' || left <= 0) return
   lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0
 }
+// ── his memory of the two of them (localStorage only, fieldy_loki_v1; he knows only what happens in the app) ──
+// Moments are kept in a small log: the day with the most tasks closed, a stuck site that got going, a long streak, the
+// first day. Facts are read from the app when he speaks. He recalls one moment a week at most and one fact a day at most,
+// and only when the line adds something; never anything personal that was not done in the app.
+const LOKI_ORD = {2: 'שני', 3: 'שלישי', 4: 'רביעי', 5: 'חמישי', 6: 'שישי', 7: 'שביעי'}
+function lokiMoment(m) { loki.moments = (loki.moments || []).filter(x => !(m.k === 'best' && x.k === 'best')).concat([Object.assign({ts: Date.now()}, m)]).slice(-20); lokiSave() }
+// a task has been closed: today's count, and the best day so far
+function lokiNoteDay() {
+  const t0 = new Date(); t0.setHours(0, 0, 0, 0)
+  const n = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => t.done && t.completedAt && t.completedAt >= +t0).length
+  if(n >= 5 && n > ((loki.best || {}).n || 0)) { loki.best = {day: getToday(), n}; lokiMoment({k: 'best', n, day: getToday()}) }
+}
+// whenever Home is drawn: stuck sites that were stuck a week or more and are free now, long streaks, the first day
+function lokiScan() {
+  if(!loki.firstDay) { loki.firstDay = getToday(); lokiSave() }
+  const seen = loki.stuckSeen = loki.stuckSeen || {}, cur = {}
+  priorityStuckSites().forEach(s => { const d = daysStuck(s); cur[s.name] = 1; if(d >= 7) seen[s.name] = Math.max(seen[s.name] || 0, d) })
+  Object.keys(seen).forEach(name => { if(cur[name]) return; const st = state.sites.find(x => x.name === name); if(st && (!st.stuckSince || st.status === 'resolved')) lokiMoment({k: 'unstuck', site: name, days: seen[name]}); delete seen[name] })
+  if(state.streak >= 7 && state.streak % 7 === 0 && loki.streakAt !== state.streak) { loki.streakAt = state.streak; lokiMoment({k: 'streak', n: state.streak}) }
+  lokiSave()
+}
+// one recall for this open, or none: a moment (a week apart) or a fact (a day apart)
+function lokiRecallItem() {
+  const now = Date.now(), today = getToday()
+  const first = loki.firstDay && Date.now() - new Date(loki.firstDay + 'T00:00:00') >= 7 * 86400000 && !loki.firstRec ? [{k: 'first', day: loki.firstDay}] : []
+  const pool = (loki.moments || []).filter(m => !m.rec && m.k !== 'streak').concat(first)
+  if(pool.length && now - (loki.momentAt || 0) >= 7 * 86400000) {
+    const m = pool[Math.floor(Math.random() * pool.length)]; loki.momentAt = now
+    if(m.k === 'first') loki.firstRec = 1; else m.rec = 1
+    lokiSave()
+    const date = new Date(m.day + 'T00:00:00').toLocaleDateString('he-IL', {day: 'numeric', month: 'long'})
+    return lokiItem('recall', lokiFill(LOKI.recall[m.k], {x: m.n || m.days, site: m.site, date}), 'read')
+  }
+  if(loki.factDay !== today && Math.random() < .5) {
+    const facts = [], wk = new Date(); wk.setHours(0, 0, 0, 0); wk.setDate(wk.getDate() - wk.getDay())
+    if(state.streak >= 2) facts.push(state.streak <= 7 ? 'יום ' + LOKI_ORD[state.streak] + ' ברצף. אני מתחיל להתרגל אליך.' : state.streak + ' ימים ברצף. אני מתחיל להתרגל אליך.')
+    const st = priorityStuckSites()[0]; if(st && daysStuck(st) >= 7) facts.push(st.name + ' הוא האתר שהכי מחכה לך, כבר ' + daysStuck(st) + ' ימים. לא מאשים. רק מזכיר שהוא שם.')
+    const done = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => t.done && t.completedAt && t.completedAt >= +wk).length
+    if(done >= 3) facts.push('השבוע סגרנו ' + done + ' משימות. הנחל מרגיש.')
+    if(facts.length) { loki.factDay = today; lokiSave(); return lokiItem('recall', facts[Math.floor(Math.random() * facts.length)], 'read') }
+  }
+  return null
+}
+// ── his life while Uri is away: how long it has been since the app was last in front of him ──
+// under two hours: he just stands; two to twelve (and up to a day): what he does at this hour, read in the morning,
+// fish at noon, sit at the edge of the river in the evening, sleep at night; a day or more: the turtle, and "I waited" (no blame)
+let lokiAwayMs = (function(){ const now = Date.now(), prev = loki.lastSeen || 0; loki.lastSeen = now; lokiSave(); return prev ? now - prev : 0 })()
+function lokiAwayItem(hour) {
+  const h = lokiAwayMs / 3600000; if(h < 2) return null
+  if(h >= 24) { const days = Math.floor(h / 24); return lokiItem('away', lokiPick('back', {x: days}, s => !/\{x\}/.test(s) || days >= 2), 'turtle') }
+  const pose = hour >= 5 && hour < 11 ? 'read' : hour >= 11 && hour < 16 ? 'fishing' : hour >= 16 && hour < 21 ? 'sit-river' : 'sleep'
+  return lokiItem('away', lokiPick('away'), pose)
+}
+document.addEventListener('visibilitychange', function() {
+  const now = Date.now()
+  if(document.visibilityState === 'hidden') { loki.lastSeen = now; lokiSave(); return }
+  lokiAwayMs = now - (loki.lastSeen || now); loki.lastSeen = now; lokiSave()
+  if(lokiAwayMs >= 2 * 3600000 && gnomeOn()) { lokiOpen = null; if(currentScreen === 'home') renderHome() }
+})
+window.addEventListener('pagehide', function(){ loki.lastSeen = Date.now(); lokiSave() })
 // what he opens with this time: one character bubble (playful or "just here"), and a line of wisdom about every second time
 let lokiOpen = null
 function lokiOpenGet(f, hour) {
   if(lokiOpen && lokiOpen.day === gardenDayKey()) return lokiOpen
-  const open = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => !t.done), stuck = (f && f.sites || []).find(s => s.stuck)
-  const L = lokiOpen = {day: gardenDayKey(), char: null, wisdom: null}
+  const open = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => !t.done), stuck = priorityStuckSites().find(s => daysStuck(s) >= 7)
+  lokiScan()
+  const L = lokiOpen = {day: gardenDayKey(), char: null, wisdom: null, away: lokiAwayItem(hour), recall: null}
+  L.recall = lokiRecallItem()
   const here = (hour >= 15 && hour < 18 ? .5 : 0) || (open.length >= 6 ? .4 : .12)
   if(Math.random() < here) L.char = lokiHereItem()
   else if(open.length >= 6) L.char = lokiItem('busy', lokiPick('busy'), 'stand')
   else if(stuck && Math.random() < .6) L.char = lokiItem('stuck', lokiPick('stuck', {site: stuck.name}), 'point')
   else L.char = lokiItem('brief', lokiPick('brief', {x: (f && f.sites || []).length}, s => !/\{x\}/.test(s) || (f && f.sites || []).length === 2), 'read')
-  if(Math.random() < .5) L.wisdom = lokiItem('wisdom', lokiPick('wisdom'), 'think')
+  if(!L.recall && Math.random() < .5) L.wisdom = lokiItem('wisdom', lokiPick('wisdom'), 'think')
   return L
 }
 
@@ -5438,6 +5514,7 @@ function toggleTask(id) {
   if(wasUndone){
     if(currentTheme === 'jungle') { const sc = document.getElementById('screen-' + currentScreen); if(sc) vnWave(sc) }
     gardenOnComplete(wasUndone)
+    if(currentTheme === 'jungle') lokiNoteDay()
     playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
