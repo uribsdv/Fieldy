@@ -1045,6 +1045,10 @@ html[data-theme="jungle"] :is(#screen-tasks,#screen-people) .card:not(.card .car
   box-shadow:0 0 18px 5px rgba(232,176,118,.5),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -6px 10px -6px rgba(110,62,24,.35)}
 [data-theme="jungle"] .nav-ind::before{display:none}
 [data-theme="jungle"] #badge-tasks{right:calc(50% - 25px)}
+/* the number badges: a dark, soft amber-cherry instead of the bright red (white digits 5.5:1 at the light end, 7.5:1 at the dark),
+   10% smaller, with a faint halo of their own hue. The number, and what it counts, stay as they are */
+html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#8C3C2D);font-size:calc(var(--fs-2xs) * .9);line-height:10.6px;padding:1px 4.5px;min-width:14.4px;
+  box-shadow:0 0 0 1px rgba(255,236,222,.55),0 0 9px rgba(165,81,59,.55)}
 /* the gnome's card: him in the start corner, a speech bubble, dots, and the briefing's own buttons below */
 [data-theme="jungle"] .gn-card{padding:14px 14px 12px}
 [data-theme="jungle"] .gn-row{display:flex;gap:10px;align-items:flex-end}
