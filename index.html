@@ -4687,34 +4687,30 @@ function gnItems(greet) {
   const f = briefingFacts(), items = [], all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later]
   const cached = (state.briefing && state.briefing.date === getToday() && state.briefing.text) ? state.briefing.text : ''
   const doneAll = all.length > 0 && all.every(t => t.done)
-  const L = lokiOpenGet(f, gnHour())
-  if(L.poof === undefined) {   // once a visit, now and then: "poof" (never on the first visit of the day, nor when he was caught away)
-    L.poof = null
-    if(!greet && !L.away && !doneAll && !lokiStorm() && Math.random() < .3) {
-      const ghost = (Date.now() - (loki.ghostAt || 0) > 4 * 86400000) && Math.random() < .35; if(ghost) { loki.ghostAt = Date.now(); lokiSave() }
-      L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiFlip = true; lokiPoofIn = true; lokiGhost = ghost
-    }
-  }
-  if(lokiStorm() && L.storm === undefined) L.storm = lokiItem('storm', lokiPick('storm'), 'shelter')
-  if(L.poof) items.push(L.poof)
-  if(L.storm && lokiStorm()) items.push(L.storm)
-  if(lokiInviteOk(gnHour())) items.push(lokiItem('invite', lokiPick('invite'), 'stand', {btn: 'sit'}))
-  if(L.away) items.push(L.away)
-  else if(greet) items.push(L.greet || (L.greet = lokiItem('greet', lokiPick('greet'), 'wave')))
-  if(L.recall && !doneAll) items.push(L.recall)
-  if(L.char && !doneAll) items.push(L.char)
-  if(L.help === undefined) { L.help = !greet && !L.away && lokiHelpOk() ? lokiItem('help', lokiPick('helpAsk'), 'stuck-hat', {btn: 'help'}) : null; if(L.help) { loki.helpAt = Date.now(); lokiSave() } }
-  if(L.help) items.push(L.help)
-  if(L.gift === undefined) { L.gift = null; if(!greet && !L.away && !L.help && !lokiStorm() && Date.now() - (loki.giftAt || 0) >= 6 * 86400000 && Date.now() - (loki.firstAt || (loki.firstAt = Date.now())) >= 3 * 86400000 && Math.random() < .3) { loki.gift = lokiGiftPick(); lokiSave(); L.gift = lokiItem('gift', lokiPick('giftOffer'), 'gift', {btn: 'take', giftImg: rewardSrc(loki.gift), giftName: rewardName(loki.gift)}) } }
-  if(L.gift && loki.gift) items.push(L.gift)
-  if(L.wisdom && !doneAll) items.push(L.wisdom)
-  if(doneAll) items.push(lokiItem('done', lokiPick('dayDone'), 'joy'))
-  if(f.focus) items.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
-  else items.push({kind: 'focus', label: tr('gn_k_focus'), text: tr('gn_focus_add'), pose: 'stand', edit: true})
-  f.sites.slice(0, 2).forEach(s => items.push({kind: 'site', label: tr('gn_k_site'), text: s.name + ' · ' + s.why, pose: 'point'}))
-  if(f.lead && f.lead.theme) items.push({kind: 'habit', label: tr('gn_k_habit'), text: f.lead.theme + (String(f.lead.text || '').length <= 34 ? ' · ' + f.lead.text : ''), pose: 'read'})
-  if(cached) items.push({kind: 'ai', label: tr('gn_k_ai'), text: (cached.replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s/)[0]), pose: 'read'})
-  return items
+  const L = lokiOpenGet(f, gnHour(), greet)
+  // 1. the opening: one short bubble of his, whichever the moment asks for (two when he was caught away for a day or more)
+  const opening = []
+  if(L.storm && lokiStorm()) opening.push(L.storm)
+  else if(L.away) { opening.push(L.away); if(L.away2) opening.push(L.away2) }
+  else if(L.away2) opening.push(L.away2)
+  else if(greet && L.greet) opening.push(L.greet)
+  else if(lokiInviteOk(gnHour())) opening.push(lokiItem('invite', lokiPick('invite'), 'stand', {btn: 'sit'}))
+  else if(L.poof) opening.push(L.poof)
+  else if(L.help) opening.push(L.help)
+  else if(L.gift && loki.gift) opening.push(L.gift)
+  else if(L.recall) opening.push(L.recall)
+  else if(doneAll) opening.push(L.done || (L.done = lokiItem('done', lokiPick('dayDone'), 'joy')))
+  else if(L.char) opening.push(L.char)
+  // 2. the briefing, up to five bubbles; 3. at the end, one line of wisdom, only when the situation calls for one. Six at most in all.
+  const brief = []
+  if(f.focus) brief.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
+  else brief.push({kind: 'focus', label: tr('gn_k_focus'), text: tr('gn_focus_add'), pose: 'stand', edit: true})
+  f.sites.slice(0, 2).forEach(s => brief.push({kind: 'site', label: tr('gn_k_site'), text: s.name + ' · ' + s.why, pose: 'point'}))
+  if(f.lead && f.lead.theme) brief.push({kind: 'habit', label: tr('gn_k_habit'), text: f.lead.theme + (String(f.lead.text || '').length <= 34 ? ' · ' + f.lead.text : ''), pose: 'read'})
+  if(cached) brief.push({kind: 'ai', label: tr('gn_k_ai'), text: (cached.replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s/)[0]), pose: 'read'})
+  const wis = L.wisdom && !L.poof ? L.wisdom : null
+  brief.length = Math.min(brief.length, Math.min(5, LOKI_MAX - opening.length - (wis ? 1 : 0)))   // what is cut is in the full briefing ("tell me more")
+  return opening.concat(brief, wis ? [wis] : [])
 }
 function gnomeCardHtml() {
   const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
@@ -4738,7 +4734,9 @@ function gnomeCardHtml() {
   const poofIn = lokiPoofIn; lokiPoofIn = false
   const ghost = lokiGhost && item.poof
   const today = getToday(), reviewedToday = state.taskReviewedDate === today
-  const dots = items.length > 1 && !night && !empty && !briefingBusy ? '<div class="gn-dots" aria-hidden="true">' + items.map((_, i) => '<i' + (i === gnIdx ? ' class="on"' : '') + '></i>').join('') + '</div>' : ''
+  // the dots show where he is in the telling he is in (a queue of his, or the visit's own run), six at most
+  const segQ = q.length && !night && gnIdx < q.length, segLen = segQ ? q.length : base.length, segAt = segQ ? gnIdx : gnIdx - (q.length && !night ? q.length : 0)
+  const dots = segLen > 1 && !night && !empty && !briefingBusy ? '<div class="gn-dots" aria-hidden="true">' + Array.from({length: Math.min(segLen, LOKI_MAX)}, (_, i) => '<i' + (i === segAt ? ' class="on"' : '') + '></i>').join('') + '</div>' : ''
   const bubbleTag = items.length > 1 && !night && !empty && !briefingBusy ? ' role="button" tabindex="0" aria-label="' + tr('gn_next') + '" onclick="gnNext()" onkeydown="if(event.key===\'Enter\')gnNext()"' : ''
   const buttons = `<div class="gn-acts">
       ${lokiStoryState().open.length ? `<button class="gn-btn gn-story" onclick="showLokiStory()">${tr('gn_story')}${lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>` : ''}
@@ -4776,7 +4774,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) lokiOpen.away = null; else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -4826,7 +4824,29 @@ const LOKI = {
   gardenKnown: ['את זה אני מכיר. הוא כבר גר כאן.'],
   gardenUp: {2: 'דרגה 2: הגן גדל. מישהו שתה הרבה מים.', 3: 'דרגה 3: עכשיו יש לי איפה להתחבא. זה בדיוק מה שביקשתי.', 4: 'דרגה 4: היער עמוק. אני פה, בערך. תעקוב אחרי הצמחים הזוהרים.'},
   gardenTap: ['שב איתי על הקצה. המים כאן קרים.', 'אל תסתכל עלי, אני מתאמן על היעלמות.', 'צב? כן, הוא חבר. הוא אף פעם לא ממהר.'],
-  wisdom: ['המים לא נלחמים באבן. הם פשוט ממשיכים לזרום סביבה.', 'הדבר הבא הוא תמיד הדבר היחיד.', 'שורש לא ממהר. ובכל זאת הוא מגיע לכל מקום.', 'אין צורך לסיים את היער. צריך רק להשקות את מה שמול העיניים.', 'גם הנהר לא מתנצל שהוא עקום.', 'מי שמטפס על עץ ומסתכל למטה, מפספס את הענפים.', 'קטן הוא לא חלש. טיפה אחת התחילה את הנהר.', 'הצעד הראשון קשה כי אין לו כיוון. מהשני כבר יש.', 'לא כל כבדות צריכה פתרון. לפעמים מספיק לשבת איתה.', 'הגשם לא שואל אם מתאים. הוא בא, והאדמה שותה.', 'מה שאתה מחזיק חזק, מחליק. מה שאתה מחזיק בנחת, נשאר.', 'הדרך הארוכה לא שואלת אם אתה מוכן. היא פשוט נפתחת, צעד אחד.', 'עץ גדול לא הרגיש שהוא עושה משהו גדול. הוא גדל עוד יום.', 'לפעמים הבאר נראית יבשה רק כי עוד לא הגענו לעומק.', 'מה שנתקע בשבוע שעבר לא אומר דבר על השבוע הזה.', 'בלי למהר, הכול מגיע. ובמהירות, חצי מגיע ושוכחים את השאר.', 'גם בלילה הכי חשוך ביער יש משהו דולק. תחפש את הזוהר הקטן.', 'אתה לא צריך להיות חזק היום. מספיק להיות פה.', 'אל תחכה שהיער יתבהר. תדליק פנס, ונלך.', 'אי אפשר לדחוף את הנהר. אבל אפשר לבחור מאיפה לשתות.'],
+  // wisdom and "just here" are tagged with the situations they fit (w); one is chosen only by the situation (busy, stuck, done, hard, tired, pressed, good,
+  // evening, back); a line with no tag is "general" and comes rarely
+  wisdom: [
+    {t: 'המים לא נלחמים באבן. הם פשוט ממשיכים לזרום סביבה.', w: []},
+    {t: 'הדבר הבא הוא תמיד הדבר היחיד.', w: ['busy', 'pressed']},
+    {t: 'שורש לא ממהר. ובכל זאת הוא מגיע לכל מקום.', w: ['stuck', 'tired', 'done', 'back']},
+    {t: 'אין צורך לסיים את היער. צריך רק להשקות את מה שמול העיניים.', w: ['busy', 'pressed', 'tired']},
+    {t: 'גם הנהר לא מתנצל שהוא עקום.', w: []},
+    {t: 'מי שמטפס על עץ ומסתכל למטה, מפספס את הענפים.', w: ['busy', 'pressed']},
+    {t: 'קטן הוא לא חלש. טיפה אחת התחילה את הנהר.', w: ['stuck', 'good', 'done']},
+    {t: 'הצעד הראשון קשה כי אין לו כיוון. מהשני כבר יש.', w: ['stuck', 'busy']},
+    {t: 'לא כל כבדות צריכה פתרון. לפעמים מספיק לשבת איתה.', w: ['hard', 'tired']},
+    {t: 'הגשם לא שואל אם מתאים. הוא בא, והאדמה שותה.', w: ['hard', 'evening', 'done']},
+    {t: 'מה שאתה מחזיק חזק, מחליק. מה שאתה מחזיק בנחת, נשאר.', w: ['pressed', 'busy']},
+    {t: 'הדרך הארוכה לא שואלת אם אתה מוכן. היא פשוט נפתחת, צעד אחד.', w: ['stuck', 'back']},
+    {t: 'עץ גדול לא הרגיש שהוא עושה משהו גדול. הוא גדל עוד יום.', w: ['done', 'good']},
+    {t: 'לפעמים הבאר נראית יבשה רק כי עוד לא הגענו לעומק.', w: ['stuck', 'hard']},
+    {t: 'מה שנתקע בשבוע שעבר לא אומר דבר על השבוע הזה.', w: ['stuck', 'back']},
+    {t: 'בלי למהר, הכול מגיע. ובמהירות, חצי מגיע ושוכחים את השאר.', w: ['busy', 'pressed', 'back']},
+    {t: 'גם בלילה הכי חשוך ביער יש משהו דולק. תחפש את הזוהר הקטן.', w: ['hard', 'evening', 'good']},
+    {t: 'אתה לא צריך להיות חזק היום. מספיק להיות פה.', w: ['hard', 'tired', 'evening']},
+    {t: 'אל תחכה שהיער יתבהר. תדליק פנס, ונלך.', w: ['hard', 'evening']},
+    {t: 'אי אפשר לדחוף את הנהר. אבל אפשר לבחור מאיפה לשתות.', w: ['pressed', 'stuck']}],
   // his answer to the mood leaf, by the moods that leaf already has (nothing is added to them): the heavy ones also offer a hug
   mood: {
     hard: ['אני פה. לא צריך להסביר. נשב רגע על הקצה.', 'יום כבד? נשים אותו על האבן ונראה מה נשאר ממנו עוד מעט.', 'אתה לא חייב הכול היום. אולי רק דבר אחד קטן. או לא. אני עדיין פה.', {t: 'גם כשקשה, יש כאן אור קטן ליד הקצה. תסתכל, זה אנחנו.', p: 'lantern'}],
@@ -4836,7 +4856,14 @@ const LOKI = {
     good: ['אני רואה את הזוהר. תשמור אותו, ונשתמש בו על משהו קשה.', 'איזה יופי. אני רושם שהיום הזה קרה.']
   },
   hug: ['בלי קסם. רק חיבוק.', 'קיבלת. נשאר איתך.'],
-  away: ['אה! לא ציפיתי לך. (ציפיתי.)'],
+  // what he is doing when Uri comes back, by the activity of the hour: two or three lines for each, none shared (the lines are Loki's own)
+  awayAct: {
+    read: ['רגע, אני באמצע פסקה.', 'המגילה אומרת שמחר יהיה יום. אני עדיין בודק.', 'כמעט סיימתי. עוד פסקה. (עוד פסקה.)'],
+    fishing: ['תפסתי משהו! (רק רגע, זה העלה.)', 'הדגים פה מנומסים. הם מסתכלים על החכה ולא נוגעים.', 'אני לא דג. אני מחכה. יש הבדל, ואני עדיין לומד אותו.'],
+    'sit-river': ['ישבתי על הקצה. המים קרים, אבל הם לא הפסיקו לדבר.', 'ספרתי כוכבים. נתקעתי בשלושה.', 'הפנסים דלוקים והנהר זורם. לא פספסת כלום.'],
+    sleep: ['אה! לא ציפיתי לך. (ציפיתי.)', 'לא ישנתי. רק עצמתי עיניים לבדוק את הכובע.', 'חלמתי שאני מופיע במקום אחר. זה לא היה חלום.'],
+    turtle: ['שנייה, הצב באמצע משפט. הוא לוקח את הזמן שלו.', 'הצב אומר שהייתי צריך לבוא מוקדם יותר. הוא אומר את זה לכולם.', 'דיברתי עם הצב עליך. רק דברים טובים.']
+  },
   poof: ['פוף. כן, מכוון. לא, לא מכוון.'],
   // his side of the give and take: the plant, a small trouble, a gift (the lines marked * are Loki's own, written to match the sheet)
   give: ['הצמח שלי שותה. הוא אומר תודה, אבל הוא עדיין לא יודע לדבר.', 'טיפה לצמח, טיפה לנהר. כולם מרוצים.'],   // *
@@ -4852,7 +4879,7 @@ const LOKI = {
   recall: {best: 'זוכר את היום עם {x} משימות? עברנו אותו. גם את זה נעבור.', unstuck: '{site} היה תקוע {x} ימים, ואז נפתח. אני עדיין מספר על זה לצבים.', first: 'היום הראשון שלנו היה {date}. היית נראה עייף. גם אני.'},
   hardStreak: 'אני שדון, אבל יש בני אדם שאוהבים אותך. אולי תתקשר לאחד מהם?',
   // "just here": nothing to do, nothing to explain; p = the pose it is told in
-  here: [{t: 'סתם. רציתי להגיד שאני פה.', p: 'listen'}, {t: 'אל תתייחס אליי. אני רק עובר.', p: 'laugh'}, {t: 'לא צריך כלום. שמעתי שמישהו עבד קשה.', p: 'listen'}, {t: 'נשימה אחת. עמוק. יופי. חזרנו.', p: 'listen'}, {t: 'אני כאן. תמשיך, אני רק מחזיק את היער.', p: 'laugh'}]
+  here: [{t: 'סתם. רציתי להגיד שאני פה.', p: 'listen', w: []}, {t: 'אל תתייחס אליי. אני רק עובר.', p: 'laugh', w: ['busy']}, {t: 'לא צריך כלום. שמעתי שמישהו עבד קשה.', p: 'listen', w: ['done', 'evening']}, {t: 'נשימה אחת. עמוק. יופי. חזרנו.', p: 'listen', w: ['pressed', 'hard']}, {t: 'אני כאן. תמשיך, אני רק מחזיק את היער.', p: 'laugh', w: ['busy', 'back']}]
 }
 // moods that already exist on the leaf -> the bank that answers them; the heavy ones also offer a hug
 const LOKI_MOOD = {overwhelmed: {bank: ['hard', 'pressed'], hug: true, pose: 'listen'}, scattered: {bank: ['pressed'], hug: true, pose: 'listen'}, tired: {bank: ['tired'], hug: true, pose: 'listen'},
@@ -4862,10 +4889,33 @@ const LK_POSE = {gift: [137, 275, 68], hug: [223, 273, 112], lantern: [228, 276,
 const LK_GLOW = {'sit-river': [[45, 183, 23], [172, 165, 21]], lantern: [[18, 72, 16], [200, 143, 27]]}   // [x, y, radius] of the lamps and the staff's gem, in file pixels
 const LK_K = .362      // render px per file px: the heads of all twelve are drawn at the size of the standing gnome's, feet (bottom of the file) on one line
 const LOKI_KEY = 'fieldy_loki_v1'
+const LOKI_MAX = 6          // bubbles in one telling, and so dots of progress: his opening, up to five of the briefing, one line of wisdom (never more than six)
 const LOKI_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 let loki = (function(){ try { const o = JSON.parse(localStorage.getItem(LOKI_KEY)); if(o && o.v === 1) return o } catch(e) {} return {v: 1, bag: {}, last: {}, hardAt: 0, hardDays: {}, hugs: 0} })()
 function lokiSave() { try { localStorage.setItem(LOKI_KEY, JSON.stringify(loki)) } catch(e) {} }
 // a line from a bank: shuffled, never the same twice before the bank has been through; `ok` can rule lines out for now
+// the situations of this moment: busy day, stuck site, day done, the mood he was given (hard, pressed, tired, good), evening, back after a day away
+function lokiContexts(f, hour) {
+  const c = new Set(), open = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => !t.done), all = open.length + [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => t.done).length
+  if(open.length >= 6) c.add('busy')
+  if(priorityStuckSites().some(s => daysStuck(s) >= 7)) c.add('stuck')
+  if(all > 0 && !open.length) c.add('done')
+  const m = typeof getCurrentMood === 'function' ? getCurrentMood() : null, mm = m && m.mood
+  if(mm === 'overwhelmed') { c.add('hard'); c.add('pressed') } else if(mm === 'scattered') c.add('pressed'); else if(mm === 'tired') c.add('tired'); else if(mm === 'focused' || mm === 'motivated') c.add('good')
+  if(hour >= 17 && hour < 22) c.add('evening')
+  if(lokiAwayMs >= 24 * 3600000) c.add('back')
+  return c
+}
+// one line of a tagged bank, chosen by the situation only: a line is eligible when one of its tags is in `ctx`; null when none is
+function lokiPickFor(name, ctx, general) {
+  const bank = LOKI[name], fit = e => general ? !(e.w && e.w.length) : (e.w || []).some(t => ctx.has(t))
+  const pool = bank.map((e, i) => i).filter(i => fit(bank[i])); if(!pool.length) return null
+  const seen = loki.bag[name + (general ? '*' : '')] = (loki.bag[name + (general ? '*' : '')] || []).filter(i => pool.indexOf(i) >= 0 && true)
+  const fresh = pool.filter(i => seen.indexOf(i) < 0), from0 = fresh.length ? fresh : pool.filter(i => i !== loki.last[name]), from = from0.length ? from0 : pool
+  const i = from[Math.floor(Math.random() * from.length)]; loki.last[name] = i
+  if(fresh.length) seen.push(i); else loki.bag[name + (general ? '*' : '')] = [i]
+  lokiSave(); return bank[i]
+}
 function lokiPick(name, vars, ok) {
   const bank = name.split('.').reduce((o, k) => o[k], LOKI), n = bank.length
   let bag = (loki.bag[name] || []).filter(i => i < n)
@@ -4912,7 +4962,7 @@ function lokiHug() {
   el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home')
 }
 // "just here": a line with no task in it
-function lokiHereItem() { const h = lokiPick('here'); return lokiItem('here', h.t, h.p) }
+function lokiHereItem(ctx) { const h = lokiPickFor('here', ctx || lokiContexts(null, gnHour())) || lokiPickFor('here', null, true); return lokiItem('here', h.t, h.p) }
 // a line for a state he stays in (thinking, resting, ...): the same for a minute, so a redraw does not change what he is saying
 const lokiSticky = {}
 function lokiLine(name) { const c = lokiSticky[name]; if(c && Date.now() - c.at < 60000) return c.t; const t = lokiPick(name); lokiSticky[name] = {t, at: Date.now()}; return t }
@@ -4968,11 +5018,11 @@ function lokiRecallItem() {
 // under two hours: he just stands; two to twelve (and up to a day): what he does at this hour, read in the morning,
 // fish at noon, sit at the edge of the river in the evening, sleep at night; a day or more: the turtle, and "I waited" (no blame)
 let lokiAwayMs = (function(){ const now = Date.now(), prev = loki.lastSeen || 0; loki.lastSeen = now; lokiSave(); return prev ? now - prev : 0 })()
-function lokiAwayItem(hour) {
-  const h = lokiAwayMs / 3600000; if(h < 2) return null
-  if(h >= 24) { const days = Math.floor(h / 24); return lokiItem('away', lokiPick('back', {x: days}, s => !/\{x\}/.test(s) || days >= 2), 'turtle') }
+function lokiAwayItems(hour) {
+  const h = lokiAwayMs / 3600000; if(h < 2) return []
+  if(h >= 24) { const days = Math.floor(h / 24); return [lokiItem('away', lokiPick('awayAct.turtle'), 'turtle'), lokiItem('away', lokiPick('back', {x: days}, s => !/\{x\}/.test(s) || days >= 2), 'turtle')] }
   const pose = hour >= 5 && hour < 11 ? 'read' : hour >= 11 && hour < 16 ? 'fishing' : hour >= 16 && hour < 21 ? 'sit-river' : 'sleep'
-  return lokiItem('away', lokiPick('away'), pose)
+  return [lokiItem('away', lokiPick('awayAct.' + pose), pose)]
 }
 document.addEventListener('visibilitychange', function() {
   const now = Date.now()
@@ -5047,7 +5097,7 @@ function lokiInviteOk(hour) {
 let lokiRitualTimer = null
 function lokiSit() {
   haptic('light'); loki.ritualDay = getToday(); lokiSave()
-  lokiQueue = [lokiItem('ritual', lokiPick('dayDone'), 'sit-river', {lamp: 'on'}), lokiItem('ritual', lokiPick('wisdom'), 'sit-river', {lamp: 'on', btn: 'lamp'})]; gnIdx = 0; lokiRender()
+  lokiQueue = [lokiItem('ritual', lokiPick('dayDone'), 'sit-river', {lamp: 'on'}), lokiItem('ritual', (lokiPickFor('wisdom', new Set([...lokiContexts(null, gnHour()), 'evening'])) || lokiPickFor('wisdom', null, true)).t, 'sit-river', {lamp: 'on', btn: 'lamp'})]; gnIdx = 0; lokiRender()
   clearTimeout(lokiRitualTimer); lokiRitualTimer = setTimeout(lokiLampOff, 30000)
 }
 function lokiLampOff() {
@@ -5132,18 +5182,31 @@ function showLokiStory() {
 }
 // what he opens with this time: one character bubble (playful or "just here"), and a line of wisdom about every second time
 let lokiOpen = null
-function lokiOpenGet(f, hour) {
+function lokiOpenGet(f, hour, greet) {
   if(lokiOpen && lokiOpen.day === gardenDayKey()) return lokiOpen
   const open = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => !t.done), stuck = priorityStuckSites().find(s => daysStuck(s) >= 7)
+  const all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later], doneAll = all.length > 0 && all.every(t => t.done)
   lokiScan(); lokiStoryTick()
-  const L = lokiOpen = {day: gardenDayKey(), char: null, wisdom: null, away: lokiAwayItem(hour), recall: null}
+  const ctx = lokiContexts(f, hour), L = lokiOpen = {day: gardenDayKey(), char: null, wisdom: null, away: null, away2: null, recall: null, greet: null, poof: null, storm: null, help: null, gift: null}
+  const away = lokiAwayItems(hour); L.away = away[0] || null; L.away2 = away[1] || null
+  if(greet) L.greet = lokiItem('greet', lokiPick('greet'), 'wave')
+  if(lokiStorm()) L.storm = lokiItem('storm', lokiPick('storm'), 'shelter')
   L.recall = lokiRecallItem()
+  // "poof": a third of the visits (never the first of the day, after an absence, on a day he shelters or has other news)
+  const calm = !greet && !L.away && !L.away2 && !L.storm && !doneAll
+  if(calm && Math.random() < .3) { const ghost = (Date.now() - (loki.ghostAt || 0) > 4 * 86400000) && Math.random() < .35; if(ghost) { loki.ghostAt = Date.now(); lokiSave() }
+    L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiFlip = true; lokiPoofIn = true; lokiGhost = ghost }
+  if(calm && !L.poof && lokiHelpOk()) { L.help = lokiItem('help', lokiPick('helpAsk'), 'stuck-hat', {btn: 'help'}); loki.helpAt = Date.now(); lokiSave() }
+  if(calm && !L.poof && !L.help && Date.now() - (loki.giftAt || 0) >= 6 * 86400000 && Date.now() - (loki.firstAt || (loki.firstAt = Date.now())) >= 3 * 86400000 && Math.random() < .3) { loki.gift = lokiGiftPick(); lokiSave(); L.gift = lokiItem('gift', lokiPick('giftOffer'), 'gift', {btn: 'take', giftImg: rewardSrc(loki.gift), giftName: rewardName(loki.gift)}) }
+  // the character bubble: "just here" now and then (likelier in the afternoon and on a busy day), else what the day asks for
   const here = (hour >= 15 && hour < 18 ? .5 : 0) || (open.length >= 6 ? .4 : .12)
-  if(Math.random() < here) L.char = lokiHereItem()
+  if(Math.random() < here) L.char = lokiHereItem(ctx)
   else if(open.length >= 6) L.char = lokiItem('busy', lokiPick('busy'), 'stand')
   else if(stuck && Math.random() < .6) L.char = lokiItem('stuck', lokiPick('stuck', {site: stuck.name}), 'point')
   else L.char = lokiItem('brief', lokiPick('brief', {x: (f && f.sites || []).length}, s => !/\{x\}/.test(s) || (f && f.sites || []).length === 2), 'read')
-  if(!L.recall && Math.random() < .5) L.wisdom = lokiItem('wisdom', lokiPick('wisdom'), 'think')
+  // wisdom: only by the situation; with none, a general line, rarely
+  const w = ctx.size ? (Math.random() < .5 ? lokiPickFor('wisdom', ctx) : null) : (Math.random() < .08 ? lokiPickFor('wisdom', ctx, true) : null)
+  if(w) L.wisdom = lokiItem('wisdom', w.t, 'think')
   return L
 }
 
