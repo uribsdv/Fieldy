@@ -958,6 +958,14 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
 [data-theme="jungle"] .jg-home .nh-tools{margin-top:16px}
 [data-theme="jungle"] .jg-home .nh-sec{margin-top:24px}
+/* room to breathe: 28px from card to card, 32px before the heading of the next group (Home, Tasks, People, Sites).
+   Only the gaps between blocks change, as a margin-top on the block that follows (it collapses with the margin above);
+   no card's padding, text, height or the sticky headers move */
+html[data-theme="jungle"] .jg-home .nh-sec{margin-top:32px}
+html[data-theme="jungle"] .jg-home > :is(.card,.nh-garden,.nh-peek) + :is(.card,.nh-garden,.nh-peek){margin-top:28px}
+html[data-theme="jungle"] .jg-home > .accordion{margin-top:32px!important}
+html[data-theme="jungle"] :is(#screen-tasks,#screen-people,#screen-sites) .card:not(.card .card) + .card:not(.card .card){margin-top:28px}
+html[data-theme="jungle"] :is(#screen-tasks,#screen-people) .card:not(.card .card) + div:not(.card):not(.vn){margin-top:32px!important}
 /* the plant in the corner of the briefing card, as it was: a thin corner vine and a hoya cluster, golden glow, a few sparkles */
 [data-theme="jungle"] .jgc-host{position:relative;overflow:visible!important}
 [data-theme="jungle"] .jg-corner{position:absolute;inset:0;pointer-events:none;z-index:2}
@@ -1037,6 +1045,17 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
   box-shadow:0 0 18px 5px rgba(232,176,118,.5),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -6px 10px -6px rgba(110,62,24,.35)}
 [data-theme="jungle"] .nav-ind::before{display:none}
 [data-theme="jungle"] #badge-tasks{right:calc(50% - 25px)}
+/* the number badges: a dark, soft amber-cherry instead of the bright red (white digits 5.5:1 at the light end, 7.5:1 at the dark),
+   10% smaller, with a faint halo of their own hue. The number, and what it counts, stay as they are */
+/* a ring of water where something is pressed (see jgRipple): 1.5px, light and half see-through, gone in 350ms */
+html[data-theme="jungle"] .jg-rip{position:fixed;z-index:9999;overflow:hidden;pointer-events:none}
+html[data-theme="jungle"] .jg-rip i{position:absolute;border-radius:50%;pointer-events:none;
+  box-shadow:inset 0 0 0 1.5px rgba(236,255,247,.7),0 0 0 .5px rgba(20,96,78,.24),inset 0 0 0 2px rgba(20,96,78,.14);transform:scale(.08);opacity:.95;animation:jg-rip 350ms cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes jg-rip{to{transform:scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){html[data-theme="jungle"] .jg-rip{display:none}}
+@media (prefers-reduced-transparency:reduce){html[data-theme="jungle"] .jg-rip{display:none}}
+html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#8C3C2D);font-size:calc(var(--fs-2xs) * .9);line-height:10.6px;padding:1px 4.5px;min-width:14.4px;
+  box-shadow:0 0 0 1px rgba(255,236,222,.55),0 0 9px rgba(165,81,59,.55)}
 /* the gnome's card: him in the start corner, a speech bubble, dots, and the briefing's own buttons below */
 [data-theme="jungle"] .gn-card{padding:14px 14px 12px}
 [data-theme="jungle"] .gn-row{display:flex;gap:10px;align-items:flex-end}
@@ -3437,7 +3456,7 @@ function placeNavInd(animate) {
 }
 window.addEventListener('resize', function(){ navIndX = null; placeNavInd(false) })
 function navRipple(btn) {
-  if(!nachalLike() || reducedMotion()) return
+  if(!nachalLike() || reducedMotion() || currentTheme === 'jungle') return   // the jungle has its own ring of water (jgRipple)
   var nav = document.getElementById('nav'), nr = nav.getBoundingClientRect(), ir = btn.querySelector('.nav-icon').getBoundingClientRect()
   for(var i = 0; i < 2; i++) {
     var r = document.createElement('span'); r.className = 'nav-rip'
@@ -3445,6 +3464,32 @@ function navRipple(btn) {
     r.addEventListener('animationend', function(e){ e.target.remove() }); nav.appendChild(r)
   }
 }
+// ── JUNGLE: a ring of water where a card, a main button or the nav is pressed. A thin light ring spreads from the
+// point of the press and is gone in 350ms, clipped to the shape pressed. Only cards, the main action buttons and the
+// bottom nav; a press on any other control inside a card makes none. It never takes the press (pointer-events: none),
+// never runs on what is off screen or in a hidden page, and not at all with reduced motion or reduced transparency.
+const JG_RIP_MAIN = '.btn-primary, .nh-ask, .gn-btn.hot, .site-hbtn-add, .btn-add, .screen-header button[style*="--bamboo"]'
+const JG_RIP_CARD = '.card, .site-card, .nh-garden, .nh-peek'
+function jgRipple(e) {
+  if(currentTheme !== 'jungle' || e.button > 0 || document.visibilityState !== 'visible') return
+  if(reducedMotion() || (window.matchMedia && matchMedia('(prefers-reduced-transparency: reduce)').matches)) return
+  const t = e.target; if(!(t instanceof Element)) return
+  const ctl = t.closest('button, a, input, select, textarea, label, [contenteditable="true"]')
+  let host = null
+  if(ctl) { if(ctl.matches('.nav-btn')) host = ctl.closest('#nav') || ctl; else if(ctl.matches(JG_RIP_MAIN)) host = ctl; else return }
+  else host = t.closest(JG_RIP_CARD)
+  if(!host) return
+  const r = host.getBoundingClientRect()
+  if(!r.width || r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) return
+  const x = e.clientX - r.left, y = e.clientY - r.top, R = Math.min(140, Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y)))
+  const box = document.createElement('span'); box.className = 'jg-rip'; box.setAttribute('aria-hidden', 'true')
+  box.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;border-radius:' + getComputedStyle(host).borderRadius
+  const ring = document.createElement('i')
+  ring.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + 2 * R + 'px;height:' + 2 * R + 'px;margin:' + (-R) + 'px 0 0 ' + (-R) + 'px'
+  box.appendChild(ring); document.body.appendChild(box)
+  setTimeout(() => box.remove(), 400)
+}
+document.addEventListener('pointerdown', jgRipple, {passive: true, capture: true})
 function popNavBadge(b) {
   if(reducedMotion()) return
   b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop')
