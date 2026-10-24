@@ -1123,6 +1123,13 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .nh-loki-plant img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
 [data-theme="jungle"] .nh-loki-plant b{display:block;font-size:var(--fs-base);color:var(--t1)}
 [data-theme="jungle"] .nh-loki-plant small{font-size:var(--fs-sm);color:var(--t2)}
+/* the story: the button under him, a small dot on what has not been read, the list of the chapters that are open */
+[data-theme="jungle"] .gn-story{position:relative}
+[data-theme="jungle"] .gn-story-dot{display:inline-block;width:8px;height:8px;margin-inline-start:6px;border-radius:50%;background:#E8A23A;box-shadow:0 0 5px rgba(232,162,58,.9)}
+[data-theme="jungle"] .nh-chap-open{margin-inline-start:auto;min-height:36px;padding:4px 14px;border-radius:18px;background:rgba(255,255,255,.7);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-sm);font-weight:700;display:inline-flex;align-items:center}
+[data-theme="jungle"] .nh-chap{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin-bottom:8px;padding:8px 14px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(45,102,52,.25);color:var(--t1);font-size:var(--fs-base);font-weight:600;text-align:start}
+[data-theme="jungle"] .nh-chap-dot{flex:none;width:9px;height:9px;border-radius:50%;background:#E8A23A;box-shadow:0 0 5px rgba(232,162,58,.9)}
+[data-theme="jungle"] .nh-chap-dot.read{background:transparent;box-shadow:none;border:1px solid rgba(45,102,52,.35)}
 [data-theme="jungle"] .gn-edit{position:absolute;bottom:22px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
 [data-theme="jungle"] .gn-dots{display:flex;gap:6px;justify-content:center}
 [data-theme="jungle"] .gn-dots i{width:7px;height:7px;border-radius:50%;background:rgba(45,102,52,.28)}
@@ -2264,6 +2271,8 @@ const TRANSLATIONS = {
   gn_name: {he:'לוקי', en:'Loki'},
   gn_hug: {he:'חיבוק', en:'A hug'},
   gn_sit: {he:'שב איתי', en:'Sit with me'},
+  gn_story: {he:'הסיפור של לוקי', en:"Loki's story"},
+  gn_chapter: {he:'פרק', en:'Chapter'},
   gn_give: {he:'תן ללוקי', en:'Give to Loki'},
   gn_help: {he:'עזור לו', en:'Lend a hand'},
   gn_take: {he:'קח', en:'Take it'},
@@ -3814,7 +3823,7 @@ function showGarden() {
     '<div class="nh-garden-pond">' + gardenSceneHtml(sc.stage, sc.prev) + gardenGrewHtml(sc) + (garden.cairn.length || garden.leaves
       ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
       : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
-    (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.png"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div></div>' : '') +
+    (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.png"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div><button class="nh-chap-open" onclick="showLokiStory()">' + tr('gn_story') + (lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : '') + '</button></div>' : '') +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -4732,6 +4741,7 @@ function gnomeCardHtml() {
   const dots = items.length > 1 && !night && !empty && !briefingBusy ? '<div class="gn-dots" aria-hidden="true">' + items.map((_, i) => '<i' + (i === gnIdx ? ' class="on"' : '') + '></i>').join('') + '</div>' : ''
   const bubbleTag = items.length > 1 && !night && !empty && !briefingBusy ? ' role="button" tabindex="0" aria-label="' + tr('gn_next') + '" onclick="gnNext()" onkeydown="if(event.key===\'Enter\')gnNext()"' : ''
   const buttons = `<div class="gn-acts">
+      ${lokiStoryState().open.length ? `<button class="gn-btn gn-story" onclick="showLokiStory()">${tr('gn_story')}${lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>` : ''}
       ${(loki.drops || 0) > 0 ? `<button class="gn-btn gn-give" onclick="lokiGive()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg> ${tr('gn_give')}</button>` : ''}
       <button class="gn-btn" onclick="toggleGnFull()" aria-expanded="${gnFull}">${tr('gn_more')}</button>
       <button id="task-review-toggle-btn" class="gn-btn${reviewedToday || taskReviewOpen ? '' : ' hot'}" onclick="toggleTaskReview()">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
@@ -4766,7 +4776,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) lokiOpen.away = null; else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) lokiOpen.away = null; else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -5086,12 +5096,46 @@ function lokiTakeGift() {
   haptic('light'); garden.items[k] = (garden.items[k] || 0) + 1; saveGarden(); loki.gift = null; loki.giftAt = Date.now(); lokiSave()
   lokiQueue = [lokiItem('gifttaken', lokiPick('giftTaken'), 'joy')]; gnIdx = 0; lokiRender()
 }
+// ── his story: six chapters, told slowly ──
+// Each chapter is three or four bubbles. The first is open from the start; the others open one at a time, on a Friday, as the garden
+// grows (by its stage) or, for the last, after a streak of fourteen days. No duty to read: a chapter stays in the list once it is open,
+// and one not yet read has a small dot. It is told from the button "Loki's story" under him, or from the garden sheet.
+const LOKI_STORY = [
+  {t: 'איך הגעתי', stage: 1, lines: ['אני לוקי. הגעתי לכאן כי טיפת אור התגלגלה בנחל ולא הצלחתי להתאפק.', 'אמרו לי לא להיכנס לגן. אז נכנסתי.', 'עכשיו אני האחראי עליו. לא ביקשו, אבל מישהו צריך.'], poses: ['gift', 'peek', 'stand']},
+  {t: 'בית הספר לקוסמים', stage: 1, lines: ['למדתי בבית ספר לקוסמים. הייתי מצוין בלהציק ובלהסתיר דברים.', 'שיעור ההיעלמות, שם קצת התעסקנו. מאז כל פעם שאני מנסה להיעלם אני מופיע במקום אחר.', 'המורה אמר: "לוקי, אתה לא נעלם. אתה פשוט עובר."', 'אני לא מתלונן. זה בעצם מועיל. אתה לא מצפה לי איפה שאני.'], poses: ['laugh', 'peek', 'stand', 'joy']},
+  {t: 'הכפר על קצה הנהר', stage: 2, lines: ['גדלתי בכפר על קצה נהר. עשרים שדונים, כולם צעקנים.', 'הערב היה הזמן הכי טוב: ישבנו על האבנים, לא עשינו כלום, והיה מושלם.', 'פעם הנהר התייבש קצת. מאז אני שומר על כל טיפה.'], poses: ['stand', 'sit-river', 'gift']},
+  {t: 'החוכמה של הזקנה', stage: 3, lines: ['סבתא-רבתא של השכן שלי אמרה: "לוקי, אתה ליצן."', 'אמרתי לה: "נכון." והיא אמרה: "טוב. ליצן אומר את האמת, ועושה את זה שיקשיבו."', 'מאז אני מנסה לומר את הדבר הנכון בזמן הנכון. לפעמים אני גם מצליח.'], poses: ['listen', 'laugh', 'think']},
+  {t: 'למה אני פה', stage: 3, lines: ['אתה מביא מים לשדות. אני לא מבין בבארות, אבל אני מבין במים.', 'כל מי שמפעיל משאבה הוא שומר היער, וזה אתה.', 'אז אני כאן. להזכיר לך מה הכי חשוב, ולהוריד את מה שלא.'], poses: ['stand', 'point', 'lantern']},
+  {t: 'למה אני נשאר', stage: 4, streak: 14, lines: ['אתה שואל למה אני לא עוזב? קל.', 'אכפת לי. זה הכול. אין שום טריק.', '(ואם משהו טוב קרה לך היום, גם זה אכפת לי.)'], poses: ['stand', 'hug', 'joy']}
+]
+function lokiStoryState() { return loki.story = loki.story || {open: [], read: {}, friday: ''} }
+function lokiChapterOk(i) { const c = LOKI_STORY[i]; return gardenStage() >= c.stage || (c.streak && (state.streak || 0) >= c.streak) }
+// the first chapter is there from the start; one more opens on a Friday, if the garden (or the streak) has earned it
+function lokiStoryTick() {
+  const st = lokiStoryState()
+  if(!st.open.length) st.open.push(0)
+  else if(new Date().getDay() === 5 && st.friday !== getToday()) { st.friday = getToday(); const next = LOKI_STORY.findIndex((c, i) => st.open.indexOf(i) < 0 && lokiChapterOk(i)); if(next >= 0) st.open.push(next) }
+  lokiSave()
+}
+function lokiStoryUnread() { const st = lokiStoryState(); return st.open.some(i => !st.read[i]) }
+function lokiTellChapter(i) {
+  const c = LOKI_STORY[i]; if(!c) return
+  closeModal(); if(currentScreen !== 'home') navigateTo('home')
+  lokiQueue = c.lines.map((t, j) => lokiItem('story', t, c.poses[j] || 'stand', {label: c.t, chap: i, last: j === c.lines.length - 1})); gnIdx = 0; gnFull = false
+  lokiRender(); const el = document.getElementById('jg-gnome'); if(el) el.scrollIntoView({block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth'})
+}
+function showLokiStory() {
+  const st = lokiStoryState()
+  openModal('<div class="nh-story"><div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:12px">' + tr('gn_story') + '</div>' +
+    st.open.map(i => '<button class="nh-chap" onclick="lokiTellChapter(' + i + ')"><span class="nh-chap-dot' + (st.read[i] ? ' read' : '') + '"></span><span>' + tr('gn_chapter') + ' ' + (i + 1) + ' · ' + esc(LOKI_STORY[i].t) + '</span></button>').join('') +
+    '<button class="btn-primary" style="margin-top:12px" onclick="closeModal()">' + tr('btn_close') + '</button></div>')
+}
 // what he opens with this time: one character bubble (playful or "just here"), and a line of wisdom about every second time
 let lokiOpen = null
 function lokiOpenGet(f, hour) {
   if(lokiOpen && lokiOpen.day === gardenDayKey()) return lokiOpen
   const open = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later].filter(t => !t.done), stuck = priorityStuckSites().find(s => daysStuck(s) >= 7)
-  lokiScan()
+  lokiScan(); lokiStoryTick()
   const L = lokiOpen = {day: gardenDayKey(), char: null, wisdom: null, away: lokiAwayItem(hour), recall: null}
   L.recall = lokiRecallItem()
   const here = (hour >= 15 && hour < 18 ? .5 : 0) || (open.length >= 6 ? .4 : .12)
