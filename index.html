@@ -958,6 +958,14 @@ html:is([data-theme="nachal"],[data-theme="jungle"]) #site-search{padding:14px 4
 [data-theme="jungle"] .jg-home .nh-greet{margin-top:2px}
 [data-theme="jungle"] .jg-home .nh-tools{margin-top:16px}
 [data-theme="jungle"] .jg-home .nh-sec{margin-top:24px}
+/* room to breathe: 28px from card to card, 32px before the heading of the next group (Home, Tasks, People, Sites).
+   Only the gaps between blocks change, as a margin-top on the block that follows (it collapses with the margin above);
+   no card's padding, text, height or the sticky headers move */
+html[data-theme="jungle"] .jg-home .nh-sec{margin-top:32px}
+html[data-theme="jungle"] .jg-home > :is(.card,.nh-garden,.nh-peek) + :is(.card,.nh-garden,.nh-peek){margin-top:28px}
+html[data-theme="jungle"] .jg-home > .accordion{margin-top:32px!important}
+html[data-theme="jungle"] :is(#screen-tasks,#screen-people,#screen-sites) .card:not(.card .card) + .card:not(.card .card){margin-top:28px}
+html[data-theme="jungle"] :is(#screen-tasks,#screen-people) .card:not(.card .card) + div:not(.card):not(.vn){margin-top:32px!important}
 /* the plant in the corner of the briefing card, as it was: a thin corner vine and a hoya cluster, golden glow, a few sparkles */
 [data-theme="jungle"] .jgc-host{position:relative;overflow:visible!important}
 [data-theme="jungle"] .jg-corner{position:absolute;inset:0;pointer-events:none;z-index:2}
