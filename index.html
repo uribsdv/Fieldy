@@ -3823,7 +3823,7 @@ function showGarden() {
     '<div class="nh-garden-pond">' + gardenSceneHtml(sc.stage, sc.prev) + gardenGrewHtml(sc) + (garden.cairn.length || garden.leaves
       ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
       : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
-    (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.png"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div><button class="nh-chap-open" onclick="showLokiStory()">' + tr('gn_story') + (lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : '') + '</button></div>' : '') +
+    (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.webp"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div><button class="nh-chap-open" onclick="showLokiStory()">' + tr('gn_story') + (lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : '') + '</button></div>' : '') +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -4671,9 +4671,9 @@ function gnPoseHtml(key, extra) {
     let lamp = ''
     if(extra && extra.lamp && LK_GLOW[key]) {
       const off = extra.lamp === 'off', masks = LK_GLOW[key].map(function(g) { const R = (g[2] + (off ? 3 : 16)) * LK_K; return 'radial-gradient(circle ' + R.toFixed(1) + 'px at ' + (g[0] / t[0] * 100).toFixed(1) + '% ' + (g[1] / t[1] * 100).toFixed(1) + '%,#000 0,#000 ' + (R * (off ? .85 : .55)).toFixed(1) + 'px,transparent ' + R.toFixed(1) + 'px)' }).join(',')
-      lamp = '<img class="gn-glow' + (off ? ' off' : '') + '" alt="" src="assets/gnome/loki/' + key + '.png" style="' + box + ';-webkit-mask-image:' + masks + ';mask-image:' + masks + '">'
+      lamp = '<img class="gn-glow' + (off ? ' off' : '') + '" alt="" src="assets/gnome/loki/poses/' + key + '.webp" style="' + box + ';-webkit-mask-image:' + masks + ';mask-image:' + masks + '">'
     }
-    return '<img class="gn-img lk-img" alt="" data-pose="' + key + '" src="assets/gnome/loki/' + key + '.png" style="' + box + '">' + lamp + line
+    return '<img class="gn-img lk-img" alt="" data-pose="' + key + '" src="assets/gnome/loki/poses/' + key + '.webp" style="' + box + '">' + lamp + line
   }
   const t = GN_TAB[key], k = GN_SIZE.body * (GN_SCALE[key] || 1) / (t[3] - t[2]), w = t[0] * k, h = t[1] * k
   const left = GN_SIZE.w / 2 - t[4] * k, top = GN_SIZE.h - 3 - t[3] * k
@@ -5068,7 +5068,7 @@ function lokiPlantStage() { const w = loki.water || 0; return w >= LOKI_PLANT[3]
 function lokiPlantHtml(stage) {
   if(currentTheme !== 'jungle' || !gnomeOn()) return ''
   const at = LOKI_PLANT_AT[stage]; const st = lokiPlantStage()
-  return '<span class="gs-loki" style="left:' + at[0] + '%;top:' + at[1] + '%;width:' + at[2] + '%;transform:translate(-50%,-100%)"><img alt="" src="assets/garden/loki-plant/stage' + st + '.png"></span>'
+  return '<span class="gs-loki" style="left:' + at[0] + '%;top:' + at[1] + '%;width:' + at[2] + '%;transform:translate(-50%,-100%)"><img alt="" src="assets/garden/loki-plant/stage' + st + '.webp"></span>'
 }
 // a task has been closed: a drop of light for him (once per task)
 function lokiDrop(id) {
