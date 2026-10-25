@@ -4921,7 +4921,7 @@ const LOKI = {
   // a trip with a reason: the tab with something waiting (by its badge), or the one the hour points to
   trip: {tasks: {one: ['משימה אחת מחכה שם. אני יושב לידה שלא תברח.'], many: ['{n} משימות מחכות שם. אחת אחת, אני פה.']},
     sites: {one: ['אתר אחד מחכה שם. הוא לא הולך לשום מקום, וגם אני לא.'], many: ['{n} אתרים מחכים שם. ישבתי לידם, שלא ירגישו לבד.']},
-    people: {one: ['מישהו שם מחכה לשמוע ממך.'], many: ['{n} אנשים מחכים לשמוע ממך. אחד אחרי השני.']},
+    people: {one: ['יש שם מישהו שחשבת עליו. כשתרצה.'], many: ['{n} אנשים שם. אחד אחד, בקצב שלך.']},
     hour: {tasks: ['בוקר. באתי לבדוק מה על הצלחת היום.'], sites: ['צהריים. השטח קורא, ואני שומר לך מקום.'], people: ['אחר הצהריים. אולי מישהו ישמח לשמוע ממך.'], tao: ['ערב. בחרתי לשבת ליד השקט.']}},
   roamTap: ['רק בודק משהו. תיכף חוזר.', 'אני בתצפית. הכול בסדר מכאן.', 'קרא לי מהגדם, ואני בא.'],
   touch: {hug: 'קיבלתי.', tired: 'די, די, אני מתעייף. (לא באמת. עוד פעם.)'},
@@ -5313,7 +5313,7 @@ function lokiSeq(name) {
     m.floor = json && json.floor_y || S.floor || b.y1
     if(S.refFile) m.final = refImg
     return m
-  })()
+  })().catch(function(e) { delete lkr.seq[name]; throw e })   // a load that failed (no connection) is tried again next time
 }
 function lokiSeqReady(name) { const p = lkr.seq[name]; return p && p.done ? p.val : null }
 // the corner's sequences are wanted at once when the card is drawn: kept ready
