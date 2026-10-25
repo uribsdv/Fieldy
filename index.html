@@ -5474,12 +5474,13 @@ function lokiProps(ep, on) {
 }
 async function lokiLeave(forced) {
   if(lkr.state !== 'in') return false
-  const g = lokiLeaveGuard(); if(g && !(forced && g === 'bubble')) { lokiWalkSchedule(g === 'scroll' || g === 'typing' || g === 'bubble' ? 8000 : 20000); return false }
-  const dest = lokiDestination(), rt = lokiRoute(dest); if(!rt) { lokiWalkSchedule(20000); return false }
+  const g = lokiLeaveGuard(); lkr.why = g; if(g && !(forced && g === 'bubble')) { lokiWalkSchedule(g === 'scroll' || g === 'typing' || g === 'bubble' ? 8000 : 20000); return false }
+  const dest = lokiDestination(), rt = lokiRoute(dest); if(!rt) { lkr.why = 'no way'; lokiWalkSchedule(20000); return false }
   let seqs = {}
-  try { for(const n of ['walk', 'dangle', 'turn', 'look', 'jump', 'standup', 'landing', 'idle', 'loop', 'ledge', 'slide']) seqs[n] = await lokiSeq(n) } catch(e) { lokiWalkSchedule(60000); return false }
-  if(lkr.state !== 'in' || lokiRoamGuard()) return false
-  const rt2 = lokiRoute(dest); if(!rt2 || Math.abs(rt2.k.y - rt.k.y) > 2) { lokiWalkSchedule(20000); return false }
+  try { for(const n of ['walk', 'dangle', 'turn', 'look', 'jump', 'standup', 'landing', 'idle', 'loop', 'ledge', 'slide']) seqs[n] = await lokiSeq(n) } catch(e) { lkr.why = 'frames'; lokiWalkSchedule(60000); return false }
+  if(lkr.state !== 'in' || lokiRoamGuard()) { lkr.why = 'after loading: ' + (lkr.state !== 'in' ? lkr.state : lokiRoamGuard()); return false }
+  const rt2 = lokiRoute(dest); if(!rt2 || Math.abs(rt2.k.y - rt.k.y) > 2) { lkr.why = 'moved: ' + (rt2 ? rt2.k.y - rt.k.y : 'no way'); lokiWalkSchedule(20000); return false }
+  lkr.why = ''
   lkr.walked = true; clearTimeout(lkr.timer)
   const A = lokiActor(), ep = lkr.ep = Object.assign(A, {rt: rt2, seqs, steps: [], si: 0, t0: 0, at: 'corner', x: rt2.k.x, y: rt2.k.y, dir: rt2.k.side, cornerTop: rt2.k.stage.top, sitting: Date.now() < lkr.sitUntil})
   A.actor.addEventListener('pointerup', function(e) { e.stopPropagation(); if(lkr.ep !== ep) return; haptic('light'); lokiRoamSay(lokiPick('roamTap')) })
