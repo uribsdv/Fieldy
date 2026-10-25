@@ -1117,6 +1117,17 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .gn-give svg{width:15px;height:15px;fill:#5BA8C8;filter:drop-shadow(0 0 2px rgba(120,200,230,.8))}
 [data-theme="jungle"] .gn-gift{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;font-weight:700;color:var(--t2)}
 [data-theme="jungle"] .gn-gift img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+[data-theme="jungle"] .gs-lkl{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden;border-radius:inherit}
+[data-theme="jungle"] .gs-lkl .gs{position:absolute;left:0;top:50%;transform:translateY(calc(var(--focal) * -100%))}
+[data-theme="jungle"] .gs-lkw{position:absolute;display:block;pointer-events:none;transform:translate(-50%,-100%)}
+[data-theme="jungle"] .gs-lk{position:relative;display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;transform-origin:50% 100%}
+[data-theme="jungle"] .gs-lk::after{content:'';position:absolute;inset:-10px}
+[data-theme="jungle"] .gs-lk>img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+[data-theme="jungle"] .gs-lk .gn-line{pointer-events:none}
+[data-theme="jungle"] .gs-lk.hop{animation:gn-hop .32s ease-out}
+[data-theme="jungle"] .gs-say{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:6px;width:max-content;max-width:min(172px,44vw);padding:6px 10px;border-radius:14px;background:rgba(255,255,255,.92);color:#10261A;font-size:13px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.28);pointer-events:none;animation:gs-say-in .25s ease-out both}
+@keyframes gs-say-in{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] .gs-lk.hop,[data-theme="jungle"] .gs-say{animation:none}}
 [data-theme="jungle"] .gs-loki{position:absolute;pointer-events:none}
 [data-theme="jungle"] .gs-loki img{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
 [data-theme="jungle"] .nh-loki-plant{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(45,102,52,.22)}
@@ -3672,7 +3683,7 @@ function gardenWeekRollover() {
 let gardenChain = Promise.resolve()
 function gardenOnComplete(task) {
   if(!nachalLike()) return
-  const k = gardenRoll(task)
+  const had = Object.assign({}, garden.items), k = gardenRoll(task)
   const d = gardenDay()
   const closeDay = d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
   if(closeDay) { d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true }
@@ -3680,6 +3691,7 @@ function gardenOnComplete(task) {
   gardenChain = gardenChain.then(async function(){
     await gardenDropFx()
     if(k) await gardenFlyFx(rewardSrc(k), tr('garden_found').replace('{n}', rewardName(k)) + (REWARDS[k].rarity >= 2 ? ' · ' + tr('rarity_' + REWARDS[k].rarity) : ''), REWARDS[k].rarity >= 3)
+    if(k) { lokiGardenReact(had[k] > 0 ? 'known' : 'new', k); if(currentScreen === 'home' && garden.stageShown !== gardenStage()) renderHome() }
     if(closeDay) { await gardenFlyFx('assets/pebbles/pebble-' + String(garden.cairn[garden.cairn.length - 1].p).padStart(2, '0') + '.png', tr('garden_day_closed')); if(currentScreen === 'home') renderHome() }
   }).catch(function(e){ console.warn('garden fx:', e) })
 }
@@ -3781,7 +3793,7 @@ const GARDEN_DEBUG = (function(){
 function gardenFound() { return GARDEN_DEBUG && GARDEN_DEBUG.items ? GARDEN_DEBUG.items : Object.keys(REWARDS).filter(k => garden.items[k] > 0) }
 function gardenStageOf(n) { return n <= 2 ? 1 : n <= 5 ? 2 : n <= 8 ? 3 : 4 }
 function gardenStage() { return GARDEN_DEBUG && GARDEN_DEBUG.stage ? GARDEN_DEBUG.stage : gardenStageOf(gardenFound().length) }
-function gardenSceneHtml(stage, prevStage) {
+function gardenSceneHtml(stage, prevStage, noLoki) {
   const sc = GARDEN_SCENES[stage], found = gardenFound()
   const items = found.filter(k => sc.slots[k]).map(function(k) {
     const sl = sc.slots[k], b = GARDEN_BBOX[k], fw = (b[4] - b[2]) / b[0], dx = ((b[2] + b[4]) / 2 - b[0] / 2) / b[0] * 100, dy = ((b[3] + b[5]) / 2 - b[1] / 2) / b[1] * 100
@@ -3789,7 +3801,7 @@ function gardenSceneHtml(stage, prevStage) {
   }).join('')
   return '<div class="gs" data-stage="' + stage + '" style="--ar:' + sc.ar.toFixed(4) + ';--focal:' + sc.focal + '">' +
     (prevStage ? '<img class="gs-bg gs-old" alt="" src="assets/garden/' + GARDEN_SCENES[prevStage].src + '">' : '') +
-    '<img class="gs-bg' + (prevStage ? ' gs-new' : '') + '" alt="" src="assets/garden/' + sc.src + '">' + items + lokiPlantHtml(stage) + '</div>'
+    '<img class="gs-bg' + (prevStage ? ' gs-new' : '') + '" alt="" src="assets/garden/' + sc.src + '">' + items + lokiPlantHtml(stage) + (noLoki ? '' : lokiGardenHtml(stage)) + '</div>'
 }
 // the scene to show now, and whether it just grew since the person last saw it.
 // The stage last seen is kept in the garden record (stageShown); an older record
@@ -3798,7 +3810,14 @@ function gardenSceneNow() {
   const now = gardenStage(), seen = garden.stageShown
   const grew = !GARDEN_DEBUG && seen !== undefined && now > seen
   if(!GARDEN_DEBUG && seen !== now) { garden.stageShown = now; saveGarden() }
+  if(grew) lokiGardenReact('up', null, now)
   return {stage: now, prev: grew ? seen : 0, grew}
+}
+// on Home his seat is in a layer of its own over the garden and its buttons (the window is under them), so a tap on him is not lost to them
+function lokiGardenLayerHtml(sc) {
+  const h = lokiGardenHtml(sc.stage); if(!h) return ''
+  const g = GARDEN_SCENES[sc.stage]
+  return '<div class="gs-lkl"><div class="gs" style="--ar:' + g.ar.toFixed(4) + ';--focal:' + g.focal + '">' + h + '</div></div>'
 }
 function gardenGrewHtml(sc) { return sc.grew ? '<div class="gs-grew" role="status">' + tr('garden_grew') + ' · ' + tr('garden_stage_' + sc.stage) + '</div>' : '' }
 // ── the pile of stones (Home) and the garden window
@@ -3820,7 +3839,7 @@ function gardenHomeHtml() {
   if(!nachalLike()) return ''
   const sc = gardenSceneNow()
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
-    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev) + '</div>' +
+    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev, true) + '</div>' + lokiGardenLayerHtml(sc) +
     '<div class="nh-garden-top"><div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' + gardenGrewHtml(sc) + '</div>' +
     (garden.cairn.length || garden.leaves ? '<div class="nh-garden-pile">' + gardenCairnHtml() + '</div>' : '') +
     '<div class="nh-garden-acts"><span class="nh-garden-b">' + tr('garden_open') + '</span>' +
@@ -3831,6 +3850,7 @@ function gardenHomeHtml() {
 }
 function showGarden() {
   const ids = Object.keys(REWARDS), found = gardenFound().length, sc = gardenSceneNow()
+  setTimeout(lokiGardenFlush, 0)
   openModal('<div class="nh-garden-sheet">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
     '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:12px">' + tr('garden_kinds').replace('{f}', found).replace('{t}', ids.length) + '</div>' +
@@ -4812,7 +4832,7 @@ function gnomeAfterRender() {
     seq.forEach(function(k, i){ setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, k) }, 250 + i * 190) })
     setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, base) }, 250 + seq.length * 190)
   }
-  lokiSettle()
+  lokiSettle(); lokiGardenFlush()
   clearTimeout(gnBlinkTimer)
   const blink = function() {
     gnBlinkTimer = setTimeout(function() {
@@ -4845,9 +4865,14 @@ const LOKI = {
   thinking: ['רגע, מתייעץ עם הענן...', 'הענן חושב. אני עושה כאילו אני מבין.', 'נותן לנחל לזרום ומחזיר לך.'],
   error: ['הקשר נפל. לא באשמתי. (קצת באשמתי.) נסה שוב עוד רגע.', 'הברק בלע את השרת. שנייה.', 'הענן לא עונה. הוא כנראה בהפסקה.'],
   gardenNew: ['תראה מה מצאנו! לא אני החבאתי אותו. (אני כן.)', 'הגן קיבל עוד פרט. הוא נראה מרוצה.', '{x}! אני הרגשתי שהוא פה.'],
-  gardenKnown: ['את זה אני מכיר. הוא כבר גר כאן.'],
-  gardenUp: {2: 'דרגה 2: הגן גדל. מישהו שתה הרבה מים.', 3: 'דרגה 3: עכשיו יש לי איפה להתחבא. זה בדיוק מה שביקשתי.', 4: 'דרגה 4: היער עמוק. אני פה, בערך. תעקוב אחרי הצמחים הזוהרים.'},
-  gardenTap: ['שב איתי על הקצה. המים כאן קרים.', 'אל תסתכל עלי, אני מתאמן על היעלמות.', 'צב? כן, הוא חבר. הוא אף פעם לא ממהר.'],
+  gardenKnown: ['את זה אני מכיר. הוא כבר גר כאן.', '{x} שוב. כבר הכרנו, ועדיין שמח לראות.', 'עוד {x}. הגן אוהב לחזור על דברים טובים.'],
+  gardenUp: {2: 'הגן גדל. מישהו שתה הרבה מים.', 3: 'עכשיו יש לי איפה להתחבא. זה בדיוק מה שביקשתי.', 4: 'היער עמוק. אני פה, בערך. תעקוב אחרי הצמחים הזוהרים.'},
+  // tapped in the garden: a line of the whole garden, or one of the place he sits in (1 river's edge, 2 fishing, 3 behind the leaf, 4 with the turtles)
+  gardenTap: {all: ['שב איתי על הקצה. המים כאן קרים.', 'אל תסתכל עלי, אני מתאמן על היעלמות.', 'כל טיפה פה עברה דרכך. אני מכיר אותן בשם.'],
+    1: ['המים כאן קרים. אני לא מתלונן, אני מדווח.', 'הנחל הזה לא ממהר. למדתי ממנו.'],
+    2: ['שקט, הם מתקרבים. (לא באמת. אני דג בשביל הישיבה.)', 'אם משהו נתפס, זה בטח הכובע.'],
+    3: ['אני לא מתחבא. אני נמצא בצד, בכיוון העלה.', 'עלה טוב. נאמן. לא שואל שאלות.'],
+    4: ['צב? כן, הוא חבר. הוא אף פעם לא ממהר.', 'הצבים אומרים שאתה בסדר. הם לא מדברים הרבה, אז זה אומר משהו.']},
   // wisdom and "just here" are tagged with the situations they fit (w); one is chosen only by the situation (busy, stuck, done, hard, tired, pressed, good,
   // evening, back); a line with no tag is "general" and comes rarely
   wisdom: [
@@ -5150,6 +5175,46 @@ function lokiPlantHtml(stage) {
   const at = LOKI_PLANT_AT[stage]; const st = lokiPlantStage()
   return '<span class="gs-loki" style="left:' + at[0] + '%;top:' + at[1] + '%;width:' + at[2] + '%;transform:translate(-50%,-100%)"><img alt="" src="assets/garden/loki-plant/stage' + st + '.webp"></span>'
 }
+// ── LOKI IN THE GARDEN ──
+// He has a seat of his own at each stage of the garden and stays in it (he does not walk about and does not climb here): 1 sitting at the river's edge,
+// 2 fishing from the bank, 3 half hidden behind a leaf, 4 talking with the turtles. A tap gives a short line (of the garden, or of his seat).
+// A find brings a line (a new kind; or "I know that one" for one found before), and so does the garden growing a stage; the line waits until he is next in view.
+const LOKI_GARDEN_AT = {1: ['sit-river', 28, 71], 2: ['fishing', 30, 71], 3: ['peek', 26, 68], 4: ['turtle', 30, 68]}   // [pose, x %, y % of the foot] on the garden painting
+const LOKI_GARDEN_K = 25.0 / 348 * 100                                                                                  // % of the painting's width for one file pixel ×100
+function lokiGardenOn() { return currentTheme === 'jungle' && gnomeOn() }
+let lokiGardenSayTimer = 0
+function lokiGardenBubble(text) { return '<span class="gs-say" role="status">' + esc(text) + '</span>' }
+function lokiGardenHtml(stage) {
+  if(!lokiGardenOn()) return ''
+  const at = LOKI_GARDEN_AT[stage], key = at[0], t = LK_POSE[key], w = (t[0] * LOKI_GARDEN_K / 100).toFixed(2)
+  const line = key === 'fishing' ? '<svg class="gn-line" aria-hidden="true" viewBox="0 0 279 262" style="left:0;top:0;width:100%;height:100%"><g class="gn-line-g"><path d="M234 38 L234 239 M234 239 v7 q0 7 -5 6 q-3 -1 -3 -4" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></g></svg>' : ''
+  const say = lokiGardenSayState && Date.now() < lokiGardenSayState.until ? lokiGardenBubble(lokiGardenSayState.text) : ''
+  return '<span class="gs-lkw" style="left:' + at[1] + '%;top:' + at[2] + '%;width:' + w + '%"><button class="gs-lk" data-pose="' + key + '" aria-label="' + esc(tr('gn_name')) + '" onclick="lokiGardenTap(event)"><img alt="" draggable="false" src="assets/gnome/loki/poses/' + key + '.webp">' + line + '</button>' + say + '</span>'
+}
+let lokiGardenSayState = null
+// a line over his head, for a few seconds, on every garden that is on the screen now
+function lokiGardenSayNow(text, ms) {
+  ms = ms || 6500; lokiGardenSayState = {text, until: Date.now() + ms}
+  document.querySelectorAll('.gs-lkw').forEach(function(w) { const o = w.querySelector('.gs-say'); if(o) o.remove(); w.insertAdjacentHTML('beforeend', lokiGardenBubble(text)) })
+  clearTimeout(lokiGardenSayTimer); lokiGardenSayTimer = setTimeout(function() { lokiGardenSayState = null; document.querySelectorAll('.gs-say').forEach(e => e.remove()) }, ms)
+}
+function lokiGardenTap(ev) {
+  if(ev) { ev.stopPropagation(); ev.preventDefault() }
+  haptic('light')
+  const st = gardenStage(), b = document.querySelector('.gs-lk'); if(b && !reducedMotion()) { b.classList.remove('hop'); void b.offsetWidth; b.classList.add('hop') }
+  lokiGardenSayNow(lokiPick(Math.random() < .5 ? 'gardenTap.' + st : 'gardenTap.all'))
+}
+// a find, or the garden growing: his line is kept (one at a time, growth before a find) until the garden is on the screen
+function lokiGardenReact(kind, k, stage) {
+  if(!lokiGardenOn()) return
+  if(kind !== 'up' && loki.gardenSay && loki.gardenSay.kind === 'up') return
+  loki.gardenSay = {kind, k: k || null, stage: stage || 0}; lokiSave(); lokiGardenFlush()
+}
+function lokiGardenFlush() {
+  const p = loki.gardenSay; if(!p || !lokiGardenOn() || !document.querySelector('.gs-lkw')) return
+  delete loki.gardenSay; lokiSave()
+  lokiGardenSayNow(p.kind === 'up' ? LOKI.gardenUp[p.stage] : lokiPick(p.kind === 'new' ? 'gardenNew' : 'gardenKnown', {x: p.k ? rewardName(p.k) : ''}))
+}
 // a task has been closed: a drop of light for him (once per task)
 function lokiDrop(id) {
   const day = getToday(); loki.dropDay = loki.dropDay === day ? loki.dropDay : day; if(loki.dropIdsDay !== day) { loki.dropIds = {}; loki.dropIdsDay = day }
@@ -5248,9 +5313,10 @@ function lokiRoamMeasure() {
   const bl = vnContent(scr, e => !!e.closest('.vn,.vine-deco,.jg-corner,#lk-roam')).filter(r => r.bottom > top - 100 && r.top < navTop + 4).map(r => ({l: r.left, r: r.right, t: r.top, b: r.bottom}))
   if(navOn) { const nr = nav.getBoundingClientRect(); bl.push({l: nr.left, r: nr.right, t: nr.top + 4, b: nr.bottom}) }
   if(hdr) { const hr = hdr.getBoundingClientRect(); bl.push({l: hr.left, r: hr.right, t: hr.top, b: hr.bottom}) }
+  scr.querySelectorAll('.nh-garden').forEach(function(g) { const gr = g.getBoundingClientRect(); bl.push({l: gr.left, r: gr.right, t: gr.top, b: gr.bottom}) })   // the garden has its own Loki, who stays in his seat
   const free = (l, t, r, b) => !bl.some(q => q.r > l - 3 && q.l < r + 3 && q.b > t - 3 && q.t < b + 3)
   const floors = []
-  scr.querySelectorAll('.card, .site-card, .nh-garden, .nh-peek, .nh-list, .gn-card, .accordion').forEach(function(c) {
+  scr.querySelectorAll('.card, .site-card, .nh-peek, .nh-list, .gn-card, .accordion').forEach(function(c) {
     if(c.parentElement && c.parentElement.closest('.card, .site-card, .nh-garden, .nh-peek, .accordion')) return
     const r = c.getBoundingClientRect(); if(r.width < 120 || r.top < top + 90 || r.top > navTop - 8) return
     floors.push({y: r.top, x0: Math.max(r.left + 14, L), x1: Math.min(r.right - 14, R), el: c})
