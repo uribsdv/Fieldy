@@ -1,0 +1,28 @@
+{
+ "canvas": [
+  171,
+  213
+ ],
+ "frames": [
+  {
+   "file": "look-01.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "look-02.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "look-03.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "look-04.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  }
+ ]
+}

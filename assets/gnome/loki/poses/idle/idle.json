@@ -1,0 +1,12 @@
+{
+ "canvas": [
+  375,
+  659
+ ],
+ "floor_y": 655,
+ "frames": 2,
+ "files": [
+  "idle-01.webp",
+  "idle-02.webp"
+ ]
+}

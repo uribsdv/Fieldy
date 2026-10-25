@@ -1,0 +1,994 @@
+{
+ "frames": [
+  {
+   "file": "ledge-01.webp",
+   "ledge_top": -6.2,
+   "ledge_bottom": 9.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": false,
+   "centroid": [
+    154.2,
+    216.9
+   ]
+  },
+  {
+   "file": "ledge-02.webp",
+   "ledge_top": -3.1,
+   "ledge_bottom": 12.5,
+   "ledge_x_left": 92.4,
+   "ledge_visible": false,
+   "centroid": [
+    155.2,
+    219.2
+   ]
+  },
+  {
+   "file": "ledge-03.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 1.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    155.3,
+    220.4
+   ]
+  },
+  {
+   "file": "ledge-04.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 4.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.5,
+    219.8
+   ]
+  },
+  {
+   "file": "ledge-05.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 6.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    152.8,
+    217.5
+   ]
+  },
+  {
+   "file": "ledge-06.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 10.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    150.4,
+    213.6
+   ]
+  },
+  {
+   "file": "ledge-07.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 12.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    147.6,
+    209.0
+   ]
+  },
+  {
+   "file": "ledge-08.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 16.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    145.0,
+    204.3
+   ]
+  },
+  {
+   "file": "ledge-09.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 18.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    142.6,
+    200.5
+   ]
+  },
+  {
+   "file": "ledge-10.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 21.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    140.6,
+    196.8
+   ]
+  },
+  {
+   "file": "ledge-11.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 24.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    139.2,
+    192.9
+   ]
+  },
+  {
+   "file": "ledge-12.webp",
+   "ledge_top": 0.0,
+   "ledge_bottom": 27.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    137.9,
+    190.7
+   ]
+  },
+  {
+   "file": "ledge-13.webp",
+   "ledge_top": 2.4,
+   "ledge_bottom": 30.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    137.1,
+    190.4
+   ]
+  },
+  {
+   "file": "ledge-14.webp",
+   "ledge_top": 6.0,
+   "ledge_bottom": 33.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    136.6,
+    191.2
+   ]
+  },
+  {
+   "file": "ledge-15.webp",
+   "ledge_top": 8.4,
+   "ledge_bottom": 36.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    136.5,
+    193.8
+   ]
+  },
+  {
+   "file": "ledge-16.webp",
+   "ledge_top": 12.0,
+   "ledge_bottom": 39.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    136.5,
+    196.9
+   ]
+  },
+  {
+   "file": "ledge-17.webp",
+   "ledge_top": 15.6,
+   "ledge_bottom": 42.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    136.4,
+    199.7
+   ]
+  },
+  {
+   "file": "ledge-18.webp",
+   "ledge_top": 18.0,
+   "ledge_bottom": 46.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    136.5,
+    202.0
+   ]
+  },
+  {
+   "file": "ledge-19.webp",
+   "ledge_top": 21.6,
+   "ledge_bottom": 48.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    137.2,
+    203.3
+   ]
+  },
+  {
+   "file": "ledge-20.webp",
+   "ledge_top": 24.0,
+   "ledge_bottom": 52.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    138.7,
+    203.1
+   ]
+  },
+  {
+   "file": "ledge-21.webp",
+   "ledge_top": 27.6,
+   "ledge_bottom": 55.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    140.4,
+    201.1
+   ]
+  },
+  {
+   "file": "ledge-22.webp",
+   "ledge_top": 31.2,
+   "ledge_bottom": 58.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    141.9,
+    198.4
+   ]
+  },
+  {
+   "file": "ledge-23.webp",
+   "ledge_top": 33.6,
+   "ledge_bottom": 61.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    143.4,
+    195.0
+   ]
+  },
+  {
+   "file": "ledge-24.webp",
+   "ledge_top": 37.2,
+   "ledge_bottom": 64.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    144.7,
+    191.8
+   ]
+  },
+  {
+   "file": "ledge-25.webp",
+   "ledge_top": 40.8,
+   "ledge_bottom": 67.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    145.7,
+    189.7
+   ]
+  },
+  {
+   "file": "ledge-26.webp",
+   "ledge_top": 43.2,
+   "ledge_bottom": 71.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    147.0,
+    188.2
+   ]
+  },
+  {
+   "file": "ledge-27.webp",
+   "ledge_top": 46.8,
+   "ledge_bottom": 75.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    148.0,
+    187.9
+   ]
+  },
+  {
+   "file": "ledge-28.webp",
+   "ledge_top": 50.4,
+   "ledge_bottom": 77.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.2,
+    190.5
+   ]
+  },
+  {
+   "file": "ledge-29.webp",
+   "ledge_top": 52.8,
+   "ledge_bottom": 81.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    151.1,
+    193.3
+   ]
+  },
+  {
+   "file": "ledge-30.webp",
+   "ledge_top": 56.4,
+   "ledge_bottom": 84.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    152.6,
+    196.3
+   ]
+  },
+  {
+   "file": "ledge-31.webp",
+   "ledge_top": 60.0,
+   "ledge_bottom": 87.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.7,
+    198.7
+   ]
+  },
+  {
+   "file": "ledge-32.webp",
+   "ledge_top": 62.4,
+   "ledge_bottom": 90.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.2,
+    200.3
+   ]
+  },
+  {
+   "file": "ledge-33.webp",
+   "ledge_top": 66.0,
+   "ledge_bottom": 94.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.3,
+    200.5
+   ]
+  },
+  {
+   "file": "ledge-34.webp",
+   "ledge_top": 69.6,
+   "ledge_bottom": 96.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.2,
+    199.8
+   ]
+  },
+  {
+   "file": "ledge-35.webp",
+   "ledge_top": 73.2,
+   "ledge_bottom": 100.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.1,
+    198.3
+   ]
+  },
+  {
+   "file": "ledge-36.webp",
+   "ledge_top": 75.6,
+   "ledge_bottom": 103.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.8,
+    195.8
+   ]
+  },
+  {
+   "file": "ledge-37.webp",
+   "ledge_top": 79.2,
+   "ledge_bottom": 106.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.8,
+    193.3
+   ]
+  },
+  {
+   "file": "ledge-38.webp",
+   "ledge_top": 82.8,
+   "ledge_bottom": 109.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.6,
+    190.2
+   ]
+  },
+  {
+   "file": "ledge-39.webp",
+   "ledge_top": 85.2,
+   "ledge_bottom": 113.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.3,
+    187.4
+   ]
+  },
+  {
+   "file": "ledge-40.webp",
+   "ledge_top": 88.8,
+   "ledge_bottom": 115.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    153.0,
+    184.1
+   ]
+  },
+  {
+   "file": "ledge-41.webp",
+   "ledge_top": 92.4,
+   "ledge_bottom": 119.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    152.7,
+    181.0
+   ]
+  },
+  {
+   "file": "ledge-42.webp",
+   "ledge_top": 94.8,
+   "ledge_bottom": 123.0,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    152.3,
+    177.1
+   ]
+  },
+  {
+   "file": "ledge-43.webp",
+   "ledge_top": 98.4,
+   "ledge_bottom": 126.6,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    152.0,
+    173.2
+   ]
+  },
+  {
+   "file": "ledge-44.webp",
+   "ledge_top": 100.8,
+   "ledge_bottom": 129.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    151.5,
+    169.2
+   ]
+  },
+  {
+   "file": "ledge-45.webp",
+   "ledge_top": 104.4,
+   "ledge_bottom": 132.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    151.1,
+    165.8
+   ]
+  },
+  {
+   "file": "ledge-46.webp",
+   "ledge_top": 108.0,
+   "ledge_bottom": 136.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    150.6,
+    163.5
+   ]
+  },
+  {
+   "file": "ledge-47.webp",
+   "ledge_top": 110.4,
+   "ledge_bottom": 138.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    150.4,
+    162.1
+   ]
+  },
+  {
+   "file": "ledge-48.webp",
+   "ledge_top": 114.0,
+   "ledge_bottom": 142.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    150.1,
+    161.5
+   ]
+  },
+  {
+   "file": "ledge-49.webp",
+   "ledge_top": 116.4,
+   "ledge_bottom": 145.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.9,
+    161.9
+   ]
+  },
+  {
+   "file": "ledge-50.webp",
+   "ledge_top": 120.0,
+   "ledge_bottom": 148.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.8,
+    163.4
+   ]
+  },
+  {
+   "file": "ledge-51.webp",
+   "ledge_top": 122.4,
+   "ledge_bottom": 151.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.6,
+    166.0
+   ]
+  },
+  {
+   "file": "ledge-52.webp",
+   "ledge_top": 126.0,
+   "ledge_bottom": 155.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.4,
+    169.5
+   ]
+  },
+  {
+   "file": "ledge-53.webp",
+   "ledge_top": 128.4,
+   "ledge_bottom": 157.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.1,
+    173.6
+   ]
+  },
+  {
+   "file": "ledge-54.webp",
+   "ledge_top": 132.0,
+   "ledge_bottom": 161.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    148.7,
+    177.8
+   ]
+  },
+  {
+   "file": "ledge-55.webp",
+   "ledge_top": 140.4,
+   "ledge_bottom": 169.8,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    147.8,
+    181.9
+   ]
+  },
+  {
+   "file": "ledge-56.webp",
+   "ledge_top": 150.0,
+   "ledge_bottom": 180.6,
+   "ledge_x_left": 212.4,
+   "ledge_visible": true,
+   "centroid": [
+    146.1,
+    179.6
+   ]
+  },
+  {
+   "file": "ledge-57.webp",
+   "ledge_top": 159.6,
+   "ledge_bottom": 191.4,
+   "ledge_x_left": 207.6,
+   "ledge_visible": true,
+   "centroid": [
+    144.2,
+    175.8
+   ]
+  },
+  {
+   "file": "ledge-58.webp",
+   "ledge_top": 169.2,
+   "ledge_bottom": 202.2,
+   "ledge_x_left": 199.2,
+   "ledge_visible": true,
+   "centroid": [
+    142.5,
+    169.8
+   ]
+  },
+  {
+   "file": "ledge-59.webp",
+   "ledge_top": 180.0,
+   "ledge_bottom": 213.0,
+   "ledge_x_left": 198.0,
+   "ledge_visible": true,
+   "centroid": [
+    141.3,
+    162.9
+   ]
+  },
+  {
+   "file": "ledge-60.webp",
+   "ledge_top": 189.6,
+   "ledge_bottom": 222.6,
+   "ledge_x_left": 190.8,
+   "ledge_visible": true,
+   "centroid": [
+    140.3,
+    155.3
+   ]
+  },
+  {
+   "file": "ledge-61.webp",
+   "ledge_top": 199.2,
+   "ledge_bottom": 233.4,
+   "ledge_x_left": 177.6,
+   "ledge_visible": true,
+   "centroid": [
+    141.2,
+    146.5
+   ]
+  },
+  {
+   "file": "ledge-62.webp",
+   "ledge_top": 207.6,
+   "ledge_bottom": 243.0,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    143.7,
+    141.1
+   ]
+  },
+  {
+   "file": "ledge-63.webp",
+   "ledge_top": 217.2,
+   "ledge_bottom": 252.6,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    146.8,
+    137.9
+   ]
+  },
+  {
+   "file": "ledge-64.webp",
+   "ledge_top": 225.6,
+   "ledge_bottom": 262.2,
+   "ledge_x_left": 104.4,
+   "ledge_visible": true,
+   "centroid": [
+    149.9,
+    137.5
+   ]
+  },
+  {
+   "file": "ledge-65.webp",
+   "ledge_top": 234.0,
+   "ledge_bottom": 270.6,
+   "ledge_x_left": 99.6,
+   "ledge_visible": true,
+   "centroid": [
+    152.6,
+    138.5
+   ]
+  },
+  {
+   "file": "ledge-66.webp",
+   "ledge_top": 241.2,
+   "ledge_bottom": 279.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    154.6,
+    140.0
+   ]
+  },
+  {
+   "file": "ledge-67.webp",
+   "ledge_top": 248.4,
+   "ledge_bottom": 287.4,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    156.1,
+    141.2
+   ]
+  },
+  {
+   "file": "ledge-68.webp",
+   "ledge_top": 256.8,
+   "ledge_bottom": 294.6,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    158.1,
+    142.7
+   ]
+  },
+  {
+   "file": "ledge-69.webp",
+   "ledge_top": 264.0,
+   "ledge_bottom": 303.0,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    159.4,
+    144.1
+   ]
+  },
+  {
+   "file": "ledge-70.webp",
+   "ledge_top": 270.0,
+   "ledge_bottom": 310.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    160.8,
+    144.5
+   ]
+  },
+  {
+   "file": "ledge-71.webp",
+   "ledge_top": 276.0,
+   "ledge_bottom": 316.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    161.9,
+    145.4
+   ]
+  },
+  {
+   "file": "ledge-72.webp",
+   "ledge_top": 282.0,
+   "ledge_bottom": 323.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    162.9,
+    145.9
+   ]
+  },
+  {
+   "file": "ledge-73.webp",
+   "ledge_top": 288.0,
+   "ledge_bottom": 329.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    163.7,
+    147.1
+   ]
+  },
+  {
+   "file": "ledge-74.webp",
+   "ledge_top": 294.0,
+   "ledge_bottom": 334.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    165.2,
+    149.5
+   ]
+  },
+  {
+   "file": "ledge-75.webp",
+   "ledge_top": 298.8,
+   "ledge_bottom": 340.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    167.2,
+    152.9
+   ]
+  },
+  {
+   "file": "ledge-76.webp",
+   "ledge_top": 303.6,
+   "ledge_bottom": 345.0,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    168.6,
+    156.2
+   ]
+  },
+  {
+   "file": "ledge-77.webp",
+   "ledge_top": 307.2,
+   "ledge_bottom": 349.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    169.2,
+    159.4
+   ]
+  },
+  {
+   "file": "ledge-78.webp",
+   "ledge_top": 312.0,
+   "ledge_bottom": 353.4,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    169.5,
+    163.0
+   ]
+  },
+  {
+   "file": "ledge-79.webp",
+   "ledge_top": 315.6,
+   "ledge_bottom": 358.2,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    169.3,
+    166.4
+   ]
+  },
+  {
+   "file": "ledge-80.webp",
+   "ledge_top": 318.0,
+   "ledge_bottom": 361.8,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    168.9,
+    170.0
+   ]
+  },
+  {
+   "file": "ledge-81.webp",
+   "ledge_top": 321.6,
+   "ledge_bottom": 364.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    168.1,
+    172.9
+   ]
+  },
+  {
+   "file": "ledge-82.webp",
+   "ledge_top": 324.0,
+   "ledge_bottom": 366.6,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    166.7,
+    175.6
+   ]
+  },
+  {
+   "file": "ledge-83.webp",
+   "ledge_top": 325.2,
+   "ledge_bottom": 369.0,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    165.2,
+    178.4
+   ]
+  },
+  {
+   "file": "ledge-84.webp",
+   "ledge_top": 327.6,
+   "ledge_bottom": 370.2,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    163.9,
+    181.6
+   ]
+  },
+  {
+   "file": "ledge-85.webp",
+   "ledge_top": 328.8,
+   "ledge_bottom": 372.6,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    162.6,
+    184.1
+   ]
+  },
+  {
+   "file": "ledge-86.webp",
+   "ledge_top": 328.8,
+   "ledge_bottom": 372.6,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    161.4,
+    185.9
+   ]
+  },
+  {
+   "file": "ledge-87.webp",
+   "ledge_top": 330.0,
+   "ledge_bottom": 373.8,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    160.2,
+    186.5
+   ]
+  },
+  {
+   "file": "ledge-88.webp",
+   "ledge_top": 330.0,
+   "ledge_bottom": 373.8,
+   "ledge_x_left": 91.2,
+   "ledge_visible": true,
+   "centroid": [
+    158.8,
+    186.4
+   ]
+  },
+  {
+   "file": "ledge-89.webp",
+   "ledge_top": 330.0,
+   "ledge_bottom": 373.8,
+   "ledge_x_left": 92.4,
+   "ledge_visible": true,
+   "centroid": [
+    157.6,
+    186.3
+   ]
+  }
+ ],
+ "fps": 24,
+ "canvas": [
+  300,
+  432
+ ],
+ "pole_x_range": [
+  138,
+  173
+ ],
+ "ledge_note": "ledge_top/bottom are y of the beam in canvas coords (extrapolated at 5.2px/frame*scale before it enters view). ledge extends right beyond the canvas.",
+ "clipped_frames_note": "frames 60-76 of this sequence (video frames 121-137) have the hat tip/crystal touching the top edge by a few px."
+}
