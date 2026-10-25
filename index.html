@@ -5713,7 +5713,7 @@ function lokiOpenGet(f, hour, greet) {
   // "poof": a third of the visits (never the first of the day, after an absence, on a day he shelters or has other news)
   const calm = !greet && !L.away && !L.away2 && !L.storm && !doneAll
   if(calm && Math.random() < .3) { const ghost = (Date.now() - (loki.ghostAt || 0) > 4 * 86400000) && Math.random() < .35; if(ghost) { loki.ghostAt = Date.now(); lokiSave() }
-    L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiFlip = false; lokiPoofIn = true; lokiGhost = ghost }
+    L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiPoofIn = true; lokiGhost = ghost }   // (he pops up again in his own corner: it does not move)
   if(calm && !L.poof && lokiHelpOk()) { L.help = lokiItem('help', lokiPick('helpAsk'), 'stuck-hat', {btn: 'help'}); loki.helpAt = Date.now(); lokiSave() }
   if(calm && !L.poof && !L.help && Date.now() - (loki.giftAt || 0) >= 6 * 86400000 && Date.now() - (loki.firstAt || (loki.firstAt = Date.now())) >= 3 * 86400000 && Math.random() < .3) { loki.gift = lokiGiftPick(); lokiSave(); L.gift = lokiItem('gift', lokiPick('giftOffer'), 'gift', {btn: 'take', giftImg: rewardSrc(loki.gift), giftName: rewardName(loki.gift)}) }
   // the character bubble: "just here" now and then (likelier in the afternoon and on a busy day), else what the day asks for
