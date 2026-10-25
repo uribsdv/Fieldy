@@ -6717,8 +6717,7 @@ function taskCard(t) {
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag tag-site">${icon('map-pin')} ${esc(t.site)}</span>`:''}
             ${t.assignee?`<span class="tag tag-person">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
-            ${t.context&&CONTEXT_ICON[t.context]?`<span class="tag tag-context">${contextLabel(t.context)}</span>`:''}
-            ${currentTheme === 'jungle' && !t.done ? gameDiffTag(t) : ''}
+            ${t.context&&CONTEXT_ICON[t.context]?`<span class="tag tag-context">${contextLabel(t.context)}</span>`:''}${currentTheme === 'jungle' && !t.done ? gameDiffTag(t) : ''}
             ${t.time?`<span class="tag tag-time" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
