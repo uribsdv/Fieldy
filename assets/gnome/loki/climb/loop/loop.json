@@ -1,0 +1,53 @@
+{
+ "frames": 33,
+ "fps": 24,
+ "canvas": [
+  191,
+  332
+ ],
+ "pole_x_range": [
+  102,
+  138
+ ],
+ "anchor_xy": [
+  109,
+  156
+ ],
+ "scale": 0.6,
+ "note": "Gnome is centroid-aligned, so the vine must scroll DOWN behind him in code. Loop is seamless: frame 33 leads into frame 01.",
+ "files": [
+  "loop-01.webp",
+  "loop-02.webp",
+  "loop-03.webp",
+  "loop-04.webp",
+  "loop-05.webp",
+  "loop-06.webp",
+  "loop-07.webp",
+  "loop-08.webp",
+  "loop-09.webp",
+  "loop-10.webp",
+  "loop-11.webp",
+  "loop-12.webp",
+  "loop-13.webp",
+  "loop-14.webp",
+  "loop-15.webp",
+  "loop-16.webp",
+  "loop-17.webp",
+  "loop-18.webp",
+  "loop-19.webp",
+  "loop-20.webp",
+  "loop-21.webp",
+  "loop-22.webp",
+  "loop-23.webp",
+  "loop-24.webp",
+  "loop-25.webp",
+  "loop-26.webp",
+  "loop-27.webp",
+  "loop-28.webp",
+  "loop-29.webp",
+  "loop-30.webp",
+  "loop-31.webp",
+  "loop-32.webp",
+  "loop-33.webp"
+ ]
+}

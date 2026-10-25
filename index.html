@@ -1131,16 +1131,28 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .nh-chap-dot{flex:none;width:9px;height:9px;border-radius:50%;background:#E8A23A;box-shadow:0 0 5px rgba(232,162,58,.9)}
 [data-theme="jungle"] .nh-chap-dot.read{background:transparent;box-shadow:none;border:1px solid rgba(45,102,52,.35)}
 /* Loki out on the screen: a layer that takes no press (only he does), the frames stacked and shown one at a time (no blending), a puff when he comes and goes */
-.lk-roam{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
-[data-theme="jungle"] .lk-actor{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;opacity:0;transition:opacity .2s ease-out;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-[data-theme="jungle"] .lk-actor.in{opacity:1}
-[data-theme="jungle"] .lk-actor.out{opacity:0;pointer-events:none}
-[data-theme="jungle"] .lk-flip{position:absolute;inset:0}
+.lk-roam{position:fixed;inset:0;z-index:101;pointer-events:none;overflow:hidden}
+[data-theme="jungle"] .lk-actor{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+[data-theme="jungle"] .lk-flip{position:absolute;inset:0;transform-origin:50% 100%}
 [data-theme="jungle"] .lk-f{position:absolute;inset:0;width:100%;height:100%;display:block;visibility:hidden;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.3))}
 [data-theme="jungle"] .lk-f.on{visibility:visible}
 [data-theme="jungle"] .lk-f.lk-g{inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);box-sizing:border-box;padding:12px;filter:drop-shadow(0 0 3px rgba(214,232,255,.95)) drop-shadow(0 0 8px rgba(160,190,255,.7))}
 [data-theme="jungle"] .lk-f.lk-g.on{animation:gn-glint 2.4s ease-in-out infinite}
 [data-theme="jungle"] .lk-puff{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none}
+[data-theme="jungle"] .lk-props{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .35s ease-out}
+[data-theme="jungle"] .lk-props.on{opacity:1}
+[data-theme="jungle"] .lk-vinebox{position:absolute;left:0;width:100%;overflow:hidden;pointer-events:none}
+[data-theme="jungle"] .lk-vine,[data-theme="jungle"] .lk-branch{position:absolute;display:block;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(10,30,15,.3))}
+[data-theme="jungle"] .lk-spr{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.3))}
+[data-theme="jungle"] .lk-spr.lk-g{inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);box-sizing:border-box;padding:12px;filter:drop-shadow(0 0 3px rgba(214,232,255,.95)) drop-shadow(0 0 8px rgba(160,190,255,.7));animation:gn-glint 2.4s ease-in-out infinite}
+[data-theme="jungle"] .lk-say{position:absolute;width:max-content;max-width:180px;padding:6px 10px;border-radius:14px;background:rgba(255,255,255,.94);color:#10261A;font-size:13px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.28);pointer-events:none}
+/* his corner when he is out: an empty stump with a small lantern (lit by drop-shadow), and the bubble left as a note */
+[data-theme="jungle"] .gn-stage.gn-empty{cursor:pointer;animation:none}
+[data-theme="jungle"] .gn-nook{position:absolute;display:block;height:auto;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.28))}
+[data-theme="jungle"] .gn-nook.gn-lamp{filter:drop-shadow(0 0 3px rgba(255,214,120,.95)) drop-shadow(0 0 8px rgba(255,186,90,.7));animation:gn-lamp 3.2s ease-in-out infinite}
+[data-theme="jungle"] .gn-bubble.note{background:#FBF5E6;border:1px dashed rgba(120,90,40,.45);transform:rotate(-1.2deg);box-shadow:0 3px 8px rgba(60,40,10,.18)}
+[data-theme="jungle"] .gn-pin{position:absolute;top:-13px;left:14px;width:30px;height:auto;transform:rotate(-8deg);pointer-events:none;filter:drop-shadow(0 2px 2px rgba(40,30,10,.3))}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] .gn-lamp,[data-theme="jungle"] .lk-spr.lk-g{animation:none}}
 [data-theme="jungle"] .lk-puff svg{width:100%;height:100%;fill:#FFE29A;filter:drop-shadow(0 0 5px rgba(255,205,90,.95)) drop-shadow(0 0 11px rgba(255,190,80,.6));animation:gn-spark .22s ease-out both}
 @media (prefers-reduced-motion:reduce){.lk-roam{display:none}}
 [data-theme="jungle"] .gn-edit{position:absolute;bottom:22px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
@@ -2284,6 +2296,7 @@ const TRANSLATIONS = {
   gn_name: {he:'לוקי', en:'Loki'},
   gn_hug: {he:'חיבוק', en:'A hug'},
   gn_sit: {he:'שב איתי', en:'Sit with me'},
+  gn_call: {he:'לקרוא ללוקי', en:'Call Loki'},
   settings_loki_roam: {he:'לוקי מסתובב', en:'Loki roams'},
   gn_story: {he:'הסיפור של לוקי', en:"Loki's story"},
   gn_chapter: {he:'פרק', en:'Chapter'},
@@ -2742,6 +2755,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
 function navigateTo(screen, ctx=null) {
   if(ctx) actionCtx = ctx
+  try { lokiScreenChange(screen) } catch(e) {}   // Loki goes back to his corner when Home is left (defined further down)
   if(medInterval && screen !== 'tao') { stopMeditation(false) }
   // An un-approved analysis is abandoned on leaving the screen. Nothing was
   // written, so there is nothing to undo — and coming back days later to a
@@ -4754,6 +4768,8 @@ function gnomeCardHtml() {
   else { pose = item.pose; label = item.label; text = item.text }
   if(GN_DEBUG.pose && (GN_TAB[GN_DEBUG.pose] || LK_POSE[GN_DEBUG.pose])) pose = GN_DEBUG.pose
   if(lokiStorm() && !night && pose !== 'sleep' && item.kind !== 'hugged' && item.kind !== 'ritual') pose = 'shelter'   // in a storm he is under the leaf, whatever he says
+  const out = lokiOut()
+  const onStump = !out && !night && Date.now() < lkr.sitUntil && !!lokiSeqReady('standup')   // just back in his corner: sitting on the stump
   const voice = !!item.lk || briefingBusy || !!briefingError || night || empty
   const poofIn = lokiPoofIn; lokiPoofIn = false
   const ghost = lokiGhost && item.poof
@@ -4769,11 +4785,11 @@ function gnomeCardHtml() {
       <button id="task-review-toggle-btn" class="gn-btn${reviewedToday || taskReviewOpen ? '' : ' hot'}" onclick="toggleTaskReview()">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
       ${serverConfigured() ? `<button id="briefing-refresh-btn" class="gn-btn" onclick="refreshBriefing()" ${briefingBusy ? 'disabled' : ''}>${icon('refresh')} ${briefingBusy ? tr('home_briefing_writing') : tr('home_briefing_refresh')}</button>` : ''}
     </div>`
-  return `<div class="card gn-card${night || pose === 'sleep' ? ' asleep' : ''}" id="jg-gnome" data-pose="${pose}" data-kind="${item.kind}" data-wave="${wave && !reducedMotion() ? 1 : 0}">
+  return `<div class="card gn-card${night || pose === 'sleep' ? ' asleep' : ''}" id="jg-gnome" data-pose="${pose}" data-kind="${item.kind}" data-wave="${wave && !out && !reducedMotion() ? 1 : 0}"${out ? ' data-out="1"' : ''}>
       <div class="gn-row${lokiFlip ? ' flip' : ''}">
-        <div class="gn-stage${poofIn ? ' poof-in' : ''}${ghost ? ' ghost' : ''}" aria-hidden="true">${gnPoseHtml(pose, {lamp: item.lamp || (pose === 'lantern' ? 'on' : null)})}${item.heart ? '<svg class="gn-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.6 1.1 4.6 2.6C12 6.1 13.6 5 15.6 5 19 5 21.1 8.4 19.6 11.8 17.5 16.4 12 21 12 21z"/></svg>' : ''}</div>
+        ${out ? `<div class="gn-stage gn-empty" role="button" tabindex="0" aria-label="${tr('gn_call')}" onkeydown="if(event.key==='Enter')lokiCall()">${lokiNookHtml('out')}` : `<div class="gn-stage${poofIn ? ' poof-in' : ''}${ghost ? ' ghost' : ''}${onStump ? ' on-stump' : ''}" aria-hidden="true">${onStump ? lokiNookHtml('sit') + lokiStageSeqHtml('standup', 0, {seat: true}) : pose === 'stand' && !night && lokiSeqReady('idle') ? lokiStageSeqHtml('idle', 0) : gnPoseHtml(pose, {lamp: item.lamp || (pose === 'lantern' ? 'on' : null)})}`}${item.heart ? '<svg class="gn-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.6 1.1 4.6 2.6C12 6.1 13.6 5 15.6 5 19 5 21.1 8.4 19.6 11.8 17.5 16.4 12 21 12 21z"/></svg>' : ''}</div>
         <div class="gn-say">
-          <div class="gn-bubble${voice ? ' lk' : ''}"${bubbleTag}>
+          <div class="gn-bubble${voice ? ' lk' : ''}${out ? ' note' : ''}"${bubbleTag}>${out ? '<img class="gn-pin" alt="" aria-hidden="true" src="' + LK_DIR + 'props/nook/note.webp">' : ''}
             <div class="gn-k"><b class="gn-nm">${tr('gn_name')}</b>${label ? ' · ' + label : ''}</div>
             <div class="gn-t" aria-live="polite">${esc(text)}</div>
             ${sub ? `<div class="gn-sub">${esc(sub)}</div>` : ''}
@@ -4813,6 +4829,12 @@ function gnomeAfterRender() {
     setTimeout(function(){ const c = document.getElementById('jg-gnome'); if(c && c.contains(img)) gnomeSet(img, base) }, 250 + seq.length * 190)
   }
   lokiSettle()
+  if(lkr.onHome === undefined) { lkr.onHome = true; lkr.homeAt = Date.now() }
+  clearTimeout(lkr.sitTimer); clearTimeout(lkr.idleTimer)
+  if(currentTheme === 'jungle' && gnomeOn()) lokiWarm()
+  if(!lokiOut() && Date.now() < lkr.sitUntil) lkr.sitTimer = setTimeout(lokiRender, lkr.sitUntil - Date.now() + 30)   // up from the stump, back to his poses
+  { const im = document.querySelector('#jg-gnome .gn-img'); if(im && /^idle:/.test(im.dataset.pose || '') && !reducedMotion()) { const br = function() { const i2 = document.querySelector('#jg-gnome .gn-img'); if(!i2 || !/^idle:/.test(i2.dataset.pose || '')) return; const n = i2.dataset.pose === 'idle:0' ? 1 : 0, tmp = document.createElement('div'); tmp.innerHTML = lokiStageSeqHtml('idle', n); const f = tmp.firstChild; if(f) { i2.src = f.src; i2.style.cssText = f.style.cssText; i2.dataset.pose = f.dataset.pose } lkr.idleTimer = setTimeout(br, 1700) }; lkr.idleTimer = setTimeout(br, 1700) } }   // breathing while he stands in his corner
+  lokiWalkSchedule()
   clearTimeout(gnBlinkTimer)
   const blink = function() {
     gnBlinkTimer = setTimeout(function() {
@@ -4896,6 +4918,12 @@ const LOKI = {
   helpThanks: ['חבר אמיתי. אני חייב לך טיפה.'],
   giftOffer: ['מצאתי את זה ליד האבן. שמרתי לך.'],
   giftTaken: ['נשים אותו בגן. הוא כבר מרגיש בבית.'],   // *
+  // a trip with a reason: the tab with something waiting (by its badge), or the one the hour points to
+  trip: {tasks: {one: ['משימה אחת מחכה שם. אני יושב לידה שלא תברח.'], many: ['{n} משימות מחכות שם. אחת אחת, אני פה.']},
+    sites: {one: ['אתר אחד מחכה שם. הוא לא הולך לשום מקום, וגם אני לא.'], many: ['{n} אתרים מחכים שם. ישבתי לידם, שלא ירגישו לבד.']},
+    people: {one: ['יש שם מישהו שחשבת עליו. כשתרצה.'], many: ['{n} אנשים שם. אחד אחד, בקצב שלך.']},
+    hour: {tasks: ['בוקר. באתי לבדוק מה על הצלחת היום.'], sites: ['צהריים. השטח קורא, ואני שומר לך מקום.'], people: ['אחר הצהריים. אולי מישהו ישמח לשמוע ממך.'], tao: ['ערב. בחרתי לשבת ליד השקט.']}},
+  roamTap: ['רק בודק משהו. תיכף חוזר.', 'אני בתצפית. הכול בסדר מכאן.', 'קרא לי מהגדם, ואני בא.'],
   touch: {hug: 'קיבלתי.', tired: 'די, די, אני מתעייף. (לא באמת. עוד פעם.)'},
   invite: ['שב איתי רגע?'],
   storm: ['אני לא מפחד. אני מקשיב לסופה מקרוב.'],
@@ -5064,7 +5092,7 @@ window.addEventListener('pagehide', function(){ loki.lastSeen = Date.now(); loki
 // ── touch: a tap, a long press, many taps; "poof"; the evening on the river's edge; the storm ──
 // A tap on him is a short answer (a line of "just here", a small hop, or "poof"), the head tilting toward the finger; a long
 // press is a hug (arms open, a golden heart, "קיבלתי."); many taps in a row tire him out, with a smile. Nothing is counted.
-let lokiFlip = false, lokiPoofIn = false, lokiGhost = false
+let lokiFlip = true, lokiPoofIn = false, lokiGhost = false   // his corner is on the left of the card (the bubble, read first, on the right); a poof moves him across
 const lokiTouch = {timer: null, down: 0, held: false, taps: [], tired: false}
 function lokiRender() { const el = document.getElementById('jg-gnome'); if(!el) return; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function lokiTilt(x) {
@@ -5081,10 +5109,10 @@ function lokiTap(e) {
   if(lokiTouch.taps.length >= 5) { if(!lokiTouch.tired) { lokiTouch.tired = true; lokiQueue = [lokiItem('tired', LOKI.touch.tired, 'laugh')]; gnIdx = 0; lokiRender() } return }
   lokiTouch.tired = false
   if(lokiQueue.some(i => i.kind === 'ritual')) return
-  const r = Math.random()
-  if(r < .5) { lokiQueue = [lokiHereItem()]; gnIdx = 0; lokiRender() }
-  else if(r < .75 || reducedMotion()) { lokiHop() }
-  else lokiPoof(false)
+  lokiQueue = [lokiHereItem()]; gnIdx = 0; lokiRender()
+  if(reducedMotion()) return
+  if(lokiSeqReady('wave')) lokiStagePlay('turn', [1, 2], 10, function() { lokiStagePlay('wave', [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], 9) })
+  else lokiHop()
 }
 function lokiHugTouch() {
   if(!gnomeOn() || briefingBusy) return
@@ -5093,6 +5121,7 @@ function lokiHugTouch() {
 }
 document.addEventListener('pointerdown', function(e) {
   const st = e.target.closest && e.target.closest('#jg-gnome .gn-stage'); if(!st) return
+  if(lokiOut()) { lokiCall(); return }
   lokiTouch.down = Date.now(); lokiTouch.held = false; clearTimeout(lokiTouch.timer)
   lokiTouch.timer = setTimeout(function(){ lokiTouch.held = true; lokiHugTouch() }, 560)
 }, true)
@@ -5114,7 +5143,7 @@ function lokiPoof(ghost) {
 }
 function lokiSettle() {   // after a poof: peeking for a moment, then out from behind the leaf
   const c = document.getElementById('jg-gnome'); if(!c || c.dataset.kind !== 'poof' || reducedMotion()) return
-  setTimeout(function() { const c2 = document.getElementById('jg-gnome'), im = c2 && c2.querySelector('.gn-img'); if(im && c2.dataset.kind === 'poof' && im.dataset.pose === 'peek') gnomeSet(im, 'stand') }, 1800)
+  setTimeout(function() { const c2 = document.getElementById('jg-gnome'), im = c2 && c2.querySelector('.gn-img'); if(im && c2.dataset.kind === 'poof' && im.dataset.pose === 'peek') { const tmp = document.createElement('div'); tmp.innerHTML = lokiStageSeqHtml('idle', 0); const f = tmp.firstChild; if(f) { im.src = f.src; im.style.cssText = f.style.cssText; im.dataset.pose = f.dataset.pose } else gnomeSet(im, 'stand') } }, 1800)
   const st = c.querySelector('.gn-stage'); if(st && st.classList.contains('ghost')) setTimeout(function(){ if(st.isConnected) st.classList.remove('ghost') }, 2200)
 }
 // the evening: after 18:00 and once a task has been closed today he asks to sit; a tap gives the river's edge with the lamp, one
@@ -5210,33 +5239,102 @@ function showLokiStory() {
     st.open.map(i => '<button class="nh-chap" onclick="lokiTellChapter(' + i + ')"><span class="nh-chap-dot' + (st.read[i] ? ' read' : '') + '"></span><span>' + tr('gn_chapter') + ' ' + (i + 1) + ' · ' + esc(LOKI_STORY[i].t) + '</span></button>').join('') +
     '<button class="btn-primary" style="margin-top:12px" onclick="closeModal()">' + tr('btn_close') + '</button></div>')
 }
-// ── LOKI ROAMS (jungle) ──
-// Now and then he is out on the screen itself: he walks along the top edge of a card, sneaks in from the side and
-// vanishes ("poof"), sits on the edge of a card with his legs swinging, or climbs a vine to a mossy branch that rests on the
-// card's top edge (one run of the picture, once: the vine and the branch are in the drawing). Where he can be is measured
-// while it runs: the place he would take must be free of text, icons, buttons and fields, and it is looked at again every
-// half second; if the screen moves under him, or Uri scrolls, types, opens something, or leaves the screen, he is gone.
-// Rarely (every four to nine minutes at most), never with reduced motion, nothing of him catches a press except himself.
-// A switch in Settings, "Loki roams", on by default.
-const LK_RM = {walk: {n: 12, w: 286, h: 450, k: .19, fps: 12}, sneak: {n: 8, w: 284, h: 450, k: .19, fps: 8.9}, dangle: {n: 6, w: 274, h: 340, k: .19, fps: 5, seat: 228}, climb: {n: 33, w: 551, h: 400, k: .25, fps: 5.5}}
+// ── LOKI'S CORNER AND HIS WALKS (jungle) ──
+// One Loki, in one place at a time: in his corner of the Home card, or out on the screen. His corner is a nook with a stump, a
+// lantern and a mushroom; when he is out the stump is empty, the note he left lies on it, and the bubble stays where it was as that
+// note (the same words: nothing of the briefing is lost).
+// Out: (up from the stump if he was sitting on it) he looks about, walks along the corner's floor to the branch at the card's edge,
+// slides down the vine to the floor below, lands, and walks to the place he is going to: above the tab that has something waiting
+// (its badge), or the one the hour of the day points to; there he stops, turns to Uri, says a line about it, and sits on the edge.
+// Back (his time is up, or a tap on the stump calls him): he turns, walks to the vine, jumps, grabs it and climbs (the climb follows
+// the distance), comes up onto the branch, turns, walks to the stump and sits down on it. Never a jump between heights without the vine.
+// Walking is slow (25px a second, starting and stopping gently) and its frames follow the distance, so his feet never slide. Where
+// he goes is measured at the moment and looked at again every half second: never over text, icons, buttons or fields; if Uri scrolls,
+// types, opens something or leaves Home, or the corner moves, he is back in his corner at once. First out 15-20 seconds after Home
+// is opened, then a minute or two in the corner between walks, 30-60 seconds out. Reduced motion: he stays in the corner. Only he
+// catches a press. A switch in Settings, "Loki roams".
+// Every sequence is shown at one size (his standing height, LK_H), measured on the drawing itself when it loads, so frames from the
+// different packs match, and a set of frames can be replaced by sharper ones (same folders, same json) with no change here.
+const LK_H = 97                   // his standing height on screen, px
+const LK_DIR = 'assets/gnome/loki/'
+// the sequences: folder, frames (or the json that lists them), the frame his size is measured on, or the sequence whose scale it shares
+const LK_SEQ = {
+  walk:    {dir: 'walk', n: 12, ref: 0, floor: 446},
+  dangle:  {dir: 'dangle', n: 6, kOf: 'walk', seat: 228},
+  turn:    {dir: 'turn', json: 'turn.json', ref: 2},
+  look:    {dir: 'look', json: 'look.json', ref: 0},
+  wave:    {dir: 'wave', json: 'wave.json', ref: 0},
+  jump:    {dir: 'jump', json: 'jump.json', ref: 0},
+  standup: {dir: 'poses/standup', json: 'standup.json', ref: 5, seatY: 460, seatX: 150},
+  landing: {dir: 'poses/landing', json: 'landing.json', kOf: 'standup', cxOf: 'standup'},
+  idle:    {dir: 'poses/idle', json: 'idle.json', kOf: 'standup'},
+  loop:    {dir: 'climb/loop', json: 'loop.json', kOf: 'ledge', feet: 319},
+  ledge:   {dir: 'climb/ledge', json: 'ledge.json', refFile: 'final-stand.webp'},
+  slide:   {dir: 'poses', files: ['slide.webp'], kOf: 'walk', kMul: 1.62}     // a pose of the first pack, drawn at about 0.62 of the walk's size
+}
+// the nook's things (drawn at one scale: the stump's seat is where the sitting Loki's seat is) and the vine and the branch
+const LK_PROP = {stump: [384, 224], lantern: [129, 181], note: [162, 130], mushroom: [185, 254], vine: [303, 954], branch: [513, 223]}
+const LK_NOOK = .182              // px on screen per pixel of the nook's drawings
+const LK_SPEED = 25, LK_CLIMB = 22, LK_SLIDE = 46, LK_ACC = .6     // px a second walking, climbing (the drawing's own pace), sliding; seconds to start and to stop
 const LK_PAD = 12                 // clear margin around the lit copy of a frame, so the light is not cut at the edge of the drawing
-const LK_RM_SPEED = 70             // px a second
-const lkr = {ep: null, timer: null, raf: 0, lastScroll: 0, lastKey: 0, frames: {}, forced: false}
+const lkr = {state: 'in', ep: null, timer: 0, raf: 0, lastScroll: 0, lastKey: 0, homeAt: 0, walked: false, backAt: 0, sitUntil: 0, sitTimer: 0, idleTimer: 0, seq: {}}
 function lokiRoamOn() { try { return localStorage.getItem('fieldy_loki_roam') !== '0' } catch(e) { return true } }
-function setLokiRoam(on) { try { localStorage.setItem('fieldy_loki_roam', on ? '1' : '0') } catch(e) {} if(on) lokiRoamSchedule(60000); else lokiRoamStop(false); renderCurrentScreen() }
+function setLokiRoam(on) { try { localStorage.setItem('fieldy_loki_roam', on ? '1' : '0') } catch(e) {} if(!on) lokiSnapHome(); renderCurrentScreen(); if(on) lokiWalkSchedule() }
+function lokiOut() { return lkr.state !== 'in' }
 document.addEventListener('scroll', function() { lkr.lastScroll = Date.now() }, true)
 document.addEventListener('keydown', function() { lkr.lastKey = Date.now() }, true)
-// why he must not be out right now ('' when he may)
+// ── the frames: loaded once, measured on the drawing (his height, the middle of him, his floor line)
+function lokiMeasure(img) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight
+  const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0)
+  const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1
+  for(let y = 0; y < c.height; y++) for(let x = 0; x < c.width; x++) if(d[(y * c.width + x) * 4 + 3] > 40) { if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y }
+  return {x0, y0, x1, y1}
+}
+function lokiImg(src) { return new Promise(function(res) { const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onload = function() { (im.decode ? im.decode() : Promise.resolve()).catch(function(){}).then(function() { res(im) }) }; im.onerror = function() { res(null) }; im.src = src }) }
+function lokiSeq(name) {
+  if(lkr.seq[name]) return lkr.seq[name]
+  const S = LK_SEQ[name], base = LK_DIR + S.dir + '/'
+  return lkr.seq[name] = (async function() {
+    let json = null, files
+    if(S.json) { try { json = await (await fetch(base + S.json)).json() } catch(e) {} }
+    if(S.files) files = S.files
+    else if(json && Array.isArray(json.frames)) files = json.frames.map(f => f.file)
+    else if(json && json.files) files = json.files
+    else files = Array.from({length: S.n || (json && json.frames) || 0}, (_, i) => name + '-' + String(i + 1).padStart(2, '0') + '.webp')
+    const imgs = await Promise.all(files.map(f => lokiImg(base + f)))
+    if(imgs.some(i => !i)) throw new Error('loki frames ' + name)
+    const m = {name, imgs, json, W: imgs[0].naturalWidth, Hc: imgs[0].naturalHeight}
+    if(S.kOf) { const o = await lokiSeq(S.kOf); m.k = o.k * (S.kMul || 1) }
+    const refImg = S.refFile ? await lokiImg(base + S.refFile) : imgs[S.ref || 0]
+    const b = lokiMeasure(refImg); m.box = b
+    if(!S.kOf) m.k = LK_H / (b.y1 - b.y0)
+    m.cx = S.cxOf ? (await lokiSeq(S.cxOf)).cx : (b.x0 + b.x1) / 2
+    m.floor = json && json.floor_y || S.floor || b.y1
+    if(S.refFile) m.final = refImg
+    return m
+  })().catch(function(e) { delete lkr.seq[name]; throw e })   // a load that failed (no connection) is tried again next time
+}
+function lokiSeqReady(name) { const p = lkr.seq[name]; return p && p.done ? p.val : null }
+// the corner's sequences are wanted at once when the card is drawn: kept ready
+function lokiWarm() { ['idle', 'standup', 'wave', 'turn', 'look'].forEach(function(n) { const p = lokiSeq(n); if(!p.hooked) { p.hooked = true; p.then(function(v) { p.done = true; p.val = v; if(n === 'idle' || n === 'standup') { const c = document.getElementById('jg-gnome'); if(c && c.dataset.pose === 'stand') lokiRender() } }).catch(function(){}) } }) }
+// ── why he must be in his corner right now ('' when he may be out)
 function lokiRoamGuard() {
   if(currentTheme !== 'jungle' || !gnomeOn() || !lokiRoamOn()) return 'off'
   if(reducedMotion()) return 'reduced'
   if(document.visibilityState !== 'visible') return 'hidden'
-  if(['home', 'tasks', 'people', 'sites'].indexOf(currentScreen) < 0) return 'screen'
+  if(currentScreen !== 'home') return 'screen'
   const mc = document.getElementById('modal-container'); if(mc && mc.children.length) return 'modal'
   const a = document.activeElement; if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || (a && a.isContentEditable)) return 'typing'
   if(Date.now() - lkr.lastKey < 4000) return 'typing'
   if(Date.now() - lkr.lastScroll < 2500) return 'scroll'
-  if(lokiQueue.some(Boolean) || gnFull || focusEditOpen || taskReviewOpen || lokiRitualTimer && lokiQueue.some(i => i && i.kind === 'ritual')) return 'bubble'
+  return ''
+}
+// and why he should not set out now: asleep, in the middle of telling something, or something of his card is open
+function lokiLeaveGuard() {
+  const g = lokiRoamGuard(); if(g) return g
+  const hr = gnHour(); if(hr >= 22 || hr < 5 || briefingBusy) return 'asleep'
+  if(lokiQueue.some(Boolean) || gnFull || focusEditOpen || taskReviewOpen) return 'bubble'
   return ''
 }
 // the free places, measured now: floors (the top edge of a card, or of the nav) with the length of floor that has room for him above it
@@ -5245,8 +5343,9 @@ function lokiRoamMeasure() {
   const sr = scr.getBoundingClientRect(), nav = document.getElementById('nav'), navOn = nav && getComputedStyle(nav).display !== 'none'
   const navTop = navOn ? nav.getBoundingClientRect().top : innerHeight, hdr = scr.querySelector('.screen-header'), top = Math.max(sr.top, hdr ? hdr.getBoundingClientRect().bottom : 0) + 6
   const L = Math.max(sr.left, 0) + 6, R = Math.min(sr.right, innerWidth) - 6
-  const bl = vnContent(scr, e => !!e.closest('.vn,.vine-deco,.jg-corner,#lk-roam')).filter(r => r.bottom > top - 100 && r.top < navTop + 4).map(r => ({l: r.left, r: r.right, t: r.top, b: r.bottom}))
-  if(navOn) { const nr = nav.getBoundingClientRect(); bl.push({l: nr.left, r: nr.right, t: nr.top + 4, b: nr.bottom}) }
+  const bl = vnContent(scr, e => !!e.closest('.vn,.vine-deco,.jg-corner,#lk-roam,#jg-gnome .gn-stage')).filter(r => r.bottom > top - 120 && r.top < navTop + 4).map(r => ({l: r.left, r: r.right, t: r.top, b: r.bottom}))
+  // the nav's own icons and labels (he may sit on its rim between them, never over them)
+  if(navOn) { const nr = nav.getBoundingClientRect(); bl.push({l: nr.left, r: nr.right, t: nr.top + 26, b: nr.bottom}); nav.querySelectorAll('svg, .nav-badge, .nav-label, span').forEach(e => { const r = e.getBoundingClientRect(); if(r.width) bl.push({l: r.left, r: r.right, t: r.top, b: r.bottom}) }) }
   if(hdr) { const hr = hdr.getBoundingClientRect(); bl.push({l: hr.left, r: hr.right, t: hr.top, b: hr.bottom}) }
   const free = (l, t, r, b) => !bl.some(q => q.r > l - 3 && q.l < r + 3 && q.b > t - 3 && q.t < b + 3)
   const floors = []
@@ -5255,124 +5354,350 @@ function lokiRoamMeasure() {
     const r = c.getBoundingClientRect(); if(r.width < 120 || r.top < top + 90 || r.top > navTop - 8) return
     floors.push({y: r.top, x0: Math.max(r.left + 14, L), x1: Math.min(r.right - 14, R), el: c})
   })
-  // the top of the navigation capsule is a floor too (he walks along it), the flat part between its rounded ends
+  // the top of the navigation capsule is a floor too, the flat part between its rounded ends
   if(navOn) { const nr = nav.getBoundingClientRect(); if(nr.top > top + 120) floors.push({y: nr.top, x0: Math.max(nr.left + 44, L), x1: Math.min(nr.right - 44, R), el: nav, nav: true}) }
-  const bandH = LK_RM.walk.h * LK_RM.walk.k, runs = []
+  const bandH = LK_H - 2, runs = []
   floors.forEach(function(f) {
     let x = f.x0, start = null
     for(; x <= f.x1 + 4; x += 4) {
-      const ok = x <= f.x1 && free(x, f.y - bandH, x + 4, f.y)
+      const ok = x <= f.x1 && free(x, f.y - bandH, x + 4, f.y - 1)
       if(ok && start === null) start = x
-      if(!ok && start !== null) { if(x - start >= 130) runs.push({y: f.y, x0: start, x1: x, el: f.el, nav: !!f.nav}); start = null }
+      if(!ok && start !== null) { if(x - start >= 90) runs.push({y: f.y, x0: start, x1: x, el: f.el, nav: !!f.nav}); start = null }
     }
   })
   return {runs, free, L, R, top, navTop, scr}
 }
-// what he will do, from what is free
-function lokiRoamPlan(want) {
-  const m = lokiRoamMeasure(); if(!m || !m.runs.length) return null
-  const A = LK_RM, hw = A.walk.w * A.walk.k / 2, pick = a => a[Math.floor(Math.random() * a.length)]
-  const opts = []
-  m.runs.forEach(function(r) {
-    const len = r.x1 - r.x0
-    if(len >= 150) opts.push({type: 'walk', run: r, w: r.nav ? 1.5 : 3})
-    if(r.nav) return
-    // sit: legs over the face of the card must be free too
-    const sw = A.dangle.w * A.dangle.k / 2, up = A.dangle.seat * A.dangle.k, dn = (A.dangle.h - A.dangle.seat) * A.dangle.k
-    for(let t = 0; t < 8; t++) { const x = r.x0 + sw + 10 + Math.random() * Math.max(1, len - 2 * sw - 20); if(len >= 120 && m.free(x - sw, r.y - up, x + sw, r.y + dn)) { opts.push({type: 'sit', run: r, x, w: 3}); break } }
-    // climb: the vine and the branch above the edge
-    const cw = A.climb.w * A.climb.k / 2, ch = A.climb.h * A.climb.k
-    for(let t = 0; t < 8; t++) { const x = r.x0 + cw + Math.random() * Math.max(1, len - 2 * cw); if(len >= 2 * cw + 4 && m.free(x - cw, r.y - ch, x + cw, r.y + 1)) { opts.push({type: 'climb', run: r, x, w: 2.5}); break } }
-    if(len >= 130 && (r.x0 <= m.L + 8 || r.x1 >= m.R - 8)) opts.push({type: 'sneak', run: r, w: 1.5})
-  })
-  const use = want ? opts.filter(o => o.type === want) : opts; if(!use.length) return null
-  let t = use.reduce((n, o) => n + o.w, 0) * Math.random(), o = use[0]
-  for(const c of use) { t -= c.w; if(t < 0) { o = c; break } }
-  o.m = m; o.hw = hw; return o
+// his corner, as it is on the screen now: the stage, its floor, and the stump's seat
+function lokiCorner() {
+  const card = document.getElementById('jg-gnome'), st = card && card.querySelector('.gn-stage'); if(!st) return null
+  // (the stage breathes, a translate of a pixel or two: its floor is taken from the row it stands in, which does not move)
+  const c = card.getBoundingClientRect(), s0 = st.getBoundingClientRect(), row = st.parentElement.getBoundingClientRect()
+  const s = {left: s0.left, right: s0.right, width: s0.width, height: st.offsetHeight, bottom: row.bottom, top: row.bottom - st.offsetHeight}
+  return {card: c, stage: s, side: s.left + s.width / 2 < c.left + c.width / 2 ? -1 : 1, x: s.left + LK_NOOK_AT.fig, y: s.bottom - 3, stumpX: s.left + LK_NOOK_AT.stump}
 }
-function lokiRoamFrames(kind) {
-  if(lkr.frames[kind]) return lkr.frames[kind]
-  const A = LK_RM[kind]
-  return lkr.frames[kind] = Promise.all(Array.from({length: A.n}, (_, i) => new Promise(function(res) { const im = new Image(); im.alt = ''; im.draggable = false; im.className = 'lk-f'; im.onload = im.onerror = () => res(im); im.src = 'assets/gnome/loki/' + kind + '/' + kind + '-' + String(i + 1).padStart(2, '0') + '.webp' })))
+// where he goes this time, and why: the tab with something waiting (its badge), or the one the hour points to
+function lokiDestination() {
+  const badges = ['tasks', 'sites', 'people'].map(k => { const b = document.getElementById('badge-' + k); return {k, n: b && !b.classList.contains('hidden') ? +b.textContent || 0 : 0} }).filter(b => b.n > 0)
+  const h = gnHour(), byHour = h < 11 ? 'tasks' : h < 16 ? 'sites' : h < 19 ? 'people' : 'tao'
+  const pick = badges.length ? badges[(lkr.trips = (lkr.trips || 0) + 1) % badges.length] : {k: byHour, n: 0, hour: true}
+  const btn = document.querySelector('#nav .nav-btn[data-screen="' + pick.k + '"]'), r = btn && btn.getBoundingClientRect()
+  return {k: pick.k, n: pick.n, hour: !!pick.hour, x: r ? r.left + r.width / 2 : innerWidth / 2}
 }
-function lokiRoamPuff(x, y) { const sp = document.createElement('div'); sp.className = 'lk-puff'; sp.style.cssText = 'left:' + x + 'px;top:' + y + 'px'; sp.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5l2.1 7.2 7.4 2.3-7.4 2.3L12 20.5l-2.1-7.2-7.4-2.3 7.4-2.3z"/></svg>'; const ov = document.getElementById('lk-roam'); if(ov) { ov.appendChild(sp); setTimeout(() => sp.remove(), 450) } }
-function lokiRoamStop(poof, tapped) {
-  const ep = lkr.ep; if(!ep) return; lkr.ep = null; cancelAnimationFrame(lkr.raf)
-  const ov = document.getElementById('lk-roam'); if(!ov) return
-  const rect = ep.actor.getBoundingClientRect()
-  if(poof) lokiRoamPuff(rect.left + rect.width / 2, rect.top + rect.height * .45)
-  ep.actor.classList.add('out'); setTimeout(function() { ov.remove() }, 260)
-  lkr.roamEnded = Date.now(); try { loki.roamAt = Date.now(); lokiSave() } catch(e) {}
-  if(!lkr.forced) lokiRoamSchedule((4 + Math.random() * 5) * 60000)
-  if(ep.type === 'sneak' && poof && !tapped && currentScreen === 'home' && !lokiQueue.some(Boolean) && document.getElementById('jg-gnome')) { lokiQueue = [lokiHereItem()]; gnIdx = 0; lokiRender() }
+function lokiDestLine(d) {
+  const bank = d.hour ? LOKI.trip.hour[d.k] : LOKI.trip[d.k][d.n === 1 ? 'one' : 'many']
+  return lokiFill(bank[Math.floor(Math.random() * bank.length)], {n: d.n})
 }
-// the run: frames by the clock, a straight line for the walk, and a look at the place every half second
-async function lokiRoamRun(plan) {
-  if(lkr.ep || lokiRoamGuard()) return false
-  const A = LK_RM, type = plan.type, r = plan.run, y = r.y, W = Math.max(plan.m.R, 0)
-  const need = type === 'sit' ? ['walk', 'dangle'] : type === 'climb' ? ['climb'] : type === 'sneak' ? ['sneak'] : ['walk']
-  const sets = {}; for(const n of need) sets[n] = await lokiRoamFrames(n)
-  if(lkr.ep || lokiRoamGuard()) return false
-  const ov = document.createElement('div'); ov.id = 'lk-roam'; ov.className = 'lk-roam'; ov.setAttribute('aria-hidden', 'true')
-  const actor = document.createElement('div'); actor.className = 'lk-actor'; const flip = document.createElement('div'); flip.className = 'lk-flip'; actor.appendChild(flip); ov.appendChild(actor); document.body.appendChild(ov)
-  const show = {}
-  const setKind = function(k) { flip.innerHTML = ''; const a = A[k]; actor.style.width = a.w * a.k + 'px'; actor.style.height = a.h * a.k + 'px'; show.kind = k; show.cur = -1; show.glows = []
-    show.imgs = sets[k].map(function(im, i) {
-      const c = im.cloneNode(); c.draggable = false; flip.appendChild(c)
-      // the crystal of the staff: a copy of this frame masked to the crystal, lit by drop-shadow, laid over it
-      const cr = k === 'walk' ? LK_CRYSTAL.walk[i] : k === 'climb' ? LK_CRYSTAL.climb[i + 1] : null
-      if(cr) { const g = im.cloneNode(); g.className = 'lk-f lk-g'; g.draggable = false; const R = 27 * a.k, m = 'radial-gradient(circle ' + R.toFixed(1) + 'px at ' + (LK_PAD + cr[0] * a.k).toFixed(1) + 'px ' + (LK_PAD + cr[1] * a.k).toFixed(1) + 'px,#000 0,#000 ' + (R * .55).toFixed(1) + 'px,transparent ' + R.toFixed(1) + 'px)'; g.style.webkitMaskImage = g.style.maskImage = m; flip.appendChild(g); show.glows[i] = g }
-      return c
-    }) }
-  const frame = function(i) { if(show.cur === i) return; if(show.cur >= 0) { show.imgs[show.cur].classList.remove('on'); if(show.glows[show.cur]) show.glows[show.cur].classList.remove('on') } show.imgs[i].classList.add('on'); if(show.glows[i]) show.glows[i].classList.add('on'); show.cur = i }
-  const place = function(cx, k, dir) { const a = A[k]; let top = y - a.h * a.k + 1; if(k === 'dangle') top = y - a.seat * a.k; actor.style.transform = 'translate(' + (cx - a.w * a.k / 2).toFixed(1) + 'px,' + top.toFixed(1) + 'px)'; flip.style.transform = dir < 0 ? 'scaleX(-1)' : '' }
-  // the script of this run
-  const hw = plan.hw, a0 = r.x0 + hw, b0 = r.x1 - hw
-  let from, to, dir = Math.random() < .5 ? 1 : -1, steps = []
-  if(type === 'walk') { from = dir > 0 ? a0 : b0; to = dir > 0 ? b0 : a0; steps = [{k: 'walk', dur: Math.abs(to - from) / LK_RM_SPEED * 1000, from, to}, {k: 'walk', hold: 2200, at: to, still: true}] }
-  else if(type === 'sneak') { const leftEdge = r.x0 <= plan.m.L + 8; dir = leftEdge ? 1 : -1; from = leftEdge ? plan.m.L - hw - 8 : plan.m.R + hw + 8; to = leftEdge ? Math.min(b0, a0 + 120 + Math.random() * 80) : Math.max(a0, b0 - 120 - Math.random() * 80); steps = [{k: 'sneak', dur: Math.abs(to - from) / (LK_RM_SPEED * .75) * 1000, from, to}] }
-  else if(type === 'sit') { const x = plan.x; dir = x > (r.x0 + r.x1) / 2 ? 1 : -1; from = dir > 0 ? a0 : b0; steps = [{k: 'walk', dur: Math.abs(x - from) / LK_RM_SPEED * 1000, from, to: x}, {k: 'dangle', hold: 7000, at: x}] }
-  else { const x = plan.x; steps = [{k: 'climb', once: true, at: x, dur: A.climb.n / A.climb.fps * 1000}, {k: 'climb', hold: 3000, at: x, last: true}] }
-  lkr.ep = {type, actor, plan, y, start: Date.now(), screen: currentScreen}
-  setKind(steps[0].k); frame(0); place(steps[0].from != null ? steps[0].from : steps[0].at, steps[0].k, dir); actor.classList.add('in')
-  if(type !== 'sneak') lokiRoamPuff(steps[0].from != null ? steps[0].from : steps[0].at, y - 38)
-  const img = actor; img.addEventListener('pointerup', function(e) { e.stopPropagation(); if(!lkr.ep) return; haptic('light'); const home = currentScreen === 'home' && !lokiQueue.some(Boolean); lokiRoamStop(true, true); if(home) { lokiQueue = [lokiHereItem()]; gnIdx = 0; lokiRender() } })
-  let si = 0, t0 = performance.now(), lastCheck = t0
-  const tick = function(now) {
-    const ep = lkr.ep; if(!ep || ep.actor !== actor) return
-    // looked at every half second: the place is still free, and nothing has been opened, typed or scrolled
-    if(now - lastCheck > 500) {
-      lastCheck = now; const g = lokiRoamGuard()
-      if(g || currentScreen !== ep.screen) return lokiRoamStop(false)
-      const m = lokiRoamMeasure(), c = actor.getBoundingClientRect()
-      if(!m || !m.free(c.left + 2, c.top + 2, c.right - 2, c.bottom - (type === 'sit' ? 4 : 0))) { const still = m && m.runs.some(rr => Math.abs(rr.y - y) < 2); if(!still) return lokiRoamStop(false) }
-      if(Date.now() - lkr.lastScroll < 300) return lokiRoamStop(false)
+// the way out and back, from what is free now: the branch and the vine beside the card's edge, the floor below, and the place on it
+function lokiRoute(dest) {
+  const k = lokiCorner(), m = lokiRoamMeasure(); if(!k || !m) return null
+  if(k.stage.top < m.top || k.stage.bottom > m.navTop - 30) return null
+  const hw = 30, s = k.side, D = LK_SEQ.dangle
+  const cands = m.runs.filter(r => r.y > k.card.bottom + 12).sort((a, b) => (b.nav - a.nav) || (b.y - a.y))
+  for(const r of cands) {
+    // the vine hangs from the branch at the corner's floor; tried from the card's edge inwards, it needs a clear column down to the floor
+    // the vine: where it is clear all the way down and he lands right at its foot; inside the card's edge if it can, else in the margin
+    let best = null
+    for(const off of [14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 6, 2, -2, -6]) {
+      const vx = s < 0 ? k.card.left + off : k.card.right - off
+      const lx = Math.max(r.x0 + hw, Math.min(r.x1 - hw, vx - s * 10))  // where he lands at the foot of the vine
+      if(Math.abs(lx - vx) > 34 || (s < 0 ? vx > k.x - 18 : vx < k.x + 18)) continue
+      if(!m.free(vx - 18, k.y - LK_H + 6, vx + 18, r.y - 2)) continue      // the slide and the climb, all the way down
+      if(!m.free(Math.min(vx, k.x) - hw + 6, k.y - LK_H + 6, Math.max(vx, k.x) + hw - 6, k.y - 1)) continue   // the walk on the corner's floor
+      if(!m.free(Math.min(lx, vx) - hw, r.y - LK_H + 6, Math.max(lx, vx) + hw, r.y - 1)) continue
+      const cost = Math.abs(lx - (vx - s * 10)) + (off < 14 ? 12 : 0)
+      if(!best || cost < best.cost) best = {vx, lx, cost}
     }
-    const st = steps[si], el = Math.max(0, now - t0)
-    if(st.hold) { const a = A[st.k]; if(st.still) frame(0); else if(st.last) frame(a.n - 1); else frame(Math.floor(el / 1000 * a.fps) % a.n); place(st.at, st.k, dir); if(el >= st.hold) { si++; t0 = now } }
-    else if(st.once) { const a = A[st.k], f = Math.min(a.n - 1, Math.floor(el / 1000 * a.fps)); frame(f); place(st.at, st.k, dir); if(el >= st.dur) { si++; t0 = now } }
-    else { const a = A[st.k], u = Math.min(1, el / Math.max(1, st.dur)), x = st.from + (st.to - st.from) * u; frame(Math.floor(el / 1000 * a.fps) % a.n); place(x, st.k, st.to >= st.from ? 1 : -1); if(u >= 1) { si++; t0 = now } }
-    if(si >= steps.length) return lokiRoamStop(true)
-    const nx = steps[si]; if(nx && (nx.k !== show.kind)) { setKind(nx.k); frame(0); place(nx.at != null ? nx.at : (steps[si - 1].to != null ? steps[si - 1].to : 0), nx.k, dir) }
-    lkr.raf = requestAnimationFrame(tick)
+    if(!best) continue
+    const vx = best.vx, lx = best.lx
+    // where on that floor: above the tab he is going to, as far as the floor is free
+    const want = dest ? dest.x : (r.x0 + r.x1) / 2, at = Math.max(r.x0 + hw, Math.min(r.x1 - hw, want))
+    // he sits on the edge where his legs hang over nothing written: the nearest such place to the one he wanted, if it is not too far
+    // (or, where they would, with his legs hanging down behind the card, out of sight)
+    const sw = 22, up = D.seat * .219, dn = (340 - D.seat) * .219, legs = x => m.free(x - sw, r.y - up, x + sw, r.y + dn)
+    let seatAt = null
+    for(let d = 0; d <= 40 && seatAt === null; d += 6) for(const x of [at - d, at + d]) if(seatAt === null && x >= r.x0 + hw && x <= r.x1 - hw && Math.abs(x - lx) > 30 && legs(x)) seatAt = x
+    return {k, r, vx, lx, at: seatAt !== null ? seatAt : at, sit: true, legsBehind: seatAt === null, m, dest}
   }
-  lkr.raf = requestAnimationFrame(tick)
+  return null
+}
+// ── the actor: one picture shown at a time (and the lit copy of the walk's crystal), with the vine and the branch behind him
+function lokiActor() {
+  const ov = document.createElement('div'); ov.id = 'lk-roam'; ov.className = 'lk-roam'; ov.setAttribute('aria-hidden', 'true')
+  const props = document.createElement('div'); props.className = 'lk-props'; ov.appendChild(props)
+  const actor = document.createElement('div'); actor.className = 'lk-actor'
+  const img = new Image(); img.alt = ''; img.draggable = false; img.className = 'lk-spr'
+  const glow = new Image(); glow.alt = ''; glow.draggable = false; glow.className = 'lk-spr lk-g'
+  actor.appendChild(img); actor.appendChild(glow); ov.appendChild(actor); document.body.appendChild(ov)
+  return {ov, props, actor, img, glow}
+}
+// one frame of a sequence, its feet (or seat, or the line of the vine) at x, y
+function lokiShow(ep, name, i, x, y, o) {
+  o = o || {}
+  const m = ep.seqs[name], im = m.imgs[i] || m.final, k = m.k, w = im.naturalWidth * k, h = im.naturalHeight * k
+  const fl = o.flip != null ? o.flip : ep.dir < 0, S = LK_SEQ[name]
+  let cx = m.cx, fy = m.floor
+  if(name === 'dangle') fy = S.seat
+  if(o.seat && name === 'standup') { cx = S.seatX; fy = S.seatY; y -= 31 }     // sitting on the stump: his seat on its top
+  if(o.cx != null) cx = o.cx
+  if(o.top != null) fy = null
+  const left = x - (fl ? im.naturalWidth - cx : cx) * k, top = o.top != null ? o.top : y - fy * k
+  if(ep.img.src !== im.src) ep.img.src = im.src
+  if(name !== 'dangle' && ep.img.style.clipPath) ep.img.style.clipPath = ''
+  ep.actor.style.width = w.toFixed(1) + 'px'; ep.actor.style.height = h.toFixed(1) + 'px'
+  ep.actor.style.transform = 'translate(' + left.toFixed(1) + 'px,' + top.toFixed(1) + 'px)' + (o.rot ? ' rotate(' + o.rot + 'deg)' : '')
+  ep.actor.style.transformOrigin = o.rot ? '50% 50%' : ''
+  ep.img.style.transform = ep.glow.style.transform = fl ? 'scaleX(-1)' : ''
+  // the crystal of the staff on the walk: a copy of the frame masked to it, lit by drop-shadow
+  const cr = name === 'walk' ? LK_CRYSTAL.walk[i] : null
+  if(cr) { if(ep.glow.src !== im.src) ep.glow.src = im.src; const R = 27 * k, mk = 'radial-gradient(circle ' + R.toFixed(1) + 'px at ' + (LK_PAD + cr[0] * k).toFixed(1) + 'px ' + (LK_PAD + cr[1] * k).toFixed(1) + 'px,#000 0,#000 ' + (R * .55).toFixed(1) + 'px,transparent ' + R.toFixed(1) + 'px)'; ep.glow.style.webkitMaskImage = ep.glow.style.maskImage = mk; ep.glow.style.display = '' }
+  else ep.glow.style.display = 'none'
+  ep.cur = {name, i}; ep.actor.dataset.kind = name
+  ep.x = o.cxScreen != null ? o.cxScreen : x; ep.y = o.seat ? y + 31 : y
+}
+// the vine (from the branch down to the floor) and the branch (its cut end off the screen's edge), drawn where the climb needs them
+function lokiProps(ep, on) {
+  const rt = ep.rt, P = ep.props
+  if(!on) { P.classList.remove('on'); return }
+  if(!P.firstChild) {
+    const L = ep.seqs.ledge, kL = L.k, s = rt.k.side, beamY = rt.k.y, floorY = rt.r.y
+    // the vine: its trunk as thick as the pole in the drawings of the climb; stacked when the way down is long
+    const need = floorY - beamY + 14, sv = Math.max(.17, Math.min(.24, need / LK_PROP.vine[1])), vh = LK_PROP.vine[1] * sv, vw = LK_PROP.vine[0] * sv
+    const boxTop = beamY - 14, boxH = floorY + 4 - boxTop
+    let html = '', vines = ''
+    for(let b = boxH, n = 0; n < 4; n++) {   // from the foot up, the roots only at the foot; cut above the branch
+      vines = '<img class="lk-vine" alt="" draggable="false" src="' + LK_DIR + 'props/climb/vine-trunk.webp" style="left:' + (rt.vx - vw / 2).toFixed(1) + 'px;top:' + (b - vh).toFixed(1) + 'px;width:' + vw.toFixed(1) + 'px;height:' + vh.toFixed(1) + 'px' + (n ? ';clip-path:inset(0 0 14% 0)' : '') + '">' + vines
+      if(b - vh <= 0) break; b = b - vh * .82
+    }
+    html += '<div class="lk-vinebox" style="top:' + boxTop.toFixed(1) + 'px;height:' + boxH.toFixed(1) + 'px">' + vines + '</div>'
+    // the branch: the beam of the drawings of the climb; its natural end just past the vine on the corner's side, its cut end off the edge
+    const beamT = 43.8 * kL, sb = beamT / 90, bw = LK_PROP.branch[0] * sb, bh = LK_PROP.branch[1] * sb, endX = rt.vx - s * 63 * kL
+    const bl = s < 0 ? endX - bw : endX
+    html += '<img class="lk-branch" alt="" draggable="false" src="' + LK_DIR + 'props/climb/branch.webp" style="left:' + bl.toFixed(1) + 'px;top:' + (beamY - 20 * sb).toFixed(1) + 'px;width:' + bw.toFixed(1) + 'px;height:' + bh.toFixed(1) + 'px;transform:' + (s < 0 ? 'scaleX(-1)' : 'none') + '">'
+    P.innerHTML = html; void P.offsetWidth
+  }
+  P.classList.add('on')
+}
+async function lokiLeave(forced) {
+  if(lkr.state !== 'in') return false
+  const g = lokiLeaveGuard(); lkr.why = g; if(g && !(forced && g === 'bubble')) { lokiWalkSchedule(g === 'scroll' || g === 'typing' || g === 'bubble' ? 8000 : 20000); return false }
+  const dest = lokiDestination(), rt = lokiRoute(dest); if(!rt) { lkr.why = 'no way'; lokiWalkSchedule(20000); return false }
+  let seqs = {}
+  try { for(const n of ['walk', 'dangle', 'turn', 'look', 'jump', 'standup', 'landing', 'idle', 'loop', 'ledge', 'slide']) seqs[n] = await lokiSeq(n) } catch(e) { lkr.why = 'frames'; lokiWalkSchedule(60000); return false }
+  if(lkr.state !== 'in' || lokiRoamGuard()) { lkr.why = 'after loading: ' + (lkr.state !== 'in' ? lkr.state : lokiRoamGuard()); return false }
+  const rt2 = lokiRoute(dest); if(!rt2 || Math.abs(rt2.k.y - rt.k.y) > 2) { lkr.why = 'moved: ' + (rt2 ? rt2.k.y - rt.k.y : 'no way'); lokiWalkSchedule(20000); return false }
+  lkr.why = ''
+  lkr.walked = true; clearTimeout(lkr.timer)
+  const A = lokiActor(), ep = lkr.ep = Object.assign(A, {rt: rt2, seqs, steps: [], si: 0, t0: 0, at: 'corner', x: rt2.k.x, y: rt2.k.y, dir: rt2.k.side, cornerTop: rt2.k.stage.top, sitting: Date.now() < lkr.sitUntil})
+  A.actor.addEventListener('pointerup', function(e) { e.stopPropagation(); if(lkr.ep !== ep) return; haptic('light'); lokiRoamSay(lokiPick('roamTap')) })
+  lokiShow(ep, ep.sitting ? 'standup' : 'idle', 0, ep.sitting ? rt2.k.stumpX : rt2.k.x, rt2.k.y, {seat: ep.sitting, flip: false})
+  lkr.state = 'leaving'; lkr.sitUntil = 0; lokiRender()     // the corner empties in the same moment he appears in it
+  lokiScript(ep, lokiOutSteps(ep))
   return true
 }
-function lokiRoamSchedule(ms) {
-  clearTimeout(lkr.timer)
-  const gap = 4 * 60000, last = loki.roamAt || 0, wait = Math.max(ms, last + gap - Date.now())
-  lkr.timer = setTimeout(async function() {
-    if(lkr.ep) return lokiRoamSchedule(30000)
-    if(lokiRoamGuard()) return lokiRoamSchedule(20000)
-    const plan = lokiRoamPlan(); if(!plan) return lokiRoamSchedule(60000)
-    if(!(await lokiRoamRun(plan))) lokiRoamSchedule(30000)
-  }, wait)
+// out: up from the stump, a look about, along the corner's floor onto the branch, down the vine, a landing, along the floor, a stop,
+// a turn to Uri and a line about where he is, and down on the edge
+function lokiOutSteps(ep) {
+  const rt = ep.rt, k = rt.k, y0 = k.y, y1 = rt.r.y, s = []
+  if(ep.sitting) s.push({t: 'seq', name: 'standup', fps: 9, x: k.stumpX, y: y0, seat: true, flip: false, to: 'idle'})
+  s.push({t: 'seq', name: 'look', fps: 2.6, x: k.x, y: y0, flip: false})
+  s.push({t: 'props', on: true, ms: 350})
+  s.push({t: 'walk', from: k.x, to: rt.vx, y: y0})
+  s.push({t: 'slide', x: rt.vx, from: y0, to: y1})
+  s.push({t: 'seq', name: 'landing', fps: 8, x: rt.lx, y: y1, at: 'floor'})
+  s.push({t: 'walk', from: rt.lx, to: rt.at, y: y1})
+  s.push({t: 'still', name: 'turn', i: 0, ms: 300, x: rt.at, y: y1})
+  s.push({t: 'seq', name: 'turn', fps: 6, x: rt.at, y: y1, frames: [0, 1, 2, 3, 2], flipFrom: true})
+  s.push({t: 'say', line: rt.dest ? lokiDestLine(rt.dest) : null})
+  s.push(rt.sit ? {t: 'sit', x: rt.at, y: y1, out: true} : {t: 'idle', x: rt.at, y: y1, out: true})
+  return s
 }
-// for tests and for looking at him: one run now, of a kind, if there is room for it (the guards still hold)
-async function lokiRoamNow(kind) { lkr.forced = true; const plan = lokiRoamPlan(kind); if(!plan) return null; const ok = await lokiRoamRun(plan); return ok ? plan.type : null }
-document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') lokiRoamStop(false) })
-setTimeout(function() { lokiRoamSchedule(90000) }, 0)
+// back: up from the edge, a turn to the vine, along the floor, a jump, the climb, onto the branch, a turn, to the stump, and down on it
+function lokiBackSteps(ep) {
+  const rt = ep.rt, k = rt.k, y0 = k.y, y1 = rt.r.y, s = [], kL = ep.seqs.ledge.k, J = ep.seqs.jump, jf = (J.json && J.json.frames) || []
+  const grab = (jf[5] && jf[5].air_px || 95) * J.k, loopFeet = LK_SEQ.loop.feet * kL
+  if(ep.at === 'floor') {
+    const toVine = rt.lx > ep.x ? 1 : -1
+    s.push({t: 'seq', name: 'turn', fps: 7, x: ep.x, y: y1, frames: [2, 1, 0], dir: toVine})
+    s.push({t: 'walk', from: ep.x, to: rt.vx, y: y1})
+    s.push({t: 'jump', x: rt.vx, y: y1, fps: 9})
+    // the climb: the loop's frames follow the distance, up to where the arrival onto the branch begins (its first frame's anchor)
+    s.push({t: 'climb', x: rt.vx, from: y1 - grab - loopFeet, to: y0 + 67.1 * kL})
+    s.push({t: 'ledge', x: rt.vx, beam: y0})
+  } else if(ep.at === 'vine') {
+    s.push({t: 'climb', x: rt.vx, from: ep.top, to: y0 + 67.1 * kL})
+    s.push({t: 'ledge', x: rt.vx, beam: y0})
+  }
+  if(ep.at !== 'corner') s.push({t: 'seq', name: 'turn', fps: 7, x: rt.vx - k.side * 6, y: y0, frames: [0, 1, 2, 1, 0], turnTo: -k.side})
+  s.push({t: 'walk', from: ep.at === 'corner' ? ep.x : rt.vx - k.side * 6, to: k.stumpX + 2, y: y0})
+  s.push({t: 'seq', name: 'standup', fps: 9, x: k.stumpX, y: y0, seat: true, flip: false, frames: [5, 4, 3, 2, 1, 0]})
+  s.push({t: 'props', on: false, ms: 10})
+  s.push({t: 'home'})
+  return s
+}
+function lokiScript(ep, steps) { ep.steps = steps; ep.si = 0; ep.t0 = performance.now(); ep.last = ep.t0; cancelAnimationFrame(lkr.raf); lkr.raf = requestAnimationFrame(lokiTick) }
+function lokiTick(now) {
+  const ep = lkr.ep; if(!ep) return
+  // looked at every half second: nothing opened, typed or scrolled, and his corner is where it was
+  if(now - ep.last > 500) {
+    ep.last = now
+    if(lokiRoamGuard()) return lokiSnapHome()
+    const k = lokiCorner(); if(!k || Math.abs(k.stage.top - ep.cornerTop) > 3) return lokiSnapHome()
+  }
+  let st = ep.steps[ep.si]
+  while(st) {
+    if(lokiStep(ep, st, Math.max(0, now - ep.t0))) break
+    ep.si++; ep.t0 = now; st = ep.steps[ep.si]
+  }
+  if(lkr.ep === ep && ep.si < ep.steps.length) lkr.raf = requestAnimationFrame(lokiTick)
+}
+// distance covered at time t for a start and a stop of `acc` seconds and a top speed v; and the whole duration
+function lokiTrapezoid(D, v, acc) {
+  const a = v / acc, ta = Math.min(acc, Math.sqrt(D / a)), da = a * ta * ta / 2, tc = Math.max(0, (D - 2 * da) / v), T = 2 * ta + tc, vm = a * ta
+  return {T: T * 1000, at: function(ms) { const t = Math.min(T, Math.max(0, ms / 1000)); if(t < ta) return a * t * t / 2; if(t < ta + tc) return da + vm * (t - ta); const u = T - t; return D - a * u * u / 2 }}
+}
+// one step at `el` ms into it; true while it is still going
+function lokiStep(ep, st, el) {
+  const S = ep.seqs
+  if(st.t === 'walk') {
+    const D = Math.abs(st.to - st.from); if(D < 1) return false
+    const tr = st.tr || (st.tr = lokiTrapezoid(D, LK_SPEED, LK_ACC)), d = tr.at(el), dir = st.to > st.from ? 1 : -1, W = S.walk
+    ep.dir = dir; lokiShow(ep, 'walk', Math.floor(d / (12.3 * W.k)) % 12, st.from + dir * d, st.y)
+    return el < tr.T
+  }
+  if(st.t === 'seq') {
+    const fr = st.frames || S[st.name].imgs.map((_, i) => i), f = Math.min(fr.length - 1, Math.floor(el / 1000 * st.fps))
+    if(st.dir) ep.dir = st.dir
+    let flip = st.flip
+    if(st.turnTo) { const i = fr[f]; flip = f < fr.length / 2 ? st.turnTo > 0 : st.turnTo < 0; if(f === fr.length - 1) ep.dir = st.turnTo }   // facing away, through the front, to the other side
+    else if(st.flipFrom) flip = ep.dir < 0
+    lokiShow(ep, st.name, fr[f], st.x, st.y, {seat: st.seat, flip})
+    if(f === fr.length - 1 && el >= fr.length / st.fps * 1000) { if(st.at) ep.at = st.at; return false }
+    return true
+  }
+  if(st.t === 'still') { lokiShow(ep, st.name, st.i, st.x, st.y); return el < st.ms }
+  if(st.t === 'props') { if(!st.done) { st.done = true; lokiProps(ep, st.on) } return el < st.ms }
+  if(st.t === 'slide') {
+    // down the vine on the drawing of the slide, turned so its vine stands upright, the vine passing up behind him
+    const D = Math.abs(st.to - st.from), tr = st.tr || (st.tr = lokiTrapezoid(D, LK_SLIDE, .35)), d = tr.at(el)
+    lokiShow(ep, 'slide', 0, st.x, st.from + d + 6, {flip: ep.rt.k.side > 0, rot: ep.rt.k.side < 0 ? 38 : -38, cx: 116}); ep.at = 'vine'
+    return el < tr.T
+  }
+  if(st.t === 'jump') {
+    const J = S.jump, jf = (J.json && J.json.frames) || [], f = Math.min(5, Math.floor(el / 1000 * st.fps)), air = (jf[f] && jf[f].air_px || 0) * J.k
+    const nx = f + 1 <= 5 ? (jf[f + 1] && jf[f + 1].air_px || 0) * J.k : air, u = el / 1000 * st.fps - f, y = st.y - (air + (nx - air) * Math.min(1, u))
+    lokiShow(ep, 'jump', f, st.x, y)
+    if(f >= 5 && el >= 6 / st.fps * 1000) { ep.at = 'vine'; return false }
+    return true
+  }
+  if(st.t === 'climb') {
+    // the loop of the climb, seen from behind; its frames follow the distance (the drawing climbs about 3.1px a frame), the vine stays put
+    const L = S.loop, kL = L.k, D = st.from - st.to; if(D <= 0) return false
+    const T = D / LK_CLIMB * 1000, d = Math.min(D, el / 1000 * LK_CLIMB), top = st.from - d, f = Math.floor(d / (3.1 * kL)) % 33
+    const pole = (L.json && L.json.pole_x_range) || [102, 138], pc = (pole[0] + pole[1]) / 2
+    lokiShow(ep, 'loop', f, st.x, top + LK_SEQ.loop.feet * kL, {top, cx: pc, flip: ep.rt.k.side < 0}); ep.at = 'vine'; ep.top = top
+    return el < T
+  }
+  if(st.t === 'ledge') {
+    // the arrival onto the branch: the branch of the drawing is where the real one lies (ledge.json, frame by frame), so he rises to it
+    const L = S.ledge, fr = L.json.frames, f = Math.min(fr.length - 1, Math.floor(el / 1000 * (L.json.fps || 24))), pole = L.json.pole_x_range, pc = (pole[0] + pole[1]) / 2
+    const lt = st.beam - fr[f].ledge_top * L.k; lokiShow(ep, 'ledge', f, st.x, lt + (fr[f].centroid[1] + 110) * L.k, {top: lt, cx: pc, flip: ep.rt.k.side < 0, cxScreen: st.x})
+    if(f >= fr.length - 1) { ep.at = 'corner'; ep.dir = ep.rt.k.side; return el < fr.length / (L.json.fps || 24) * 1000 + 250 }
+    return true
+  }
+  if(st.t === 'say') { if(!st.done) { st.done = true; if(st.line) lokiRoamSay(st.line, 5200) } return el < 900 }
+  if(st.t === 'sit') {
+    lokiShow(ep, 'dangle', Math.floor(el / 1000 * 5) % 6, st.x, st.y, {flip: false})
+    ep.img.style.clipPath = ep.rt.legsBehind ? 'inset(0 0 ' + ((340 - LK_SEQ.dangle.seat - 6) / 340 * 100).toFixed(1) + '% 0)' : ''   // legs behind the card
+    if(st.out && lkr.state === 'leaving') lokiArrived(ep); return true
+  }
+  if(st.t === 'idle') { lokiShow(ep, 'idle', Math.floor(el / 1600) % 2, st.x, st.y, {flip: false}); if(st.out && lkr.state === 'leaving') lokiArrived(ep); return true }
+  if(st.t === 'home') { lokiBackInCorner(); return false }
+  return false
+}
+function lokiArrived(ep) { ep.at = 'floor'; lkr.state = 'out'; clearTimeout(lkr.timer); lkr.timer = setTimeout(lokiComeBack, (30 + Math.random() * 30) * 1000) }
+// called by a tap on the stump, or his time out is up: he comes back the way he went, from wherever he is on it
+function lokiComeBack() {
+  const ep = lkr.ep; clearTimeout(lkr.timer); if(!ep || lkr.state === 'coming') return
+  if(reducedMotion() || lokiRoamGuard()) return lokiSnapHome()
+  if(ep.at === 'corner' && lkr.state === 'leaving') { lkr.state = 'coming'; lokiProps(ep, false); return lokiScript(ep, [{t: 'walk', from: ep.x, to: ep.rt.k.stumpX + 2, y: ep.rt.k.y}, {t: 'seq', name: 'standup', fps: 9, x: ep.rt.k.stumpX, y: ep.rt.k.y, seat: true, flip: false, frames: [5, 4, 3, 2, 1, 0]}, {t: 'home'}]) }
+  lkr.state = 'coming'; lokiScript(ep, lokiBackSteps(ep))
+}
+function lokiCall() { if(!lokiOut()) return; haptic('light'); if(lkr.state === 'coming') return; lokiComeBack() }
+// in his corner again, at the end of the way back: the walker is gone in the same moment he sits down on the stump
+function lokiBackInCorner() {
+  const ep = lkr.ep; lkr.ep = null; cancelAnimationFrame(lkr.raf); if(ep) ep.ov.remove()
+  lkr.state = 'in'; lkr.backAt = Date.now(); lkr.sitUntil = Date.now() + 20000
+  lokiRender(); lokiWalkSchedule()
+}
+// at once, with no walk: Uri scrolled, typed, opened something or left Home, or the corner moved
+function lokiSnapHome() {
+  const ep = lkr.ep; lkr.ep = null; cancelAnimationFrame(lkr.raf); clearTimeout(lkr.timer); if(ep) ep.ov.remove()
+  const was = lkr.state; lkr.state = 'in'; if(was !== 'in') { lkr.backAt = Date.now(); if(currentScreen === 'home') lokiRender() }
+}
+// a short line over his head while he is out
+function lokiRoamSay(text, ms) {
+  const ep = lkr.ep; if(!ep || !text) return
+  const old = ep.ov.querySelector('.lk-say'); if(old) old.remove()
+  const b = document.createElement('div'); b.className = 'lk-say'; b.textContent = text; b.style.visibility = 'hidden'; ep.ov.appendChild(b)
+  const r = ep.actor.getBoundingClientRect(), m = lokiRoamMeasure(), cx = r.left + r.width / 2
+  // where it covers nothing: beside his head (narrower if it must be), else above him
+  const fits = function(x, y, w, h) { return x >= 4 && x + w <= innerWidth - 4 && y >= 6 && (!m || m.free(x, y, x + w, y + h)) }
+  const tryAt = function(side) {
+    const room = side > 0 ? innerWidth - 14 - r.right : r.left - 14; if(room < 120) return null
+    b.style.maxWidth = Math.min(180, room) + 'px'; const w = b.offsetWidth, h = b.offsetHeight
+    for(const y of [r.top + 8, r.top - h / 2, r.top + 30]) { const x = side > 0 ? r.right + 4 : r.left - 4 - w; if(fits(x, y, w, h)) return [x, y] }
+    return null
+  }
+  let at = tryAt(cx < innerWidth / 2 ? -1 : 1) || tryAt(cx < innerWidth / 2 ? 1 : -1)
+  if(!at) { b.style.maxWidth = ''; at = [cx - b.offsetWidth / 2, r.top - b.offsetHeight - 4] }
+  b.style.left = Math.max(6, Math.min(innerWidth - 6 - b.offsetWidth, at[0])) + 'px'; b.style.top = Math.max(6, at[1]) + 'px'; b.style.visibility = ''
+  setTimeout(function() { if(b.isConnected) b.remove() }, ms || 3600)
+}
+// when he sets out: 15-20 seconds after Home is opened (once a visit), then a minute or two after he came back
+function lokiWalkSchedule(ms) {
+  if(lkr.state !== 'in') return
+  clearTimeout(lkr.timer)
+  if(currentScreen !== 'home' || currentTheme !== 'jungle' || !gnomeOn() || !lokiRoamOn() || reducedMotion()) return
+  const wait = ms != null ? ms : !lkr.walked ? Math.max(500, lkr.homeAt + 15000 + Math.random() * 5000 - Date.now()) : Math.max(500, lkr.backAt + (60 + Math.random() * 60) * 1000 - Date.now())
+  lkr.timer = setTimeout(function() { lokiLeave(false) }, wait)
+}
+function lokiScreenChange(screen) {
+  if(screen !== 'home') { lokiSnapHome(); clearTimeout(lkr.timer); lkr.onHome = false }
+  else if(!lkr.onHome) { lkr.onHome = true; lkr.homeAt = Date.now(); lkr.walked = false }
+}
+// for tests and for looking at him: out now (if the way is free; the guards still hold)
+async function lokiWalkNow() { lkr.walked = true; const ok = await lokiLeave(true); return ok ? lkr.ep.rt : null }
+document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') lokiSnapHome() })
+// ── his nook in the card: the stump, the lantern (lit by drop-shadow) and the mushroom; the note on the stump when he is out
+const LK_NOOK_AT = {stump: 54, fig: 65}     // x in the stage: the stump's middle, and his own middle when he stands up from it
+function lokiNookHtml(mode) {
+  const P = LK_DIR + 'props/nook/', z = LK_NOOK, sw = LK_PROP.stump[0] * z, seat = 31
+  const at = function(cls, file, x, bottom, w) { return '<img class="gn-nook ' + cls + '" alt="" draggable="false" src="' + P + file + '.webp" style="left:' + x.toFixed(1) + 'px;bottom:' + bottom.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px">' }
+  const sx = LK_NOOK_AT.stump - sw / 2, lw = LK_PROP.lantern[0] * z, nw = LK_PROP.note[0] * z, mw = LK_PROP.mushroom[0] * z
+  let h = at('gn-mush', 'mushroom', sx - mw * .62, 3, mw) + at('gn-stump', 'stump', sx, 1, sw)
+  if(mode === 'out') h += at('gn-note', 'note', LK_NOOK_AT.stump - nw - 2, seat + 1, nw) + at('gn-lamp', 'lantern', LK_NOOK_AT.stump + 4, seat - 1, lw)
+  else h += at('gn-lamp', 'lantern', sx + sw + 6, 3, lw)
+  return h
+}
+// a frame of one of his sequences, drawn in the card's stage the way the poses are (feet on its floor, his middle at x)
+function lokiStageSeqHtml(name, i, o) {
+  const m = lokiSeqReady(name); if(!m) return ''
+  o = o || {}; const S = LK_SEQ[name], im = m.imgs[i], k = m.k, cx = o.seat ? S.seatX : m.cx, fy = o.seat ? S.seatY : m.floor
+  const x = o.seat ? LK_NOOK_AT.stump : LK_NOOK_AT.fig, y = GN_SIZE.h - 3 - (o.seat ? 31 : 0)
+  return '<img class="gn-img lk-img" alt="" data-pose="' + name + ':' + i + '" src="' + im.src + '" style="left:' + (x - cx * k).toFixed(1) + 'px;top:' + (y - fy * k).toFixed(1) + 'px;width:' + (im.naturalWidth * k).toFixed(1) + 'px;height:' + (im.naturalHeight * k).toFixed(1) + 'px">'
+}
+// in the card: a few frames of a sequence over his pose (a wave, a turn), then back to it
+function lokiStagePlay(name, frames, fps, done) {
+  const st = document.querySelector('#jg-gnome .gn-stage'), m = lokiSeqReady(name); if(!st || !m || reducedMotion()) { if(done) done(); return }
+  clearTimeout(lkr.idleTimer); let i = 0
+  const step = function() {
+    const s2 = document.querySelector('#jg-gnome .gn-stage'); if(!s2 || s2 !== st || lokiOut()) return     // the card was drawn again: the play is over
+    const old = s2.querySelector('.gn-img'), tmp = document.createElement('div'); tmp.innerHTML = lokiStageSeqHtml(name, frames[i]); const n = tmp.firstChild
+    if(old && n) { old.src = n.src; old.style.cssText = n.style.cssText; old.dataset.pose = n.dataset.pose }
+    i++; if(i < frames.length) lkr.playTimer = setTimeout(step, 1000 / fps); else lkr.playTimer = setTimeout(function() { if(done) done(); else lokiRender() }, 1000 / fps)
+  }
+  clearTimeout(lkr.playTimer); step()
+}
 // what he opens with this time: one character bubble (playful or "just here"), and a line of wisdom about every second time
 let lokiOpen = null
 function lokiOpenGet(f, hour, greet) {
@@ -5388,7 +5713,7 @@ function lokiOpenGet(f, hour, greet) {
   // "poof": a third of the visits (never the first of the day, after an absence, on a day he shelters or has other news)
   const calm = !greet && !L.away && !L.away2 && !L.storm && !doneAll
   if(calm && Math.random() < .3) { const ghost = (Date.now() - (loki.ghostAt || 0) > 4 * 86400000) && Math.random() < .35; if(ghost) { loki.ghostAt = Date.now(); lokiSave() }
-    L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiFlip = true; lokiPoofIn = true; lokiGhost = ghost }
+    L.poof = lokiItem('poof', lokiPick('poof'), reducedMotion() ? 'stand' : 'peek', {poof: true}); lokiPoofIn = true; lokiGhost = ghost }   // (he pops up again in his own corner: it does not move)
   if(calm && !L.poof && lokiHelpOk()) { L.help = lokiItem('help', lokiPick('helpAsk'), 'stuck-hat', {btn: 'help'}); loki.helpAt = Date.now(); lokiSave() }
   if(calm && !L.poof && !L.help && Date.now() - (loki.giftAt || 0) >= 6 * 86400000 && Date.now() - (loki.firstAt || (loki.firstAt = Date.now())) >= 3 * 86400000 && Math.random() < .3) { loki.gift = lokiGiftPick(); lokiSave(); L.gift = lokiItem('gift', lokiPick('giftOffer'), 'gift', {btn: 'take', giftImg: rewardSrc(loki.gift), giftName: rewardName(loki.gift)}) }
   // the character bubble: "just here" now and then (likelier in the afternoon and on a busy day), else what the day asks for

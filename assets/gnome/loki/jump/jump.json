@@ -1,0 +1,38 @@
+{
+ "canvas": [
+  167,
+  288
+ ],
+ "frames": [
+  {
+   "file": "jump-01.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "jump-02.webp",
+   "air_px": -0.5,
+   "scale_applied": 0.904
+  },
+  {
+   "file": "jump-03.webp",
+   "air_px": 18.8,
+   "scale_applied": 0.86
+  },
+  {
+   "file": "jump-04.webp",
+   "air_px": 97.2,
+   "scale_applied": 0.864
+  },
+  {
+   "file": "jump-05.webp",
+   "air_px": 139.0,
+   "scale_applied": 0.831
+  },
+  {
+   "file": "jump-06.webp",
+   "air_px": 94.8,
+   "scale_applied": 0.85
+  }
+ ]
+}

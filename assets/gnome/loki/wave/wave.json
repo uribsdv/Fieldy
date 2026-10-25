@@ -1,0 +1,38 @@
+{
+ "canvas": [
+  162,
+  208
+ ],
+ "frames": [
+  {
+   "file": "wave-01.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "wave-02.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "wave-03.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "wave-04.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "wave-05.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  },
+  {
+   "file": "wave-06.webp",
+   "air_px": 0.0,
+   "scale_applied": 1.0
+  }
+ ]
+}

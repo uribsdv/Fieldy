@@ -1,0 +1,16 @@
+{
+ "canvas": [
+  400,
+  681
+ ],
+ "floor_y": 677,
+ "frames": 6,
+ "files": [
+  "standup-01.webp",
+  "standup-02.webp",
+  "standup-03.webp",
+  "standup-04.webp",
+  "standup-05.webp",
+  "standup-06.webp"
+ ]
+}
