@@ -1072,6 +1072,12 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
   box-shadow:0 6px 14px -10px rgba(10,40,20,.5);display:flex;flex-direction:column;justify-content:center;gap:3px}
 [data-theme="jungle"] .gn-bubble::after{content:'';position:absolute;right:-7px;bottom:12px;width:12px;height:12px;background:inherit;border-inline-end:1px solid rgba(45,102,52,.22);border-top:1px solid rgba(45,102,52,.22);transform:rotate(45deg) skew(8deg,8deg);border-radius:0 3px 0 0;display:none}
 [data-theme="jungle"] .gn-bubble[role="button"]{cursor:pointer}
+/* Loki's own voice: his words lean a little, in the app's own font; only what he says (the bubble, the note, the lines
+   while he is out). The font has no slanted face, so the browser slants it (about 14deg; it draws no smaller angle, which
+   is why this is italic and not oblique 8deg). A slanted letter reaches past its box, and a bubble that clamps its lines
+   clips at that box: 4px more room on each side, given back by the margin, so the width and the line breaks stay the same. */
+[data-theme="jungle"] #jg-gnome .gn-t,[data-theme="jungle"] .lk-say{font-style:italic}
+[data-theme="jungle"] #jg-gnome .gn-t{padding-inline:4px;margin-inline:-4px}
 [data-theme="jungle"] .gn-k{font-size:12.5px;font-weight:700;color:var(--gold);line-height:1.2}
 [data-theme="jungle"] .gn-t{font-size:15px;font-weight:600;line-height:1.35;color:var(--t1);text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 [data-theme="jungle"] .gn-nm{font-weight:800;color:var(--t1)}
@@ -4858,7 +4864,7 @@ function gnomeCardHtml() {
         ${out ? `<div class="gn-stage gn-empty" role="button" tabindex="0" aria-label="${tr('gn_call')}" onkeydown="if(event.key==='Enter')lokiCall()">${lokiNookHtml('out')}` : `<div class="gn-stage${poofIn ? ' poof-in' : ''}${ghost ? ' ghost' : ''}${onStump ? ' on-stump' : ''}" aria-hidden="true">${onStump ? lokiNookHtml('sit') + lokiStageSeqHtml('standup', 0, {seat: true}) : pose === 'stand' && !night && lokiSeqReady('idle') ? lokiStageSeqHtml('idle', 0) : gnPoseHtml(pose, {lamp: item.lamp || (pose === 'lantern' ? 'on' : null)})}`}${item.heart ? '<svg class="gn-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.6 1.1 4.6 2.6C12 6.1 13.6 5 15.6 5 19 5 21.1 8.4 19.6 11.8 17.5 16.4 12 21 12 21z"/></svg>' : ''}</div>
         <div class="gn-say">
           <div class="gn-bubble${voice ? ' lk' : ''}${out ? ' note' : ''}"${bubbleTag}>${out ? '<img class="gn-pin" alt="" aria-hidden="true" src="' + LK_DIR + 'props/nook/note.webp">' : ''}
-            <div class="gn-k"><b class="gn-nm">${tr('gn_name')}</b>${label ? ' · ' + label : ''}</div>
+            ${label ? `<div class="gn-k">${label}</div>` : ''}
             <div class="gn-t" aria-live="polite">${esc(text)}</div>
             ${sub ? `<div class="gn-sub">${esc(sub)}</div>` : ''}
             ${item.giftImg ? `<div class="gn-gift"><img alt="" src="${esc(item.giftImg)}"><span>${esc(item.giftName)}</span></div>` : ''}
