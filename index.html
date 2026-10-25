@@ -5395,23 +5395,28 @@ function lokiRoute(dest) {
   const cands = m.runs.filter(r => r.y > k.card.bottom + 12).sort((a, b) => (b.nav - a.nav) || (b.y - a.y))
   for(const r of cands) {
     // the vine hangs from the branch at the corner's floor; tried from the card's edge inwards, it needs a clear column down to the floor
-    for(let i = 0; i < 12; i++) {
-      const vx = s < 0 ? k.card.left + 14 + i * 4 : k.card.right - 14 - i * 4
-      const lx = vx - s * 10                                         // where he lands at the foot of the vine
-      if(s < 0 ? lx > k.x - 8 : lx < k.x + 8) break
-      if(lx - hw < r.x0 - 2 || lx + hw > r.x1 + 2) continue
+    // the vine: where it is clear all the way down and he lands right at its foot; inside the card's edge if it can, else in the margin
+    let best = null
+    for(const off of [14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 6, 2, -2, -6]) {
+      const vx = s < 0 ? k.card.left + off : k.card.right - off
+      const lx = Math.max(r.x0 + hw, Math.min(r.x1 - hw, vx - s * 10))  // where he lands at the foot of the vine
+      if(Math.abs(lx - vx) > 34 || (s < 0 ? vx > k.x - 18 : vx < k.x + 18)) continue
       if(!m.free(vx - 18, k.y - LK_H + 6, vx + 18, r.y - 2)) continue      // the slide and the climb, all the way down
       if(!m.free(Math.min(vx, k.x) - hw + 6, k.y - LK_H + 6, Math.max(vx, k.x) + hw - 6, k.y - 1)) continue   // the walk on the corner's floor
       if(!m.free(Math.min(lx, vx) - hw, r.y - LK_H + 6, Math.max(lx, vx) + hw, r.y - 1)) continue
-      // where on that floor: above the tab he is going to, as far as the floor is free
-      const want = dest ? dest.x : (r.x0 + r.x1) / 2, at = Math.max(r.x0 + hw, Math.min(r.x1 - hw, want))
-      // he sits on the edge where his legs hang over nothing written: the nearest such place to the one he wanted, if it is not too far
-      const sw = 22, up = D.seat * .219, dn = (340 - D.seat) * .219, legs = x => m.free(x - sw, r.y - up, x + sw, r.y + dn)
-      // (or, where they would, with his legs hanging down behind the card, out of sight)
-      let seatAt = null
-      for(let d = 0; d <= 40 && seatAt === null; d += 6) for(const x of [at - d, at + d]) if(seatAt === null && x >= r.x0 + hw && x <= r.x1 - hw && Math.abs(x - lx) > 30 && legs(x)) seatAt = x
-      return {k, r, vx, lx, at: seatAt !== null ? seatAt : at, sit: true, legsBehind: seatAt === null, m, dest}
+      const cost = Math.abs(lx - (vx - s * 10)) + (off < 14 ? 12 : 0)
+      if(!best || cost < best.cost) best = {vx, lx, cost}
     }
+    if(!best) continue
+    const vx = best.vx, lx = best.lx
+    // where on that floor: above the tab he is going to, as far as the floor is free
+    const want = dest ? dest.x : (r.x0 + r.x1) / 2, at = Math.max(r.x0 + hw, Math.min(r.x1 - hw, want))
+    // he sits on the edge where his legs hang over nothing written: the nearest such place to the one he wanted, if it is not too far
+    // (or, where they would, with his legs hanging down behind the card, out of sight)
+    const sw = 22, up = D.seat * .219, dn = (340 - D.seat) * .219, legs = x => m.free(x - sw, r.y - up, x + sw, r.y + dn)
+    let seatAt = null
+    for(let d = 0; d <= 40 && seatAt === null; d += 6) for(const x of [at - d, at + d]) if(seatAt === null && x >= r.x0 + hw && x <= r.x1 - hw && Math.abs(x - lx) > 30 && legs(x)) seatAt = x
+    return {k, r, vx, lx, at: seatAt !== null ? seatAt : at, sit: true, legsBehind: seatAt === null, m, dest}
   }
   return null
 }
