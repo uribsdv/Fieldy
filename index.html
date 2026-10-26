@@ -5346,6 +5346,16 @@ function lokiMeasure(img) {
   for(let y = 0; y < c.height; y++) for(let x = 0; x < c.width; x++) if(d[(y * c.width + x) * 4 + 3] > 40) { if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y }
   return {x0, y0, x1, y1}
 }
+// how far his drawing reaches to either side of his feet while he stands, turns or walks (the staff included), measured once on those
+// frames, the larger side for both (he faces either way): the room on a perch is measured with it
+function lokiHalf() {
+  if(lkr.half) return lkr.half
+  let h = 0, n = 0
+  ;['walk', 'turn', 'look', 'idle', 'wave'].forEach(function(name) { const m = lokiSeqReady(name); if(!m || !m.met) return; m.imgs.forEach(function(im, i) { const t = m.met[i]; if(!t) return; const b = lokiMeasure(im); h = Math.max(h, (t.fc - b.x0) * m.k, (b.x1 + 1 - t.fc) * m.k); n++ }) })
+  if(!n) return 24
+  const all = ['walk', 'turn', 'look', 'idle', 'wave'].every(name => lokiSeqReady(name))
+  return all ? (lkr.half = Math.ceil(h)) : Math.max(Math.ceil(h), 24)   // kept once every one of those sequences is there
+}
 // where the feet are in one frame (the middle of the lowest few rows of the drawing, and its lowest row) and the topmost point (a raised hand)
 function lokiFeet(img) {
   const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight
@@ -5518,11 +5528,11 @@ function lokiGeo() {
   lokiPerchEls(scr).forEach(function(p) {
     const r = p.el.getBoundingClientRect(); if(!r.width) return
     if(p.fixed) { perches.push({key: p.key, el: p.el, fixed: true, ok: false, why: 'no drawn way down to it yet (hop down, G2)', y: Y(r.top), ref: X(r.left), runs: [], w: r.width}); return }
-    const y = Y(r.top), x0 = Math.max(X(r.left) + 8, L + 28), x1 = Math.min(X(r.right) - 8, R - 28), runs = []
+    const hw = lokiHalf(), y = Y(r.top), x0 = Math.max(X(r.left) + 8, L + hw + 4), x1 = Math.min(X(r.right) - 8, R - hw - 4), runs = []
     let s = null, room = 0
     for(let x = x0; x <= x1 + 4; x += 4) {
-      const ok = x <= x1 && clear(x - 24, y - LK_H - 2, x + 24, y - 1)
-      if(x <= x1) { let h = 0; while(h < LK_H + 40 && clear(x - 24, y - h - 6, x + 24, y - 1)) h += 6; room = Math.max(room, h) }
+      const ok = x <= x1 && clear(x - hw, y - LK_H - 2, x + hw, y - 1)
+      if(x <= x1) { let h = 0; while(h < LK_H + 40 && clear(x - hw, y - h - 6, x + hw, y - 1)) h += 6; room = Math.max(room, h) }
       if(ok && s === null) s = x
       if(!ok && s !== null) { if(x - 4 - s >= 16) runs.push([s, x - 4]); s = null }
     }
@@ -6135,7 +6145,7 @@ function lokiLabDraw() {
     g.perches.forEach(function(p) {
       if(p.fixed) return
       h += '<div class="lk-lab-p' + (p.ok ? ' ok' : '') + '" style="left:' + p.ref.toFixed(1) + 'px;top:' + (p.y - 2).toFixed(1) + 'px;width:' + p.w.toFixed(1) + 'px"><b>' + (p.ok ? '✓ ' : '✕ ') + p.key + '</b>' + (p.ok ? '' : ' <i>rejected: ' + esc(p.why) + '</i>') + '</div>'
-      p.runs.forEach(r => { h += '<div class="lk-lab-run" style="left:' + (r[0] - 24).toFixed(1) + 'px;top:' + (p.y - LK_H - 2).toFixed(1) + 'px;width:' + (r[1] - r[0] + 48).toFixed(1) + 'px;height:' + (LK_H + 2) + 'px"></div>' })
+      p.runs.forEach(r => { h += '<div class="lk-lab-run" style="left:' + (r[0] - lokiHalf()).toFixed(1) + 'px;top:' + (p.y - LK_H - 2).toFixed(1) + 'px;width:' + (r[1] - r[0] + 2 * lokiHalf()).toFixed(1) + 'px;height:' + (LK_H + 2) + 'px"></div>' })
     })
     g.unused.forEach(v => { h += '<div class="lk-lab-v no" style="left:' + (v.vx - 18).toFixed(1) + 'px;top:' + v.drawTop.toFixed(1) + 'px;height:' + (v.bot - v.drawTop).toFixed(1) + 'px"><b>✕ ' + v.key + '</b></div>' })
     g.vines.forEach(v => { h += '<div class="lk-lab-v" style="left:' + (v.vx - 18).toFixed(1) + 'px;top:' + v.top.toFixed(1) + 'px;height:' + (v.bot - v.top).toFixed(1) + 'px"><b>' + v.key + '</b></div>' })
