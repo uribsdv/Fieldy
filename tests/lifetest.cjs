@@ -23,8 +23,7 @@ async function boot({theme='jungle',rm=false,q='?gnomeHour=12',W=390}={}){const 
   await pg.route('**/*',r=>{const u=r.request().url();(u.startsWith(B)||/fonts\.(googleapis|gstatic)\.com/.test(u))?r.continue():r.abort()})
   await pg.goto(B);await pg.evaluate(([s,t,d])=>{localStorage.clear();localStorage.setItem('fieldy_v2',JSON.stringify(s));localStorage.setItem('fieldy_theme',t);localStorage.setItem('fieldy_gnome_wave',d)},[seededState(),theme,today()])
   await pg.goto(B+q);await pg.waitForTimeout(400);if(theme==='jungle'&&!rm)await pg.waitForFunction(()=>!!lokiSeqReady('ledge')&&!!lkr.geo,null,{timeout:20000});await pg.evaluate(()=>{lkr.lastKey=0;clearTimeout(lkr.timer)});return pg}
-// a Home where the trunk joins his nook and the flow of tasks. Until vine-tile.png (the trunk's repeating piece) is there, the way is
-// there only when the briefing card is short enough for one trunk drawing: the briefing's words change from load to load, so load again
+// a Home where the trunk joins his nook and the flow of tasks: it should be there on every load, whatever the briefing card's height
 let noRoute=[]
 async function bootRoute(o={}){for(let i=0;i<12;i++){const pg=await boot(o);const why=await pg.evaluate(()=>{lokiLifeSync();const g=lkr.geo;return g.vines.some(v=>v.key==='nook>flow')?'':((g.tried.find(t=>t.key==='nook>flow')||{}).why||'no nook>flow')});if(!why)return pg;noRoute.push(why);await pg.context().close()}return null}
 // the trunk's and the lip's ink (alpha > 40) inside a rectangle on the screen, sampled every pixel through the drawn image
@@ -55,15 +54,28 @@ ok(!P('focus').ok&&/room above it \d+px, he needs 105/.test(P('focus').why),'the
 ok(!P('nav').ok&&/G2/.test(P('nav').why),'the nav: no drawn way down to it yet: '+P('nav').why)
 retired('a vine joins his corner and the flow of tasks','the thin vine is no longer a way: the way out of the nook is the trunk beside the briefing card (checked below)')
 await pg.context().close();pg=await bootRoute()
-ok(!!pg,'the trunk joins his nook and the flow of tasks (on a Home with a short enough briefing card, while vine-tile.png is missing)'+(noRoute.length?' — loads without it: '+noRoute.length+' ('+[...new Set(noRoute)].join(' / ')+')':''))
-ok(noRoute.every(w=>/vine-tile\.png/.test(w)),'where there is no way, the only reason is the missing repeating piece of the trunk: '+[...new Set(noRoute)].join(' / '))
+ok(!!pg&&noRoute.length===0,'the trunk joins his nook and the flow of tasks, on the first load'+(noRoute.length?' — loads without it: '+noRoute.length+' ('+[...new Set(noRoute)].join(' / ')+')':''))
+retired('where there is no way, the only reason is the missing repeating piece of the trunk','vine-tile.png is here: the way should always be there (checked above, and over 24 loads below)')
 if(!pg)pg=await boot()
 r=await pg.evaluate(()=>{const g=lkr.geo,v=g.vines.find(v=>v.key==='nook>flow'),c=document.getElementById('jg-gnome').getBoundingClientRect(),o=document.querySelector('[data-loki-perch="flow"]').getBoundingClientRect(),O=lkr.layer.getBoundingClientRect();return v?{margin:Math.round(c.left-o.left),gap:getComputedStyle(document.getElementById('jg-gnome')).marginLeft,core:+(v.vx-g.nodes.nook.card.l).toFixed(1),top:Math.round(v.drawTop+O.top-c.top),roots:Math.round(v.bot+O.top-o.top),sv:v.sv,core37:+(37*v.sv).toFixed(1),pole:+(36*lokiSeqReady('ledge').k).toFixed(1),lip:!!document.querySelector('#lk-roam .lk-branch'),cut:v.lip.flip?v.lip.l<=g.L+.5:v.lip.l+v.lip.w>=g.R-.5,flat:document.querySelectorAll('#lk-roam .lk-trunk').length}:null})
 ok(r&&r.margin>0&&r.gap==='36px','the briefing card stands in a wider margin on the nook\'s side (36px more than the other cards): '+JSON.stringify(r&&{margin:r.margin,gap:r.gap}))
 ok(r&&Math.abs(r.core)<=3,'the trunk leans on the briefing card\'s side (its core at the card\'s edge): '+(r&&r.core))
-ok(r&&r.top===0&&r.roots===0,'it reaches from the top edge of the flow of tasks (its roots) to the briefing card\'s top edge: '+JSON.stringify(r&&{top:r.top,roots:r.roots}))
+ok(r&&r.top>=-1&&r.top<=12&&r.roots===0,'it reaches from the top edge of the flow of tasks (its roots) up to the briefing card\'s top edge (cut behind the lip there): '+JSON.stringify(r&&{top:r.top,roots:r.roots}))
 ok(r&&r.lip&&r.cut,'the moss lip lies over its top, its cut end at the screen\'s edge')
-ok(r&&Math.abs(r.core37/r.pole-1.17)<.02,'one scale: its core about as thick as the pole he climbs ('+(r&&r.core37)+'px against '+(r&&r.pole)+'px)')
+ok(r&&Math.abs(r.core37/r.pole-.98)<.02,'one scale: its core about as thick as the pole he climbs ('+(r&&r.core37)+'px against '+(r&&r.pole)+'px)')
+// the pieces: vine-trunk from row 474 down (roots on the flow of tasks), whole tiles of vine-tile.png above it, each one's bottom on the next one's top
+r=await pg.evaluate(()=>{const v=lkr.geo.vines.find(v=>v.key==='nook>flow');if(!v)return null;const P=v.pieces,b=P[P.length-1],T=LK_TRUNK,t=T.tile;return {tile:!!t.rows&&t.w===303&&t.h===342,bottom:/vine-trunk/.test(b.file)&&Math.abs(b.from-(b.top+474*v.sv))<.01&&Math.abs(b.top+b.h-v.bot)<.01,tiles:P.slice(0,-1).every(q=>/vine-tile/.test(q.file)&&Math.abs(q.from-q.top)<.01&&Math.abs(q.h-342*v.sv)<.01),joins:P.slice(0,-1).map((q,i)=>+(q.top+q.h-P[i+1].from).toFixed(3)),n:P.length,cut:v.drawTop,lip:[v.lip.t+44*v.lip.h/223,v.lip.t+112*v.lip.h/223],sv:v.sv,tsv:[b.w/303,P[0].w/303]}})
+ok(r&&r.tile,'vine-tile.png is there (303x342)')
+ok(r&&r.bottom,'the trunk is shown from its row 474 down, its roots on the flow of tasks (its thin curled top is not used)')
+ok(r&&r.tiles&&r.n>=2,'above it whole tiles only ('+(r&&r.n-1)+'), at the trunk\'s scale: '+JSON.stringify(r&&r.tsv))
+ok(r&&r.joins.every(d=>Math.abs(d)<.01),'each tile\'s bottom sits exactly on the row above the next piece (no gap, no overlap): '+JSON.stringify(r&&r.joins))
+ok(r&&r.cut>=r.lip[0]&&r.cut<=r.lip[1],'the top cut is on a row behind the lip\'s solid band: '+JSON.stringify(r&&{cut:r.cut,band:r.lip}))
+// the cut row, pixel by pixel: every pixel of the trunk on it is behind a solid pixel of the lip
+r=await pg.evaluate(async()=>{const box=document.querySelector('#lk-roam .lk-vinebox[data-vine="nook>flow"]'),lipIm=document.querySelector('#lk-roam .lk-branch');if(!box||!lipIm)return {err:'missing'};const load=async im=>{await im.decode().catch(()=>{});const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const g=c.getContext('2d');g.drawImage(im,0,0);return {d:g.getImageData(0,0,c.width,c.height).data,w:c.width,h:c.height,R:im.getBoundingClientRect(),fl:/scaleX\(-1\)/.test(im.style.transform)}}
+  const y=box.getBoundingClientRect().top+.5,L=await load(lipIm),lb=lipIm.parentElement.getBoundingClientRect();let ink=0,bare=0
+  for(const im of box.querySelectorAll('img')){const p=im.parentElement.getBoundingClientRect();if(y<p.top||y>=p.bottom)continue;const I=await load(im),v=Math.floor((y-I.R.top)/I.R.height*I.h);for(let x=Math.ceil(I.R.left)+.5;x<I.R.right;x++){let u=Math.floor((x-I.R.left)/I.R.width*I.w);if(I.fl)u=I.w-1-u;if(I.d[(v*I.w+u)*4+3]<=40)continue;ink++;let a=0;if(x>=lb.left&&x<lb.right&&y>=L.R.top&&y<L.R.bottom){let lu=Math.floor((x-L.R.left)/L.R.width*L.w);if(L.fl)lu=L.w-1-lu;const lv=Math.floor((y-L.R.top)/L.R.height*L.h);a=L.d[(lv*L.w+lu)*4+3]}if(a<=200)bare++}}
+  return {ink,bare}})
+ok(r&&r.ink>0&&r.bare===0,'no cut edge in view: on the cut row every pixel of the trunk is behind the lip: '+JSON.stringify(r))
 r=await pg.evaluate(()=>[...document.querySelectorAll('#screen-home > #lk-roam .lk-trunk')].map(im=>[im.style.width,im.style.height,im.naturalWidth,im.naturalHeight]).map(([w,h,nw,nh])=>Math.abs(parseFloat(w)/nw-parseFloat(h)/nh)))
 ok(r.length>=1&&r.every(d=>d<.001),'the trunk is never stretched (the same scale across and down): '+r.map(d=>d.toFixed(4)))
 // no ink of the trunk or the lip over anything readable or touchable, the middle of the mushroom's cap, the stump, the lantern or the note
@@ -72,6 +84,9 @@ r=await pg.evaluate(([src,rects])=>(0,eval)(src)(rects),[INK_IN,r]);ok(r.length=
 r=await pg.evaluate(()=>{const g=lkr.geo;return {tried:g.tried.filter(t=>!t.deco).map(t=>t.key+': '+t.why),thin:g.decos.length}})
 ok(r.tried.some(t=>/^flow>peek: /.test(t)),'between the flow of tasks and the peek: no way unless one passes every rule (the reason is given): '+r.tried.find(t=>/^flow>peek/.test(t)))
 ok(r.tried.some(t=>/^focus>flow: focus itself is rejected/.test(t)),'the briefing card\'s top is not climbed over (no room above it to stand)')
+// the way on 24 loads: three widths, four hours (the briefing card short and tall), twice each
+{const miss=[],hs=new Set();for(const W of [360,390,412])for(const h of [8,12,17,20])for(let i=0;i<2;i++){const p=await boot({q:'?gnomeHour='+h,W});const x=await p.evaluate(()=>{lokiLifeSync();return {ok:lkr.geo.vines.some(v=>v.key==='nook>flow'),why:(lkr.geo.tried.find(t=>t.key==='nook>flow')||{}).why,h:document.getElementById('jg-gnome').offsetHeight}});hs.add(x.h);if(!x.ok)miss.push(W+'/'+h+': '+x.why);await p.context().close()}
+ ok(miss.length===0,'the way is there on all 24 loads (briefing card heights '+[...hs].sort().join(', ')+'): '+miss.join(' | '))}
 r=await pg.evaluate(()=>({can:lokiCan('edgeSit',lkr.seq&&Object.fromEntries(Object.keys(lkr.seq).filter(k=>lkr.seq[k].done).map(k=>[k,1]))),canWith:lokiCan('edgeSit',{sitedge:1}),hop:lokiCan('hopUp',{}),walk:lokiCan('walk',{walk:1})}))
 ok(!r.can&&r.canWith&&!r.hop&&r.walk,'a verb is there only with its frames (sitting on an edge, a jump: not yet; the code takes them from the manifest when they come): '+JSON.stringify(r))
 r=await pg.evaluate(async()=>(await (await fetch('assets/gnome/loki/manifest.json')).json()).extra);ok(r&&typeof r==='object'&&!Object.keys(r).length,'the manifest of frames still to come is there, and empty')
