@@ -4847,6 +4847,7 @@ function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderH
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
 function gnomeAfterRender() {
   const card = document.getElementById('jg-gnome'); if(!card) return
+  lokiTopicsSoon()
   if(gnObs) gnObs.disconnect()
   if(window.IntersectionObserver) { gnObs = new IntersectionObserver(function(es){ gnVisible = es[0].isIntersecting; card.classList.toggle('gn-off', !gnVisible) }, {threshold: .1}); gnObs.observe(card) }
   const img = card.querySelector('.gn-img')
@@ -5054,7 +5055,7 @@ function lokiHardStreakItem() {
 let lokiQueue = []
 function lokiOnMood(mood) {
   if(!gnomeOn()) return
-  if(mood === 'overwhelmed') { loki.hardDays[getToday()] = 1; Object.keys(loki.hardDays).sort().slice(0, -10).forEach(k => delete loki.hardDays[k]); lokiSave() }
+  if(mood === 'overwhelmed') { loki.hardDays[getToday()] = 1; Object.keys(loki.hardDays).sort().slice(0, -10).forEach(k => delete loki.hardDays[k]); lokiSave(); lokiHard3() }
   if(lokiOut()) { LOKI.react('mood', {mood}); return }
   const q = [lokiMoodItem(mood)], h = mood === 'overwhelmed' ? lokiHardStreakItem() : null
   if(h) q.push(h)
@@ -5351,7 +5352,7 @@ const LK_TIME = {first: [15, 20], out: [300, 900], dwell: [45, 150], gap: 45, ho
 const LK_SKIP = '.vn,.vine-deco,.jg-corner,#lk-roam,#jg-gnome .gn-stage,.gs-win,.jg-branch-v'   // drawings, not content: he may stand in front of them
 const LK_LAB = (function(){ try { return new URLSearchParams(location.search).get('loki-lab') === '1' } catch(e) { return false } })()
 const lkr = {state: 'in', ep: null, timer: 0, raf: 0, lastKey: 0, homeAt: 0, walked: false, backAt: 0, sitUntil: 0, sitTimer: 0, idleTimer: 0, playTimer: 0,
-  seq: {}, layer: null, geo: null, outUntil: 0, lastMove: 0, moveTimer: 0, recent: [], want: null, why: '', slow: 1, trace: null, extra: null}
+  seq: {}, layer: null, geo: null, outUntil: 0, lastMove: 0, moveTimer: 0, recent: [], want: null, why: '', slow: 1, trace: null, extra: null, rq: [], rqT: 0, lastReact: 0}
 function lokiRoamOn() { try { return localStorage.getItem('fieldy_loki_roam') !== '0' } catch(e) { return true } }
 function setLokiRoam(on) { try { localStorage.setItem('fieldy_loki_roam', on ? '1' : '0') } catch(e) {} if(!on) lokiSnapHome(); renderCurrentScreen(); if(on) lokiWalkSchedule() }
 function lokiOut() { return lkr.state !== 'in' }
@@ -5779,7 +5780,7 @@ function lokiVineClear(clear, vx, side, top, bot, sv, topFloor) {
   return clear(vx - e.ll, top - e.up, vx + e.lr, top - 1) && clear(vx - Math.max(e.l, h), top + 1, vx + Math.max(e.r, h), bot - 2)
 }
 // how far above a floor the top of him is when he hangs on a vine just after the jump to it (the climb's highest point from a floor)
-function lokiGrabTop() { const J = lokiSeqReady('jump'), P = lokiSeqReady('loop'); if(!J || !P) return LK_H * 2; const jf = (J.json && J.json.frames) || []; return (jf[5] && jf[5].air_px || 95) * J.k + LK_SEQ.loop.feet * P.k }
+function lokiGrabTop() { const J = lokiSeqReady('jump'), P = lokiSeqReady('loop'); if(!J || !P) return LK_H * 2; return lokiCatchH(J) + LK_SEQ.loop.feet * P.k }
 function lokiVineClimbable(v) {   // room on it for the jump to it, at least a little of the climb, and the arrival over the edge
   const L = lokiSeqReady('ledge'), J = lokiSeqReady('jump'), P = lokiSeqReady('loop'); if(!L || !J || !P) return true
   if(v.topFloor) return v.bot - v.top >= 12
@@ -5820,8 +5821,8 @@ function lokiVineSteps(c, v, dir) {
   const up = lokiNode(v.up), dn = lokiNode(v.down), s = [], upDx = v.upX - up.ref, vDx = v.downX - dn.ref
   if(v.topFloor) {   // from a floor at the top (the nook): a jump to the vine and off it at both ends
     const sv = lokiVineHold(v)
-    if(dir < 0) { s.push(...lokiWalkSteps(c, v.up, upDx), ...lokiFaceSteps(c, v.up, v.side)); s.push({t: 'grab', vine: v.key, v: sv, at: 'top', dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: -1}, {t: 'grab', vine: v.key, v: sv, rev: true}); c.node = v.down; c.dx = vDx }
-    else { s.push(...lokiWalkSteps(c, v.down, vDx), ...lokiFaceSteps(c, v.down, v.side)); s.push({t: 'grab', vine: v.key, v: sv, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'grab', vine: v.key, v: sv, at: 'top', rev: true}); c.node = v.up; c.dx = upDx }
+    if(dir < 0) { s.push(...lokiWalkSteps(c, v.up, upDx), ...lokiFaceSteps(c, v.up, v.side)); s.push({t: 'grab', vine: v.key, v: sv, at: 'top', short: true, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: -1}, {t: 'grab', vine: v.key, v: sv, rev: true}); c.node = v.down; c.dx = vDx }
+    else { s.push(...lokiWalkSteps(c, v.down, vDx), ...lokiFaceSteps(c, v.down, v.side)); s.push({t: 'grab', vine: v.key, v: sv, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'grab', vine: v.key, v: sv, at: 'top', short: true, rev: true}); c.node = v.up; c.dx = upDx }
     c.face = v.side
     return s
   }
@@ -5891,6 +5892,12 @@ function lokiTrapezoid(D, v, acc) {
 // the loop of the climb and the arrival over the edge, placed on a vine (its line, its beam)
 function lokiClimbFeet(ep) { return LK_SEQ.loop.feet * ep.seqs.loop.k }
 function lokiGrabH(ep) { const J = ep.seqs.jump, jf = (J.json && J.json.frames) || []; return (jf[5] && jf[5].air_px || 95) * J.k }
+// from the nook's floor the jump is as short as its frames allow: jump-01, 02 and 03 (the crouch and the take-off), then the catch
+// (jump-06) at the take-off's height, the lowest a catch can be (lower, he would hang with his feet still on the floor). The high
+// part of the jump (jump-04, 05) is left out: he does not go up only to climb down again
+const LK_SHORT_JUMP = [0, 1, 2, 5]
+function lokiShortAir(J) { const jf = (J && J.json && J.json.frames) || []; return LK_SHORT_JUMP.map((f, i) => i === LK_SHORT_JUMP.length - 1 ? Math.max(0, ...LK_SHORT_JUMP.slice(0, -1).map(g => jf[g] && jf[g].air_px || 0)) : (jf[f] && jf[f].air_px || 0)) }
+function lokiCatchH(J) { const a = lokiShortAir(J); return a[a.length - 1] * J.k }
 // one step at `el` ms into it; true while it is still going
 function lokiStep(ep, st, el) {
   const S = ep.seqs
@@ -5931,9 +5938,11 @@ function lokiStep(ep, st, el) {
   if(st.t === 'grab') {
     // a jump up to the vine (its frames rise by the drawing's own air), or the same frames the other way round, down off it
     const v = lokiVineLive(st); if(!v) return false
-    const J = S.jump, jf = (J.json && J.json.frames) || [], fps = 9, n = 6, p = Math.min(n - 1, Math.floor(el / 1000 * fps)), f = st.rev ? n - 1 - p : p
-    const air = i => (jf[i] && jf[i].air_px || 0) * J.k, u = Math.min(1, el / 1000 * fps - p), nf = st.rev ? Math.max(0, f - 1) : Math.min(n - 1, f + 1)
-    const y = (st.at === 'top' ? v.top : v.bot) - (air(f) + (air(nf) - air(f)) * (p >= n - 1 ? 0 : u))
+    const J = S.jump, jf = (J.json && J.json.frames) || [], fps = 9
+    const fr = st.short ? LK_SHORT_JUMP : [0, 1, 2, 3, 4, 5], ai = st.short ? lokiShortAir(J) : fr.map(i => jf[i] && jf[i].air_px || 0), n = fr.length
+    const p = Math.min(n - 1, Math.floor(el / 1000 * fps)), q = st.rev ? n - 1 - p : p, f = fr[q]
+    const air = j => ai[j] * J.k, u = Math.min(1, el / 1000 * fps - p), nq = st.rev ? Math.max(0, q - 1) : Math.min(n - 1, q + 1)
+    const y = (st.at === 'top' ? v.top : v.bot) - (air(q) + (air(nq) - air(q)) * (p >= n - 1 ? 0 : u))
     ep.dir = v.side; lokiShow(ep, 'jump', f, v.vx, y, {flip: v.side < 0, cx: v.handX != null ? v.handX : undefined})   // the raised hand on the vine
     if(p >= n - 1 && el >= n / fps * 1000) { if(st.rev) { const top = st.at === 'top'; ep.node = top ? v.up : v.down; ep.dx = (top ? v.upX : v.downX) - lokiNode(ep.node).ref; ep.dir = v.side; ep.face = v.side } return false }
     return true
@@ -5941,7 +5950,7 @@ function lokiStep(ep, st, el) {
   if(st.t === 'climb') {
     // the loop of the climb, seen from behind; its frames follow the distance (the drawing climbs about 3.1px a frame), the vine stays put
     const v = lokiVineLive(st); if(!v) return false
-    const L = S.loop, kL = L.k, lowTop = v.bot - lokiGrabH(ep) - lokiClimbFeet(ep), highTop = v.topFloor ? v.top - lokiGrabH(ep) - lokiClimbFeet(ep) : v.top + 67.1 * S.ledge.k + (v.ledgeDy || 0), D = lowTop - highTop; if(D <= 0) return false
+    const L = S.loop, kL = L.k, lowTop = v.bot - lokiGrabH(ep) - lokiClimbFeet(ep), highTop = v.topFloor ? v.top - lokiCatchH(S.jump) - lokiClimbFeet(ep) : v.top + 67.1 * S.ledge.k + (v.ledgeDy || 0), D = lowTop - highTop; if(D <= 0) return false
     const T = D / LK_CLIMB * 1000, d = Math.min(D, el / 1000 * LK_CLIMB), top = st.dir > 0 ? lowTop - d : highTop + d
     const f0 = Math.floor(d / (3.1 * kL)) % 33, f = st.dir > 0 ? f0 : (33 - f0) % 33
     const pole = (L.json && L.json.pole_x_range) || [102, 138], pc = (pole[0] + pole[1]) / 2
@@ -6116,6 +6125,7 @@ function lokiWalkSchedule(ms) {
 }
 // another screen: if he is out he stays where he is (stopped, Home is not in front) and is there when Home comes back
 function lokiScreenChange(screen) {
+  if(screen === 'sites') lokiOnSites()
   if(screen !== 'home') { clearTimeout(lkr.timer); lkr.onHome = false; if(lkr.state === 'in') return }
   else if(!lkr.onHome) { lkr.onHome = true; lkr.homeAt = Date.now(); if(lkr.state === 'in') lkr.walked = false; else if(Date.now() >= lkr.outUntil) setTimeout(function() { if(lkr.state === 'perched') lokiComeBack() }, 1500) }
 }
@@ -6131,6 +6141,8 @@ const LK_REACT = {
   badge:         {go: d => d.k === 'tasks' ? 'flow' : 'nav', line: d => lokiDestLine(d)},
   gardenNew:     {go: 'garden', line: () => lokiPick('gardenNew')},
   stuck:         {go: 'nav', line: d => lokiPick('stuck', {site: d.site})},
+  // the topics with no event of their own (LK_TOPIC): they wait in the queue below, wherever he is
+  evening: {queue: true}, emptyDay: {queue: true}, field: {queue: true}, hard3: {queue: true}, jester: {queue: true},
   // the journey (claude/game-a), when it is part of Home: the places it names
   'game:dayFull':  {go: 'focus'}, 'game:weekFull': {go: 'focus'}, 'game:scroll': {go: 'journey'}, 'game:rest': {go: 'side'}, 'game:ach': {}, 'game:hard': {go: 'focus'}
 }
@@ -6147,12 +6159,92 @@ function lokiGoTo(target, o) {
 function lokiSayIt(text) { if(!text) return false; if(lkr.ep) { lokiRoamSay(text, 5200); return true } lokiQueue = [lokiItem('say', text, 'stand')]; gnIdx = 0; if(currentScreen === 'home') lokiRender(); return true }
 // true when he handled it out here (the caller then leaves his card alone); false while he is on his stump
 function lokiReact(evt, data) {
-  const e = LK_REACT[evt]; if(!e || !lkr.ep) return false
+  const e = LK_REACT[evt]; if(!e) return false
+  if(e.queue) return lokiReactQueue(evt, data)
+  if(!lkr.ep) return false
   data = data || {}
   const line = e.line ? e.line(data) : null, go = typeof e.go === 'function' ? e.go(data) : e.go
+  lkr.lastReact = Date.now()
   if(go && lkr.state === 'perched' && lokiGoTo(go, {line})) return true
   if(line) lokiRoamSay(line, 5200)
   return true
+}
+// ── the topics with no event of their own, and when each is due (the lines are the banks' own, unchanged):
+// evening   from 19:00, once an evening (he sleeps from 22:00)
+// emptyDay  the first opening of a day after a day with no task closed (a streak that broke is one), once a day
+// field     coming to the sites screen with a site stuck a week or more, once a day (said on Home, where he is)
+// hard3     with the line for three heavy days in a row (hardStreak, unchanged), once a streak
+// jester    a light line while he sits on his stump, once an hour at most
+// (courage waits for the journey of claude/game-a, which is not in main: there is no difficulty to start a task at yet)
+// They wait in one queue: one at a time, 45 seconds at least after anything else he reacted to, only while Home is in front
+// and nothing else is being said or typed; out on Home he says it beside him, on his stump in his card (always, in reduced
+// motion). Never a push notification.
+const LK_TOPIC = {
+  evening:  {bank: 'evening', pose: 'listen', ttl: 'day'},
+  emptyDay: {bank: 'emptyDay', pose: 'listen', ttl: 'day'},
+  field:    {bank: 'field', pose: 'stand', ttl: 'day'},
+  hard3:    {bank: 'hard3', pose: 'listen', ttl: 86400000},
+  jester:   {bank: 'jester', pose: 'laugh', ttl: 600000, sitting: true}
+}
+const LK_REACT_GAP = 45000
+function lokiReactQueue(evt, data) {
+  const T = LK_TOPIC[evt]; if(!T || !gnomeOn()) return false
+  if(!lkr.rq.some(x => x.evt === evt)) { const d = new Date(); d.setHours(24, 0, 0, 0); lkr.rq.push({evt, data: data || {}, exp: T.ttl === 'day' ? +d : Date.now() + T.ttl}) }
+  lokiReactSoon(500); return true
+}
+function lokiReactSoon(ms) { clearTimeout(lkr.rqT); lkr.rqT = setTimeout(lokiReactTick, ms) }
+// sitting on his stump: just back in his corner, or a pose he sits in
+function lokiSitting() { const el = document.getElementById('jg-gnome'); return !!el && !lokiOut() && (Date.now() < lkr.sitUntil || /^(sit-|fishing)/.test(el.dataset.pose || '')) }
+// he can say it now: Home in front, nothing open, Uri not typing, awake, and nothing else being said (out: on a perch, not moving)
+function lokiReactFree() {
+  if(currentScreen !== 'home' || document.visibilityState !== 'visible' || !gnomeOn()) return false
+  const mc = document.getElementById('modal-container'); if(mc && mc.children.length) return false
+  const a = document.activeElement; if(a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return false
+  if(Date.now() - lkr.lastKey < 4000) return false
+  const h = gnHour(); if(h >= 22 || h < 5) return false
+  if(lkr.ep) return lkr.state === 'perched' && !document.querySelector('#lk-roam .lk-say')
+  return !lokiQueue.some(Boolean) && !gnFull && !focusEditOpen && !taskReviewOpen && !briefingBusy
+}
+function lokiReactTick() {
+  const now = Date.now(); lkr.rq = lkr.rq.filter(x => x.exp > now && (!LK_TOPIC[x.evt].sitting || lokiSitting()))
+  if(!lkr.rq.length) return
+  const wait = LK_REACT_GAP - (now - lkr.lastReact)
+  if(wait > 0 || !lokiReactFree()) return lokiReactSoon(Math.max(wait, 3000))
+  const x = lkr.rq.shift(), T = LK_TOPIC[x.evt], line = lokiPick(T.bank, x.data)
+  lkr.lastReact = now; lkr.lastTopic = {evt: x.evt, line, at: now}
+  if(lkr.ep) lokiRoamSay(line, 5200)
+  else { lokiQueue = [lokiItem('react', line, T.pose)]; gnIdx = 0; gnFull = false; lokiRender() }
+  if(lkr.rq.length) lokiReactSoon(LK_REACT_GAP)
+}
+// which topics are due now (on Home, every half minute and when his card is drawn)
+function lokiTopicsDue() {
+  if(!gnomeOn() || currentScreen !== 'home') return
+  const today = getToday(), y = getTodayPlus(-1), r = loki.react = loki.react || {}, h = gnHour(), now = Date.now()
+  if(h >= 19 && h < 22 && r.evening !== today) { r.evening = today; lokiSave(); LOKI.react('evening') }
+  if(r.open !== today) {
+    r.open = today
+    const all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later], d0 = new Date(y + 'T00:00:00'), d1 = new Date(today + 'T00:00:00')
+    const closedY = state.lastStreakDate === y || all.some(t => t.done && t.completedAt && t.completedAt >= +d0 && t.completedAt < +d1)
+    if(state.lastStreakDate && state.lastStreakDate !== today && !closedY && r.emptyDay !== today) { r.emptyDay = today; LOKI.react('emptyDay') }
+    lokiSave()
+  }
+  if(lokiSitting() && now - (r.jesterAt || 0) >= 3600000) { r.jesterAt = now; lokiSave(); LOKI.react('jester') }
+}
+function lokiTopicsSoon() { clearTimeout(lkr.topicT); lkr.topicT = setTimeout(lokiTopicsDue, 800) }
+setInterval(lokiTopicsDue, 30000)
+// the sites screen opened: a site stuck a week or more is something for him to say, once a day
+function lokiOnSites() {
+  if(!gnomeOn()) return
+  const today = getToday(), r = loki.react = loki.react || {}; if(r.field === today) return
+  if(priorityStuckSites().some(st => daysStuck(st) >= 7)) { r.field = today; lokiSave(); LOKI.react('field') }
+}
+// three heavy days in a row: hard3 joins the existing line, once for the streak (it is known by its first day)
+function lokiHard3() {
+  const day = n => getTodayPlus(-n), hd = loki.hardDays || {}
+  if(!(hd[day(0)] && hd[day(1)] && hd[day(2)])) return
+  let n = 2; while(hd[day(n + 1)]) n++
+  const run = day(n); if(loki.hard3Run === run) return
+  loki.hard3Run = run; lokiSave(); LOKI.react('hard3')
 }
 Object.assign(LOKI, {goTo: lokiGoTo, say: lokiSayIt, react: lokiReact})
 // ── the lab (?loki-lab=1): the map of perches and vines, and each movement by itself
