@@ -1149,9 +1149,9 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .lk-props.on{opacity:1}
 [data-theme="jungle"] .lk-vinebox{position:absolute;left:0;width:100%;overflow:hidden;pointer-events:none}
 [data-theme="jungle"] .lk-lipbox{position:absolute;overflow:hidden;pointer-events:none}
-/* the trunk's margin: beside the briefing card, on the nook's side, the way he leaves the nook (only while he lives on Home); 56px is the
-   least in which the trunk's leaves keep off the mushroom and the screen's edge at 360, 390 and 412 */
-[data-theme="jungle"] #screen-home:has(> #lk-roam) #jg-gnome{margin-left:var(--lk-trunk-gap,56px)}
+/* the trunk's margin: beside the briefing card, on the nook's side, the way he leaves the nook (only while he lives on Home): about the
+   least in which the trunk's leaves keep off the middle of the mushroom's cap and the screen's edge, and he jumps to it from the nook's floor, at 360, 390 and 412 */
+[data-theme="jungle"] #screen-home:has(> #lk-roam) #jg-gnome{margin-left:var(--lk-trunk-gap,36px)}
 [data-theme="jungle"] .lk-vine,[data-theme="jungle"] .lk-branch{position:absolute;display:block;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(10,30,15,.3))}
 [data-theme="jungle"] .lk-spr{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.3))}
 [data-theme="jungle"] .lk-spr.lk-g{inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);box-sizing:border-box;padding:12px;filter:drop-shadow(0 0 3px rgba(214,232,255,.95)) drop-shadow(0 0 8px rgba(160,190,255,.7));animation:gn-glint 2.4s ease-in-out infinite}
@@ -5401,10 +5401,8 @@ function lokiProfile(img) {
   return out
 }
 function lokiLoadProps() {
-  if(!lkr.propsP) lkr.propsP = Promise.all([LK_TRUNK, LK_THIN].map(P => lokiImg(LK_DIR + P.file).then(im => { if(im) P.prof = lokiProfile(im) }))).then(function() {
-    // a drawing made to repeat for more length (vine-tile.png), if it is there
-    return fetch(LK_DIR + LK_THIN.tile, {method: 'HEAD'}).then(r => { LK_THIN.hasTile = r.ok }).catch(() => { LK_THIN.hasTile = false })
-  })
+  // the trunk, its repeating piece (vine-tile.png: more length for the trunk, one piece above another, if it is there) and the thin vine
+  if(!lkr.propsP) lkr.propsP = Promise.all([LK_TRUNK, LK_TRUNK.tile, LK_THIN].map(P => lokiImg(LK_DIR + P.file).then(im => { if(im) { P.prof = lokiProfile(im); P.h = im.naturalHeight; P.w = im.naturalWidth } })))
   return lkr.propsP
 }
 let lokiAll = null
@@ -5458,8 +5456,10 @@ const LK_APPROVED = {focus: 1, flow: 1, peek: 1, nav: 1}   // the map that was a
 // the two vines (pack of props): vine-trunk is the way up and down between cards, leaning on a card's side, its top under the moss lip
 // (branch.webp) on that card's top edge (layers: card, trunk, lip, Loki); vine-thin hangs in the margins, to be looked at only.
 // Both at one scale, the trunk's core as thick as the pole he climbs in the drawings; more length is more of the drawing, never stretched.
-const LK_TRUNK = {w: 303, h: 954, core: 37, cx: 143, file: 'props/climb/vine-trunk.webp'}
-const LK_THIN = {w: 326, h: 969, cx: 204, file: 'props/climb/vine-thin.webp', tile: 'props/climb/vine-tile.png'}
+const LK_TRUNK = {w: 303, h: 954, core: 37, cx: 143, file: 'props/climb/vine-trunk.webp', tile: {w: 303, h: 0, cx: 143, file: 'props/climb/vine-tile.png'}}
+const LK_TRUNK_K = 1.17           // every trunk at one scale: its core this many times the climb's pole (so its leaves by the nook are the same whatever the cards' heights)
+const LK_TUCK = 8                 // how far below the top edge the trunk's tip may end, hidden under the moss lip
+const LK_THIN = {w: 326, h: 969, cx: 204, file: 'props/climb/vine-thin.webp'}
 const LK_ROUTE_MIN = 300          // no way up or down between two cards with less clear height than this
 function lokiPerchEls(scr) {
   const out = [], seen = new Set()
@@ -5522,6 +5522,8 @@ function lokiGeo() {
   const cardEls = [...scr.querySelectorAll('.card, .nh-garden, .nh-peek, .accordion, #jg-gnome')].filter(e => !e.parentElement || !e.parentElement.closest('.card'))
   const cards = cardEls.map(e => { const r = e.getBoundingClientRect(); return {el: e, l: X(r.left), r: X(r.right), t: Y(r.top), b: Y(r.bottom)} })
   const props = lokiNookRects(X(k.stage.left), Y(k.stage.bottom))   // where the stump, the mushroom and the lantern stand (drawn or not right now)
+  // what the trunk's leaves may not cross: the middle of the mushroom's cap (its edges they may), the stump, the lantern (both places) and the note
+  const mu = props[0], cap = {l: mu.l + (mu.r - mu.l) * .25, r: mu.r - (mu.r - mu.l) * .25, t: mu.t, b: mu.t + (mu.b - mu.t) * .42}, keep = [cap].concat(props.slice(1))
   const hits = (list, l, t, r, b) => list.some(q => q.r > l + .5 && q.l < r - .5 && q.b > t + .5 && q.t < b - .5)
   const LD = lokiSeqReady('ledge'), kL = LD ? LD.k : .3003, pole = 36 * kL
   // a drawing's ink, band by band (its outline as lokiProfile measured it), placed at left/top at scale sv, mirrored or not
@@ -5530,11 +5532,14 @@ function lokiGeo() {
       const a = flip ? P.w - 1 - b[1] : b[0], z = flip ? P.w - 1 - b[0] : b[1]; out.push({l: left + a * sv, r: left + (z + 1) * sv, t, b: Math.min(top + H, t + 8 * sv)}) })
     return out
   }
+  const pieceInk = function(pieces, vx, sv, flip, t0, t1) {   // the ink of a trunk made of pieces, cut to t0..t1
+    return pieces.map(q => ink(q.P, vx - (flip ? q.P.w - 1 - q.P.cx : q.P.cx) * sv, q.top, sv, flip, q.P.h * sv)).flat().filter(r => r.b > t0 && r.t < t1).map(r => ({l: r.l, r: r.r, t: Math.max(t0, r.t), b: Math.min(t1, r.b)}))
+  }
   const inkWhy = function(rs, mine) {   // '' when a vine's ink is on the screen and over nothing it may not cover
     for(const q of rs) {
       if(q.l < L + 1 || q.r > R - 1) return [1, 'it would be cut by the screen\'s edge (by ' + Math.max(L + 1 - q.l, q.r - R + 1).toFixed(1) + 'px)']
       if(hits(cards.filter(c => !mine.includes(c.el)), q.l, q.t, q.r, q.b)) return [2, 'it would lie over another card']
-      if(hits(props, q.l, q.t, q.r, q.b)) return [3, 'it would lie over the stump, the mushroom or the lantern']
+      if(hits(keep, q.l, q.t, q.r, q.b)) return [3, 'it would lie over the middle of the mushroom\'s cap, the stump, the lantern or the note']
       if(!clear(q.l + LK_AIR, q.t, q.r - LK_AIR, q.b)) return [4, 'it would cover text, an icon or a control']
     }
     return null
@@ -5547,17 +5552,21 @@ function lokiGeo() {
     if(!fromNook && !U.ok) return {key, why: U.key + ' itself is rejected (' + U.why + ')'}
     if(!D.ok) return {key, why: D.key + ' itself is rejected (' + D.why + ')'}
     if(len < LK_ROUTE_MIN) return {key, why: 'only ' + Math.round(len) + 'px of height between the two cards, a way needs ' + LK_ROUTE_MIN}
-    const sv = len / T.h
-    if(T.core * sv > pole * 1.6) return {key, why: Math.round(len) + 'px is longer than one trunk drawing can be at the climb\'s scale (' + Math.round(T.h * pole * 1.6 / T.core) + 'px); a drawing to repeat for the trunk is missing'}
+    // the trunk at its one scale, its roots on the card below; above it the repeating piece, one after another, up to the top edge (cut there)
+    const sv = LK_TRUNK_K * pole / T.core, pieces = [{P: T, top: D.y - T.h * sv}]
+    if(pieces[0].top > U.y + LK_TUCK) {
+      if(!T.tile.prof) return {key, why: 'the trunk is ' + Math.round(T.h * sv) + 'px tall and the way ' + Math.round(len) + 'px: ' + Math.round(pieces[0].top - U.y) + 'px more is wanted, and vine-tile.png (the trunk\'s repeating piece) is missing'}
+      for(let y = pieces[0].top; y > U.y + LK_TUCK; y -= T.tile.h * sv) pieces.unshift({P: T.tile, top: y - T.tile.h * sv})
+    }
     const mine = [U.el]
     let best = [-1, ''], bestDraw = null
     for(const side of fromNook ? [nk.side] : [nk.side, -nk.side]) {
       const edge = side < 0 ? U.ref : U.ref + U.w, e = lokiClimbExt(side)
-      const xs = []; for(let d = 0; d <= 40; d += 2) { xs.push(edge + side * d); if(d) xs.push(edge - side * d) }
+      const xs = []; for(let d = 0; d <= 40; d += .5) { xs.push(edge + side * d); if(d) xs.push(edge - side * d) }
       for(const vx of xs) for(const flip of [false, true]) {
         const left = vx - (flip ? T.w - 1 - T.cx : T.cx) * sv
         // the drawing first: the trunk's ink, then the lip (its rounded end a little past the trunk onto the card, its cut end at or past the screen's edge, never in view)
-        let w = inkWhy(ink(T, left, U.y, sv, flip, len), mine), lip = null
+        let w = inkWhy(pieceInk(pieces, vx, sv, flip, U.y, D.y), mine), lip = null
         if(!w) {
           const t = U.y - 45 * sb
           let l = side < 0 ? vx + 12 - bw : vx - 12
@@ -5570,13 +5579,14 @@ function lokiGeo() {
         // then him on it
         if(!w && (vx - e.l < L || vx + e.r > R)) w = [5, 'climbing it he would go past the screen\'s edge']
         const v = lokiVineFeet(fromNook ? {vx, side, top: nk.y, bot: D.y, sv, topFloor: true} : {vx, side, top: U.y, bot: D.y, sv})
-        if(!w && fromNook && (v.upX < nk.card.l + 6 || v.upX > nk.fig)) w = [5, 'the jump to it (the frames there are rise straight up, ' + Math.abs(v.upX - vx).toFixed(0) + 'px to the side) would start ' + Math.round(nk.card.l + 6 - v.upX) + 'px outside the nook\'s floor']
+        if(!w && fromNook && (v.upX < nk.card.l + 2 || v.upX > nk.fig)) w = [5, 'the jump to it (the frames there are rise straight up, ' + Math.abs(v.upX - vx).toFixed(0) + 'px to the side) would start ' + Math.round(nk.card.l + 2 - v.upX) + 'px outside the nook\'s floor']
         if(!w && !lokiVineClear(clear, vx, side, v.top, D.y, sv, fromNook)) w = [6, 'his climb would cover text or a control']
         if(!w && !lokiVineClimbable(v)) w = [8, 'too short for the whole climb']
         if(!w && !fromNook && lokiInRuns(U.runs, v.upX, 1) === null) w = [9, 'no room for him where the climb ends on ' + U.key]
         if(!w && lokiInRuns(D.runs, v.downX, 2) === null) w = [9, 'no room for him at its foot on ' + D.key]
-        if(!w) return {key, ok: true, v: lokiVineFeet({key, up: fromNook ? 'nook' : U.key, down: D.key, vx, top: fromNook ? nk.y : U.y, bot: D.y, side, sv, flip, imgL: left, lip, drawTop: U.y, topFloor: fromNook})}
-        if(w[0] > best[0]) { best = w; if(w[0] >= 5) bestDraw = {key, vx, side, sv, flip, imgL: left, lip, drawTop: U.y, top: U.y, bot: D.y, why: w[1]} }
+        const draw = {vx, side, sv, flip, imgL: left, lip, drawTop: U.y, pieces: pieces.map(q => ({file: q.P.file, w: q.P.w * sv, h: q.P.h * sv, top: q.top, left: vx - (flip ? q.P.w - 1 - q.P.cx : q.P.cx) * sv}))}
+        if(!w) return {key, ok: true, v: lokiVineFeet(Object.assign({key, up: fromNook ? 'nook' : U.key, down: D.key, top: fromNook ? nk.y : U.y, bot: D.y, topFloor: fromNook}, draw))}
+        if(w[0] > best[0]) { best = w; if(w[0] >= 5) bestDraw = Object.assign({key, top: U.y, bot: D.y, why: w[1]}, draw) }
       }
     }
     return {key, why: best[1], draw: bestDraw}
@@ -5591,11 +5601,11 @@ function lokiGeo() {
   // the thin vine: to be looked at only, hanging in the margins from a card's top corner, at the props' scale, never climbed;
   // more length is more of it, one drawing after another (vine-tile.png when it is there), never stretched
   const TH = LK_THIN, svT = pole / T.core, tw = TH.w * svT, th = TH.h * svT
-  const taken = vines.concat(unused).map(v => ink(T, v.imgL, v.drawTop, v.sv, v.flip, v.bot - v.drawTop)).flat()
+  const taken = vines.concat(unused).map(v => v.pieces.map(q => ink(q.file === T.file ? T : T.tile, q.left, q.top, v.sv, v.flip, q.h)).flat()).flat()
   cards.forEach(function(c) {
     if(decos.length >= 2) return
     for(const side of [-1, 1]) {
-      const H = Math.min(c.b - c.t, th * 2), vx = side < 0 ? c.l : c.r
+      const H = Math.min(c.b - c.t, th), vx = side < 0 ? c.l : c.r
       let w = null, at = null
       for(let d = 0; d <= 30 && !at; d += 3) for(const flip of [false, true]) {
         const x = vx + side * d, left = x - (flip ? TH.w - 1 - TH.cx : TH.cx) * svT
@@ -5631,20 +5641,20 @@ function lokiPropsDraw() {
   const g = lkr.geo, ly = lkr.layer, L = lokiSeqReady('ledge'); if(!ly) return
   const P = ly.querySelector('.lk-props'); if(!g || !L) { P.innerHTML = ''; P.classList.remove('on'); return }
   const f1 = n => typeof n === 'number' ? n.toFixed(1) : n
-  const trunks = LK_LAB ? g.vines.concat(g.unused) : g.vines     // the lab shows a trunk placed by the rules that he cannot use yet
-  const sig = trunks.map(v => [v.key, v.vx, v.drawTop, v.bot, v.imgL, v.flip].map(f1).join(',')).concat(g.decos.map(d => [d.key, d.l, d.t, d.H, d.flip].map(f1).join(','))).join('|') + (LK_THIN.hasTile ? 'T' : '')
+  const trunks = g.vines.concat(g.unused)     // a trunk placed by the rules is part of Home in the jungle, whether he can climb it yet or not
+  const sig = trunks.map(v => [v.key, v.vx, v.drawTop, v.bot, v.imgL, v.flip, v.pieces.length].map(f1).join(',')).concat(g.decos.map(d => [d.key, d.l, d.t, d.H, d.flip].map(f1).join(','))).join('|')
   if(P.dataset.sig === sig) return
   const img = (file, cls, l, t, w, h, flip) => '<img class="' + cls + '" alt="" draggable="false" src="' + LK_DIR + file + '" style="left:' + l.toFixed(1) + 'px;top:' + t.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px' + (flip ? ';transform:scaleX(-1)' : '') + '">'
   let html = ''
   // the thin vines first (behind everything of his), each length of it one drawing after another, cut at the length it hangs
   g.decos.forEach(function(d) {
-    let imgs = ''; for(let y = 0; y < d.H; y += d.h) imgs += img(y && LK_THIN.hasTile ? LK_THIN.tile : LK_THIN.file, 'lk-vine lk-thin', d.l, y, d.w, d.h, d.flip)
+    const imgs = img(LK_THIN.file, 'lk-vine lk-thin', d.l, 0, d.w, d.h, d.flip)
     html += '<div class="lk-vinebox lk-deco" data-deco="' + d.key + '" style="top:' + d.t.toFixed(1) + 'px;height:' + d.H.toFixed(1) + 'px">' + imgs + '</div>'
   })
   // the trunk (one drawing, its roots on the card below, its top on the edge it leans on), then the moss lip over its top, cut at the screen's edge
   trunks.forEach(function(v) {
     const T0 = v.drawTop != null ? v.drawTop : v.top, H = v.bot - T0
-    html += '<div class="lk-vinebox" data-vine="' + v.key + '" style="top:' + T0.toFixed(1) + 'px;height:' + H.toFixed(1) + 'px">' + img(LK_TRUNK.file, 'lk-vine lk-trunk', v.imgL, 0, LK_TRUNK.w * v.sv, LK_TRUNK.h * v.sv, v.flip) + '</div>'
+    html += '<div class="lk-vinebox" data-vine="' + v.key + '" style="top:' + T0.toFixed(1) + 'px;height:' + H.toFixed(1) + 'px">' + v.pieces.map(q => img(q.file, 'lk-vine lk-trunk', q.left, q.top - T0, q.w, q.h, v.flip)).join('') + '</div>'
     const lp = v.lip
     html += '<div class="lk-lipbox" data-lip="' + v.key + '" style="left:' + g.L.toFixed(1) + 'px;width:' + (g.R - g.L).toFixed(1) + 'px;top:' + lp.t.toFixed(1) + 'px;height:' + lp.h.toFixed(1) + 'px">' + img('props/climb/branch.webp', 'lk-branch', lp.l - g.L, 0, lp.w, lp.h, lp.flip) + '</div>'
   })
@@ -6121,7 +6131,7 @@ function lokiLabDraw() {
   const hidden = document.body.classList.contains('lk-lab-hide')
   if(hidden) { panel.innerHTML = '<button data-a="debug">הצג דיבאג</button>'; return }
   panel.innerHTML = '<div class="lk-lab-st">' + esc(lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) : '') + (lkr.why ? ' · ' + lkr.why : '')) + '</div>' +
-    '<div class="lk-lab-vines">' + (g ? g.vines.map(v => '✓ vine-trunk ' + esc(v.key)).concat((g.tried || []).filter(t => !t.deco).map(t => '✕ vine-trunk ' + esc(t.key) + ': ' + esc(t.why))).concat(g.decos.map(d => '✓ vine-thin ' + esc(d.key))).concat((g.tried || []).filter(t => t.deco).map(t => '✕ vine-' + esc(t.key) + ': ' + esc(t.why))).concat([LK_THIN.hasTile ? '' : 'vine-tile.png: missing (vine-thin repeated)']).filter(Boolean).join('<br>') : '') + '</div>' +
+    '<div class="lk-lab-vines">' + (g ? g.vines.map(v => '✓ vine-trunk ' + esc(v.key)).concat((g.tried || []).filter(t => !t.deco).map(t => '✕ vine-trunk ' + esc(t.key) + ': ' + esc(t.why))).concat(g.decos.map(d => '✓ vine-thin ' + esc(d.key))).concat((g.tried || []).filter(t => t.deco).map(t => '✕ vine-' + esc(t.key) + ': ' + esc(t.why))).concat([LK_TRUNK.tile.prof ? '' : 'vine-tile.png (the trunk\'s repeating piece): missing']).filter(Boolean).join('<br>') : '') + '</div>' +
     '<button data-a="debug">הסתר דיבאג</button>' +
     '<button data-a="out">out</button><button data-a="home">home</button>' + perch +
     '<button data-a="walk" data-v="-1">walk ←</button><button data-a="walk" data-v="1">walk →</button><button data-a="act" data-v="turn">turn</button><button data-a="act" data-v="look">look</button><button data-a="act" data-v="wave">wave</button>' +
