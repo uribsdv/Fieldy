@@ -4885,7 +4885,9 @@ function gnomeAfterRender() {
 const LOKI = {
   greet: ['הופה! הייתי כאן לפני שהגעת. כמעט.', 'בוקר טוב, אורי. אני כבר פה. לא ראית אותי כי הייתי שם.', 'יום חדש, הנחל זז. בוא נראה לאן.', 'היער התעורר לפניך. אני רק מוודא שהוא לא בר.'],
   brief: ['שלושה דברים לפני שהיום מתחיל. נתחיל בקטן.', 'יש היום {x} אתרים. שניהם יסתדרו. אני כמעט חותם.', 'הנה מה שחשוב, בלי הכול שמתחבא מאחוריו.', 'אחזיק את הרשימה. אתה רק תגיד איפה להתחיל.'],
-  taskDone: ['אחת פחות. היער שמר לה כבוד.', 'יפה. עוד טיפה לנחל.', 'עוד אחד. אני מפסיק להעמיד פנים שלא התרשמתי.', 'סגרנו. עכשיו הגרגר הבא.'],
+  taskDone: ['אחת פחות. היער שמר לה כבוד.', 'יפה. עוד טיפה לנחל.', 'עוד אחד. אני מפסיק להעמיד פנים שלא התרשמתי.', 'סגרנו. עכשיו הגרגר הבא.',
+    'משימה אחת. מלמעלה זה נראה קטן, אבל אני גמד, ומפה זה ענק.', 'צעד קטן הוא עדיין צעד. ספרתי.', 'ראית? הזזת משהו. העולם קצת אחר עכשיו.',
+    'אתה רואה את כל מה שלא עשית. אני רואה מכאן מישהו שלא הפסיק לנסות.'],
   dayDone: ['סיימנו. אפשר לשבת על קצה הנחל ולא לחשוב על כלום. אני כבר שם.', 'היום נגמר, והיער חי. הלילה אני עושה משמרת.', 'אתה יודע שעשית היום המון, נכון? אני מזכיר, למקרה ששכחת.'],
   empty: ['אין לך כלום. אני לא מאמין. בוא נבדוק שוב... לא, באמת אין.', 'נחל שקט. נשתמש בזה.'],
   busy: ['הרבה? ניקח אחד. את השאר אני מחזיק שלא יברחו.', 'אם זה גדול מדי, זה כי עוד לא חתכנו אותו. תן לי את הפינה הראשונה.', 'הכול בבת אחת הוא בדיוק ההגדרה של "לא נתחיל". נתחיל במשהו קטן.'],
@@ -4924,12 +4926,16 @@ const LOKI = {
   // his answer to the mood leaf, by the moods that leaf already has (nothing is added to them): the heavy ones also offer a hug
   mood: {
     hard: ['אני פה. לא צריך להסביר. נשב רגע על הקצה.', 'יום כבד? נשים אותו על האבן ונראה מה נשאר ממנו עוד מעט.', 'אתה לא חייב הכול היום. אולי רק דבר אחד קטן. או לא. אני עדיין פה.', {t: 'גם כשקשה, יש כאן אור קטן ליד הקצה. תסתכל, זה אנחנו.', p: 'lantern'}],
-    tired: ['עייף? גם עצים נחים. נבחר רק מה שאי אפשר לדחות.', 'אין כבוד בלהמשיך על ריק. נשתה קצת מים קודם.'],
+    tired: ['עייף? גם עצים נחים. נבחר רק מה שאי אפשר לדחות.', 'אין כבוד בלהמשיך על ריק. נשתה קצת מים קודם.',
+      'אני יודע שזה מעייף, אבל אני כאן.', 'אני יודע שזה מעייף. אני כאן, על הקצה, לא הולך לשום מקום.', 'היום לא צריך לנצח. מספיק להגיע לערב.',
+      'גם הנהר לא זורם מהר כל הזמן. יש קטעים שהוא רק נח בבריכה.', 'כבד לך? תניח רגע. אני אחזיק את הצד השני.', 'לא חייבים לראות עכשיו את כל הדרך. רק את הצעד שמתחת לרגליים.',
+      'הטחב גדל לאט, ואף אחד לא אומר לו שהוא מאחר.', 'עייף זה לא חלש. עייף זה מי שהלך הרבה.', 'אני לא מתקן כלום. אני רק יושב פה לידך. לפעמים זה מספיק.',
+      'תהיה עדין עם עצמך היום. אתה היחיד שמסתובב איתך כל היום.'],
     pressed: ['הכול בבת אחת מרגיש כמו מפולת. נחזיר אותו לנהר: מה הדבר הראשון?', 'נשימה אחת, עמוק. עוד אחת. יופי. עכשיו רק אחד.'],
     ok: ['בסדר זה בסיס מצוין. נבנה ממנו בנחת.', 'יום בינוני מספיק. לא כל יום צריך להיות אגדה.'],
     good: ['אני רואה את הזוהר. תשמור אותו, ונשתמש בו על משהו קשה.', 'איזה יופי. אני רושם שהיום הזה קרה.']
   },
-  hug: ['בלי קסם. רק חיבוק.', 'קיבלת. נשאר איתך.'],
+  hug: ['בלי קסם. רק חיבוק.', 'קיבלת. נשאר איתך.', 'חיבוק של גמד מגיע עד הברכיים, אבל הוא אמיתי לגמרי.', 'קיבלתי. החזקתי. שמרתי לך עוד אחד למחר.'],
   // what he is doing when Uri comes back, by the activity of the hour: two or three lines for each, none shared (the lines are Loki's own)
   awayAct: {
     read: ['רגע, אני באמצע פסקה.', 'המגילה אומרת שמחר יהיה יום. אני עדיין בודק.', 'כמעט סיימתי. עוד פסקה. (עוד פסקה.)'],
@@ -4957,12 +4963,20 @@ const LOKI = {
   storm: ['אני לא מפחד. אני מקשיב לסופה מקרוב.'],
   // a moment the two of them shared, told at most once a week (the lines are Loki's own; {x} {site} {date} come from the app)
   recall: {best: 'זוכר את היום עם {x} משימות? עברנו אותו. גם את זה נעבור.', unstuck: '{site} היה תקוע {x} ימים, ואז נפתח. אני עדיין מספר על זה לצבים.', first: 'היום הראשון שלנו היה {date}. היית נראה עייף. גם אני.'},
+  // topics added to the bank with no trigger in the code yet (nothing calls them: they wait for the moods / screens that will); never a push
+  emptyDay: ['יום ריק הוא לא כישלון. זה יום שבו האדמה נחה.', 'גם עצים לא עושים כלום כל החורף, ואף אחד לא כועס עליהם.', 'מחר יש מספיק בוקר בשביל הכל.',
+    'נפלת מהרצף? יופי, עכשיו אתה יודע איפה הרצפה. קמים.'],
+  evening: ['הלילה לא מבקש ממך כלום. גם אני לא.', 'תניח את היום על המדף. הוא יחכה פה מחר, אם בכלל נצטרך אותו.'],
+  field: ['אתר תקוע הוא לא אתה תקוע.', 'הרבה אתרים זה הרבה ידיים. אתה לא צריך להחזיק את כולם באותו רגע.'],
+  courage: ['אומץ זה לא בלי פחד. זה לקום מהגדם בכל זאת.', 'גם אני לא מטפס על הגזע לבד. יש לי גפן. מי הגפן שלך היום?'],
+  jester: ['אומרים שהחיים קשים. אני אומר שהם פשוט מלאים בשורשים. מועדים, קמים, ממשיכים.', 'יש לי עצה חכמה מאוד: לשתות מים. כן, זאת כל העצה. מים.'],
+  hard3: ['שלושה ימים כבדים ברצף. אני לא שואל למה. רק רוצה שתדע שאני שם לב, ושאני כאן.', 'אולי מישהו שאתה אוהב ישמח לשמוע ממך היום?'],
   hardStreak: 'אני שדון, אבל יש בני אדם שאוהבים אותך. אולי תתקשר לאחד מהם?',
   // "just here": nothing to do, nothing to explain; p = the pose it is told in
   here: [{t: 'סתם. רציתי להגיד שאני פה.', p: 'listen', w: []}, {t: 'אל תתייחס אליי. אני רק עובר.', p: 'laugh', w: ['busy']}, {t: 'לא צריך כלום. שמעתי שמישהו עבד קשה.', p: 'listen', w: ['done', 'evening']}, {t: 'נשימה אחת. עמוק. יופי. חזרנו.', p: 'listen', w: ['pressed', 'hard']}, {t: 'אני כאן. תמשיך, אני רק מחזיק את היער.', p: 'laugh', w: ['busy', 'back']}]
 }
 // moods that already exist on the leaf -> the bank that answers them; the heavy ones also offer a hug
-const LOKI_MOOD = {overwhelmed: {bank: ['hard', 'pressed'], hug: true, pose: 'listen'}, scattered: {bank: ['pressed'], hug: true, pose: 'listen'}, tired: {bank: ['tired'], hug: true, pose: 'listen'},
+const LOKI_MOOD = {overwhelmed: {bank: ['hard', 'pressed', 'tired'], hug: true, pose: 'listen'}, scattered: {bank: ['pressed'], hug: true, pose: 'listen'}, tired: {bank: ['tired'], hug: true, pose: 'listen'},
   focused: {bank: ['good'], hug: false, pose: 'joy'}, motivated: {bank: ['good'], hug: false, pose: 'joy'}}
 const LK_POSE = {gift: [137, 275, 68], hug: [223, 273, 112], lantern: [228, 276, 125], laugh: [141, 271, 72], 'stuck-hat': [197, 280, 100], 'water-plant': [163, 226, 105],
   turtle: [165, 241, 108], listen: [277, 255, 140], fishing: [279, 262, 150], 'sit-river': [228, 260, 130], peek: [223, 268, 90], shelter: [196, 237, 100],
@@ -5007,8 +5021,12 @@ function lokiPick(name, vars, ok) {
   let bag = (loki.bag[name] || []).filter(i => i < n)
   if(!bag.length) { bag = Array.from({length: n}, (_, i) => i); for(let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]] }
     if(n > 1 && bag[0] === loki.last[name]) { const j = 1 + Math.floor(Math.random() * (n - 1)); [bag[0], bag[j]] = [bag[j], bag[0]] } }   // a full round, and not the line just told first
-  let at = 0; if(ok) { at = bag.findIndex(i => ok(bank[i])); if(at < 0) at = 0 }
-  const i = bag.splice(at, 1)[0]; loki.bag[name] = bag; loki.last[name] = i; lokiSave()
+  // never one of the last five told from this bank (fewer in a bank too small for that): if the rest of the round is all recent, a new round is dealt
+  const recent = ((loki.recent = loki.recent || {})[name] || []).slice(-Math.min(5, n - 1)), good = i => recent.indexOf(i) < 0 && (!ok || ok(bank[i]))
+  let at = bag.findIndex(good)
+  if(at < 0 && n > 1) { bag = Array.from({length: n}, (_, i) => i); for(let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]] } at = bag.findIndex(good) }
+  if(at < 0) at = ok ? Math.max(0, bag.findIndex(i => ok(bank[i]))) : 0
+  const i = bag.splice(at, 1)[0]; loki.bag[name] = bag; loki.last[name] = i; loki.recent[name] = recent.concat(i).slice(-5); lokiSave()
   return lokiFill(bank[i], vars)
 }
 function lokiFill(line, vars) {
