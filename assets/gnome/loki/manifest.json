@@ -1,0 +1,4 @@
+{
+  "note": "Frames drawn after pack 4. Each entry under extra is a sequence (the same fields as LK_SEQ in index.html: dir, json or n, ref or kOf, floor, seat...). Once a sequence is listed here and its files are in its folder, the verbs that use it (LK_VERBS) become available, and the ways that need them open, with no change to the code. Expected names: hopup (G1), hopdown (G2), sitedge (G3), sitflat (G4), seatlook, seatread, seatwave, seatnap, seatpoint (G5).",
+  "extra": {}
+}
