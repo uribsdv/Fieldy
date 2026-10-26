@@ -1172,6 +1172,10 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 .lk-lab-panel{position:fixed;left:6px;right:6px;top:6px;z-index:9999;display:flex;flex-wrap:wrap;gap:4px;padding:6px;border-radius:10px;background:rgba(0,0,0,.72);direction:ltr}
 .lk-lab-panel button{padding:4px 8px;border-radius:6px;background:#2a3b30;color:#fff;font:600 11px system-ui}
 .lk-lab-st{width:100%;font:600 11px system-ui;color:#cfe}
+.lk-lab-vines{width:100%;font:500 10px/1.35 system-ui;color:#fdd}
+.lk-lab-p i{font-style:normal;font-weight:600;color:#ffd6d6}
+body.lk-lab-hide .lk-lab{display:none}
+body.lk-lab-hide .lk-lab-panel{left:auto;right:6px;background:rgba(0,0,0,.45);padding:4px}
 [data-theme="jungle"] .gn-edit{position:absolute;bottom:22px;left:-6px;width:32px;height:32px;border-radius:50%;background:var(--surface-2);color:var(--t2);display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
 [data-theme="jungle"] .gn-dots{display:flex;gap:6px;justify-content:center}
 [data-theme="jungle"] .gn-dots i{width:7px;height:7px;border-radius:50%;background:rgba(45,102,52,.28)}
@@ -5429,6 +5433,9 @@ const LK_PERCH = [
   {key: 'more', sel: '#screen-home .accordion'},
   {key: 'nav', sel: '#nav', fixed: true}
 ]
+const LK_APPROVED = {focus: 1, flow: 1, peek: 1, nav: 1}   // the map that was approved (places 2, 3, 5, 6): only these are ever chosen
+const LK_VINE_W = .12 * LK_H     // the vine's stem: about 12% of his height (vine-thin, drawn at one scale, never stretched)
+const LK_VTHIN = {w: 326, h: 969, stem: 102, leaves: 181}   // its file: size, the stem's usual width with its leaves, the widest leaves
 function lokiPerchEls(scr) {
   const out = [], seen = new Set()
   LK_PERCH.forEach(function(p) { const el = document.querySelector(p.sel); if(!el || seen.has(el)) return; seen.add(el); el.dataset.lokiPerch = p.key; out.push({key: p.key, el, fixed: !!p.fixed, why: p.why || ''}) })
@@ -5445,6 +5452,13 @@ function lokiCorner() {
   const c = card.getBoundingClientRect(), s0 = st.getBoundingClientRect(), row = st.parentElement.getBoundingClientRect()
   const s = {left: s0.left, right: s0.right, width: s0.width, height: st.offsetHeight, bottom: row.bottom, top: row.bottom - st.offsetHeight}
   return {card: c, stage: s, side: s.left + s.width / 2 < c.left + c.width / 2 ? -1 : 1, x: s.left + LK_NOOK_AT.fig, y: s.bottom - 3, stumpX: s.left + LK_NOOK_AT.stump}
+}
+// the nook's things as lokiNookHtml places them (both ways: Loki home, the lantern beside the stump; Loki out, on it with the note), in the coordinates of x0 (the stage's left) and b (its floor)
+function lokiNookRects(x0, b) {
+  const z = LK_NOOK, sw = LK_PROP.stump[0] * z, sh = LK_PROP.stump[1] * z, sx = LK_NOOK_AT.stump - sw / 2, seat = 31
+  const mw = LK_PROP.mushroom[0] * z, mh = LK_PROP.mushroom[1] * z, lw = LK_PROP.lantern[0] * z, lh = LK_PROP.lantern[1] * z, nw = LK_PROP.note[0] * z, nh = LK_PROP.note[1] * z
+  const r = (x, bottom, w, h) => ({l: x0 + x, r: x0 + x + w, t: b - bottom - h, b: b - bottom})
+  return [r(sx - mw * .62, 3, mw, mh), r(sx, 1, sw, sh), r(sx + sw + 6, 3, lw, lh), r(LK_NOOK_AT.stump + 4, seat - 1, lw, lh), r(LK_NOOK_AT.stump - nw - 2, seat + 1, nw, nh)]
 }
 function lokiInRuns(runs, x, reach) {   // the nearest place in the runs to x, within reach; null if none
   let best = null
@@ -5474,42 +5488,68 @@ function lokiGeo() {
       if(ok && s === null) s = x
       if(!ok && s !== null) { if(x - 4 - s >= 16) runs.push([s, x - 4]); s = null }
     }
-    perches.push({key: p.key, el: p.el, y, ref: X(r.left), w: r.width, runs, why: runs.length ? '' : 'room above it ' + Math.min(room, LK_H) + 'px, he needs ' + (LK_H + 2 * LK_AIR), ok: runs.length > 0, reason: p.why})
+    const why = !LK_APPROVED[p.key] ? 'not in the approved map' : runs.length ? '' : 'room above it ' + Math.min(room, LK_H) + 'px, he needs ' + (LK_H + 2 * LK_AIR)
+    perches.push({key: p.key, el: p.el, y, ref: X(r.left), w: r.width, h: r.height, runs: why ? [] : runs, why, ok: !why, reason: p.why})
   })
   perches.forEach(p => { nodes[p.key] = p })
-  const vines = [], nk = nodes.nook, s = nk.side
-  // the vine at his corner: from the branch at the nook's floor, down by the card's edge, to the first perch below it with a clear way
-  const below = perches.filter(p => p.ok && p.y > nk.card.b + 12).sort((a, b) => a.y - b.y)
-  for(const D of below) {
-    let best = null
-    for(const off of [14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 6, 2, -2, -6]) {
-      const vx = s < 0 ? cardL + off : cardR - off
-      if(s < 0 ? vx > nk.fig - 18 : vx < nk.fig + 18) continue
-      if(!lokiVineClear(clear, vx, s, nk.y, D.y)) continue                                                         // the climb, all the way down
-      if(!clear(Math.min(vx, nk.fig) - 24, nk.y - LK_H + 6, Math.max(vx, nk.fig) + 24, nk.y - 1)) continue        // the walk on the nook's floor
-      const v = lokiVineFeet({vx, side: s, top: nk.y, bot: D.y})
-      if(!lokiVineClimbable(v) || lokiInRuns(D.runs, v.downX, 2) === null) continue                                                          // he comes off the vine standing at its foot
-      const cost = (off < 14 ? 12 : 0) + Math.abs(off - 22)
-      if(!best || cost < best.cost) best = {vx, cost}
-    }
-    if(best) { vines.push(lokiVineFeet({key: 'nook>' + D.key, up: 'nook', down: D.key, vx: best.vx, top: nk.y, bot: D.y, side: s})); break }
+  const vines = [], tried = [], nk = nodes.nook, s = nk.side
+  // what a vine may not lie over: any card (it hangs beside one, from its edge), and the stump, the mushroom and the lantern of his nook
+  const cards = [...scr.querySelectorAll('.card, .nh-garden, .nh-peek, .accordion, #jg-gnome')].map(e => { const r = e.getBoundingClientRect(); return {l: X(r.left), r: X(r.right), t: Y(r.top), b: Y(r.bottom)} })
+  const props = lokiNookRects(X(k.stage.left), Y(k.stage.bottom))   // where the stump, the mushroom and the lantern stand (drawn or not right now)
+  const hits = (list, l, t, r, b) => list.some(q => q.r > l + .5 && q.l < r - .5 && q.b > t + .5 && q.t < b - .5)
+  const hw = LK_VTHIN.leaves * (LK_VINE_W / LK_VTHIN.stem) / 2
+  // why a vine at vx, hanging from the edge at y=top down to y=bot, cannot be there ('' when it can)
+  const vineWhy = function(vx, side, top, bot, walkFrom) {
+    const e = lokiClimbExt(side)
+    if(vx - hw < L + 2 || vx + hw > R - 2) return 'the vine would be cut by the screen\'s edge (by ' + Math.max(L + 2 - (vx - hw), vx + hw - (R - 2)).toFixed(1) + 'px)'
+    if(hits(cards, vx - hw, top, vx + hw, bot)) return 'the vine would lie over a card'
+    if(hits(props, vx - hw, top - 10, vx + hw, bot)) return 'the vine would lie over the stump, the mushroom or the lantern'
+    if(vx - e.l < L || vx + e.r > R) return 'climbing it he would go past the screen\'s edge'
+    if(!lokiVineClear(clear, vx, side, top, bot)) return 'his climb would cover text or a control'
+    if(walkFrom != null && hits(props, Math.min(vx, walkFrom) - 24, top - LK_H, Math.max(vx, walkFrom) + 24, top - 1)) return 'the way to it passes in front of the stump, the mushroom or the lantern'
+    if(walkFrom != null && !clear(Math.min(vx, walkFrom) - 24, top - LK_H + 6, Math.max(vx, walkFrom) + 24, top - 1)) return 'the way to it on the nook\'s floor is not clear'
+    return ''
   }
-  // and between two perches, one above the other, wherever a column beside the upper one is clear all the way down
-  const ok = perches.filter(p => p.ok).sort((a, b) => a.y - b.y)
+  // the mossy trunk (vine-trunk) belongs by the stump only: at the scale of the nook's things (so beside the stump as a tree would be),
+  // standing on the nook's floor, within the card, over none of the stump, the mushroom, the lantern or the card's corners
+  const tw = LK_PROP.vine[0] * LK_NOOK, th = LK_PROP.vine[1] * LK_NOOK, stumpR = LK_PROP.stump[0] * LK_NOOK
+  let trunk = null, trunkWhy = ''
+  if(!props.length) trunkWhy = 'no nook drawn'
+  else if(tw > stumpR + .5) trunkWhy = 'wider than the stump'
+  else if(nk.y - th < nk.card.t + 14) trunkWhy = 'at the stump\'s scale it is ' + Math.round(th) + 'px tall: it would rise past the card\'s top edge (' + Math.round(nk.y - nk.card.t - 14) + 'px of room)'
+  else {
+    const st = props[1]
+    for(const x of [st.r + 2, st.l - 2 - tw]) { if(x >= nk.card.l + 14 && x + tw <= nk.card.r - 14 && !hits(props, x, nk.y - th, x + tw, nk.y)) { trunk = {l: x, t: nk.y - th, w: tw, h: th}; break } }
+    if(!trunk) trunkWhy = 'no place beside the stump that is clear of the mushroom, the lantern and the card\'s edges'
+  }
+  // the vine at his corner: hanging from the briefing card's side edge (outside it) at the nook's floor, down to the first perch below
+  const below = perches.filter(p => p.ok && p.y > nk.card.b + 12).sort((a, b) => a.y - b.y)
+  if(!below.length) tried.push({key: 'nook>?', why: 'no perch with room below his corner'})
+  for(const D of below) {
+    const vx = s < 0 ? cardL - hw - 1 : cardR + hw + 1, v = lokiVineFeet({vx, side: s, top: nk.y, bot: D.y})
+    let why = vineWhy(vx, s, nk.y, D.y, nk.fig)
+    if(!why && !lokiVineClimbable(v)) why = 'too short for the whole climb'
+    if(!why && lokiInRuns(D.runs, v.downX, 2) === null) why = 'no room for him where it reaches ' + D.key
+    if(!why) { vines.push(lokiVineFeet({key: 'nook>' + D.key, up: 'nook', down: D.key, vx, top: nk.y, bot: D.y, side: s})); break }
+    tried.push({key: 'nook>' + D.key, why})
+  }
+  // and between two perches, one above the other: hanging from the upper card's side edge, outside it
+  const ok = perches.filter(p => p.ok && !p.fixed).sort((a, b) => a.y - b.y)
   for(let i = 0; i < ok.length; i++) for(let j = i + 1; j < ok.length; j++) {
     const U = ok[i], D = ok[j]; if(D.y - U.y < 80 || vines.some(v => v.down === D.key)) continue
-    let best = null
-    for(const side of [s, -s]) for(const off of [-6, -2, 2, 6, 10, 14, 18]) {
-      const vx = side < 0 ? U.ref + off : U.ref + U.w - off, f = lokiVineFeet({vx, side, top: U.y, bot: D.y})
-      if(!lokiVineClimbable(f) || lokiInRuns(U.runs, f.upX, 1) === null || lokiInRuns(D.runs, f.downX, 2) === null) continue
-      if(!lokiVineClear(clear, vx, side, U.y, D.y)) continue
-      const cost = Math.abs(off - 6) + (side === s ? 0 : 8)
-      if(!best || cost < best.cost) best = {vx, side, cost}
+    let done = false, why = ''
+    for(const side of [s, -s]) {
+      const vx = side < 0 ? U.ref - hw - 1 : U.ref + U.w + hw + 1, f = lokiVineFeet({vx, side, top: U.y, bot: D.y})
+      why = vineWhy(vx, side, U.y, D.y, null)
+      if(!why && !lokiVineClimbable(f)) why = 'too short for the whole climb'
+      if(!why && (lokiInRuns(U.runs, f.upX, 1) === null || lokiInRuns(D.runs, f.downX, 2) === null)) why = 'no room for him at its top or its foot'
+      if(!why) { vines.push(lokiVineFeet({key: U.key + '>' + D.key, up: U.key, down: D.key, vx, top: U.y, bot: D.y, side})); done = true; break }
     }
-    if(best) { vines.push(lokiVineFeet({key: U.key + '>' + D.key, up: U.key, down: D.key, vx: best.vx, top: U.y, bot: D.y, side: best.side})); break }
+    if(done) break
+    tried.push({key: U.key + '>' + D.key, why})
   }
   const adj = {}; vines.forEach(v => { (adj[v.up] = adj[v.up] || []).push({to: v.down, vine: v.key, dir: -1}); (adj[v.down] = adj[v.down] || []).push({to: v.up, vine: v.key, dir: 1}) })
-  return {nodes, perches, vines, adj, clear, L, R, scrTop: Y(sr.top), scrBottom: Y(Math.min(sr.bottom, (document.getElementById('nav') || {getBoundingClientRect: () => ({top: innerHeight})}).getBoundingClientRect().top))}
+  return {nodes, perches, vines, tried, trunk, trunkWhy, adj, clear, L, R, scrTop: Y(sr.top), scrBottom: Y(Math.min(sr.bottom, (document.getElementById('nav') || {getBoundingClientRect: () => ({top: innerHeight})}).getBoundingClientRect().top))}
 }
 function lokiVine(key) { const g = lkr.geo; return g && g.vines.find(v => v.key === key) }
 // a vine as a move holds it: the same vine for the whole move, at where its two places are now (it hangs from the upper one)
@@ -5531,24 +5571,17 @@ function lokiPath(from, to) {
 function lokiPropsDraw() {
   const g = lkr.geo, ly = lkr.layer, L = lokiSeqReady('ledge'); if(!ly) return
   const P = ly.querySelector('.lk-props'); if(!g || !L) { P.innerHTML = ''; P.classList.remove('on'); return }
-  const kL = L.k, sig = g.vines.map(v => [v.key, v.vx, v.top, v.bot, v.side].map(n => typeof n === 'number' ? n.toFixed(1) : n).join(',')).join('|')
+  const kL = L.k, sig = (g.trunk ? 'T' + g.trunk.l.toFixed(1) + ',' + g.trunk.t.toFixed(1) : '') + g.vines.map(v => [v.key, v.vx, v.top, v.bot, v.side].map(n => typeof n === 'number' ? n.toFixed(1) : n).join(',')).join('|')
   if(P.dataset.sig === sig) return
   let html = ''
   g.vines.forEach(function(v) {
-    const s = v.side, beamY = v.top, floorY = v.bot
-    // the vine: its trunk as thick as the pole in the drawings of the climb; stacked when the way down is long; roots at its foot only
-    const need = floorY - beamY + 14, sv = Math.max(.17, Math.min(.24, need / LK_PROP.vine[1])), vh = LK_PROP.vine[1] * sv, vw = LK_PROP.vine[0] * sv
-    const boxTop = beamY - 14, boxH = floorY + 4 - boxTop
-    let vines = ''
-    for(let b = boxH, n = 0; n < 6; n++) {
-      vines = '<img class="lk-vine" alt="" draggable="false" src="' + LK_DIR + 'props/climb/vine-trunk.webp" style="left:' + (v.vx - vw / 2).toFixed(1) + 'px;top:' + (b - vh).toFixed(1) + 'px;width:' + vw.toFixed(1) + 'px;height:' + vh.toFixed(1) + 'px' + (n ? ';clip-path:inset(0 0 14% 0)' : '') + '">' + vines
-      if(b - vh <= 0) break; b = b - vh * .82
-    }
-    html += '<div class="lk-vinebox" data-vine="' + v.key + '" style="top:' + boxTop.toFixed(1) + 'px;height:' + boxH.toFixed(1) + 'px">' + vines + '</div>'
-    // the branch: the beam of the drawings of the climb, its natural end just past the vine, its cut end toward the card
-    const beamT = 43.8 * kL, sb = beamT / 90, bw = LK_PROP.branch[0] * sb, bh = LK_PROP.branch[1] * sb, endX = v.vx - s * 63 * kL
-    html += '<img class="lk-branch" alt="" draggable="false" src="' + LK_DIR + 'props/climb/branch.webp" style="left:' + (s < 0 ? endX - bw : endX).toFixed(1) + 'px;top:' + (beamY - 20 * sb).toFixed(1) + 'px;width:' + bw.toFixed(1) + 'px;height:' + bh.toFixed(1) + 'px;transform:' + (s < 0 ? 'scaleX(-1)' : 'none') + '">'
+    // the thin vine at one scale (its stem about 12% of his height), one length of it after another from the edge it hangs from to the place below
+    const sv = LK_VINE_W / LK_VTHIN.stem, vw = LK_VTHIN.w * sv, vh = LK_VTHIN.h * sv, H = v.bot - v.top + 2
+    let imgs = ''
+    for(let y = 0, n = 0; y < H && n < 12; y += vh * .9, n++) imgs += '<img class="lk-vine" alt="" draggable="false" src="' + LK_DIR + 'props/climb/vine-thin.webp" style="left:' + (v.vx - vw / 2).toFixed(1) + 'px;top:' + y.toFixed(1) + 'px;width:' + vw.toFixed(1) + 'px;height:' + vh.toFixed(1) + 'px">'
+    html += '<div class="lk-vinebox" data-vine="' + v.key + '" style="top:' + v.top.toFixed(1) + 'px;height:' + H.toFixed(1) + 'px">' + imgs + '</div>'
   })
+  if(g.trunk) html += '<img class="lk-vine lk-trunk" alt="" draggable="false" src="' + LK_DIR + 'props/climb/vine-trunk.webp" style="left:' + g.trunk.l.toFixed(1) + 'px;top:' + g.trunk.t.toFixed(1) + 'px;width:' + g.trunk.w.toFixed(1) + 'px;height:' + g.trunk.h.toFixed(1) + 'px">'
   P.innerHTML = html; P.dataset.sig = sig; P.classList.toggle('on', !!html)
 }
 // ── Home was drawn (or the card, or the window changed): the layer back in place, the map measured again, he where his perch is now
@@ -5614,7 +5647,7 @@ function lokiClimbExt(side) {
   const e = lkr.ext; return side < 0 ? {l: e.r, r: e.l, ll: e.lr, lr: e.ll, up: e.up} : e
 }
 // the vine's own drawing: as wide as its leaves at the scale it is drawn
-function lokiVineHalf(top, bot) { const sv = Math.max(.17, Math.min(.24, (bot - top + 14) / LK_PROP.vine[1])); return LK_PROP.vine[0] * sv / 2 }
+function lokiVineHalf() { return LK_VTHIN.leaves * (LK_VINE_W / LK_VTHIN.stem) / 2 }
 // clear for a climb on a vine at vx: the arrival over the edge above it, and the whole climb and the vine below it, nothing readable or touchable
 function lokiVineClear(clear, vx, side, top, bot) {
   const e = lokiClimbExt(side), h = lokiVineHalf(top, bot)
@@ -5856,7 +5889,7 @@ function lokiChoose(from) {
   const g = lkr.geo; if(!g) return null
   const h = gnHour(), want = h < 11 ? 'morning' : h < 17 ? 'tasks' : 'evening'
   const tb = document.getElementById('badge-tasks'), tasks = tb && !tb.classList.contains('hidden') ? +tb.textContent || 0 : 0
-  const vis = n => n.y > g.scrTop + 20 && n.y < g.scrBottom - 10
+  const vis = n => n.y > g.scrTop + 20 && n.y + 60 < g.scrBottom      // its edge on the screen, and enough of the card under it to be seen as a card
   const opts = []
   g.perches.filter(p => p.ok).forEach(function(p) {
     const path = lokiPath(from, p.key); if(!path) return
@@ -5915,23 +5948,26 @@ function lokiSnapHome() {
   const was = lkr.state; lkr.state = 'in'; lkr.want = null; if(was !== 'in') { lkr.backAt = Date.now(); if(currentScreen === 'home') lokiRender() }
 }
 function lokiSayClear() { const ly = lkr.layer, b = ly && ly.querySelector('.lk-say'); if(b) b.remove() }
-// a short line beside him while he is out (in the layer, so it scrolls with him), where it covers nothing
+// a short line beside his head while he is out (in the layer, so it scrolls with him): on the side with room, inside the screen,
+// over nothing readable or touchable, not over the vine and not over him; above his head if neither side has room
 function lokiRoamSay(text, ms) {
   const ep = lkr.ep, ly = lkr.layer; if(!ep || !text || !ly) return
   lokiSayClear()
   const b = document.createElement('div'); b.className = 'lk-say'; b.textContent = text; b.style.visibility = 'hidden'; ly.appendChild(b)
-  const O = ly.getBoundingClientRect(), a = ep.actor.getBoundingClientRect(), r = {left: a.left - O.left, right: a.right - O.left, top: a.top - O.top}
-  const g = lkr.geo, W = g ? g.R : innerWidth, L0 = g ? g.L : 0, cx = (r.left + r.right) / 2
-  const fits = function(x, y, w, h) { return x >= L0 + 4 && x + w <= W - 4 && (!g || g.clear(x, y, x + w, y + h)) }
-  const tryAt = function(side) {
-    const room = side > 0 ? W - 14 - r.right : r.left - 14 - L0; if(room < 120) return null
-    b.style.maxWidth = Math.min(180, room) + 'px'; const w = b.offsetWidth, h = b.offsetHeight
-    for(const y of [r.top + 8, r.top - h / 2, r.top + 30]) { const x = side > 0 ? r.right + 4 : r.left - 4 - w; if(fits(x, y, w, h)) return [x, y] }
-    return null
+  const O = ly.getBoundingClientRect(), A = ep.actor.getBoundingClientRect(), g = lkr.geo, L0 = (g ? g.L : 0) + 8, W = (g ? g.R : innerWidth) - 8
+  const him = {l: A.left - O.left, r: A.right - O.left, t: A.top - O.top, b: A.bottom - O.top}, head = him.t + 6
+  const vines = [...ly.querySelectorAll('.lk-vinebox')].map(e => { const r = e.getBoundingClientRect(), im = e.querySelector('img'), ir = im ? im.getBoundingClientRect() : r; return {l: ir.left - O.left, r: ir.right - O.left, t: r.top - O.top, b: r.bottom - O.top} })
+  const free = (x, y, w, h) => x >= L0 && x + w <= W && (!g || g.clear(x, y, x + w, y + h)) && !vines.some(q => q.r > x && q.l < x + w && q.b > y && q.t < y + h) && !(him.r > x + 2 && him.l < x + w - 2 && him.b > y + 2 && him.t < y + h - 2)
+  const sides = [W - him.r, him.l - L0].map((room, i) => ({side: i ? -1 : 1, room})).sort((a, c) => c.room - a.room)
+  let at = null
+  for(const sd of sides) {
+    if(sd.room < 110) continue
+    b.style.maxWidth = Math.min(180, sd.room - 6) + 'px'; const w = b.offsetWidth, h = b.offsetHeight
+    for(const y of [head, head - h / 2, head + 18]) { const x = sd.side > 0 ? him.r + 4 : him.l - 4 - w; if(free(x, y, w, h)) { at = [x, y]; break } }
+    if(at) break
   }
-  let at = tryAt(cx < (L0 + W) / 2 ? 1 : -1) || tryAt(cx < (L0 + W) / 2 ? -1 : 1)
-  if(!at) { b.style.maxWidth = ''; at = [cx - b.offsetWidth / 2, r.top - b.offsetHeight - 4] }
-  b.style.left = Math.max(L0 + 6, Math.min(W - 6 - b.offsetWidth, at[0])) + 'px'; b.style.top = at[1] + 'px'; b.style.visibility = ''
+  if(!at) { b.style.maxWidth = Math.min(180, W - L0) + 'px'; const w = b.offsetWidth, h = b.offsetHeight; at = [Math.max(L0, Math.min(W - w, (him.l + him.r) / 2 - w / 2)), him.t - h - 4] }
+  b.style.left = at[0].toFixed(1) + 'px'; b.style.top = at[1].toFixed(1) + 'px'; b.style.visibility = ''
   setTimeout(function() { if(b.isConnected) b.remove() }, ms || 3600)
 }
 // when he sets out: 15-20 seconds after Home is opened (once a visit), then a minute or two after he came back
@@ -5990,7 +6026,7 @@ function lokiLabDraw() {
   if(g) {
     g.perches.forEach(function(p) {
       if(p.fixed) return
-      h += '<div class="lk-lab-p' + (p.ok ? ' ok' : '') + '" style="left:' + p.ref.toFixed(1) + 'px;top:' + (p.y - 2).toFixed(1) + 'px;width:' + p.w.toFixed(1) + 'px"><b>' + p.key + '</b>' + (p.ok ? '' : ' · ' + esc(p.why)) + '</div>'
+      h += '<div class="lk-lab-p' + (p.ok ? ' ok' : '') + '" style="left:' + p.ref.toFixed(1) + 'px;top:' + (p.y - 2).toFixed(1) + 'px;width:' + p.w.toFixed(1) + 'px"><b>' + (p.ok ? '✓ ' : '✕ ') + p.key + '</b>' + (p.ok ? '' : ' <i>rejected: ' + esc(p.why) + '</i>') + '</div>'
       p.runs.forEach(r => { h += '<div class="lk-lab-run" style="left:' + (r[0] - 24).toFixed(1) + 'px;top:' + (p.y - LK_H - 2).toFixed(1) + 'px;width:' + (r[1] - r[0] + 48).toFixed(1) + 'px;height:' + (LK_H + 2) + 'px"></div>' })
     })
     g.vines.forEach(v => { h += '<div class="lk-lab-v" style="left:' + (v.vx - 18).toFixed(1) + 'px;top:' + v.top.toFixed(1) + 'px;height:' + (v.bot - v.top).toFixed(1) + 'px"><b>' + v.key + '</b></div>' })
@@ -6003,7 +6039,11 @@ function lokiLabDraw() {
     panel.addEventListener('click', function(e) { const b = e.target.closest('button'); if(b) lokiLabDo(b.dataset.a, b.dataset.v) })
   }
   const perch = g ? g.perches.filter(p => p.ok).map(p => '<button data-a="go" data-v="' + p.key + '">→ ' + p.key + '</button>').join('') : ''
+  const hidden = document.body.classList.contains('lk-lab-hide')
+  if(hidden) { panel.innerHTML = '<button data-a="debug">הצג דיבאג</button>'; return }
   panel.innerHTML = '<div class="lk-lab-st">' + esc(lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) : '') + (lkr.why ? ' · ' + lkr.why : '')) + '</div>' +
+    '<div class="lk-lab-vines">' + (g ? g.vines.map(v => '✓ vine-thin ' + esc(v.key)).concat((g.tried || []).map(t => '✕ vine-thin ' + esc(t.key) + ': ' + esc(t.why))).concat([g.trunk ? '✓ vine-trunk by the stump' : '✕ vine-trunk by the stump: ' + esc(g.trunkWhy || '')]).join('<br>') : '') + '</div>' +
+    '<button data-a="debug">הסתר דיבאג</button>' +
     '<button data-a="out">out</button><button data-a="home">home</button>' + perch +
     '<button data-a="walk" data-v="-1">walk ←</button><button data-a="walk" data-v="1">walk →</button><button data-a="act" data-v="turn">turn</button><button data-a="act" data-v="look">look</button><button data-a="act" data-v="wave">wave</button>' +
     '<button data-a="slow">' + (lkr.slow < 1 ? '×1' : '×¼') + '</button>'
@@ -6012,6 +6052,7 @@ function lokiLabDo(a, v) {
   if(a === 'out') { lokiWalkNow(v || undefined).then(lokiLabDraw); return }
   if(a === 'home') { lokiCall(); return }
   if(a === 'slow') { lkr.slow = lkr.slow < 1 ? 1 : .25; lokiLabDraw(); return }
+  if(a === 'debug') { document.body.classList.toggle('lk-lab-hide'); lokiLabDraw(); return }
   const ep = lkr.ep
   if(a === 'go') { if(!ep) lokiWalkNow(v).then(lokiLabDraw); else lokiGoTo(v, {force: true}); return }
   if(!ep || lkr.state !== 'perched') return
@@ -6019,7 +6060,7 @@ function lokiLabDo(a, v) {
   if(a === 'walk') { const r = n.runs.find(r => ep.dx + n.ref >= r[0] - 1 && ep.dx + n.ref <= r[1] + 1) || n.runs[0]; const to = (+v > 0 ? r[1] : r[0]) - n.ref; lokiMoveTo(ep.node, to, null); return }
   if(a === 'act') { const st = ep.steps[ep.si]; if(st && st.t === 'life') { const L = st.L || (st.L = {at: 0}); const el = (performance.now() - ep.t0) * lkr.slow; L.act = v === 'wave' ? {name: 'wave', frames: [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], fps: 9, at: el} : v === 'look' ? {name: 'look', frames: [0, 1, 2, 3, 3, 2, 1, 0], fps: 2.6, at: el} : {name: 'turn', frames: [3, 2, 1, 0, 0, 1, 2, 3], fps: 4, at: el} } }
 }
-setInterval(function() { if(LK_LAB && currentScreen === 'home') { const p = document.getElementById('lk-lab-panel'), s = p && p.querySelector('.lk-lab-st'); if(s) s.textContent = lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) + ' · ' + ((lkr.ep.steps[lkr.ep.si] || {}).t || '') : '') + (lkr.why ? ' · ' + lkr.why : '') } }, 500)
+setInterval(function() { if(LK_LAB && currentScreen === 'home') { const p = document.getElementById('lk-lab-panel'), s = p && p.querySelector('.lk-lab-st'); if(s && !document.body.classList.contains('lk-lab-hide')) s.textContent = lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) + ' · ' + ((lkr.ep.steps[lkr.ep.si] || {}).t || '') : '') + (lkr.why ? ' · ' + lkr.why : '') } }, 500)
 // ── his nook in the card: the stump, the lantern (lit by drop-shadow) and the mushroom; the note on the stump when he is out
 const LK_NOOK_AT = {stump: 54, fig: 65}     // x in the stage: the stump's middle, and his own middle when he stands up from it
 function lokiNookHtml(mode) {
