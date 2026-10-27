@@ -5693,6 +5693,7 @@ function gameReadScroll(i) {
   if(!lines.length) { gameSheetRefresh(); return }
   closeModal(); if(currentScreen !== 'home') navigateTo('home')
   lokiQueue = lines.map(t => lokiItem('scroll', t, 'read', {label: GAME_TXT.scroll[i]})); gnIdx = 0; gnFull = false; lokiRender()
+  gameSheetRefresh()   // the chip's dot, now that it is read
 }
 gameGet()
 // ── LOKI'S CORNER AND HIS WALKS (jungle) ──
