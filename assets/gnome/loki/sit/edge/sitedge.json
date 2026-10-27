@@ -1,0 +1,67 @@
+{
+ "canvas": [
+  232,
+  323
+ ],
+ "brim_px": 89,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 89",
+ "kind": "block",
+ "frames": [
+  {
+   "file": "sitedge-01.webp",
+   "source": "sit-trans-1.png",
+   "seat": [
+    180,
+    283
+   ],
+   "hang": 4.0,
+   "feet": [
+    109.2,
+    287.0
+   ],
+   "legs_x": 113.5
+  },
+  {
+   "file": "sitedge-02.webp",
+   "source": "sit-trans-2.png",
+   "seat": [
+    181,
+    283
+   ],
+   "hang": 3.0,
+   "feet": [
+    97.3,
+    286.0
+   ],
+   "legs_x": 115.0
+  },
+  {
+   "file": "sitedge-03.webp",
+   "source": "sit-trans-3.png",
+   "seat": [
+    149,
+    248
+   ],
+   "hang": 66.0,
+   "feet": [
+    176.3,
+    314.0
+   ],
+   "legs_x": 138.5
+  },
+  {
+   "file": "sitedge-04.webp",
+   "source": "sit-trans-4.png",
+   "seat": [
+    150,
+    248
+   ],
+   "hang": 69.0,
+   "feet": [
+    166.9,
+    317.0
+   ],
+   "legs_x": 140.0
+  }
+ ]
+}

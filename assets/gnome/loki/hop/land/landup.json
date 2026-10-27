@@ -1,0 +1,25 @@
+{
+ "canvas": [
+  199,
+  239
+ ],
+ "brim_px": 92,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 92",
+ "kind": "landup",
+ "frames": [
+  {
+   "file": "landup-01.webp",
+   "source": "crouch-a-2.png",
+   "feet": [
+    115.1,
+    232.0
+   ],
+   "ledge": [
+    93,
+    230
+   ],
+   "u": 1.0,
+   "dx": 22.1
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "canvas": [
+  229,
+  355
+ ],
+ "brim_px": 116,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 116",
+ "kind": "block",
+ "frames": [
+  {
+   "file": "seatwave-01.webp",
+   "source": "sit-wave-1.png",
+   "seat": [
+    127.5,
+    263
+   ],
+   "hang": 84.0,
+   "feet": [
+    125.4,
+    347.0
+   ],
+   "legs_x": 114.5,
+   "block_edge": 188
+  },
+  {
+   "file": "seatwave-02.webp",
+   "source": "sit-wave-2.png",
+   "seat": [
+    118.0,
+    260
+   ],
+   "hang": 88.0,
+   "feet": [
+    120.3,
+    348.0
+   ],
+   "legs_x": 105.0,
+   "block_edge": 188
+  },
+  {
+   "file": "seatwave-03.webp",
+   "source": "sit-wave-3.png",
+   "seat": [
+    109.5,
+    246
+   ],
+   "hang": 84.0,
+   "feet": [
+    127.7,
+    330.0
+   ],
+   "legs_x": 96.5,
+   "block_edge": 204
+  },
+  {
+   "file": "seatwave-04.webp",
+   "source": "sit-wave-4.png",
+   "seat": [
+    117.0,
+    246
+   ],
+   "hang": 84.0,
+   "feet": [
+    127.9,
+    330.0
+   ],
+   "legs_x": 104.0,
+   "block_edge": 204
+  }
+ ]
+}

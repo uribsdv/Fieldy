@@ -1,0 +1,47 @@
+{
+ "canvas": [
+  177,
+  301
+ ],
+ "brim_px": 90,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 90",
+ "kind": "feet",
+ "frames": [
+  {
+   "file": "thinking-01.webp",
+   "source": "think-1.png",
+   "feet": [
+    64.9,
+    294.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "thinking-02.webp",
+   "source": "think-2.png",
+   "feet": [
+    64.2,
+    294.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "thinking-03.webp",
+   "source": "think-3.png",
+   "feet": [
+    70.6,
+    290.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "thinking-04.webp",
+   "source": "think-4.png",
+   "feet": [
+    76.5,
+    290.0
+   ],
+   "air": 0
+  }
+ ]
+}

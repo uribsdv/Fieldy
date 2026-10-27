@@ -1,0 +1,41 @@
+{
+ "canvas": [
+  338,
+  313
+ ],
+ "brim_px": 160,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 160",
+ "kind": "block",
+ "frames": [
+  {
+   "file": "sitflat-01.webp",
+   "source": "sit-down-3.png",
+   "seat": [
+    161.5,
+    290
+   ],
+   "hang": 14.0,
+   "feet": [
+    153.0,
+    304.0
+   ],
+   "legs_x": 143.5,
+   "block_edge": 357
+  },
+  {
+   "file": "sitflat-02.webp",
+   "source": "sit-down-4.png",
+   "seat": [
+    170.5,
+    290
+   ],
+   "hang": 16.0,
+   "feet": [
+    156.3,
+    306.0
+   ],
+   "legs_x": 152.5,
+   "block_edge": 357
+  }
+ ]
+}

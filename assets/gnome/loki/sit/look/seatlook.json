@@ -1,0 +1,71 @@
+{
+ "canvas": [
+  448,
+  594
+ ],
+ "brim_px": 184,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 184",
+ "kind": "block",
+ "frames": [
+  {
+   "file": "seatlook-01.webp",
+   "source": "sit-look-1.png",
+   "seat": [
+    195.7,
+    446
+   ],
+   "hang": 141.0,
+   "feet": [
+    199.3,
+    587.0
+   ],
+   "legs_x": 175.0,
+   "block_edge": 340
+  },
+  {
+   "file": "seatlook-02.webp",
+   "source": "sit-look-2.png",
+   "seat": [
+    180.2,
+    446
+   ],
+   "hang": 141.0,
+   "feet": [
+    183.0,
+    587.0
+   ],
+   "legs_x": 159.5,
+   "block_edge": 332
+  },
+  {
+   "file": "seatlook-03.webp",
+   "source": "sit-look-3.png",
+   "seat": [
+    212.2,
+    416
+   ],
+   "hang": 142.0,
+   "feet": [
+    222.3,
+    558.0
+   ],
+   "legs_x": 191.5,
+   "block_edge": 340
+  },
+  {
+   "file": "seatlook-04.webp",
+   "source": "sit-look-4.png",
+   "seat": [
+    174.7,
+    416
+   ],
+   "hang": 142.0,
+   "feet": [
+    186.0,
+    558.0
+   ],
+   "legs_x": 154.0,
+   "block_edge": 332
+  }
+ ]
+}
