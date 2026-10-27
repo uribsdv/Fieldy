@@ -4828,7 +4828,8 @@ function gnomeCardHtml() {
   const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
   if(gnGreet === null) gnGreet = GN_DEBUG.greet || ((GN_DEBUG.idx === null || GN_DEBUG.idx === undefined) && gnomeWaveToday())
   const greet = gnGreet
-  const empty = !briefingHasContent(f) && !gameOnboardItem()   // a new user's empty day still gets the opening walk's next step
+  // a new user's empty day still gets the opening walk's next step, and a scroll he was asked to read is told on any day
+  const empty = !briefingHasContent(f) && !gameOnboardItem() && !(!night && lokiQueue.some(x => x && x.kind === 'scroll'))
   const base = gnItems(greet && !night && !empty), q = lokiQueue.filter(Boolean)
   let items = q.length && !night ? q.concat(base) : base, item, pose, label = '', text, portrait = false, sub = ''
   const wave = items.length && items[0].kind === 'greet' && !gnWaved
@@ -4888,7 +4889,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'scroll') gameScrollRead(lokiQueue[gnIdx].scroll) } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -5686,15 +5687,16 @@ const GAME_SCROLL_LINES = [
   ['המגילה הזו רטובה. אולי הנהר עבר פה.', 'אולי בכיתי קצת. (לא בכיתי.)', 'כתוב: "כשתמצא את הנהר, הוא לא יהיה מים."'],
   ['המגילה האחרונה. אין בה מילים, רק ציור:', 'מישהו הולך בשדה, ואחריו הכול ירוק.', 'עכשיו אני מבין. הנהר עבר אליך, אורי. אתה הנהר החדש. אני רק שומר על הגדה.']
 ]
+// it is read once its last line has been shown (as a chapter of his story is), not when it is tapped
 function gameReadScroll(i) {
   const g = gameGet(); if(g.scrolls.open.indexOf(i) < 0) return
-  g.scrolls.read[i] = 1; gameSave()
   const lines = GAME_SCROLL_LINES[i] || []
-  if(!lines.length) { gameSheetRefresh(); return }
+  if(!lines.length) { gameScrollRead(i); return }
   closeModal(); if(currentScreen !== 'home') navigateTo('home')
-  lokiQueue = lines.map(t => lokiItem('scroll', t, 'read', {label: GAME_TXT.scroll[i]})); gnIdx = 0; gnFull = false; lokiRender()
-  gameSheetRefresh()   // the chip's dot, now that it is read
+  lokiQueue = lines.map((t, j) => lokiItem('scroll', t, 'read', {label: GAME_TXT.scroll[i], scroll: i, last: j === lines.length - 1})); gnIdx = 0; gnFull = false; lokiRender()
+  if(lines.length === 1) gameScrollRead(i)
 }
+function gameScrollRead(i) { const g = gameGet(); if(g.scrolls.read[i]) return; g.scrolls.read[i] = 1; gameSave(); gameSheetRefresh() }   // and the chip's dot goes
 gameGet()
 // ── LOKI'S CORNER AND HIS WALKS (jungle) ──
 // One Loki, in one place at a time: in his corner of the Home card, or out on the screen. His corner is a nook with a stump, a

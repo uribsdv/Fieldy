@@ -199,17 +199,44 @@ srv.listen(0, async () => {
   eq(r, ['עוד 25 משימות', 'עוד 70 משימות', 'עוד 130 משימות', 'עוד 230 משימות'], 'the closed ones say how many tasks are left')
   ok(await pg.evaluate(() => { navigateTo('home'); return !!document.querySelector('.gm-chip .gn-story-dot') }), 'an unread scroll puts a dot on the chip')
   await done(pg)
-  // a day with open tasks (on an empty day his card shows only the empty-day line, whatever is queued: the same for Loki's story)
-  pg = await boot({ state: seededState(), game: { v: 1, total: 250, scrolls: { open: [0, 1, 2, 3, 4, 5], read: {} }, onboard: { done: true } } })
-  for (let i = 0; i < 6; i++) {
+  // reading: tap a scroll on the sheet, then tap through his bubble; each line is read off the card as it is shown, with
+  // whether the scroll is marked read at that moment. A busy day, and an empty day (no open task, no focus, no stuck site).
+  const readScroll = async (pg, i) => {
     await pg.evaluate(() => gameShowJourney()); await pg.waitForTimeout(100)
     await pg.locator('.gm-sheet .nh-chap').nth(i).click(); await pg.waitForTimeout(200)
-    r = await pg.evaluate(() => ({ q: lokiQueue.map(x => [x.kind, x.label, x.text]), home: currentScreen === 'home', sheet: !!document.querySelector('.gm-sheet'), card: (document.getElementById('jg-gnome') || {}).textContent || '' }))
-    eq(r.q, SCROLLS[i].map(t => ['scroll', SCROLL_NAMES[i], t]), 'scroll ' + (i + 1) + ': told in three bubbles, in order, under its name')
-    ok(r.home && !r.sheet && r.card.includes(SCROLLS[i][0]), 'scroll ' + (i + 1) + ': the sheet closes and Home shows its first line')
-    ok(await pg.evaluate(j => !!G().scrolls.read[j], i), 'scroll ' + (i + 1) + ': marked read')
+    const seen = [], q = await pg.evaluate(() => lokiQueue.map(x => [x.kind, x.label, x.text]))
+    const at = () => pg.evaluate(j => ({ t: (document.querySelector('#jg-gnome .gn-t') || {}).textContent || '', k: (document.querySelector('#jg-gnome .gn-k') || {}).textContent || '', read: !!G().scrolls.read[j], home: currentScreen === 'home', sheet: !!document.querySelector('.gm-sheet') }), i)
+    for (let j = 0; j < 3; j++) { if (j) { await pg.locator('#jg-gnome .gn-bubble').click(); await pg.waitForTimeout(120) } seen.push(await at()) }
+    await pg.locator('#jg-gnome .gn-bubble').click(); await pg.waitForTimeout(120)
+    return { q, seen, after: await at() }
   }
-  ok(await pg.evaluate(() => !gameUnread() && !document.querySelector('.gm-chip .gn-story-dot')), 'all read: no dot')
+  const EMPTY_DAY = Object.assign({}, EMPTY, { tasks: { now: [], today: [{ id: 'dn', text: 'נסגרה', done: true, completedAt: Date.now() - 864e5 }], later: [] } })
+  for (const [dayName, st] of [['a busy day', seededState()], ['an empty day', EMPTY_DAY]]) {
+    pg = await boot({ state: st, game: { v: 1, total: 250, scrolls: { open: [0, 1, 2, 3, 4, 5], read: {} }, onboard: { done: true } } })
+    if (dayName === 'an empty day') ok(await pg.evaluate(() => !briefingHasContent(briefingFacts()) && (document.querySelector('#jg-gnome .gn-t') || {}).textContent === lokiLine('empty')), 'an empty day: his card shows the empty-day line')
+    for (let i = 0; i < 6; i++) {
+      r = await readScroll(pg, i)
+      const name = dayName + ', scroll ' + (i + 1) + ': '
+      eq(r.q, SCROLLS[i].map(t => ['scroll', SCROLL_NAMES[i], t]), name + 'three bubbles queued, in order, under its name')
+      ok(r.seen[0].home && !r.seen[0].sheet, name + 'the sheet closes, Home shows')
+      eq(r.seen.map(x => x.t), SCROLLS[i], name + 'all three lines shown on his card, whole and in order')
+      ok(r.seen.every(x => x.k === SCROLL_NAMES[i]), name + 'under its name')
+      eq(r.seen.map(x => x.read), [false, false, true], name + 'marked read only once its last line is shown')
+      ok(r.after.read, name + 'still read after the telling ends')
+    }
+    if (dayName === 'an empty day') ok(await pg.evaluate(() => (document.querySelector('#jg-gnome .gn-t') || {}).textContent === lokiLine('empty')), 'an empty day: after the scroll, the empty-day line again')
+    ok(await pg.evaluate(() => !gameUnread() && !document.querySelector('.gm-chip .gn-story-dot')), dayName + ': all read, no dot on the chip')
+    await done(pg)
+  }
+  // left in the middle: not read, and it can be told again
+  pg = await boot({ state: EMPTY_DAY, game: { v: 1, total: 5, scrolls: { open: [0], read: {} }, onboard: { done: true } } })
+  await pg.evaluate(() => gameReadScroll(0)); await pg.waitForTimeout(100)
+  await pg.locator('#jg-gnome .gn-bubble').click(); await pg.waitForTimeout(100)
+  r = await pg.evaluate(() => { const a = !!G().scrolls.read[0]; navigateTo('tasks'); navigateTo('home'); return [a, !!G().scrolls.read[0], gameUnread()] })
+  eq(r, [false, false, true], 'a scroll left after two lines stays unread')
+  // Loki's story is as it was: on an empty day his card keeps the empty-day line
+  r = await pg.evaluate(() => { lokiTellChapter(0); return [(document.querySelector('#jg-gnome .gn-t') || {}).textContent === lokiLine('empty'), lokiQueue[0] && lokiQueue[0].kind] })
+  eq(r, [true, 'story'], "Loki's story on an empty day is unchanged (the empty-day line)")
   await done(pg)
   pg = await boot({ game: { v: 1, total: 4, onboard: { done: true } } })
   ok(await pg.evaluate(() => { lokiQueue = []; gameReadScroll(0); return lokiQueue.length === 0 && !G().scrolls.read[0] }), 'a scroll not yet open tells nothing')
