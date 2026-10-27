@@ -87,9 +87,9 @@ ok(r.tried.some(t=>/^focus>flow: focus itself is rejected/.test(t)),'the briefin
 // the way on 24 loads: three widths, four hours (the briefing card short and tall), twice each
 {const miss=[],hs=new Set();for(const W of [360,390,412])for(const h of [8,12,17,20])for(let i=0;i<2;i++){const p=await boot({q:'?gnomeHour='+h,W});const x=await p.evaluate(()=>{lokiLifeSync();return {ok:lkr.geo.vines.some(v=>v.key==='nook>flow'),why:(lkr.geo.tried.find(t=>t.key==='nook>flow')||{}).why,h:document.getElementById('jg-gnome').offsetHeight}});hs.add(x.h);if(!x.ok)miss.push(W+'/'+h+': '+x.why);await p.context().close()}
  ok(miss.length===0,'the way is there on all 24 loads (briefing card heights '+[...hs].sort().join(', ')+'): '+miss.join(' | '))}
-r=await pg.evaluate(()=>({can:lokiCan('edgeSit',lkr.seq&&Object.fromEntries(Object.keys(lkr.seq).filter(k=>lkr.seq[k].done).map(k=>[k,1]))),canWith:lokiCan('edgeSit',{sitedge:1}),hop:lokiCan('hopUp',{}),walk:lokiCan('walk',{walk:1})}))
-ok(!r.can&&r.canWith&&!r.hop&&r.walk,'a verb is there only with its frames (sitting on an edge, a jump: not yet; the code takes them from the manifest when they come): '+JSON.stringify(r))
-r=await pg.evaluate(async()=>(await (await fetch('assets/gnome/loki/manifest.json')).json()).extra);ok(r&&typeof r==='object'&&!Object.keys(r).length,'the manifest of frames still to come is there, and empty')
+r=await pg.evaluate(()=>({can:lokiCan('edgeSit',{}),canWith:lokiCan('edgeSit',{sitedge:1}),hop:lokiCan('hopUp',{}),hopWith:lokiCan('hopUp',{hopup:1}),walk:lokiCan('walk',{walk:1})}))
+ok(!r.can&&r.canWith&&!r.hop&&r.hopWith&&r.walk,'a verb is there only with its frames (sitting on an edge, a jump: only once their frames are loaded): '+JSON.stringify(r))
+r=await pg.evaluate(async()=>(await (await fetch('assets/gnome/loki/manifest.json')).json()).extra);{const P5=['sitedge','seatlook','seatwave','seatread','sitflat','standpoint','thinking','laughing','prep','hopup','hopdown','landup'],k=Object.keys(r||{});ok(k.length===P5.length&&P5.every(n=>r[n]&&r[n].dir&&r[n].json&&r[n].kOf==='walk'&&r[n].kMul>0),'the manifest has the twelve sets of pack 5 (and nothing else: crouch-b and the hires frames stay out): '+k.join(','))}
 
 // 2 the timings: first out 15-20 s after Home opens, a minute or two between visits, 5-15 minutes out, 45-150 s on a perch, a move at most every 45 s
 const STUB=`(()=>{const rec=[];const o=window.setTimeout;window.setTimeout=(f,ms)=>{rec.push(ms);return o(()=>{},1e9)};return ()=>{window.setTimeout=o;return rec}})()`
@@ -146,7 +146,7 @@ ok(Math.abs(r.d1-r.d0)<.6&&Math.abs(r.x1-r.x0)<.6,'when Home scrolls he scrolls 
 ok(Math.abs(r.d2-r.d0)<1.5&&r.inLayer&&r.state==='perched','when Home is drawn again he is still there, on the same card: '+r.d2.toFixed(1))
 // a tap on him: a wave and a line; LOKI.say / react / goTo
 r=await pg.evaluate(async()=>{const a=document.querySelector('.lk-actor'),b=a.getBoundingClientRect();a.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,clientX:b.left+b.width/2,clientY:b.top+b.height/2}));const seen=new Set();for(let i=0;i<14;i++){await new Promise(r=>setTimeout(r,90));seen.add(a.dataset.kind)}return {seen:[...seen],say:(document.querySelector('.lk-say')||{}).textContent,bank:LOKI.roamTap}})
-ok(r.seen.includes('wave')&&r.bank.includes(r.say),'a tap on him: he waves and says a line: '+r.seen.join(',')+' / '+r.say)
+ok((r.seen.includes('wave')||r.seen.includes('seatwave'))&&r.bank.includes(r.say),'a tap on him: he waves (standing, or seated on a card corner) and says a line: '+r.seen.join(',')+' / '+r.say)
 r=await pg.evaluate(()=>{lokiSayClear();const a=LOKI.react('taskDone');const t1=(document.querySelector('.lk-say')||{}).textContent;const b=LOKI.say('בדיקה');const t2=(document.querySelector('.lk-say')||{}).textContent;const c=LOKI.goTo('focus'),d=LOKI.goTo('nav'),e=LOKI.goTo('flow');return {a,t1,in:LOKI.taskDone||LOKI['taskDone'],ok1:LOKI.taskDone.includes(t1),b,t2,c,d,e}})
 ok(r.a&&r.ok1,'LOKI.react: he answers out here, where he is: '+r.t1);ok(r.b&&r.t2==='בדיקה','LOKI.say: a line beside him');ok(r.c===false&&r.d===false,'LOKI.goTo a place with no room, or no drawn way: no')
 ok(r.e===false,'LOKI.goTo again within 45 s of his last move: no (one move every 45 s at most)')
