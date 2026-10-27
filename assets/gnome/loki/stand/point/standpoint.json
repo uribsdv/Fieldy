@@ -1,0 +1,47 @@
+{
+ "canvas": [
+  299,
+  418
+ ],
+ "brim_px": 125,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 125",
+ "kind": "feet",
+ "frames": [
+  {
+   "file": "standpoint-01.webp",
+   "source": "stand-point-1.png",
+   "feet": [
+    108.0,
+    410.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "standpoint-02.webp",
+   "source": "stand-point-2.png",
+   "feet": [
+    113.6,
+    411.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "standpoint-03.webp",
+   "source": "stand-point-3.png",
+   "feet": [
+    117.4,
+    404.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "standpoint-04.webp",
+   "source": "stand-point-4.png",
+   "feet": [
+    122.1,
+    403.0
+   ],
+   "air": 0
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "canvas": [
+  190,
+  310
+ ],
+ "brim_px": 101,
+ "scale_note": "kMul by height: 0.328 css px per px (by brim it would be 0.308, 7px shorter than think and stand-point beside him)",
+ "kind": "feet",
+ "frames": [
+  {
+   "file": "laughing-01.webp",
+   "source": "laugh-1.png",
+   "feet": [
+    55.4,
+    301.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "laughing-02.webp",
+   "source": "laugh-2.png",
+   "feet": [
+    57.8,
+    301.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "laughing-03.webp",
+   "source": "laugh-3.png",
+   "feet": [
+    60.3,
+    303.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "laughing-04.webp",
+   "source": "laugh-4.png",
+   "feet": [
+    63.3,
+    303.0
+   ],
+   "air": 0
+  }
+ ]
+}

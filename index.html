@@ -1246,6 +1246,8 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 .lk-lab-panel button{padding:4px 8px;border-radius:6px;background:#2a3b30;color:#fff;font:600 11px system-ui}
 .lk-lab-st{width:100%;font:600 11px system-ui;color:#cfe}
 .lk-lab-vines{width:100%;font:500 10px/1.35 system-ui;color:#fdd}
+.lk-lab-row{width:100%;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.lk-lab-ledge{position:absolute;height:0;border-top:2px dashed #FFD24A;font:700 10px system-ui;color:#FFD24A;text-shadow:0 1px 2px #000}
 .lk-lab-p i{font-style:normal;font-weight:600;color:#ffd6d6}
 body.lk-lab-hide .lk-lab{display:none}
 body.lk-lab-hide .lk-lab-panel{left:auto;right:6px;background:rgba(0,0,0,.45);padding:4px}
@@ -5821,7 +5823,15 @@ const LK_VERBS = {
   edgeSit:   ['sitedge'],              // down on an edge, legs over it        (to be drawn: G3)
   edgeLife:  ['seatlook', 'dangle'],   // sitting on an edge                   (G5; the dangle once he can sit)
   hopUp:     ['hopup'],                // a jump onto something a little higher (G1)
-  hopDown:   ['hopdown']               // down off an edge                      (G2)
+  hopDown:   ['hopdown'],              // down off an edge                      (G2)
+  flatSit:   ['sitflat'],              // cross-legged, breathing (G4; no frames of getting into it: he sits on an edge first)
+  seatRead:  ['seatread'],             // reading, sitting on an edge (G5)
+  seatWave:  ['seatwave'],             // waving and, in the evening, dozing, sitting on an edge (G5)
+  standPoint: ['standpoint'],          // pointing, or reading, on his feet
+  ponder:    ['thinking'],             // thinking, a hand in his beard
+  laugh:     ['laughing'],
+  prep:      ['prep'],                 // the wind-up before a jump up
+  land:      ['landup']                // the landing after a jump up
 }
 // the frames whose feet are measured (all of them, or the ones that meet another sequence: the ledge's last, the jump's first and last)
 const LK_FEET = {walk: 'all', turn: 'all', look: 'all', idle: 'all', wave: 'all', standup: 'all', landing: 'all', jump: [0, 5], ledge: [-1]}
@@ -6235,6 +6245,10 @@ function lokiShow(ep, name, i, x, y, o) {
   if(name === 'dangle') fy = S.seat
   if(o.seat && name === 'standup') { cx = S.seatX; fy = S.seatY; y -= 31 }     // sitting on the stump: his seat on its top
   else if(o.feet && m.met && m.met[i]) { cx = m.met[i].fc; fy = m.met[i].fb }  // standing in place: this frame's own feet at x, on the line
+  else if(o.pk) {   // a frame of pack 5, by its own anchor (its json): the edge and line of his seat, or his feet (above the line by what is drawn of a hop)
+    const f = m.json && m.json.frames && m.json.frames[i]
+    if(f && f.seat) { cx = f.seat[0]; fy = f.seat[1] } else if(f && f.feet) { cx = f.feet[0]; fy = f.feet[1] + (f.air || 0) }
+  }
   if(o.cx != null) cx = o.cx
   const left = x - (fl ? im.naturalWidth - cx : cx) * k, top = o.top != null ? o.top : y - fy * k
   if(ep.img.src !== im.src) ep.img.src = im.src
@@ -6294,7 +6308,11 @@ function lokiReplace(ep) { const st = ep.steps[ep.si]; if(st && !lokiFrozen()) r
 // frame, so a step goes on from where that place is now
 function lokiNodeX(node, dx) { const n = lokiNode(node); return n ? n.ref + dx : 0 }
 function lokiNodeY(node) { const n = lokiNode(node); return n ? n.y : 0 }
-function lokiStepPos(ep, st) { if(!st || st.node == null) return null; return {x: lokiNodeX(st.node, st.dx != null ? st.dx : ep.dx), y: lokiNodeY(st.node)} }
+function lokiStepPos(ep, st) {
+  if(!st || st.node == null) return null
+  const dx = st.t === 'pk' || st.t === 'hop' ? st.at : st.t === 'life' && ep.seat && ep.seat.node === st.node ? ep.seat.edgeDx : st.dx != null ? st.dx : ep.dx
+  return {x: lokiNodeX(st.node, dx), y: lokiNodeY(st.node)}
+}
 // a move is planned on a cursor (where he will be, which way he will face: 1 right, -1 left, 0 Uri), step by step; the steps do the moving
 // walking along a node from where he is to dx; turning to the side he goes first if he faces another way (through the front)
 function lokiWalkSteps(c, node, toDx) {
@@ -6339,7 +6357,7 @@ function lokiVineSteps(c, v, dir) {
 function lokiGoSteps(c, to, toDx, o) {
   o = o || {}
   const path = lokiPath(c.node, to); if(!path) return null
-  const s = []
+  const s = lokiUnsitSteps(c)
   if(o.look) s.push({t: 'seq', name: 'look', fps: 2.6, node: c.node, dx: c.dx, flip: false})
   for(const e of path) { const v = lokiVine(e.vine); if(!v) return null; s.push(...lokiVineSteps(c, v, e.dir)) }
   if(to === 'nook') {
@@ -6350,14 +6368,83 @@ function lokiGoSteps(c, to, toDx, o) {
     s.push({t: 'home'})
     return s
   }
+  const seat = o.sit === false ? null : lokiChooseSeat(to, toDx, o.sit === true)
+  if(seat) {   // to the corner, and down on its edge (sit-trans 1-4)
+    s.push(...lokiWalkSteps(c, to, seat.standDx), ...lokiFaceSteps(c, to, seat.side))
+    s.push(...lokiSitSteps(c, to, seat))
+    s.push({t: 'arrive', node: to, dx: seat.standDx, line: o.line || null})
+    s.push({t: 'life', node: to, dx: seat.standDx})
+    return s
+  }
   s.push(...lokiWalkSteps(c, to, toDx))
   s.push(...lokiFaceSteps(c, to, 0, 6))
   s.push({t: 'arrive', node: to, dx: toDx, line: o.line || null})
   s.push({t: 'life', node: to, dx: toDx})
   return s
 }
+// ── sitting on the edge of a card (pack 5): at one of its top corners (the right one; the left, mirrored), where the straight part of its
+// edge begins; only where nothing readable or touchable is under his legs or around him, and inside the screen
+const LK_SEATED = ['sitedge', 'seatlook', 'seatwave', 'seatread', 'sitflat']
+const LK_SEAT_IN = 22             // the card's rounded corner (its radius): his seat is on the straight edge
+// how far the seated drawings reach from the edge and line of his seat, measured once on their frames: above the line all of him (the
+// pointing arm too: l, r, t), below it only his legs (bl, br, b); mirrored on the left
+function lokiSeatExt(side, flat) {
+  const mir = e => side < 0 ? {l: e.r, r: e.l, t: e.t, b: e.b, bl: e.br, br: e.bl} : e, key = flat ? 'seatExtFlat' : 'seatExt'
+  if(!lkr[key]) {
+    const e = {l: 0, r: 0, t: 0, b: 0, bl: 0, br: 0}; let n = 0
+    ;(flat ? ['sitflat'] : LK_SEATED.filter(x => x !== 'sitflat')).forEach(function(name) { const m = lokiSeqReady(name); if(!m || !m.json) return; m.imgs.forEach(function(im, i) { const f = m.json.frames[i]; if(!f || !f.seat) return
+      const b = lokiMeasure(im), lb = lokiMeasureBelow(im, Math.ceil(f.seat[1]))
+      e.l = Math.max(e.l, (f.seat[0] - b.x0) * m.k); e.r = Math.max(e.r, (b.x1 + 1 - f.seat[0]) * m.k); e.t = Math.max(e.t, (f.seat[1] - b.y0) * m.k)
+      if(lb) { e.bl = Math.max(e.bl, (f.seat[0] - lb.x0) * m.k); e.br = Math.max(e.br, (lb.x1 + 1 - f.seat[0]) * m.k); e.b = Math.max(e.b, (lb.y1 + 1 - f.seat[1]) * m.k) }
+      n++ }) })
+    if(!n || !lokiSeqReady('sitedge')) return null
+    if(!LK_SEATED.every(name => !LK_SEQ[name] || lokiSeqReady(name))) return mir(e)   // kept once all of them are there
+    lkr[key] = e
+  }
+  return mir(lkr[key])
+}
+// the ink of a drawing below one of its rows (his legs below the line of his seat): its box, or null
+function lokiMeasureBelow(img, y0) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight
+  const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0); if(y0 >= c.height) return null
+  const d = g.getImageData(0, y0, c.width, c.height - y0).data; let x0 = c.width, x1 = -1, y1 = -1
+  for(let y = 0; y < c.height - y0; y++) for(let x = 0; x < c.width; x++) if(d[(y * c.width + x) * 4 + 3] > 40) { if(x < x0) x0 = x; if(x > x1) x1 = x; y1 = y }
+  return x1 < 0 ? null : {x0, x1, y1: y1 + y0}
+}
+// a corner of a perch as a seat: the edge of his seat there, where his feet are before he sits down; or why not
+function lokiSeatAt(node, side) {
+  const g = lkr.geo, n = lokiNode(node), e = lokiSeatExt(side), m = lokiSeqReady('sitedge')
+  if(!g || !n || !n.ok || n.fixed || node === 'nook' || !e || !m || !m.json) return {why: 'no seat here'}
+  // (a little further in where the reach of his arm, a wave or a point, would pass the screen's edge)
+  const edge = side > 0 ? Math.min(n.ref + n.w - LK_SEAT_IN, g.R - 2 - e.r) : Math.max(n.ref + LK_SEAT_IN, g.L + 2 + e.l), y = n.y, l = edge - e.l, r = edge + e.r
+  if(l < g.L + 2 || r > g.R - 2) return {why: 'past the screen\'s edge'}
+  if(!g.clear(l, y - e.t, r, y - 1)) return {why: 'no room around him above the edge'}
+  if(!g.clear(edge - e.bl, y + 1, edge + e.br, y + e.b)) return {why: 'his legs would hang over text or a control'}
+  const f0 = m.json.frames[0], standX = edge + (f0.feet[0] - f0.seat[0]) * m.k * side
+  // cross-legged (the evening) only where its legs, spread wider, are over nothing either
+  const ef = lokiSeqReady('sitflat') && lokiSeatExt(side, true), flat = !!ef && g.clear(edge - ef.l, y - ef.t, edge + ef.r, y - 1) && g.clear(edge - ef.bl, y + 1, edge + ef.br, y + ef.b) && edge - ef.l >= g.L + 2 && edge + ef.r <= g.R - 2
+  return {node, side, edgeDx: edge - n.ref, standDx: standX - n.ref, flat}
+}
+// whether he sits down where he is going (most of the time, when a corner lets him), and on which corner: the nearer one that does
+function lokiChooseSeat(node, nearDx, always) {
+  if(!lokiSeqReady('sitedge') || node === 'nook' || (!always && Math.random() > .65)) return null
+  const n = lokiNode(node); if(!n) return null
+  const sides = [1, -1].sort((a, b) => Math.abs((a > 0 ? n.w : 0) - nearDx) - Math.abs((b > 0 ? n.w : 0) - nearDx))
+  for(const sd of sides) { const st = lokiSeatAt(node, sd); if(st && !st.why) return st }
+  return null
+}
+function lokiSitSteps(c, node, seat) {
+  c.seat = seat; c.face = 0
+  return [{t: 'pk', name: 'sitedge', frames: [0, 1, 2, 3], fps: 5, node, at: seat.edgeDx, flip: seat.side < 0, sit: seat}]
+}
+// up from the edge (sit-trans the other way round), to where he stood before he sat
+function lokiUnsitSteps(c) {
+  const seat = c.seat; if(!seat) return []
+  c.seat = null; c.dx = seat.standDx; c.face = seat.side
+  return [{t: 'pk', name: 'sitedge', frames: [3, 2, 1, 0], fps: 5, node: seat.node, at: seat.edgeDx, flip: seat.side < 0, unsit: true, standDx: seat.standDx, side: seat.side}]
+}
 function lokiVineHold(v) { return Object.assign({}, v, {upRef: lokiNode(v.up).ref, dnRef: lokiNode(v.down).ref}) }
-function lokiCursor(ep) { return {node: ep.node, dx: ep.dx, face: ep.face == null ? 0 : ep.face} }
+function lokiCursor(ep) { return {node: ep.node, dx: ep.dx, face: ep.face == null ? 0 : ep.face, seat: ep.seat || null} }
 function lokiScript(ep, steps) { ep.steps = steps; ep.si = 0; ep.t0 = performance.now(); ep.last = ep.t0; ep.paused = 0; cancelAnimationFrame(lkr.raf); clearTimeout(lkr.frz); lkr.parked = false; lkr.raf = requestAnimationFrame(lokiTick) }
 function lokiFrozen() { const g = lokiRoamGuard(); return !!g && g !== 'off' && g !== 'reduced' }
 function lokiTick(now) {
@@ -6373,9 +6460,10 @@ function lokiTick(now) {
     ep.si++; ep.t0 = now; st = ep.steps[ep.si]
   }
   if(lkr.ep === ep && ep.si < ep.steps.length) {
-    // standing still on a perch the picture changes every 1.6 s: looked at five times a second, not sixty
-    const cur = ep.steps[ep.si], lazy = cur && cur.t === 'life' && !(cur.L && cur.L.act) && !ep.tap
-    if(lazy) lokiTickLater(200); else lkr.raf = requestAnimationFrame(lokiTick)
+    // standing still on a perch the picture changes every 1.6 s: looked at five times a second, not sixty; a look, a page, a doze
+    // (0.8-9 frames a second) twice a frame
+    const cur = ep.steps[ep.si], a = cur && cur.L && cur.L.act, lazy = cur && cur.t === 'life' && !ep.tap && !ep.point && !ep.laugh
+    if(lazy) lokiTickLater(a ? Math.max(16, Math.min(200, Math.round(500 / a.fps))) : 200); else lkr.raf = requestAnimationFrame(lokiTick)
   }
 }
 function lokiTickLater(ms) { clearTimeout(lkr.frz); lkr.frz = setTimeout(function() { lkr.raf = requestAnimationFrame(lokiTick) }, ms) }
@@ -6472,6 +6560,20 @@ function lokiStep(ep, st, el) {
     return false
   }
   if(st.t === 'life') return lokiLife(ep, st, el)
+  if(st.t === 'pk') {
+    const fr = st.frames, n = fr.length, f = Math.min(n - 1, Math.floor(el / 1000 * st.fps))
+    if(st.unsit && f === 0 && ep.seat) ep.seat = null
+    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, st.at), lokiNodeY(st.node) + (st.dy || 0), {pk: true, flip: !!st.flip})
+    if(f === n - 1 && el >= n / st.fps * 1000) {
+      if(st.sit) { ep.seat = st.sit; ep.node = st.node; ep.dx = st.sit.standDx; ep.face = 0 }
+      if(st.unsit) { ep.node = st.node; ep.dx = st.standDx; ep.dir = ep.face = st.side }
+      if(st.feetEnd != null) { ep.node = st.node; ep.dx = st.feetEnd }
+      return false
+    }
+    return true
+  }
+  if(st.t === 'hop') return lokiHop(ep, st, el)
+  if(st.t === 'labback') { ep.node = st.node; ep.dx = st.dx; ep.seat = null; lkr.labLedge = null; if(LK_LAB) lokiLabDraw(); return false }
   if(st.t === 'say') { if(!st.done) { st.done = true; if(st.line) lokiRoamSay(st.line, 5200) } return el < 900 }
   if(st.t === 'home') { lokiBackInCorner(); return false }
   return false
@@ -6479,16 +6581,73 @@ function lokiStep(ep, st, el) {
 // his life on a perch: breathing, now and then a look about, a turn away and back; a wave when he is tapped. (Sitting on an edge
 // needs its own frames, edgeSit; once they are there he sits, and lives sitting.)
 function lokiLife(ep, st, el) {
-  const x = lokiNodeX(st.node, ep.node === st.node ? ep.dx : st.dx), y = lokiNodeY(st.node), L = st.L || (st.L = {at: 0, act: null, next: 6000 + Math.random() * 8000})
+  if(ep.seat && ep.seat.node === st.node) return lokiSeatLife(ep, st, el)
+  const x = lokiNodeX(st.node, ep.node === st.node ? ep.dx : st.dx), y = lokiNodeY(st.node), L = st.L || (st.L = {at: 0, act: null, next: 6000 + Math.random() * 8000}), S = ep.seqs
   if(ep.tap) { L.act = {name: 'wave', frames: [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], fps: 9, at: el}; ep.tap = false }
-  if(!L.act && el - L.at > L.next) { L.act = Math.random() < .6 ? {name: 'look', frames: [0, 1, 2, 3, 3, 2, 1, 0], fps: 2.6, at: el} : {name: 'turn', frames: [3, 2, 1, 0, 0, 1, 2, 3], fps: 4, at: el, flip: Math.random() < .5} }
+  if(ep.point) { ep.point = false; if(S.standpoint) L.act = {name: 'standpoint', frames: [0, 1, 1, 1, 1, 0], fps: 2, at: el, pk: true} }
+  if(ep.laugh) { ep.laugh = false; if(S.laughing) L.act = {name: 'laughing', frames: [0, 1, 2, 1, 2, 1, 3], fps: 4, at: el, pk: true} }
+  if(!L.act && el - L.at > L.next) {
+    // now and then: a look about, a turn away and back; and with pack 5, a thought (a hand in his beard) or a page read on his feet
+    const r = Math.random()
+    L.act = S.thinking && r < .18 ? {name: 'thinking', frames: [0, 1, 2, 2, 1, 0, 3, 3, 0], fps: 1.6, at: el, pk: true}
+      : S.standpoint && r < .32 ? {name: 'standpoint', frames: [2, 3, 2, 3, 2, 3], fps: 1.2, at: el, pk: true}
+      : r < .74 ? {name: 'look', frames: [0, 1, 2, 3, 3, 2, 1, 0], fps: 2.6, at: el} : {name: 'turn', frames: [3, 2, 1, 0, 0, 1, 2, 3], fps: 4, at: el, flip: Math.random() < .5}
+  }
   if(L.act) {
     const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
-    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, {flip: !!a.flip, feet: true}); return true }
+    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, a.pk ? {pk: true, flip: !!a.flip} : {flip: !!a.flip, feet: true}); return true }
     L.act = null; L.at = el; L.next = 9000 + Math.random() * 12000
   }
   lokiShow(ep, 'idle', Math.floor(el / 1600) % 2, x, y, {flip: false, feet: true})
   return true
+}
+// his life sitting on the edge: still in the day (sit-look 2), now and then a look about, a page or two of a book, a point; a wave when he
+// is tapped; in the evening (19:00-22:00) cross-legged, breathing (sit-down 3-4), and now and then dozing off (sit-wave 3-4)
+function lokiSeatLife(ep, st, el) {
+  const s = ep.seat, x = lokiNodeX(st.node, s.edgeDx), y = lokiNodeY(st.node), fl = s.side < 0, S = ep.seqs, h = gnHour(), eve = h >= 19 && h < 22
+  const L = st.L || (st.L = {at: 0, act: null, next: 5000 + Math.random() * 7000})
+  if(ep.tap) { ep.tap = false; if(S.seatwave) L.act = {name: 'seatwave', frames: [0, 1, 0, 1, 0, 1, 0], fps: 4, at: el} }
+  if(ep.point) { ep.point = false; if(S.seatlook) L.act = {name: 'seatlook', frames: [1, 3, 3, 3, 3, 1], fps: 2, at: el} }
+  ep.laugh = false        // (laughing is drawn on his feet)
+  if(!L.act && el - L.at > L.next) {
+    const opts = eve ? [S.seatwave && {name: 'seatwave', frames: [2, 3, 2, 3, 2, 3, 2, 3], fps: .8}, S.seatlook && {name: 'seatlook', frames: [1, 0, 0, 1, 2, 2, 1], fps: 2.2}]
+      : [S.seatlook && {name: 'seatlook', frames: [1, 0, 0, 1, 2, 2, 1], fps: 2.2}, S.seatread && {name: 'seatread', frames: [0, 1, 2, 3, 2, 1, 2, 3, 2, 1, 0], fps: 1.4}, S.seatlook && Math.random() < .25 && {name: 'seatlook', frames: [1, 3, 3, 3, 1], fps: 1.6}]
+    const c = opts.filter(Boolean)
+    if(c.length) L.act = Object.assign({at: el}, c[Math.floor(Math.random() * c.length)]); else { L.at = el; L.next = 9000 + Math.random() * 12000 }
+  }
+  if(L.act) {
+    const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
+    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, {pk: true, flip: fl}); return true }
+    L.act = null; L.at = el; L.next = 9000 + Math.random() * 12000
+  }
+  if(eve && S.sitflat && s.flat) lokiShow(ep, 'sitflat', Math.floor(el / 1600) % 2, x, y, {pk: true, flip: fl})
+  else lokiShow(ep, S.seatlook ? 'seatlook' : 'sitedge', S.seatlook ? 1 : 3, x, y, {pk: true, flip: fl})
+  return true
+}
+// ── a hop (pack 5): up onto a ledge (a wind-up, the jump, the landing crouch) or down off one. Each frame is placed by where its feet are
+// between the two ledges it was drawn with (u: 0 on the one he leaves, 1 on the one he lands on) and how far from the edge (dx), at the
+// real height of this ledge: the drawn heights are not the same from frame to frame (jump-up: 115, 115, 107, 90 px), so the middle frames
+// follow the real one. hop-down-3 (drawn by itself) is placed halfway between hop-down-2 and 4.
+// st: node, at (the edge, as an offset on the node), h (how much higher or lower the other ledge is, px), dir (1: to the right)
+function lokiHop(ep, st, el) {
+  const name = st.kind === 'up' ? 'hopup' : 'hopdown', m = ep.seqs[name]; if(!m || !m.json) return false
+  const fr = m.json.frames, n = fr.length, fps = 7, p = Math.min(n - 1, Math.floor(el / 1000 * fps)), f = fr[p]
+  const ex = lokiNodeX(st.node, st.at), y0 = lokiNodeY(st.node) + (st.dy || 0), y = st.kind === 'up' ? y0 - f.u * st.h : y0 + f.u * st.h
+  ep.dir = st.dir; lokiShow(ep, name, p, ex + f.dx * m.k * st.dir, y, {pk: true, flip: st.dir < 0})
+  return p < n - 1 || el < n / fps * 1000
+}
+// the steps of a hop from where he stands (the wind-up and the landing too, where their frames are): on a ledge h px higher (up) or
+// lower (down), its edge `edgeDx` along the node, in the direction dir; the landing's node and offset are given by `land`
+function lokiHopSteps(c, node, kind, edgeDx, h, dir, land) {
+  const S = lkr.ep && lkr.ep.seqs, s = []
+  if(!S || !S[kind === 'up' ? 'hopup' : 'hopdown']) return null
+  const m = S[kind === 'up' ? 'hopup' : 'hopdown'], f0 = m.json.frames[0], startDx = edgeDx + f0.dx * m.k * dir
+  s.push(...lokiUnsitSteps(c), ...lokiWalkSteps(c, node, startDx), ...lokiFaceSteps(c, node, dir))
+  if(kind === 'up' && S.prep) s.push({t: 'pk', name: 'prep', frames: [0, 1, 2, 1, 2, 3], fps: 6, node, at: startDx, flip: dir < 0})
+  s.push({t: 'hop', kind, node, at: edgeDx, h, dir})
+  if(kind === 'up' && S.landup) s.push({t: 'pk', name: 'landup', frames: [0, 0, 0], fps: 6, node: land.node, at: land.landDx, dy: land.dy || 0, flip: dir < 0, feetEnd: land.dx})
+  c.node = land.node; c.dx = land.dx; c.face = dir
+  return s
 }
 // ── going out, moving on, coming back
 async function lokiLeave(forced, to) {
@@ -6672,6 +6831,8 @@ function lokiReact(evt, data) {
   const line = e.line ? e.line(data) : null, go = typeof e.go === 'function' ? e.go(data) : e.go
   lkr.lastReact = Date.now()
   if(go && lkr.state === 'perched' && lokiGoTo(go, {line})) return true
+  if(evt === 'badge' || evt === 'stuck') lkr.ep.point = true      // where he cannot go, he points (standing: stand-point 1-2; sitting: sit-look 4)
+  if(evt === 'dayDone') lkr.ep.laugh = true                         // the day done: he laughs (on his feet; laugh 1-4)
   if(line) lokiRoamSay(line, 5200)
   return true
 }
@@ -6718,7 +6879,7 @@ function lokiReactTick() {
   if(wait > 0 || !lokiReactFree()) return lokiReactSoon(Math.max(wait, 3000))
   const x = lkr.rq.shift(), T = LK_TOPIC[x.evt], line = lokiPick(T.bank, x.data)
   lkr.lastReact = now; lkr.lastTopic = {evt: x.evt, line, at: now}
-  if(lkr.ep) lokiRoamSay(line, 5200)
+  if(lkr.ep) { lokiRoamSay(line, 5200); if(x.evt === 'jester') lkr.ep.laugh = true }
   else { lokiQueue = [lokiItem('react', line, T.pose)]; gnIdx = 0; gnFull = false; lokiRender() }
   if(lkr.rq.length) lokiReactSoon(LK_REACT_GAP)
 }
@@ -6766,6 +6927,8 @@ function lokiLabDraw() {
     g.unused.forEach(v => { h += '<div class="lk-lab-v no" style="left:' + (v.vx - 18).toFixed(1) + 'px;top:' + v.drawTop.toFixed(1) + 'px;height:' + (v.bot - v.drawTop).toFixed(1) + 'px"><b>✕ ' + v.key + '</b></div>' })
     g.vines.forEach(v => { h += '<div class="lk-lab-v" style="left:' + (v.vx - 18).toFixed(1) + 'px;top:' + v.top.toFixed(1) + 'px;height:' + (v.bot - v.top).toFixed(1) + 'px"><b>' + v.key + '</b></div>' })
     const nk = g.nodes.nook; h += '<div class="lk-lab-n" style="left:' + (nk.stump - 6).toFixed(1) + 'px;top:' + (nk.y - 8).toFixed(1) + 'px">nook</div>'
+    const lg = lkr.labLedge   // the ledge of a hop the lab is trying: from its edge onward, h above (up) or below (down) the perch
+    if(lg) { const y = lg.kind === 'up' ? lg.y - lg.h : lg.y + lg.h, x0 = lg.kind === 'up' ? lg.x : lg.x + 4 * lg.dir, w = 90; h += '<div class="lk-lab-ledge" style="left:' + (lg.dir > 0 ? x0 : x0 - w).toFixed(1) + 'px;top:' + y.toFixed(1) + 'px;width:' + w + 'px"><b>' + (lg.kind === 'up' ? '↑' : '↓') + lg.h + '</b></div>' }
   }
   lab.innerHTML = h
   let panel = document.getElementById('lk-lab-panel')
@@ -6781,9 +6944,42 @@ function lokiLabDraw() {
     '<button data-a="debug">הסתר דיבאג</button>' +
     '<button data-a="out">out</button><button data-a="home">home</button>' + perch +
     '<button data-a="walk" data-v="-1">walk ←</button><button data-a="walk" data-v="1">walk →</button><button data-a="act" data-v="turn">turn</button><button data-a="act" data-v="look">look</button><button data-a="act" data-v="wave">wave</button>' +
-    '<button data-a="slow">' + (lkr.slow < 1 ? '×1' : '×¼') + '</button>'
+    '<button data-a="slow">' + (lkr.slow < 1 ? '×1' : '×¼') + '</button>' +
+    // pack 5, each move by itself: sitting on a corner and up again; seated: look, point, read, wave, doze, cross-legged; on his feet:
+    // point, read, think, laugh, the wind-up; and a hop up or down a ledge drawn by the lab (dashed), of the height on the button
+    '<div class="lk-lab-row">' + [['sit', '', 'sit'], ['unsit', '', 'stand up'], ['p5', 'slook', 'look·s'], ['p5', 'spoint', 'point·s'], ['p5', 'sread', 'read·s'], ['p5', 'swave', 'wave·s'], ['p5', 'snap', 'doze'], ['p5', 'flat', 'cross-legged'],
+      ['p5', 'point', 'point'], ['p5', 'read', 'read'], ['p5', 'think', 'think'], ['p5', 'laugh', 'laugh'], ['p5', 'prep', 'wind-up'], ['hop', 'up:44', 'hop ↑44'], ['hop', 'up:28', 'hop ↑28'], ['hop', 'up:60', 'hop ↑60'], ['hop', 'down:32', 'hop ↓32'], ['hop', 'down:56', 'hop ↓56']]
+      .map(b => '<button data-a="' + b[0] + '" data-v="' + b[1] + '">' + b[2] + '</button>').join('') + '</div>'
+}
+// the lab's pack-5 moves (each by itself, on the perch he is on)
+const LK_LAB_ACTS = {slook: ['seatlook', [1, 0, 0, 1, 2, 2, 1], 2.2, 1], spoint: ['seatlook', [1, 3, 3, 3, 1], 1.6, 1], sread: ['seatread', [0, 1, 2, 3, 2, 1, 0], 1.4, 1], swave: ['seatwave', [0, 1, 0, 1, 0, 1, 0], 4, 1],
+  snap: ['seatwave', [2, 3, 2, 3, 2, 3], .8, 1], flat: ['sitflat', [0, 1, 0, 1, 0, 1], .625, 2], point: ['standpoint', [0, 1, 1, 1, 0], 2, 0], read: ['standpoint', [2, 3, 2, 3, 2, 3], 1.2, 0],
+  think: ['thinking', [0, 1, 2, 2, 1, 0, 3, 3, 0], 1.6, 0], laugh: ['laughing', [0, 1, 2, 1, 2, 1, 3], 4, 0], prep: ['prep', [0, 1, 2, 1, 2, 3, 0], 4, 0]}
+function lokiLabP5(a, v) {
+  const ep = lkr.ep; if(!ep || lkr.state !== 'perched') return
+  const node = ep.node, n = lokiNode(node), c = lokiCursor(ep), st0 = ep.steps[ep.si]
+  if(a === 'sit') {
+    if(ep.seat) return
+    const seat = [1, -1].map(sd => lokiSeatAt(node, sd)).find(x => x && !x.why); if(!seat) { lkr.why = 'no corner to sit on: ' + [1, -1].map(sd => (lokiSeatAt(node, sd) || {}).why).join(' / '); return lokiLabDraw() }
+    return lokiScript(ep, [...lokiWalkSteps(c, node, seat.standDx), ...lokiFaceSteps(c, node, seat.side), ...lokiSitSteps(c, node, seat), {t: 'life', node, dx: seat.standDx}])
+  }
+  if(a === 'unsit') { if(!ep.seat) return; const s = lokiUnsitSteps(c); return lokiScript(ep, s.concat([{t: 'life', node, dx: c.dx}])) }
+  if(a === 'p5') {
+    const d = LK_LAB_ACTS[v]; if(!d || !ep.seqs[d[0]] || !!d[3] !== !!ep.seat || (d[3] === 2 && !ep.seat.flat) || !st0 || st0.t !== 'life') { if(d && d[3] === 2 && ep.seat && !ep.seat.flat) { lkr.why = 'cross-legged: its legs would cover something at this corner'; lokiLabDraw() } return }
+    const L = st0.L || (st0.L = {at: 0}); L.act = {name: d[0], frames: d[1], fps: d[2], at: (performance.now() - ep.t0) * lkr.slow, pk: true}; return
+  }
+  if(a === 'hop') {   // a ledge drawn by the lab, `h` px above (or below) the perch, its edge where his first frame of the hop puts his feet where he stands
+    if(ep.seat) return
+    const [kind, hs] = v.split(':'), h = +hs, name = kind === 'up' ? 'hopup' : 'hopdown', m = ep.seqs[name]; if(!m) return
+    const g = lkr.geo, dir = n.ref + ep.dx < (g.L + g.R) / 2 ? 1 : -1, f = m.json.frames, edgeDx = ep.dx - f[0].dx * m.k * dir
+    const lu = ep.seqs.landup, landDx = kind === 'up' && lu ? edgeDx + lu.json.frames[0].dx * lu.k * dir : edgeDx + f[f.length - 1].dx * m.k * dir
+    lkr.labLedge = {kind, x: n.ref + edgeDx, y: n.y, h, dir}; lokiLabDraw()
+    const s = lokiHopSteps(c, node, kind, edgeDx, h, dir, {node, landDx, dx: landDx, dy: kind === 'up' ? -h : h}); if(!s) return
+    return lokiScript(ep, s.concat([{t: 'pk', name: kind === 'up' && lu ? 'landup' : name, frames: [kind === 'up' && lu ? 0 : f.length - 1], fps: 1, node, at: landDx, dy: kind === 'up' ? -h : h, flip: dir < 0}, {t: 'labback', node, dx: ep.dx}, {t: 'life', node, dx: ep.dx}]))
+  }
 }
 function lokiLabDo(a, v) {
+  if(a === 'sit' || a === 'unsit' || a === 'p5' || a === 'hop') return lokiLabP5(a, v)
   if(a === 'out') { lokiWalkNow(v || undefined).then(lokiLabDraw); return }
   if(a === 'home') { lokiCall(); return }
   if(a === 'slow') { lkr.slow = lkr.slow < 1 ? 1 : .25; lokiLabDraw(); return }

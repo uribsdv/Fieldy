@@ -1,0 +1,70 @@
+{
+ "canvas": [
+  247,
+  322
+ ],
+ "brim_px": 80,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 80",
+ "kind": "hopdown",
+ "frames": [
+  {
+   "file": "hopdown-01.webp",
+   "source": "hop-down-1.png",
+   "feet": [
+    57.2,
+    232.0
+   ],
+   "ledge": [
+    75,
+    231
+   ],
+   "low": 314,
+   "u": 0.012,
+   "dx": -17.8
+  },
+  {
+   "file": "hopdown-02.webp",
+   "source": "hop-down-2.png",
+   "feet": [
+    115.0,
+    236.0
+   ],
+   "ledge": [
+    73,
+    231
+   ],
+   "low": 314,
+   "u": 0.06,
+   "dx": 42.0
+  },
+  {
+   "file": "hopdown-03.webp",
+   "source": "hop-down-3.png",
+   "feet": [
+    145.1,
+    276.0
+   ],
+   "between": [
+    2,
+    4
+   ],
+   "u": 0.53,
+   "dx": 72.0
+  },
+  {
+   "file": "hopdown-04.webp",
+   "source": "hop-down-4.png",
+   "feet": [
+    175.0,
+    315.0
+   ],
+   "ledge": [
+    73,
+    234
+   ],
+   "low": 315,
+   "u": 1.0,
+   "dx": 102.0
+  }
+ ]
+}

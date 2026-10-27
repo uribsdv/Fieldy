@@ -1,0 +1,47 @@
+{
+ "canvas": [
+  276,
+  334
+ ],
+ "brim_px": 102,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 102",
+ "kind": "feet",
+ "frames": [
+  {
+   "file": "prep-01.webp",
+   "source": "prep-1.png",
+   "feet": [
+    121.7,
+    327.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "prep-02.webp",
+   "source": "prep-2.png",
+   "feet": [
+    112.9,
+    326.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "prep-03.webp",
+   "source": "prep-3.png",
+   "feet": [
+    113.8,
+    325.0
+   ],
+   "air": 0
+  },
+  {
+   "file": "prep-04.webp",
+   "source": "prep-4.png",
+   "feet": [
+    78.7,
+    314.0
+   ],
+   "air": 13.0
+  }
+ ]
+}

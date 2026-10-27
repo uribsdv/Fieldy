@@ -1,0 +1,72 @@
+{
+ "canvas": [
+  199,
+  309
+ ],
+ "brim_px": 88,
+ "scale_note": "kMul = walk-01 brim 142 / this sheet's brim 88",
+ "kind": "block",
+ "frames": [
+  {
+   "file": "seatread-01.webp",
+   "source": "sit-read-1.png",
+   "seat": [
+    122.9,
+    224
+   ],
+   "hang": 63.0,
+   "feet": [
+    139.4,
+    287.0
+   ],
+   "legs_x": 113.0,
+   "block_edge": 147
+  },
+  {
+   "file": "seatread-02.webp",
+   "source": "sit-read-2.png",
+   "seat": [
+    118.4,
+    223
+   ],
+   "hang": 66.0,
+   "feet": [
+    134.1,
+    289.0
+   ],
+   "legs_x": 108.5,
+   "block_edge": 148
+  },
+  {
+   "file": "seatread-03.webp",
+   "source": "sit-read-3.png",
+   "seat": [
+    114.9,
+    236
+   ],
+   "hang": 66.0,
+   "feet": [
+    143.0,
+    302.0
+   ],
+   "legs_x": 105.0,
+   "block_edge": 115
+  },
+  {
+   "file": "seatread-04.webp",
+   "source": "sit-read-4.png",
+   "seat": [
+    88.9,
+    210.0
+   ],
+   "hang": 66.0,
+   "feet": [
+    107.8,
+    276.0
+   ],
+   "legs_x": 79.0,
+   "block_edge": 147.3,
+   "seat_by": "hang of sit-read-1..3"
+  }
+ ]
+}
