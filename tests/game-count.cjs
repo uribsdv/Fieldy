@@ -2,7 +2,7 @@
 // The journey's counts in Hebrew, through the one helper gameCount(n, kind): one is its own word ("משימה אחת", "טיפה אחת",
 // "יום טוב אחד"), two may have its own ("שתי טיפות"), the rest are plural with the number. Checked in the helper and where
 // it shows: the day line on the sheet, the scrolls still closed, the week line, the good days, the wallet and difficulty
-// labels, and Loki's "רשמתי" for a side quest.
+// labels, Loki's "רשמתי" for a side quest, and the review's "נשמר. משימה אחת עברה ל'אחר כך'."
 // Run: node tests/game-count.cjs     Exit code 0 = all checks passed, 1 = at least one failed.
 // ROOT=<dir> runs it against another checkout (default: this repository).
 'use strict'
@@ -31,7 +31,8 @@ srv.listen(0, async () => {
     ['task', ['0 משימות', 'משימה אחת', '2 משימות', '3 משימות', '10 משימות']],
     ['drop', ['0 טיפות', 'טיפה אחת', 'שתי טיפות', '3 טיפות', '10 טיפות']],
     ['goodDay', ['0 ימים טובים', 'יום טוב אחד', '2 ימים טובים', '3 ימים טובים', '10 ימים טובים']],
-    ['fullDay', ['0 ימים מלאים', 'יום מלא אחד', '2 ימים מלאים', '3 ימים מלאים', '10 ימים מלאים']]], 'one, two and many, for tasks, drops, good days and full days')
+    ['fullDay', ['0 ימים מלאים', 'יום מלא אחד', '2 ימים מלאים', '3 ימים מלאים', '10 ימים מלאים']],
+    ['movedLater', ['0 משימות עברו', 'משימה אחת עברה', '2 משימות עברו', '3 משימות עברו', '10 משימות עברו']]], 'one, two and many, for tasks, drops, good days, full days and tasks moved (its verb agreeing)')
   eq(await pg.evaluate(() => Object.values(GAME_TXT).concat(Object.values(GAME_TXT.say)).filter(v => typeof v === 'string' && /\{n\}\s*(משימות|טיפות|ימים|שבועות)/.test(v))), [], 'no text left with a number glued to a plural noun')
 
   console.log('where it shows')
@@ -54,6 +55,11 @@ srv.listen(0, async () => {
     const said = []; const take = () => { const q = lokiQueue.filter(Boolean).filter(x => x.kind === 'game').map(x => x.text); lokiQueue = []; return q.filter(t => t.startsWith('רשמתי')) }
     lokiQueue = []; gameGymRest(); gameSideToggle(g.side[0].id); said.push(take()); gameSideToggle(g.side[1].id); said.push(take()); gameSideToggle(g.side[2].id); said.push(take()); return said.concat([g.days[k].sd]) }),
     [['רשמתי. שתי טיפות.'], ['רשמתי. שתי טיפות.'], ['רשמתי. טיפה אחת.'], 6], 'Loki says the drops a side quest gave: two, two, then one')
+  // the review's undo message ("סיימתי לסקור"), in the jungle and in an old theme
+  const review = n => pg.evaluate(n => { closeModal(); const ids = []; for (let i = 0; i < n; i++) ids.push(T()); taskReviewOpen = true; taskReviewUnchecked = new Set(ids); finishTaskReview(); const t = (document.querySelector('#undo-toast span') || {}).textContent; commitUndo(); taskReviewOpen = false; return t }, n)
+  eq([await review(1), await review(2), await review(3)], ["נשמר. משימה אחת עברה ל'אחר כך'.", "נשמר. 2 משימות עברו ל'אחר כך'.", "נשמר. 3 משימות עברו ל'אחר כך'."], 'the review: "משימה אחת עברה", "2 משימות עברו", "3 משימות עברו"')
+  await pg.evaluate(() => { applyTheme('original'); navigateTo('home') }); await pg.waitForTimeout(200)
+  eq(await review(1), "נשמר. משימה אחת עברה ל'אחר כך'.", 'the same in an old theme')
   eq(errs, [], 'no page errors')
   await br.close(); srv.close()
   console.log('\n' + pass + '/' + (pass + fail) + ' checks passed')
