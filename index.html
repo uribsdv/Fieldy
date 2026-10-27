@@ -5365,17 +5365,17 @@ const GAME_LEARN = /ללמוד|למידה|לימוד|קורס|הדרכ|לקרו�
 const GAME_SIDE = {gym: {root: 'body', target: 3}, med: {root: 'body', target: 5}, walk: {root: 'body', target: 3}, read: {root: 'learn', target: 3}, journal: {root: 'learn', target: 3}, home: {root: 'people', target: 3}, own: {root: 'field', target: 3}}
 const GAME_TXT = {
   title: 'המסע', day: 'היום והשבוע', roots: 'ארבעה שורשים', side: 'משימות צד', ach: 'הישגים', scrolls: 'מגילות', onboard: 'מסע פתיחה',
-  good: 'יום טוב · {n} משימות', full: 'יום מלא', week: 'שבוע: {n} מתוך {m} ימים מלאים', streak: '{n} ימים טובים',
+  good: 'יום טוב · {n}', full: 'יום מלא', week: 'שבוע: {n} מתוך {m}', streak: '{n}',
   off: 'יום חופשי', rest: 'יום מנוחה מאימון', addSide: 'הוסף משימת צד', why: 'למה זה חשוב לי?',
   diff: {1: 'קל', 2: 'בינוני', 4: 'קשה', 8: 'אגדי'}, root: {field: 'שטח', people: 'אנשים', learn: 'למידה', body: 'גוף ושקט'},
   sideName: {gym: 'אימון', med: 'מדיטציה', walk: 'הליכה', read: 'קריאה/טאו', journal: 'יומן', home: 'שיחה עם הבית', own: 'משימה משלך'},
   thisWeek: '{n}/{m} השבוע', markToday: 'היום', done: '✓', remove: 'הסר', name: 'שם', add: 'הוסף', soon: 'בקרוב',
-  locked: '???', moreTasks: 'עוד {n} משימות', oneMore: 'עוד משימה אחת', scroll: ['מגילה ראשונה', 'מגילה שנייה', 'מגילה שלישית', 'מגילה רביעית', 'מגילה חמישית', 'מגילה שישית'],
-  days: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'], drops: '{n} טיפות', pick: 'קושי', close: 'סגור',
+  locked: '???', moreTasks: 'עוד {n}', scroll: ['מגילה ראשונה', 'מגילה שנייה', 'מגילה שלישית', 'מגילה רביעית', 'מגילה חמישית', 'מגילה שישית'],
+  days: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'], drops: '{n}', pick: 'קושי', close: 'סגור',
   say: {
     dayFull: 'יום מלא. שלוש טיפות נוספות לנחל.', weekFull: 'שבוע מלא. עשר טיפות, וגפן אחת גאה מאוד.', back: 'טוב שבאת. הגדם עוד חם.',
     rest: 'שלושה אימונים ברצף. מחר אולי יום מנוחה? גם שורשים צריכים לנוח.', why: "פעם אמרת לי: '{why}'. אני רק מזכיר.",
-    side: 'רשמתי. שתי טיפות.', cap: 'היום הנחל כבר מלא. הטיפות של מחר מחכות.', scroll: 'נפתחה מגילה חדשה. היא מחכה לך כשיהיה לך רגע.',
+    side: 'רשמתי. {n}.', cap: 'היום הנחל כבר מלא. הטיפות של מחר מחכות.', scroll: 'נפתחה מגילה חדשה. היא מחכה לך כשיהיה לך רגע.',
     obDone: 'זהו. אתה מכיר את כל השבילים. מכאן זה הנחל שלך.'
   },
   ob: [
@@ -5386,6 +5386,9 @@ const GAME_TXT = {
     {t: 'קרא לי מהגדם', say: 'כשאני יוצא לטייל, לחיצה על הגדם מחזירה אותי. נסה.'}
   ]
 }
+// a count in Hebrew, for every {n} above: one is its own word ("משימה אחת"), two may have its own ("שתי טיפות"), the rest plural
+const GAME_COUNT = {task: ['משימה אחת', 'משימות'], drop: ['טיפה אחת', 'טיפות', 'שתי טיפות'], goodDay: ['יום טוב אחד', 'ימים טובים'], fullDay: ['יום מלא אחד', 'ימים מלאים']}
+function gameCount(n, kind) { const w = GAME_COUNT[kind]; return n === 1 ? w[0] : n === 2 && w[2] ? w[2] : n + ' ' + w[1] }
 // the twelve achievements: always all shown, each with how far along it is ([have, need])
 const GAME_ACH = [
   {id: 'first', name: 'הצעד הראשון', line: 'הנה. צעד אחד. ככה מתחילים נחלים.', p: g => [g.total, 1]},
@@ -5565,7 +5568,7 @@ function gameSidePay(q, say) {
   if(d.sp[q.id]) return
   d.sp[q.id] = 1; game.roots[q.root || 'body']++
   const room = GAME_RULES.sideCap - (d.sd || 0), n = Math.min(GAME_RULES.side, Math.max(0, room))
-  if(n > 0) { d.sd = (d.sd || 0) + n; gameEarn(n); say.push({t: GAME_TXT.say.side}) } else say.push({t: GAME_TXT.say.cap, pose: 'stand'})
+  if(n > 0) { d.sd = (d.sd || 0) + n; gameEarn(n); say.push({t: GAME_TXT.say.side.replace('{n}', gameCount(n, 'drop'))}) } else say.push({t: GAME_TXT.say.cap, pose: 'stand'})
   const wk = gardenWeekKey()
   if(game.side.length && !game.sideWeeks[wk] && game.side.every(x => gameSideWeek(x) >= x.target)) { game.sideWeeks[wk] = 1; gameEarn(GAME_RULES.sideWeek) }
 }
@@ -5633,7 +5636,7 @@ function gameScan() {
 const GAME_DROP_SVG = '<svg class="gm-drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg>'
 function gameDiffTag(t) {
   const d = gameDiffOf(t), set = GAME_DIFF.indexOf(gameGet().diff[t.id]) >= 0
-  return `<button class="tag gm-diff${set ? '' : ' sug'}" onclick="gamePickDiff(${jsArg(t.id)})" aria-label="${GAME_TXT.pick}: ${GAME_TXT.diff[d]} · ${GAME_TXT.drops.replace('{n}', d)}">${GAME_TXT.diff[d]} · ${d}${GAME_DROP_SVG}</button>`
+  return `<button class="tag gm-diff${set ? '' : ' sug'}" onclick="gamePickDiff(${jsArg(t.id)})" aria-label="${GAME_TXT.pick}: ${GAME_TXT.diff[d]} · ${GAME_TXT.drops.replace('{n}', gameCount(d, 'drop'))}">${GAME_TXT.diff[d]} · ${d}${GAME_DROP_SVG}</button>`
 }
 function gamePickDiff(id) {
   const t = gameTasks().find(x => x.id === id); if(!t) return
@@ -5644,21 +5647,21 @@ function gamePickDiff(id) {
 }
 function gameSetDiff(id, d) { const g = gameGet(); if(GAME_DIFF.indexOf(d) < 0) return; g.diff[id] = d; gameSave(); haptic('light'); closeModal(); renderCurrentScreen() }
 // on the jungle Home: the good days in place of the flame, and the drops beside the progress (it opens the journey)
-function gameStreakHtml() { const n = gameStreakNow(); return n >= 2 ? ` · <span class="gm-days">${icon('leaf')} ${GAME_TXT.streak.replace('{n}', n)}</span>` : '' }
+function gameStreakHtml() { const n = gameStreakNow(); return n >= 2 ? ` · <span class="gm-days">${icon('leaf')} ${GAME_TXT.streak.replace('{n}', gameCount(n, 'goodDay'))}</span>` : '' }
 function gameUnread() { const s = gameGet().scrolls; return s.open.some(i => !s.read[i]) }
 function gameChipHtml() {
   const g = gameGet()
-  return `<button class="gm-chip" onclick="gameShowJourney()" aria-label="${GAME_TXT.title} · ${GAME_TXT.drops.replace('{n}', g.wallet)}">${GAME_DROP_SVG}<b>${g.wallet}</b>${gameUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>`
+  return `<button class="gm-chip" onclick="gameShowJourney()" aria-label="${GAME_TXT.title} · ${GAME_TXT.drops.replace('{n}', gameCount(g.wallet, 'drop'))}">${GAME_DROP_SVG}<b>${g.wallet}</b>${gameUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>`
 }
 function gameCanGive() { return Math.min(gameGet().wallet, loki.drops || 0) > 0 }
 // ── the sheet "the journey": the day and the week, the four roots, side quests, achievements, scrolls, the opening walk ──
 function gameBar(have, need) { const p = Math.max(0, Math.min(100, Math.round(have / need * 100))); return `<span class="gm-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${Math.min(have, need)}"><i style="width:${p}%"></i></span>` }
 function gameSheetHtml() {
   const g = gameGet(), T = GAME_TXT, today = gardenDayKey(), d = g.days[today] || {n: 0, p: 0}, w = gameWeekInfo(), streak = gameStreakNow()
-  const dayLine = d.full ? T.full : d.n ? T.good.replace('{n}', d.n) : ''
+  const dayLine = d.full ? T.full : d.n ? T.good.replace('{n}', gameCount(d.n, 'task')) : ''
   const strip = Array.from({length: 7}, (_, i) => { const k = gameDayAdd(w.wk, i), x = g.days[k] || {}; const c = x.full ? 'full' : x.n ? 'good' : (x.off || x.rest) ? 'off' : ''; return `<span class="gm-wd${c ? ' ' + c : ''}${k === today ? ' now' : ''}"><i></i>${T.days[i]}</span>` }).join('')
   const sec = (title, body) => `<div class="gm-sec"><div class="gm-h2">${title}</div>${body}</div>`
-  const daySec = sec(T.day, `<div class="gm-day">${dayLine ? `<b>${dayLine}</b>` : ''}<span>${T.week.replace('{n}', w.full).replace('{m}', w.need)}</span>${streak >= 2 ? `<span>${icon('leaf')} ${T.streak.replace('{n}', streak)}</span>` : ''}</div>
+  const daySec = sec(T.day, `<div class="gm-day">${dayLine ? `<b>${dayLine}</b>` : ''}<span>${T.week.replace('{n}', w.full).replace('{m}', gameCount(w.need, 'fullDay'))}</span>${streak >= 2 ? `<span>${icon('leaf')} ${T.streak.replace('{n}', gameCount(streak, 'goodDay'))}</span>` : ''}</div>
       <div class="gm-week" aria-hidden="true">${strip}</div>
       <button class="gm-btn${d.off ? ' on' : ''}" aria-pressed="${!!d.off}" onclick="gameDayOff()">${T.off}</button>`)
   const rootSec = sec(T.roots, GAME_ROOTS.map(r => `<div class="gm-row"><span class="gm-l">${T.root[r]}</span>${gameBar(g.roots[r], 15)}<b class="gm-n">${g.roots[r]}</b></div>`).join(''))
@@ -5683,7 +5686,7 @@ function gameSheetHtml() {
   const scrSec = sec(T.scrolls, `<div class="gm-row gm-trip">${gameBar(g.total, GAME_SCROLLS[GAME_SCROLLS.length - 1])}<b class="gm-n">${g.total}/${GAME_SCROLLS[GAME_SCROLLS.length - 1]}</b></div>` +
     GAME_SCROLLS.map((need, i) => g.scrolls.open.indexOf(i) >= 0
       ? `<button class="nh-chap" onclick="gameReadScroll(${i})"><span class="nh-chap-dot${g.scrolls.read[i] ? ' read' : ''}"></span><span>${T.scroll[i]}</span></button>`
-      : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${need - g.total === 1 ? T.oneMore : T.moreTasks.replace('{n}', need - g.total)}</small></div>`).join(''))
+      : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${T.moreTasks.replace('{n}', gameCount(need - g.total, 'task'))}</small></div>`).join(''))
   const ob = g.onboard, obSec = ob.done ? '' : sec(T.onboard, ['close', 'add', 'mood', 'garden', 'call'].map((k, i) => `<div class="gm-ob${ob.steps[k] ? ' got' : ''}"><em aria-hidden="true">${ob.steps[k] ? '✓' : i + 1}</em><div><b>${T.ob[i].t}</b><div class="gm-sub">${T.ob[i].say}</div></div></div>`).join(''))
   return `<div class="gm-sheet"><div class="gm-top"><div class="gm-h1">${T.title}</div><span class="gm-wallet">${GAME_DROP_SVG}<b>${g.wallet}</b></span></div>
     ${obSec}${daySec}${rootSec}${sideSec}${achSec}${scrSec}
