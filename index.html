@@ -1233,6 +1233,35 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 @media (prefers-reduced-motion:reduce){[data-theme="jungle"] .gn-lamp,[data-theme="jungle"] .lk-spr.lk-g{animation:none}}
 [data-theme="jungle"] .lk-puff svg{width:100%;height:100%;fill:#FFE29A;filter:drop-shadow(0 0 5px rgba(255,205,90,.95)) drop-shadow(0 0 11px rgba(255,190,80,.6));animation:gn-spark .22s ease-out both}
 @media (prefers-reduced-motion:reduce){.lk-roam{display:none}}
+/* the world's guests (stage 1): a layer of Home like Loki's, no height and no press; a guest moves by itself for a few seconds, then the layer goes */
+.wg-layer{position:relative;display:block;height:0;z-index:29;pointer-events:none}
+[data-theme="jungle"] .wg-guest{position:absolute;pointer-events:none;opacity:0;animation-timing-function:ease-in-out;animation-fill-mode:both;transform-origin:50% 100%}
+[data-theme="jungle"] .wg-f{position:absolute;inset:0;display:block}
+[data-theme="jungle"] .wg-flip .wg-f{transform:scaleX(-1)}
+[data-theme="jungle"] .wg-guest img{display:block;width:100%;height:100%;-webkit-user-drag:none;filter:drop-shadow(0 2px 2px rgba(10,30,15,.35))}
+[data-theme="jungle"] .wg-kupa{animation-name:wg-kupa}
+[data-theme="jungle"] .wg-kupa img{transform-origin:50% 100%;animation:wg-breathe 1.6s ease-in-out infinite}
+@keyframes wg-kupa{0%{opacity:0;transform:translate(calc(var(--d) * 54px),0)}6%{opacity:1;transform:translate(calc(var(--d) * 40px),-16px)}11%{transform:translate(calc(var(--d) * 27px),0)}17%{transform:translate(calc(var(--d) * 13px),-13px)}22%,84%{opacity:1;transform:translate(0,0)}90%{opacity:1;transform:translate(0,-15px)}100%{opacity:0;transform:translate(0,-4px)}}
+@keyframes wg-breathe{50%{transform:scale(1.025,.975)}}
+[data-theme="jungle"] .wg-dragonfly{animation-name:wg-fly}
+[data-theme="jungle"] .wg-dragonfly img{animation:wg-wing .14s linear infinite alternate}
+@keyframes wg-fly{0%{opacity:0;transform:translate(var(--far),-40px)}8%{opacity:1}30%{transform:translate(0,0)}38%{transform:translate(calc(var(--d) * -6px),-5px)}46%{transform:translate(calc(var(--d) * 4px),3px)}54%{transform:translate(calc(var(--d) * -3px),-4px)}62%{transform:translate(0,0)}90%{opacity:1}100%{opacity:0;transform:translate(calc(var(--d) * -110vw),-90px)}}
+@keyframes wg-wing{to{transform:scaleY(.93)}}
+[data-theme="jungle"] .wg-fireflies{animation-name:wg-rise}
+[data-theme="jungle"] .wg-fireflies img{filter:drop-shadow(0 0 4px rgba(255,214,120,.95)) drop-shadow(0 0 10px rgba(255,186,90,.6));animation:wg-blink 2.2s ease-in-out infinite}
+@keyframes wg-rise{0%{opacity:0;transform:translate(0,24px)}15%{opacity:1}50%{transform:translate(calc(var(--d) * 6px),0)}85%{opacity:1}100%{opacity:0;transform:translate(calc(var(--d) * -4px),-30px)}}
+@keyframes wg-blink{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.wg-layer{display:none}}
+/* the field journal, in the journey's sheet */
+[data-theme="jungle"] .wg-row{display:flex;gap:10px;align-items:center;padding:6px 0}
+[data-theme="jungle"] .wg-ico{width:44px;height:44px;flex:none;object-fit:contain}
+[data-theme="jungle"] .wg-ico.wg-dim{filter:grayscale(1) brightness(.45);opacity:.4}
+[data-theme="jungle"] .wg-mid{flex:1;min-width:0}
+[data-theme="jungle"] .wg-mid b{font-size:var(--fs-base);color:var(--t1)}
+[data-theme="jungle"] .wg-mid .gm-row{min-height:22px}
+[data-theme="jungle"] .wg-mid .gm-row .gm-sub{flex:none}
+[data-theme="jungle"] .wg-h3{margin-top:8px;font-weight:700}
+[data-theme="jungle"] .wg-log{margin:4px 0 0;padding:0 18px 0 0;font-size:var(--fs-sm);color:var(--t2);line-height:1.6}
 /* the lab (?loki-lab=1): the perches (green: room for him; red: why not), the room over each, the vines, and a panel of buttons */
 .lk-lab{position:absolute;left:0;top:0;width:100%;height:0;pointer-events:none}
 .lk-lab-p{position:absolute;height:0;border-top:3px solid #E5484D;font:700 10px/1.2 system-ui;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap}
@@ -4876,8 +4905,8 @@ function gnomeCardHtml() {
   const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
   if(gnGreet === null) gnGreet = GN_DEBUG.greet || ((GN_DEBUG.idx === null || GN_DEBUG.idx === undefined) && gnomeWaveToday())
   const greet = gnGreet
-  // a new user's empty day still gets the opening walk's next step, and a scroll he was asked to read is told on any day
-  const empty = !briefingHasContent(f) && !gameOnboardItem() && !(!night && lokiQueue.some(x => x && x.kind === 'scroll'))
+  // a new user's empty day still gets the opening walk's next step, and a scroll he was asked to read (or a guest) is told on any day
+  const empty = !briefingHasContent(f) && !gameOnboardItem() && !(!night && lokiQueue.some(x => x && (x.kind === 'scroll' || x.kind === 'guest')))
   const base = gnItems(greet && !night && !empty), q = lokiQueue.filter(Boolean)
   let items = q.length && !night ? q.concat(base) : base, item, pose, label = '', text, portrait = false, sub = ''
   const wave = items.length && items[0].kind === 'greet' && !gnWaved
@@ -4943,7 +4972,7 @@ function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderH
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
 function gnomeAfterRender() {
   const card = document.getElementById('jg-gnome'); if(!card) return
-  lokiTopicsSoon()
+  lokiTopicsSoon(); worldMoved()
   if(gnObs) gnObs.disconnect()
   if(window.IntersectionObserver) { gnObs = new IntersectionObserver(function(es){ gnVisible = es[0].isIntersecting; card.classList.toggle('gn-off', !gnVisible) }, {threshold: .1}); gnObs.observe(card) }
   const img = card.querySelector('.gn-img')
@@ -5316,6 +5345,7 @@ function lokiSit() {
   haptic('light'); loki.ritualDay = getToday(); lokiSave()
   lokiQueue = [lokiItem('ritual', lokiPick('dayDone'), 'sit-river', {lamp: 'on'}), lokiItem('ritual', (lokiPickFor('wisdom', new Set([...lokiContexts(null, gnHour()), 'evening'])) || lokiPickFor('wisdom', null, true)).t, 'sit-river', {lamp: 'on', btn: 'lamp'})]; gnIdx = 0; lokiRender()
   clearTimeout(lokiRitualTimer); lokiRitualTimer = setTimeout(lokiLampOff, 30000)
+  worldOnSummary()
 }
 function lokiLampOff() {
   clearTimeout(lokiRitualTimer); if(!lokiQueue.some(i => i.kind === 'ritual')) return
@@ -5442,7 +5472,55 @@ const GAME_TXT = {
 }
 // a count in Hebrew, for every {n} above: one is its own word ("משימה אחת"), two may have its own ("שתי טיפות"), the rest plural
 const GAME_COUNT = {task: ['משימה אחת', 'משימות'], drop: ['טיפה אחת', 'טיפות', 'שתי טיפות'], goodDay: ['יום טוב אחד', 'ימים טובים'], fullDay: ['יום מלא אחד', 'ימים מלאים'], movedLater: ['משימה אחת עברה', 'משימות עברו']}
-function gameCount(n, kind) { const w = GAME_COUNT[kind]; return n === 1 ? w[0] : n === 2 && w[2] ? w[2] : n + ' ' + w[1] }
+function gameCount(n, kind) { const w = Array.isArray(kind) ? kind : GAME_COUNT[kind]; return n === 1 ? w[0] : n === 2 && w[2] ? w[2] : n + ' ' + w[1] }
+// ── THE FOREST KEEPER'S WORLD, stage 1: guests (jungle). Kept inside fieldy_game_v1 as game.world (no key of its own) ──
+// A guest is a small creature drawn in assets/rewards/ that comes to Home once in a while after a task is closed, chosen by the
+// task's root (gameRoot). One a creature a day, three a day in all, never at night, never while Loki is busy or something is open.
+// Friendship grows with each visit (1, 3, 8, 15) and never goes back; the field journal keeps the meetings. Nothing leaves or dies.
+const WORLD_DIR = 'assets/rewards/'
+const WORLD_GUESTS = {
+  kupa:      {file: 'frog.png', name: 'קופה הצפרדע', short: 'קופה', roots: ['field', 'people', 'learn', 'body'], w: 60},
+  dragonfly: {file: 'dragonfly-teal.png', name: 'השפירית', short: 'השפירית', roots: ['learn'], w: 64},
+  fireflies: {file: 'fireflies.png', name: 'הגחליליות', short: 'הגחליליות', roots: ['people'], w: 104}
+}
+const WORLD_RULES = {perDay: 3, settle: 1500, wait: 300000, evening: 18, log: 90}
+const WORLD_FRIEND = [1, 3, 8, 15]          // visits for each step of a friendship
+const WORLD_COUNT = {visit: ['ביקור אחד', 'ביקורים', 'שני ביקורים'], meet: ['פגישה אחת', 'פגישות', 'שתי פגישות']}
+const WORLD_TXT = {
+  journal: 'יומן שטח', empty: 'עוד לא היו פגישות. כשמשימה נסגרת, לפעמים מישהו קופץ לבקר.', notYet: 'עוד לא נפגשנו',
+  next: 'עוד {n} עד הצעד הבא', recent: 'פגישות אחרונות',
+  step: ['', 'פגישה ראשונה', 'מכירים', 'חברים', 'חברים ותיקים'],
+  ctx: {evening: 'בערב', summary: 'בסוף היום', scroll: 'בגלילה'},
+  say: {
+    kupa: {
+      field: ['קופה קפצה מהשטח. יש לה בוץ על הרגליים, והיא גאה בזה.', 'קופה הגיעה מהבאר. היא אומרת שהמים שם זורמים טוב יותר כשמישהו דואג להם.'],
+      people: ['קופה שמעה שדיברת עם מישהו. היא קרקרה לו שלום בחזרה.', 'קופה אוהבת שיחות. היא ישבה רגע והקשיבה.'],
+      learn: ['קופה ישבה לידי והקשיבה. היא חושבת שלמדת משהו היום.', 'קופה הביאה עלה עם כתם בצורת אות. היא מתעקשת שזו אות.'],
+      body: ['קופה נושמת לאט על העלה שלה. היא אומרת שמותר גם לך.', 'קופה עשתה מתיחה ארוכה ונרדמה לשנייה. ככה היא נחה.'],
+      any: ['קופה קפצה לבקר. היא לא אומרת הרבה, רק מקרקרת כשמשהו נסגר.']
+    },
+    dragonfly: {learn: ['שפירית ריחפה רגע מעל הדף. היא סקרנית, כמוך.', 'שפירית עברה ונעצרה. גם היא רצתה לדעת מה למדת.', 'שפיריות אוהבות מי שלומד. הן אומרות שזה מבריק את הכנפיים.']},
+    fireflies: {
+      evening: ['ערב, והגחליליות יצאו. כל שיחה טובה מדליקה עוד אחת.', 'הגחליליות באו להאיר קצת את מי שדיברת איתו היום.'],
+      summary: ['הגחליליות מתאספות סביב סוף היום. כל אחת היא מישהו שהיה איתך היום.', 'היום נסגר, והגחליליות עוד פה. הן נשארות ליד אנשים טובים.']
+    }
+  },
+  friend: {
+    kupa: ['', 'זו קופה. היא ביישנית, אבל היא תחזור.', 'קופה כבר מכירה את הדרך אליך.', 'קופה ואתה חברים. היא שומרת לך מקום על העלה.', 'קופה מספרת עליך לכל הבריכה.'],
+    dragonfly: ['', 'שפירית ראשונה. היא עוד מתביישת.', 'השפירית חוזרת. היא זוכרת את הדרך.', 'השפירית חברה שלך עכשיו. היא נוחתת קרוב יותר.', 'השפירית כבר מביאה איתה חברות.'],
+    fireflies: ['', 'גחליליות ראשונות. הן מאירות בשקט.', 'הגחליליות מכירות אותך כבר.', 'הגחליליות חברות שלך. הן מחכות לערב.', 'הגחליליות מאירות לך את השביל הביתה.']
+  }
+}
+function worldFresh() { return {v: 1, met: {}, day: {k: '', n: 0, seen: {}}, log: []} }
+// a saved world with anything missing filled in (an older journey has none: it starts empty, nothing else changes)
+function worldFill(o) {
+  const f = worldFresh(); if(!o || typeof o !== 'object' || Array.isArray(o)) return f
+  const w = {v: 1, met: {}, day: f.day, log: []}
+  if(o.met && typeof o.met === 'object' && !Array.isArray(o.met)) Object.keys(WORLD_GUESTS).forEach(g => { const m = o.met[g]; if(m && typeof m === 'object') w.met[g] = {n: Math.max(0, +m.n || 0), first: String(m.first || ''), last: String(m.last || '')} })
+  if(o.day && typeof o.day === 'object') w.day = {k: String(o.day.k || ''), n: Math.max(0, +o.day.n || 0), seen: o.day.seen && typeof o.day.seen === 'object' && !Array.isArray(o.day.seen) ? o.day.seen : {}}
+  if(Array.isArray(o.log)) w.log = o.log.filter(x => x && WORLD_GUESTS[x.g] && +x.ts).slice(-WORLD_RULES.log)
+  return w
+}
 // the twelve achievements: always all shown, each with how far along it is ([have, need])
 const GAME_ACH = [
   {id: 'first', name: 'הצעד הראשון', line: 'הנה. צעד אחד. ככה מתחילים נחלים.', p: g => [g.total, 1]},
@@ -5462,7 +5540,7 @@ function gameTasks() { return [...state.tasks.now, ...state.tasks.today, ...stat
 function gameFresh() {
   return {v: 1, wallet: 0, earned: 0, total: 0, best: 0, returns: 0, roots: {field: 0, people: 0, learn: 0, body: 0}, byDiff: {1: 0, 2: 0, 4: 0, 8: 0},
     diff: {}, rootOf: {}, paid: {}, days: {}, weeks: {}, sideWeeks: {}, streak: {n: 0, last: ''}, ach: {}, scrolls: {open: [], read: {}}, side: [],
-    whyAt: 0, unstuck: '', stuck: {}, onboard: {done: true, start: 0, steps: {}}}
+    whyAt: 0, unstuck: '', stuck: {}, onboard: {done: true, start: 0, steps: {}}, world: worldFresh()}
 }
 // a saved (or restored) journey with anything missing filled in, so an older or partial one never breaks a screen
 function gameFill(o) {
@@ -5474,6 +5552,7 @@ function gameFill(o) {
   if(!g.scrolls.read || typeof g.scrolls.read !== 'object') g.scrolls.read = {}
   if(!g.onboard.steps || typeof g.onboard.steps !== 'object') g.onboard.steps = {}
   ;['wallet', 'earned', 'total', 'best', 'returns', 'whyAt'].forEach(k => { g[k] = +g[k] || 0 })
+  g.world = worldFill(o.world)
   return g
 }
 let game = null
@@ -5627,6 +5706,7 @@ function gameOnTaskDone(t) {
   }
   gameScrollTick(say); gameAchTick(say); gameOnboardTick(say)
   gameSave(); gameSay(say)
+  if(Date.now() - taskCreatedAt(t) >= GARDEN_RULES.minAgeMs) worldOnDone(gameRoot(t))   // a guest may come for it (on Home, later)
 }
 // side quests: done on a day (the gym and meditation read the app's own logs; a Tao sit of two minutes or more counts too)
 function gameSideDoneOn(q, k) {
@@ -5769,7 +5849,7 @@ function gameSheetHtml() {
       : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${T.moreTasks.replace('{n}', gameCount(need - g.total, 'task'))}</small></div>`).join(''))
   const ob = g.onboard, obSec = ob.done ? '' : sec(T.onboard, ['close', 'add', 'mood', 'garden', 'call'].map((k, i) => `<div class="gm-ob${ob.steps[k] ? ' got' : ''}"><em aria-hidden="true">${ob.steps[k] ? '✓' : i + 1}</em><div><b>${T.ob[i].t}</b><div class="gm-sub">${T.ob[i].say}</div></div></div>`).join(''))
   return `<div class="gm-sheet"><div class="gm-top"><div class="gm-h1">${T.title}</div><span class="gm-wallet">${GAME_DROP_SVG}<b>${g.wallet}</b></span></div>
-    ${obSec}${daySec}${rootSec}${sideSec}${achSec}${scrSec}
+    ${obSec}${daySec}${rootSec}${sideSec}${achSec}${scrSec}${worldJournalHtml()}
     <button class="btn-primary" style="margin-top:14px" onclick="closeModal()">${T.close}</button></div>`
 }
 function gameShowJourney() { haptic('light'); gameAddOpen = false; openModal(gameSheetHtml()) }
@@ -6469,6 +6549,7 @@ function lokiScript(ep, steps) { ep.steps = steps; ep.si = 0; ep.t0 = performanc
 function lokiFrozen() { const g = lokiRoamGuard(); return !!g && g !== 'off' && g !== 'reduced' }
 function lokiTick(now) {
   const ep = lkr.ep; if(!ep) return
+  worldTick(now)
   if(!lokiAllowed()) return lokiSnapHome()
   // he stops where he is (in the middle of a step too) while Uri types, a sheet is open, Home is not in front, or the app is away
   // (Home not in front, or the app away: nothing is looked at until lokiWake; the rest is looked at again every 250 ms)
@@ -6807,6 +6888,7 @@ function lokiWalkSchedule(ms) {
 }
 // another screen: if he is out he stays where he is (stopped, Home is not in front) and is there when Home comes back
 function lokiScreenChange(screen) {
+  worldMoved(); if(screen !== 'home') worldGone()
   if(screen === 'sites') lokiOnSites()
   if(screen !== 'home') { clearTimeout(lkr.timer); lkr.onHome = false; if(lkr.state === 'in') return }
   else {
@@ -6871,7 +6953,8 @@ const LK_TOPIC = {
   emptyDay: {bank: 'emptyDay', pose: 'listen', ttl: 'day'},
   field:    {bank: 'field', pose: 'stand', ttl: 'day'},
   hard3:    {bank: 'hard3', pose: 'listen', ttl: 86400000},
-  jester:   {bank: 'jester', pose: 'laugh', ttl: 600000, sitting: true}
+  jester:   {bank: 'jester', pose: 'laugh', ttl: 600000, sitting: true},
+  guest:    {guest: true, ttl: WORLD_RULES.wait}       // a guest of the world (worldQueue): its own line, said in worldArrive
 }
 const LK_REACT_GAP = 45000
 function lokiReactQueue(evt, data) {
@@ -6897,6 +6980,13 @@ function lokiReactTick() {
   if(!lkr.rq.length) return
   const wait = LK_REACT_GAP - (now - lkr.lastReact)
   if(wait > 0 || !lokiReactFree()) return lokiReactSoon(Math.max(wait, 3000))
+  // a guest first in line: gone if it can no longer come today; not ready yet, the others go first (or it is looked at again soon)
+  if(lkr.rq[0].evt === 'guest') {
+    const r = worldReady(lkr.rq[0])
+    if(r === 'no') { lkr.rq.shift(); return lokiReactTick() }
+    if(r === 'wait') { if(lkr.rq.length < 2) return lokiReactSoon(600); lkr.rq.push(lkr.rq.shift()) }
+    else { const g = lkr.rq.shift(); lkr.lastReact = now; worldArrive(g.data); if(lkr.rq.length) lokiReactSoon(LK_REACT_GAP); return }
+  }
   const x = lkr.rq.shift(), T = LK_TOPIC[x.evt], line = lokiPick(T.bank, x.data)
   lkr.lastReact = now; lkr.lastTopic = {evt: x.evt, line, at: now}
   if(lkr.ep) { lokiRoamSay(line, 5200); if(x.evt === 'jester') lkr.ep.laugh = true }
@@ -6934,6 +7024,138 @@ function lokiHard3() {
   loki.hard3Run = run; lokiSave(); LOKI.react('hard3')
 }
 Object.assign(LOKI, {goTo: lokiGoTo, say: lokiSayIt, react: lokiReact})
+// ── the guests' engine (the world, stage 1): one guest at a time, through Loki's own queue (lkr.rq), when lokiReactFree says he is
+// free and LK_REACT_GAP has passed since anything else he reacted to. A closed task (counted, gameOnTaskDone) asks for a guest by its
+// root; the guest waits in the queue for five minutes at most, for Home to be in front and still for 1.5 seconds (the dragonfly, for
+// a scroll of Home too), and then comes: Loki says its line (beside him when he is out, in his card on his stump), and the drawing
+// moves for a few seconds in a layer of Home that takes no press. Reduced motion: the line only. Nothing at night (22-05), nothing
+// while the app is away, a sheet is open or Uri types. Nothing is left running: no timer once the queue is empty, none while away.
+const wg = {settledAt: 0, scrollAt: 0, poke: 0, layer: null, t: 0, hooked: false, last: null}
+function worldOn() { return currentTheme === 'jungle' && gnomeOn() }
+function worldNight() { const h = gnHour(); return h >= 22 || h < 5 }
+function worldDay() { const w = gameGet().world, k = gardenDayKey(); if(w.day.k !== k) w.day = {k, n: 0, seen: {}}; return w.day }
+function worldCan(g) { const d = worldDay(); return d.n < WORLD_RULES.perDay && !d.seen[g] }
+function worldStep(n) { let s = 0; WORLD_FRIEND.forEach((t, i) => { if(n >= t) s = i + 1 }); return s }
+// who comes: the dragonfly for learning, the fireflies for people in the evening and at the end of the day, Kupa for any root
+function worldPick(root, ctx) {
+  if(ctx === 'summary') return worldCan('fireflies') ? 'fireflies' : null
+  if(root === 'learn' && worldCan('dragonfly')) return 'dragonfly'
+  if(root === 'people' && ctx === 'evening' && worldCan('fireflies')) return 'fireflies'
+  return worldCan('kupa') ? 'kupa' : null
+}
+function worldPeopleToday() { const t0 = new Date(); t0.setHours(0, 0, 0, 0); return gameTasks().some(t => t.done && t.completedAt >= +t0 && gameRoot(t) === 'people') }
+function worldOnDone(root) {
+  if(!worldOn() || worldNight() || GAME_ROOTS.indexOf(root) < 0) return
+  // the last open task of the day: the day's summary, the fireflies' time, when someone was part of today
+  if(!gameTasks().some(t => !t.done) && worldPeopleToday() && worldPick(root, 'summary')) return worldQueue('fireflies', 'people', 'summary')
+  const ctx = root === 'people' && gnHour() >= WORLD_RULES.evening ? 'evening' : root === 'learn' ? 'scroll' : ''
+  const g = worldPick(root, ctx); if(g) worldQueue(g, root, g === 'kupa' ? '' : ctx)
+}
+// the evening by the river (lokiSit) is the day's summary too
+function worldOnSummary() { if(worldOn() && !worldNight() && worldPeopleToday() && worldPick('people', 'summary')) worldQueue('fireflies', 'people', 'summary') }
+function worldQueue(g, root, ctx) {
+  const now = Date.now(), data = {g, root, ctx, at: now}, x = lkr.rq.find(q => q.evt === 'guest')
+  if(x) { x.data = data; x.exp = now + WORLD_RULES.wait } else lkr.rq.push({evt: 'guest', data, exp: now + WORLD_RULES.wait})
+  worldHook(); lokiReactSoon(500)
+}
+// may it come now: 'ok'; 'wait' (Home not still yet, or the dragonfly's scroll not yet); 'no' (it can no longer come today)
+function worldReady(x) {
+  const d = x.data, now = Date.now()
+  if(!worldOn() || !worldCan(d.g)) return 'no'
+  if(worldNight()) return 'wait'
+  if(now - wg.settledAt < WORLD_RULES.settle) return 'wait'
+  if(d.ctx === 'scroll') { const s = document.getElementById('screen-home'); if(s && s.scrollHeight > s.clientHeight + 40 && wg.scrollAt < d.at) return 'wait' }
+  return 'ok'
+}
+function worldMoved() { wg.settledAt = Date.now() }
+function worldHook() {
+  if(wg.hooked) return; const s = document.getElementById('screen-home'); if(!s) return; wg.hooked = true
+  s.addEventListener('scroll', function() { wg.settledAt = wg.scrollAt = Date.now() }, {passive: true})
+  window.addEventListener('resize', worldMoved, {passive: true})
+}
+// in lokiTick, while he is out: a guest waiting for him is looked at twice a second, so it comes as soon as he is on a perch and free
+function worldTick(now) {
+  if(!lkr.rq.length || now - wg.poke < 500) return; wg.poke = now
+  if(lkr.rq[0].evt === 'guest' && lkr.state === 'perched' && Date.now() - lkr.lastReact >= LK_REACT_GAP && lokiReactFree()) lokiReactSoon(0)
+}
+function worldLine(d, n) { const b = WORLD_TXT.say[d.g], list = b[d.ctx] || b[d.root] || b.any; return list[(n - 1) % list.length] }
+// it comes: the visit is kept (the friendship, the day, the journal), Loki says its line, the drawing moves
+function worldArrive(d) {
+  const G = WORLD_GUESTS[d.g], w = gameGet().world, day = worldDay()
+  const m = w.met[d.g] = w.met[d.g] || {n: 0, first: '', last: ''}, was = worldStep(m.n)
+  m.n++; if(!m.first) m.first = day.k; m.last = day.k
+  day.n++; day.seen[d.g] = 1
+  w.log.push({ts: Date.now(), g: d.g, root: d.root, ctx: d.ctx || ''}); if(w.log.length > WORLD_RULES.log) w.log = w.log.slice(-WORLD_RULES.log)
+  gameSave()
+  const step = worldStep(m.n), line = worldLine(d, m.n) + (step > was ? ' ' + WORLD_TXT.friend[d.g][step] : '')
+  wg.last = {g: d.g, root: d.root, ctx: d.ctx || '', line, step, at: Date.now(), drawn: !reducedMotion()}
+  if(lkr.ep) lokiRoamSay(line, 6000)
+  else { lokiQueue = [lokiItem('guest', line, 'listen', {label: G.name})]; gnIdx = 0; gnFull = false; lokiRender() }
+  if(!reducedMotion()) worldDraw(d.g)
+}
+// ── the drawing: in a layer of Home's scrolling content (like Loki's, no height, no press), gone when it is done
+const WORLD_DUR = {kupa: 8000, dragonfly: 7000, fireflies: 9000}
+function worldGone() { clearTimeout(wg.t); if(wg.layer) wg.layer.remove(); wg.layer = null }
+// the cards a guest may come to, the most of them in sight first
+function worldAnchors() {
+  const vh = innerHeight
+  return ['#jg-gnome', '#screen-home .nh-list', '#screen-home .nh-peek', '#screen-home .gm-prog'].map(s => document.querySelector(s)).filter(Boolean)
+    .map(el => { const r = el.getBoundingClientRect(); return {el, r, seen: Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 60))} })
+    .filter(a => a.r.width > 0 && a.seen > 40).sort((a, b) => b.seen - a.seen)
+}
+// a place over nothing readable or touchable (text by its own lines, any control or picture), not over Loki, inside the screen and
+// clear of the nav; the drawings of Home (the vines in the margins) do not count, but the card's corner vine does (it would hide a guest)
+function worldFree(x, y, w, h) {
+  const nav = document.getElementById('nav'), bottom = nav ? nav.getBoundingClientRect().top - 6 : innerHeight - 96
+  if(x < 4 || x + w > innerWidth - 4 || y < 56 || y + h > bottom) return false
+  // not over Loki (on his stump or out), nor lost in the card's corner vine (these take no press, so they are found by their boxes)
+  if([...document.querySelectorAll('#jg-gnome .gn-stage,.lk-actor,#screen-home .jgc')].some(e => { const q = e.getBoundingClientRect(); return q.width && q.right > x + 4 && q.left < x + w - 4 && q.bottom > y + 4 && q.top < y + h - 4 })) return false
+  for(let i = 0; i < 4; i++) for(let j = 0; j < 3; j++) {
+    const px = x + w * (i + .5) / 4, py = y + h * (j + .5) / 3, el = document.elementFromPoint(px, py)
+    if(!el || el.closest('#jg-gnome .gn-stage,.lk-actor')) return false
+    if(el.closest(LK_SKIP)) continue
+    if(el.closest('button,a,input,textarea,select,img,svg,[role="button"],#nav')) return false
+    for(const n of el.childNodes) if(n.nodeType === 3 && n.textContent.trim()) { const rg = document.createRange(); rg.selectNodeContents(n); if([...rg.getClientRects()].some(q => px > q.left - 6 && px < q.right + 6 && py > q.top - 6 && py < q.bottom + 6)) return false }
+  }
+  return true
+}
+// where each one goes on a card: Kupa sits in a bottom corner of it, the dragonfly hovers and the fireflies float over its top
+function worldSpots(g, r, w, h) {
+  const L = r.left + 12, R = r.right - 12 - w, up = g === 'fireflies' ? r.top - h * .55 : r.top - h + 6, above = [[L, up], [L + w * .7, up], [(r.left + r.right - w) / 2, up], [R, up]], inBot = [[L, r.bottom - h - 8], [R, r.bottom - h - 8]], inTop = [[L, r.top + 8], [R, r.top + 8]]
+  return g === 'kupa' ? inBot.concat(above, inTop) : above.concat(inTop, inBot)
+}
+function worldPlace(g) {
+  const w = WORLD_GUESTS[g].w
+  for(const a of worldAnchors()) for(const s of worldSpots(g, a.r, w, w)) if(worldFree(s[0], s[1], w, w)) return {x: s[0], y: s[1], r: a.r}
+  return null
+}
+function worldDraw(g) {
+  worldGone()
+  const scr = document.getElementById('screen-home'), at = worldPlace(g); if(!scr || !at) return      // no clear place in sight: the line only
+  const G = WORLD_GUESTS[g], ly = document.createElement('div'); ly.className = 'wg-layer'; ly.setAttribute('aria-hidden', 'true'); scr.appendChild(ly); wg.layer = ly
+  const O = ly.getBoundingClientRect(), w = G.w, x = at.x, dir = x + w / 2 < (at.r.left + at.r.right) / 2 ? -1 : 1
+  const el = document.createElement('div'); el.className = 'wg-guest wg-' + g
+  el.style.cssText = 'left:' + (x - O.left).toFixed(1) + 'px;top:' + (at.y - O.top).toFixed(1) + 'px;width:' + w + 'px;height:' + w + 'px;--d:' + dir +
+    ';--far:' + Math.round(dir * (dir > 0 ? innerWidth - x + 20 : x + w + 20)) + 'px;animation-duration:' + WORLD_DUR[g] + 'ms'
+  if(dir < 0 && g !== 'fireflies') el.classList.add('wg-flip')     // the frog and the dragonfly are drawn facing left: coming from the left they turn
+  el.innerHTML = '<i class="wg-f"><img alt="" src="' + WORLD_DIR + G.file + '"></i>'
+  ly.appendChild(el); wg.at = {g, x: Math.round(x), y: Math.round(at.y), w}
+  wg.t = setTimeout(worldGone, WORLD_DUR[g] + 100)
+}
+document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') return worldGone(); if(lkr.rq.length) lokiReactSoon(1500) })
+// ── the field journal: in the journey's sheet, after the scrolls; every creature, its friendship, the last meetings
+function worldJournalHtml() {
+  const w = gameGet().world, T = WORLD_TXT, all = Object.keys(WORLD_GUESTS).reduce((s, g) => s + (w.met[g] ? w.met[g].n : 0), 0)
+  const rows = Object.keys(WORLD_GUESTS).map(g => {
+    const G = WORLD_GUESTS[g], n = w.met[g] ? w.met[g].n : 0, s = worldStep(n), nx = WORLD_FRIEND[s]
+    return `<div class="wg-row"><img class="wg-ico${n ? '' : ' wg-dim'}" alt="" src="${WORLD_DIR + G.file}"><div class="wg-mid"><b>${n ? G.name : T.notYet}</b>` +
+      (n ? `<div class="gm-sub">${T.step[s]} · ${gameCount(n, WORLD_COUNT.visit)}</div>` : '') +
+      (nx ? `<div class="gm-row">${gameBar(n, nx)}<span class="gm-sub">${T.next.replace('{n}', gameCount(nx - n, WORLD_COUNT.visit))}</span></div>` : '') + `</div></div>`
+  }).join('')
+  const recent = w.log.slice(-6).reverse().map(x => `<li>${new Date(x.ts).toLocaleDateString('he-IL', {day: 'numeric', month: 'short'})} · ${WORLD_GUESTS[x.g].short} · ${GAME_TXT.root[x.root] || ''}${x.ctx && T.ctx[x.ctx] ? ' · ' + T.ctx[x.ctx] : ''}</li>`).join('')
+  return `<div class="gm-sec wg-journal"><div class="gm-h2">${T.journal}${all ? ` <span class="gm-sub">${gameCount(all, WORLD_COUNT.meet)}</span>` : ''}</div>${rows}` +
+    (recent ? `<div class="gm-sub wg-h3">${T.recent}</div><ul class="wg-log">${recent}</ul>` : `<div class="gm-sub">${T.empty}</div>`) + `</div>`
+}
 // ── the lab (?loki-lab=1): the map of perches and vines, and each movement by itself
 function lokiLabDraw() {
   const ly = lkr.layer, lab = ly && ly.querySelector('.lk-lab'), g = lkr.geo; if(!lab) return
