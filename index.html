@@ -1136,6 +1136,69 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .nh-chap{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;margin-bottom:8px;padding:8px 14px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid rgba(45,102,52,.25);color:var(--t1);font-size:var(--fs-base);font-weight:600;text-align:start}
 [data-theme="jungle"] .nh-chap-dot{flex:none;width:9px;height:9px;border-radius:50%;background:#E8A23A;box-shadow:0 0 5px rgba(232,162,58,.9)}
 [data-theme="jungle"] .nh-chap-dot.read{background:transparent;box-shadow:none;border:1px solid rgba(45,102,52,.35)}
+/* the journey (jungle only): the drops beside the progress, the difficulty tag on a task, the sheet "the journey". Nothing moves. */
+[data-theme="jungle"] .gm-prog{display:flex;align-items:center;gap:10px;margin-top:20px}
+[data-theme="jungle"] .gm-prog>.jg-branch{flex:1;min-width:0;margin-top:0}
+[data-theme="jungle"] .gm-prog>.nh-prog{flex:1;min-width:0;margin-top:0}
+[data-theme="jungle"] .gm-chip{position:relative;flex:none;margin-inline-start:auto;display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:4px 12px;border-radius:18px;background:rgba(255,255,255,.82);border:1px solid rgba(45,102,52,.3);color:#0B1A12;font-size:15px;font-variant-numeric:tabular-nums}
+[data-theme="jungle"] .gm-chip b{font-weight:800}
+[data-theme="jungle"] .gm-chip .gn-story-dot{position:absolute;top:-2px;inset-inline-end:-2px;margin:0}
+[data-theme="jungle"] .gm-drop{width:15px;height:15px;flex:none;fill:#2E7DA0;vertical-align:-2px}
+[data-theme="jungle"] .gm-diff{display:inline-flex;align-items:center;gap:3px;border:1px solid rgba(45,102,52,.3);background:#E4EFDF;color:#0B1A12;font-weight:600}
+[data-theme="jungle"] .gm-diff.sug{border-style:dashed}
+[data-theme="jungle"] .gm-diff .gm-drop{width:13px;height:13px}
+[data-theme="jungle"] .gm-h1{font-size:var(--fs-2xl);font-weight:800;color:var(--t1)}
+[data-theme="jungle"] .gm-h2{font-size:var(--fs-lg);font-weight:800;color:var(--t1);margin-bottom:8px}
+[data-theme="jungle"] .gm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+[data-theme="jungle"] .gm-wallet{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-lg);color:var(--t1)}
+[data-theme="jungle"] .gm-wallet .gm-drop{width:18px;height:18px}
+[data-theme="jungle"] .gm-sec{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(45,102,52,.22)}
+[data-theme="jungle"] .gm-day{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:var(--fs-base);color:var(--t2);margin-bottom:10px}
+[data-theme="jungle"] .gm-day b{color:var(--t1)}
+[data-theme="jungle"] .gm-week{display:flex;justify-content:space-between;margin-bottom:10px}
+[data-theme="jungle"] .gm-wd{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:var(--fs-sm);color:var(--t2);min-width:28px}
+[data-theme="jungle"] .gm-wd i{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(45,102,52,.4);background:transparent}
+[data-theme="jungle"] .gm-wd.good i{background:#A8D5A0;border-color:#3E7D45}
+[data-theme="jungle"] .gm-wd.full i{background:#2F7D46;border-color:#1F5A31}
+[data-theme="jungle"] .gm-wd.off i{background:repeating-linear-gradient(45deg,rgba(45,102,52,.35) 0 2px,transparent 2px 4px)}
+[data-theme="jungle"] .gm-wd.now{color:var(--t1);font-weight:800}
+[data-theme="jungle"] .gm-row{display:flex;align-items:center;gap:10px;min-height:30px}
+[data-theme="jungle"] .gm-l{flex:0 0 116px;font-size:var(--fs-base);color:var(--t1);font-weight:600}
+[data-theme="jungle"] .gm-n{flex:none;min-width:40px;text-align:end;font-size:var(--fs-sm);color:var(--t1);font-variant-numeric:tabular-nums}
+[data-theme="jungle"] .gm-bar{flex:1;height:8px;border-radius:4px;background:rgba(45,102,52,.15);overflow:hidden}
+[data-theme="jungle"] .gm-bar i{display:block;height:100%;border-radius:4px;background:#3E8A50}
+[data-theme="jungle"] .gm-sub{font-size:var(--fs-sm);color:var(--t2);line-height:1.45}
+[data-theme="jungle"] .gm-btn{min-height:36px;padding:6px 14px;border-radius:18px;background:rgba(255,255,255,.85);border:1px solid rgba(45,102,52,.35);color:#0B1A12;font-size:var(--fs-sm);font-weight:700}
+[data-theme="jungle"] .gm-btn.on{background:#D6EBD0;border-color:#2F7D46}
+[data-theme="jungle"] .gm-side{padding:10px 0;border-bottom:1px solid rgba(45,102,52,.15)}
+[data-theme="jungle"] .gm-side-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+[data-theme="jungle"] .gm-side-top b{font-size:var(--fs-base);color:var(--t1)}
+[data-theme="jungle"] .gm-x{margin-inline-start:auto;width:36px;height:36px;border-radius:50%;color:var(--t2);font-size:20px;line-height:1}
+[data-theme="jungle"] .gm-side-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+[data-theme="jungle"] .gm-step{display:inline-flex;align-items:center;gap:2px;margin-inline-start:auto}
+[data-theme="jungle"] .gm-step button{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(45,102,52,.35);color:#0B1A12;font-size:18px;font-weight:700}
+[data-theme="jungle"] .gm-step b{min-width:22px;text-align:center;color:var(--t1)}
+[data-theme="jungle"] .gm-why{margin-top:2px;min-height:40px;padding:8px 12px;border-radius:12px;font-size:var(--fs-sm)}
+[data-theme="jungle"] .gm-days{white-space:nowrap}
+[data-theme="jungle"] .gm-add{margin-top:10px}
+[data-theme="jungle"] .gm-cat{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+[data-theme="jungle"] .gm-own{display:flex;gap:8px;width:100%}
+[data-theme="jungle"] .gm-own .form-input{flex:1;min-width:0}
+[data-theme="jungle"] .gm-own .form-select{flex:0 0 108px}
+[data-theme="jungle"] .gm-ach{padding:4px 0}
+[data-theme="jungle"] .gm-ach .gm-sub{padding-inline-start:4px;margin-bottom:4px}
+[data-theme="jungle"] .gm-ok{font-style:normal;color:#1F6A35;margin-inline-end:4px}
+[data-theme="jungle"] .gm-trip{margin-bottom:8px}
+[data-theme="jungle"] .gm-lock{opacity:1;color:var(--t2)}
+[data-theme="jungle"] .gm-lock small{margin-inline-start:auto;font-size:var(--fs-sm);color:var(--t2);font-weight:600}
+[data-theme="jungle"] .gm-ob{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+[data-theme="jungle"] .gm-ob em{flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:var(--fs-sm);font-weight:800;border:1.5px solid rgba(45,102,52,.45);color:var(--t1)}
+[data-theme="jungle"] .gm-ob.got em{background:#2F7D46;border-color:#2F7D46;color:#fff}
+[data-theme="jungle"] .gm-ob b{font-size:var(--fs-base);color:var(--t1)}
+[data-theme="jungle"] .gm-pick-t{font-size:var(--fs-base);color:var(--t2);margin:4px 0 12px}
+[data-theme="jungle"] .gm-opt{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;margin-bottom:8px;padding:8px 14px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-base)}
+[data-theme="jungle"] .gm-opt.on{background:#D6EBD0;border:2px solid #2F7D46}
+[data-theme="jungle"] .gm-opt span{display:inline-flex;align-items:center;gap:4px;font-weight:700}
 /* Loki out on the screen: a layer that takes no press (only he does), the frames stacked and shown one at a time (no blending), a puff when he comes and goes */
 .lk-roam{position:fixed;inset:0;z-index:101;pointer-events:none;overflow:hidden}
 [data-theme="jungle"] .lk-actor{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -1963,6 +2026,7 @@ function togglePersonalLog(key, eventName, payload) {
   const personal = {...state.personal}; personal[key] = log
   setState({personal})
   if(!wasSet) logEvent(eventName, payload)
+  if(!wasSet && (key === 'gymLog' || key === 'meditationLog')) gameOnSide(key === 'gymLog' ? 'gym' : 'med')   // the journey's side quests (fieldy_game_v1)
 }
 function toggleGymToday() { togglePersonalLog('gymLog', 'gym_completed', {date: getToday()}) }
 function toggleMeditationToday() { togglePersonalLog('meditationLog', 'meditation_completed', {source:'manual'}) }
@@ -3340,7 +3404,7 @@ function drawMedCircle(ratio) {
 }
 
 function stopMeditation(completed) {
-  if(medInterval) { clearInterval(medInterval); medInterval = null; }
+  if(medInterval) { clearInterval(medInterval); medInterval = null; gameOnTao(medTotal - medSeconds); }   // a sit of two minutes or more counts for the journey's meditation quest
   window._onBreathCycle = null;
   document.getElementById('modal-container').innerHTML = '';
   try { stopAmbientMusic(); } catch(e) { console.log('stopAmbientMusic err:', e); }
@@ -3850,6 +3914,7 @@ function gardenHomeHtml() {
   return html
 }
 function showGarden() {
+  gameNote('garden')
   const ids = Object.keys(REWARDS), found = gardenFound().length, sc = gardenSceneNow()
   openModal('<div class="nh-garden-sheet">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('garden_title') + '</div>' +
@@ -4401,6 +4466,7 @@ function askFieldyHtml() {
 }
 
 function renderHome() {
+  gameScan()
   if(currentTheme === 'jungle') { renderHomeJungle(); return }
   if(nachalLike()) { renderHomeNachal(); return }
   const el = document.getElementById('screen-home')
@@ -4630,7 +4696,7 @@ function renderHomeJungle() {
     <div class="nh jg-home">
       <div class="nh-top">
         <div class="nh-head">
-          <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
+          <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${gameStreakHtml()}</div>
           <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
           <div class="nh-region">Region II · Cagayan Valley</div>
           <div class="nh-stats">
@@ -4645,10 +4711,10 @@ function renderHomeJungle() {
         </div>
       </div>
       ${offline ? `<div class="jg-srv" onclick="navigateTo('settings')" role="button" tabindex="0">${icon('cloud')} <span><b>${tr('home_server_needed_title')}</b> · ${tr('home_server_needed_body')}</span></div>` : ''}
-      ${total > 0 ? (jgBranchOn() ? jgBranchHtml(done, total) : `<div class="nh-prog">
+      <div class="gm-prog">${total > 0 ? (jgBranchOn() ? jgBranchHtml(done, total) : `<div class="nh-prog">
         <div class="nh-prog-row"><span>${tr('home_progress')}</span><b>${done}/${total}</b></div>
         <div class="nh-prog-bar"><i style="width:${pct}%"></i></div>
-      </div>`) : ''}
+      </div>`) : ''}${gameChipHtml()}</div>
       <div class="nh-tools">
         <button class="nh-ask" onclick="navigateTo('input')">${icon('search')}<span>${tr('home_ask_organize')}</span></button>
         <button class="nh-calm${moodPanelOpen ? ' on' : ''}" onclick="toggleMoodPanel()" aria-expanded="${moodPanelOpen}" aria-label="${tr('home_mood_prompt')}">${icon('leaf')}${moodDef ? `<u style="background:${moodDef.color}"></u>` : ''}</button>
@@ -4737,11 +4803,13 @@ function gnItems(greet) {
   if(L.storm && lokiStorm()) opening.push(L.storm)
   else if(L.away) { opening.push(L.away); if(L.away2) opening.push(L.away2) }
   else if(L.away2) opening.push(L.away2)
-  else if(greet && L.greet) opening.push(L.greet)
+  else if(greet && L.greet) { opening.push(L.greet); const ob = gameOnboardItem(); if(ob) opening.push(ob) }
+  else if(gameOnboardItem()) opening.push(gameOnboardItem())
   else if(lokiInviteOk(gnHour())) opening.push(lokiItem('invite', lokiPick('invite'), 'stand', {btn: 'sit'}))
   else if(L.poof) opening.push(L.poof)
   else if(L.help) opening.push(L.help)
   else if(L.gift && loki.gift) opening.push(L.gift)
+  else if(L.why) opening.push(L.why)
   else if(L.recall) opening.push(L.recall)
   else if(doneAll) opening.push(L.done || (L.done = lokiItem('done', lokiPick('dayDone'), 'joy')))
   else if(L.char) opening.push(L.char)
@@ -4760,7 +4828,8 @@ function gnomeCardHtml() {
   const f = briefingFacts(), hour = gnHour(), night = hour >= 22 || hour < 5
   if(gnGreet === null) gnGreet = GN_DEBUG.greet || ((GN_DEBUG.idx === null || GN_DEBUG.idx === undefined) && gnomeWaveToday())
   const greet = gnGreet
-  const empty = !briefingHasContent(f)
+  // a new user's empty day still gets the opening walk's next step, and a scroll he was asked to read is told on any day
+  const empty = !briefingHasContent(f) && !gameOnboardItem() && !(!night && lokiQueue.some(x => x && x.kind === 'scroll'))
   const base = gnItems(greet && !night && !empty), q = lokiQueue.filter(Boolean)
   let items = q.length && !night ? q.concat(base) : base, item, pose, label = '', text, portrait = false, sub = ''
   const wave = items.length && items[0].kind === 'greet' && !gnWaved
@@ -4786,7 +4855,7 @@ function gnomeCardHtml() {
   const bubbleTag = items.length > 1 && !night && !empty && !briefingBusy ? ' role="button" tabindex="0" aria-label="' + tr('gn_next') + '" onclick="gnNext()" onkeydown="if(event.key===\'Enter\')gnNext()"' : ''
   const buttons = `<div class="gn-acts">
       ${lokiStoryState().open.length ? `<button class="gn-btn gn-story" onclick="showLokiStory()">${tr('gn_story')}${lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>` : ''}
-      ${(loki.drops || 0) > 0 ? `<button class="gn-btn gn-give" onclick="lokiGive()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg> ${tr('gn_give')}</button>` : ''}
+      ${gameCanGive() ? `<button class="gn-btn gn-give" onclick="lokiGive()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg> ${tr('gn_give')}</button>` : ''}
       <button class="gn-btn" onclick="toggleGnFull()" aria-expanded="${gnFull}">${tr('gn_more')}</button>
       <button id="task-review-toggle-btn" class="gn-btn${reviewedToday || taskReviewOpen ? '' : ' hot'}" onclick="toggleTaskReview()">${icon('clipboard')} ${taskReviewOpen ? tr('home_review_close') : (reviewedToday ? tr('home_review_done') : tr('home_review_open'))}</button>
       ${serverConfigured() ? `<button id="briefing-refresh-btn" class="gn-btn" onclick="refreshBriefing()" ${briefingBusy ? 'disabled' : ''}>${icon('refresh')} ${briefingBusy ? tr('home_briefing_writing') : tr('home_briefing_refresh')}</button>` : ''}
@@ -4820,7 +4889,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'scroll') gameScrollRead(lokiQueue[gnIdx].scroll) } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -5208,9 +5277,11 @@ function lokiDrop(id) {
   const day = getToday(); loki.dropDay = loki.dropDay === day ? loki.dropDay : day; if(loki.dropIdsDay !== day) { loki.dropIds = {}; loki.dropIdsDay = day }
   if(loki.dropIds[id]) return; loki.dropIds[id] = 1; loki.drops = Math.min(30, (loki.drops || 0) + 1); lokiSave()
 }
+// "give to Loki": three drops from the journey's wallet a tap. The plant still takes no more than one drop for each task closed
+// (his own count, loki.drops, kept as it always was), so it grows at the pace it always did; the rest stays in the wallet.
 function lokiGive() {
-  const n = loki.drops || 0; if(!n) return
-  const before = lokiPlantStage(); loki.water = (loki.water || 0) + n; loki.drops = 0; const after = lokiPlantStage(); lokiSave(); haptic('light')
+  const g = gameGet(), n = Math.min(GAME_RULES.give, g.wallet, loki.drops || 0); if(n <= 0) return
+  const before = lokiPlantStage(); loki.water = (loki.water || 0) + n; loki.drops = (loki.drops || 0) - n; g.wallet -= n; gameSave(); const after = lokiPlantStage(); lokiSave(); haptic('light')
   lokiQueue = [lokiItem('gave', lokiPick('give'), 'water-plant')]
   if(after > before) lokiQueue.push(lokiItem('plantup', LOKI.plantUp[after], 'joy'))
   gnIdx = 0; lokiRender()
@@ -5263,6 +5334,370 @@ function showLokiStory() {
     st.open.map(i => '<button class="nh-chap" onclick="lokiTellChapter(' + i + ')"><span class="nh-chap-dot' + (st.read[i] ? ' read' : '') + '"></span><span>' + tr('gn_chapter') + ' ' + (i + 1) + ' · ' + esc(LOKI_STORY[i].t) + '</span></button>').join('') +
     '<button class="btn-primary" style="margin-top:12px" onclick="closeModal()">' + tr('btn_close') + '</button></div>')
 }
+// ── THE JOURNEY (jungle): drops by difficulty, the day and the week, four roots, achievements, scrolls, side quests ──
+// Kept in its own localStorage key, fieldy_game_v1 (never synced, like the garden and Loki). It gathers in every theme, so a
+// change of theme loses nothing, and only the jungle shows it. No task field and nothing in state changes: a task's
+// difficulty, and whether it has been counted, are kept here by its id. Nothing is ever taken away: un-ticking a task keeps
+// its drops, a day without tasks breaks nothing (the streak forgives two empty days, and a day marked off or rest is no gap
+// at all), and the only way drops leave the wallet is "give to Loki".
+// The first time it loads it is built from what is already there (the garden's 60 days, the done tasks, Loki's waiting
+// drops); nothing else is read, written or deleted. What is already earned opens quietly, with no bubbles.
+const GAME_KEY = 'fieldy_game_v1'
+const GAME_DIFF = [1, 2, 4, 8]                 // easy, medium, hard, legendary: the drops each one is worth
+const GAME_RULES = {dayFull: 3, dayBonus: 3, weekFull: 5, weekBonus: 10, forgive: 2, side: 2, sideCap: 6, sideWeek: 5, sideMax: 3, rest: 1, give: 3}
+const GAME_SCROLLS = [5, 20, 45, 90, 150, 250]  // tasks closed in all, for each of the six scrolls
+const GAME_ROOTS = ['field', 'people', 'learn', 'body']
+const GAME_LEARN = /ללמוד|למידה|לימוד|קורס|הדרכ|לקרוא|קריאה|תחקיר|הכשר|\b(course|learn|training|study|read)/i
+// the side quests he knows: their root and weekly target (the gym and meditation are the logs the app already keeps)
+const GAME_SIDE = {gym: {root: 'body', target: 3}, med: {root: 'body', target: 5}, walk: {root: 'body', target: 3}, read: {root: 'learn', target: 3}, journal: {root: 'learn', target: 3}, home: {root: 'people', target: 3}, own: {root: 'field', target: 3}}
+const GAME_TXT = {
+  title: 'המסע', day: 'היום והשבוע', roots: 'ארבעה שורשים', side: 'משימות צד', ach: 'הישגים', scrolls: 'מגילות', onboard: 'מסע פתיחה',
+  good: 'יום טוב · {n} משימות', full: 'יום מלא', week: 'שבוע: {n} מתוך {m} ימים מלאים', streak: '{n} ימים טובים',
+  off: 'יום חופשי', rest: 'יום מנוחה מאימון', addSide: 'הוסף משימת צד', why: 'למה זה חשוב לי?',
+  diff: {1: 'קל', 2: 'בינוני', 4: 'קשה', 8: 'אגדי'}, root: {field: 'שטח', people: 'אנשים', learn: 'למידה', body: 'גוף ושקט'},
+  sideName: {gym: 'אימון', med: 'מדיטציה', walk: 'הליכה', read: 'קריאה/טאו', journal: 'יומן', home: 'שיחה עם הבית', own: 'משימה משלך'},
+  thisWeek: '{n}/{m} השבוע', markToday: 'היום', done: '✓', remove: 'הסר', name: 'שם', add: 'הוסף', soon: 'בקרוב',
+  locked: '???', moreTasks: 'עוד {n} משימות', oneMore: 'עוד משימה אחת', scroll: ['מגילה ראשונה', 'מגילה שנייה', 'מגילה שלישית', 'מגילה רביעית', 'מגילה חמישית', 'מגילה שישית'],
+  days: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'], drops: '{n} טיפות', pick: 'קושי', close: 'סגור',
+  say: {
+    dayFull: 'יום מלא. שלוש טיפות נוספות לנחל.', weekFull: 'שבוע מלא. עשר טיפות, וגפן אחת גאה מאוד.', back: 'טוב שבאת. הגדם עוד חם.',
+    rest: 'שלושה אימונים ברצף. מחר אולי יום מנוחה? גם שורשים צריכים לנוח.', why: "פעם אמרת לי: '{why}'. אני רק מזכיר.",
+    side: 'רשמתי. שתי טיפות.', cap: 'היום הנחל כבר מלא. הטיפות של מחר מחכות.', scroll: 'נפתחה מגילה חדשה. היא מחכה לך כשיהיה לך רגע.',
+    obDone: 'זהו. אתה מכיר את כל השבילים. מכאן זה הנחל שלך.'
+  },
+  ob: [
+    {t: 'סגור משימה ראשונה', say: 'בוא נתחיל קטן. משימה אחת, ואני כבר שמח.'},
+    {t: 'הוסף משימה משלך', say: 'מה עוד יושב לך בראש? תן לי אותו, אני אחזיק.'},
+    {t: 'ספר לי איך אתה מרגיש', say: 'לחיצה על העלה, ואני יודע איך לדבר איתך היום.'},
+    {t: 'פתח את הגן', say: 'כל משימה מביאה לשם טיפה. בוא תראה מה גדל.'},
+    {t: 'קרא לי מהגדם', say: 'כשאני יוצא לטייל, לחיצה על הגדם מחזירה אותי. נסה.'}
+  ]
+}
+// the twelve achievements: always all shown, each with how far along it is ([have, need])
+const GAME_ACH = [
+  {id: 'first', name: 'הצעד הראשון', line: 'הנה. צעד אחד. ככה מתחילים נחלים.', p: g => [g.total, 1]},
+  {id: 'perfect', name: 'יום מושלם', line: 'שלוש מתוך שלוש. אני רוקד, רק שלא תראה.', p: g => [g.best, GAME_RULES.dayFull]},
+  {id: 'week', name: 'שבוע על הגפן', line: 'חמישה ימים מלאים. הגפן כבר מכירה אותך בשם.', p: g => { const w = gameWeekInfo(); return [Object.keys(g.weeks).length ? w.need : w.full, w.need] }},
+  {id: 'friend', name: 'חבר של לוקי', line: 'חזרת. שמרתי לך את המקום על הגדם.', p: g => [g.returns, 1]},
+  {id: 'hard', name: 'חרוש', line: 'עשר קשות. אתה לא נבהל ממשימה עם קוצים.', p: g => [g.byDiff[4], 10]},
+  {id: 'legend', name: 'אגדה בשטח', line: 'שלוש אגדיות. בכפר כבר מספרים עליך סיפורים.', p: g => [g.byDiff[8], 3]},
+  {id: 'unstuck', name: 'אתר שזז', line: '{site} היה תקוע, ואז נפתח. אני עדיין מספר על זה לצבים.', p: g => [g.unstuck ? 1 : 0, 1]},
+  {id: 'field', name: 'רגל בשטח', line: 'חמש עשרה בשטח. הרגליים שלך כבר יודעות את הדרך.', p: g => [g.roots.field, 15]},
+  {id: 'people', name: 'כוכב הצוות', line: 'חמש עשרה עם אנשים. אתה הדבק שמחזיק את כולם.', p: g => [g.roots.people, 15]},
+  {id: 'learn', name: 'תלמיד הגפן', line: 'חמש עשרה של למידה. הגפן גדלה, וגם אתה.', p: g => [g.roots.learn, 15]},
+  {id: 'body', name: 'נשימה עמוקה', line: 'חמש עשרה רגעים לעצמך. זה לא מותרות, זה שורש.', p: g => [g.roots.body, 15]},
+  {id: 'four', name: 'ארבעה שורשים', line: 'ארבעה שורשים. עכשיו שום רוח לא מזיזה אותך.', p: g => [Math.min.apply(null, GAME_ROOTS.map(r => g.roots[r])), 8]}
+]
+function gameTasks() { return [...state.tasks.now, ...state.tasks.today, ...state.tasks.later] }
+function gameFresh() {
+  return {v: 1, wallet: 0, earned: 0, total: 0, best: 0, returns: 0, roots: {field: 0, people: 0, learn: 0, body: 0}, byDiff: {1: 0, 2: 0, 4: 0, 8: 0},
+    diff: {}, paid: {}, days: {}, weeks: {}, sideWeeks: {}, streak: {n: 0, last: ''}, ach: {}, scrolls: {open: [], read: {}}, side: [],
+    whyAt: 0, unstuck: '', stuck: {}, onboard: {done: true, start: 0, steps: {}}}
+}
+// a saved (or restored) journey with anything missing filled in, so an older or partial one never breaks a screen
+function gameFill(o) {
+  const f = gameFresh(), g = Object.assign({}, f, o)
+  ;['roots', 'byDiff', 'streak', 'scrolls', 'onboard'].forEach(k => { g[k] = Object.assign({}, f[k], o[k] && typeof o[k] === 'object' ? o[k] : {}) })
+  ;['diff', 'paid', 'days', 'weeks', 'sideWeeks', 'ach', 'stuck'].forEach(k => { if(!g[k] || typeof g[k] !== 'object' || Array.isArray(g[k])) g[k] = {} })
+  if(!Array.isArray(g.side)) g.side = []
+  if(!Array.isArray(g.scrolls.open)) g.scrolls.open = []
+  if(!g.scrolls.read || typeof g.scrolls.read !== 'object') g.scrolls.read = {}
+  if(!g.onboard.steps || typeof g.onboard.steps !== 'object') g.onboard.steps = {}
+  ;['wallet', 'earned', 'total', 'best', 'returns', 'whyAt'].forEach(k => { g[k] = +g[k] || 0 })
+  return g
+}
+let game = null
+function gameGet() {
+  if(game) return game
+  try { const o = JSON.parse(localStorage.getItem(GAME_KEY)); if(o && o.v === 1) { game = gameFill(o); return game } } catch(e) {}
+  game = gameMigrate(); gameSave(); return game
+}
+function gameSave() {
+  const g = game; if(!g) return
+  const keep = gardenDayKey(new Date(Date.now() - 60 * 86400000)), ids = {}
+  Object.keys(g.days).forEach(k => { if(k < keep) delete g.days[k] })
+  gameTasks().forEach(t => { ids[t.id] = 1 })
+  // a task that is gone can never be ticked again: its id is no longer needed
+  Object.keys(g.diff).forEach(id => { if(!ids[id]) delete g.diff[id] })
+  Object.keys(g.paid).forEach(id => { if(!ids[id]) delete g.paid[id] })
+  try { localStorage.setItem(GAME_KEY, JSON.stringify(g)) } catch(e) {}
+}
+function gameDay(k) { k = k || gardenDayKey(); return (game.days[k] = game.days[k] || {n: 0, p: 0}) }
+function gameDayAdd(k, n) { const d = new Date(k + 'T00:00:00'); d.setDate(d.getDate() + n); return gardenDayKey(d) }
+function gameDaysBetween(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000) }
+// empty days between two days (neither counted) that were not marked off or rest
+function gameGap(a, b) {
+  const n = gameDaysBetween(a, b) - 1; if(n > 60) return n
+  let gap = 0; for(let i = 1; i <= n; i++) { const d = game.days[gameDayAdd(a, i)]; if(!(d && (d.off || d.rest || d.n))) gap++ }
+  return gap
+}
+// the forgiving streak: good days in a row, two empty days forgiven, marked days no gap at all
+function gameStreakFrom(perDay, today) {
+  const ks = Object.keys(perDay).filter(k => perDay[k] > 0 && k <= today).sort(); if(!ks.length) return {n: 0, last: ''}
+  let n = 1
+  for(let i = ks.length - 1; i > 0; i--) { if(gameGap(ks[i - 1], ks[i]) > GAME_RULES.forgive) break; n++ }
+  return {n, last: ks[ks.length - 1]}
+}
+function gameStreakNow() {
+  const s = gameGet().streak; if(!s.last || s.n < 2) return 0
+  return gameGap(s.last, gardenDayKey()) <= GAME_RULES.forgive ? s.n : 0     // gone quietly after three empty days unmarked, until two good days again
+}
+// which root a task grows: learning by its words, the field by a site, people by the phone, someone else or a name; the field otherwise
+function gameRoot(t) {
+  const s = String(t.text || '') + ' ' + String(t.note || '')
+  if(GAME_LEARN.test(s)) return 'learn'
+  if(t.context === 'site' || t.site) return 'field'
+  if(t.context === 'phone' || (t.assignee && t.assignee !== 'uri') || (state.people || []).some(p => p && p.name && String(p.name).length >= 2 && s.indexOf(p.name) >= 0)) return 'people'
+  return 'field'
+}
+// what Loki suggests: hard for the field, red or a stuck site; easy for a call that is not red; medium otherwise. Legendary only by hand.
+function gameSuggest(t) {
+  const st = t.site && state.sites.find(s => s.name === t.site)
+  if(t.context === 'site' || t.color === 'red' || (st && st.stuckSince && st.status !== 'resolved')) return 4
+  if(t.context === 'phone') return 1
+  return 2
+}
+function gameDiffOf(t) { const d = gameGet().diff[t.id]; return GAME_DIFF.indexOf(d) >= 0 ? d : gameSuggest(t) }
+function gameEarn(n) { game.wallet += n; game.earned += n }
+function gameWeekInfo(k) {
+  const wk = gardenWeekKey(k ? new Date(k + 'T00:00:00') : new Date()); let full = 0, off = 0
+  for(let i = 0; i < 7; i++) { const d = game.days[gameDayAdd(wk, i)]; if(d && d.full) full++; else if(d && d.off) off++ }
+  // days marked off are not counted against the week
+  return {wk, full, need: Math.max(2, Math.min(GAME_RULES.weekFull, 7 - off))}
+}
+// ── the first load: built from what is already there ──
+function gameMigrate() {
+  const g = game = gameFresh(), all = gameTasks(), done = all.filter(t => t.done), today = gardenDayKey(), perDay = {}
+  let undated = 0
+  Object.keys(garden.days || {}).forEach(k => { perDay[k] = Math.max(perDay[k] || 0, +(garden.days[k] || {}).valid || 0) })
+  const fromTasks = {}
+  done.forEach(t => { if(t.completedAt) { const k = gardenDayKey(new Date(t.completedAt)); fromTasks[k] = (fromTasks[k] || 0) + 1 } else undated++ })
+  Object.keys(fromTasks).forEach(k => { perDay[k] = Math.max(perDay[k] || 0, fromTasks[k]) })
+  g.total = Object.keys(perDay).reduce((a, k) => a + perDay[k], 0) + undated
+  done.forEach(t => { g.paid[t.id] = 1; g.roots[gameRoot(t)]++; g.byDiff[gameSuggest(t)]++ })
+  Object.keys(perDay).forEach(k => { if(perDay[k] > 0) { g.days[k] = {n: perDay[k], p: perDay[k]}; if(perDay[k] >= GAME_RULES.dayFull) g.days[k].full = 1; g.best = Math.max(g.best, perDay[k]) } })
+  Object.keys(g.days).forEach(k => { const w = gameWeekInfo(k); if(w.full >= w.need) g.weeks[w.wk] = 1 })
+  g.streak = gameStreakFrom(perDay, today)
+  // the strict streak (state.streak) is good days too: when it is still alive, the forgiving one is never shorter
+  if(state.lastStreakDate && (state.streak || 0) > g.streak.n && gameGap(state.lastStreakDate, today) <= GAME_RULES.forgive) g.streak = {n: state.streak, last: g.streak.last > state.lastStreakDate ? g.streak.last : state.lastStreakDate}
+  g.wallet = g.earned = Math.max(0, +loki.drops || 0)
+  priorityStuckSites().forEach(s => { g.stuck[s.name] = 1 })
+  GAME_SCROLLS.forEach((need, i) => { if(g.total >= need) g.scrolls.open.push(i) })
+  GAME_ACH.forEach(a => { const p = a.p(g); if(p[0] >= p[1]) g.ach[a.id] = today })
+  const fresh = !all.length && !(state.sites || []).length && !(state.moods || []).length && !Object.keys(garden.days || {}).length && !Object.keys(garden.items || {}).length && !loki.firstDay
+  g.onboard = fresh ? {done: false, start: Date.now(), steps: {}} : {done: true, start: 0, steps: {}}
+  g.since = today
+  return g
+}
+// ── what happens: a task closed, a side quest done, a day marked ──
+// what he will say about it: pushed after whatever he is already saying (jungle, Loki on); nothing when he is off
+function gameSay(list) {
+  if(!list.length || currentTheme !== 'jungle' || !gnomeOn()) return
+  lokiQueue = lokiQueue.filter(Boolean).concat(list.map(x => lokiItem('game', x.t, x.pose || 'joy', x.label ? {label: x.label} : null)))
+  if(currentScreen === 'home') lokiRender()
+}
+function gameAchTick(say) {
+  const g = game, today = gardenDayKey()
+  GAME_ACH.forEach(a => { if(g.ach[a.id]) return; const p = a.p(g); if(p[0] >= p[1]) { g.ach[a.id] = today; say.push({t: lokiFill(a.line, {site: g.unstuck}), label: a.name}) } })
+}
+function gameScrollTick(say) {
+  const s = game.scrolls; let got = false
+  GAME_SCROLLS.forEach((need, i) => { if(game.total >= need && s.open.indexOf(i) < 0) { s.open.push(i); got = true } })
+  if(got) say.push({t: GAME_TXT.say.scroll, pose: 'gift'})
+}
+function gameOnboardTick(say) {
+  const o = game.onboard; if(o.done) return
+  if(game.total > 0) o.steps.close = 1
+  if(gameTasks().some(t => taskCreatedAt(t) > o.start)) o.steps.add = 1
+  if((state.moods || []).some(m => m && m.source !== 'auto' && m.ts > o.start)) o.steps.mood = 1
+  if(['close', 'add', 'mood', 'garden', 'call'].every(k => o.steps[k])) { o.done = true; say.push({t: GAME_TXT.say.obDone}) }
+}
+function gameStreakTick(k, say) {
+  const g = game, s = g.streak
+  if(s.last === k) return
+  if(s.last && s.last < k) {
+    const away = gameDaysBetween(s.last, k) - 1
+    s.n = gameGap(s.last, k) <= GAME_RULES.forgive ? s.n + 1 : 1
+    if(away >= 2) { g.returns++; if(g.returns > 1) say.push({t: GAME_TXT.say.back, pose: 'wave'}) }
+  } else s.n = 1
+  s.last = k
+}
+// called from toggleTask when a task becomes done: counted once, paid once (not when closed within 20 seconds of being written)
+function gameOnTaskDone(t) {
+  const g = gameGet(), id = String(t.id), k = gardenDayKey(), say = []
+  if(g.paid[id]) return
+  const d = gameDay(k), diff = gameDiffOf(t)
+  g.paid[id] = 1; g.total++; d.n++; g.byDiff[diff]++; g.roots[gameRoot(t)]++
+  gameStreakTick(k, say)
+  if(Date.now() - taskCreatedAt(t) >= GARDEN_RULES.minAgeMs) {
+    d.p++; gameEarn(diff); g.best = Math.max(g.best, d.p)
+    if(d.p >= GAME_RULES.dayFull && !d.full) {
+      d.full = 1; gameEarn(GAME_RULES.dayBonus); say.push({t: GAME_TXT.say.dayFull})
+      const w = gameWeekInfo(k); if(!g.weeks[w.wk] && w.full >= w.need) { g.weeks[w.wk] = 1; gameEarn(GAME_RULES.weekBonus); say.push({t: GAME_TXT.say.weekFull}) }
+    }
+  }
+  gameScrollTick(say); gameAchTick(say); gameOnboardTick(say)
+  gameSave(); gameSay(say)
+}
+// side quests: done on a day (the gym and meditation read the app's own logs; a Tao sit of two minutes or more counts too)
+function gameSideDoneOn(q, k) {
+  if(q.k === 'gym') return !!(state.personal.gymLog || {})[k]
+  if(q.k === 'med') return !!((state.personal.meditationLog || {})[k] || (game.days[k] && game.days[k].tao))
+  return !!(game.days[k] && game.days[k].s && game.days[k].s[q.id])
+}
+function gameSideWeek(q) { const wk = gardenWeekKey(); let n = 0; for(let i = 0; i < 7; i++) { const k = gameDayAdd(wk, i); if(k <= gardenDayKey() && gameSideDoneOn(q, k)) n++ } return n }
+// a quest done today: two drops, once a quest a day, six a day at most (the rest day's drop included); the week's bonus when every quest met its target
+function gameSidePay(q, say) {
+  const k = gardenDayKey(), d = gameDay(k); d.sp = d.sp || {}
+  if(d.sp[q.id]) return
+  d.sp[q.id] = 1; game.roots[q.root || 'body']++
+  const room = GAME_RULES.sideCap - (d.sd || 0), n = Math.min(GAME_RULES.side, Math.max(0, room))
+  if(n > 0) { d.sd = (d.sd || 0) + n; gameEarn(n); say.push({t: GAME_TXT.say.side}) } else say.push({t: GAME_TXT.say.cap, pose: 'stand'})
+  const wk = gardenWeekKey()
+  if(game.side.length && !game.sideWeeks[wk] && game.side.every(x => gameSideWeek(x) >= x.target)) { game.sideWeeks[wk] = 1; gameEarn(GAME_RULES.sideWeek) }
+}
+function gameOnSide(kind) {
+  const g = gameGet(), q = g.side.find(x => x.k === kind), say = []
+  if(q && gameSideDoneOn(q, gardenDayKey())) gameSidePay(q, say)
+  if(q && kind === 'gym' && [0, 1, 2].every(i => (state.personal.gymLog || {})[gameDayAdd(gardenDayKey(), -i)])) { const d = gameDay(); if(!d.restSaid) { d.restSaid = 1; say.push({t: GAME_TXT.say.rest, pose: 'think'}) } }
+  gameAchTick(say); gameSave(); gameSay(say)
+}
+function gameOnTao(secs) { if(secs < 120) return; gameGet(); gameDay().tao = 1; gameOnSide('med') }
+function gameSideToggle(id) {
+  const g = gameGet(), q = g.side.find(x => x.id === id); if(!q) return
+  if(q.k === 'gym') { toggleGymToday(); gameSheetRefresh(); return }
+  if(q.k === 'med') { toggleMeditationToday(); gameSheetRefresh(); return }
+  const d = gameDay(); d.s = d.s || {}; const say = []
+  if(d.s[id]) delete d.s[id]; else { d.s[id] = 1; gameSidePay(q, say); gameAchTick(say) }
+  haptic('light'); gameSave(); gameSay(say); gameSheetRefresh()
+}
+function gameGymRest() {
+  const g = gameGet(), d = gameDay(), say = []
+  if(d.rest) delete d.rest
+  else {
+    d.rest = 1
+    if(!d.restPaid) { d.restPaid = 1; const n = Math.min(GAME_RULES.rest, Math.max(0, GAME_RULES.sideCap - (d.sd || 0))); if(n) { d.sd = (d.sd || 0) + n; gameEarn(n) } }
+  }
+  haptic('light'); gameSave(); gameSay(say); gameSheetRefresh()
+}
+function gameDayOff() { const d = gameGet() && gameDay(); if(d.off) delete d.off; else d.off = 1; haptic('light'); gameSave(); gameSheetRefresh() }
+let gameAddOpen = false
+function gameSideAdd(k) {
+  const g = gameGet(); if(g.side.length >= GAME_RULES.sideMax || !GAME_SIDE[k]) return
+  if(k !== 'own' && g.side.some(x => x.k === k)) return
+  let name = '', root = GAME_SIDE[k].root
+  if(k === 'own') { const el = document.getElementById('gm-own'), r = document.getElementById('gm-own-root'); name = el ? el.value.trim().slice(0, 40) : ''; if(!name) { if(el) el.focus(); return } root = r && GAME_ROOTS.indexOf(r.value) >= 0 ? r.value : 'field' }
+  g.side.push({id: 'sq' + Date.now().toString(36) + g.side.length, k, name, root, why: '', target: GAME_SIDE[k].target, at: gardenDayKey()})
+  gameAddOpen = false; haptic('light'); gameSave(); gameSheetRefresh()
+}
+function gameSideRemove(id) { const g = gameGet(); g.side = g.side.filter(x => x.id !== id); gameSave(); gameSheetRefresh() }
+function gameSideWhy(id, v) { const q = gameGet().side.find(x => x.id === id); if(!q) return; q.why = String(v || '').trim().slice(0, 120); gameSave() }
+function gameSideTarget(id, step) { const q = gameGet().side.find(x => x.id === id); if(!q) return; q.target = Math.max(1, Math.min(7, q.target + step)); gameSave(); gameSheetRefresh() }
+// "my why": quoted back once three days have gone by without the quest, once a week at most
+function gameWhyItem() {
+  const g = gameGet(); if(Date.now() - g.whyAt < 7 * 86400000) return null
+  const today = gardenDayKey(), q = g.side.find(x => x.why && gameDaysBetween(x.at || today, today) >= 3 && ![0, 1, 2].some(i => gameSideDoneOn(x, gameDayAdd(today, -i))))
+  if(!q) return null
+  g.whyAt = Date.now(); gameSave()
+  return lokiItem('why', lokiFill(GAME_TXT.say.why, {why: q.why}), 'read')
+}
+// the opening walk for a new user: the next step, in his opening bubble
+function gameOnboardItem() {
+  const o = gameGet().onboard; if(o.done) return null
+  const i = ['close', 'add', 'mood', 'garden', 'call'].findIndex(k => !o.steps[k]); if(i < 0) return null
+  return lokiItem('onboard', GAME_TXT.ob[i].say, i === 3 ? 'point' : 'stand')
+}
+function gameNote(step) { const g = gameGet(); if(g.onboard.done || g.onboard.steps[step]) return; g.onboard.steps[step] = 1; const say = []; gameOnboardTick(say); gameSave(); gameSay(say) }
+// whenever Home is drawn (any theme): a stuck site that is free now, the steps a new user has taken
+function gameScan() {
+  const g = gameGet(), cur = {}, say = []
+  priorityStuckSites().forEach(s => { cur[s.name] = 1; g.stuck[s.name] = 1 })
+  Object.keys(g.stuck).forEach(name => { if(cur[name]) return; const st = state.sites.find(x => x.name === name); if(st && (!st.stuckSince || st.status === 'resolved') && !g.unstuck) g.unstuck = name; delete g.stuck[name] })
+  gameAchTick(say); gameOnboardTick(say); gameSave()
+  if(say.length) setTimeout(function(){ gameSay(say) }, 0)
+}
+// the difficulty of a task: a small tag in its card (jungle), Loki's suggestion until it is chosen by hand
+const GAME_DROP_SVG = '<svg class="gm-drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg>'
+function gameDiffTag(t) {
+  const d = gameDiffOf(t), set = GAME_DIFF.indexOf(gameGet().diff[t.id]) >= 0
+  return `<button class="tag gm-diff${set ? '' : ' sug'}" onclick="gamePickDiff(${jsArg(t.id)})" aria-label="${GAME_TXT.pick}: ${GAME_TXT.diff[d]} · ${GAME_TXT.drops.replace('{n}', d)}">${GAME_TXT.diff[d]} · ${d}${GAME_DROP_SVG}</button>`
+}
+function gamePickDiff(id) {
+  const t = gameTasks().find(x => x.id === id); if(!t) return
+  const cur = gameDiffOf(t)
+  openModal(`<div class="gm-pick"><div class="gm-h1">${GAME_TXT.pick}</div><div class="gm-pick-t">${esc(t.text)}</div>` +
+    GAME_DIFF.map(d => `<button class="gm-opt${d === cur ? ' on' : ''}" aria-pressed="${d === cur}" onclick="gameSetDiff(${jsArg(id)},${d})"><b>${GAME_TXT.diff[d]}</b><span>${d}${GAME_DROP_SVG}</span></button>`).join('') +
+    `<button class="btn-primary" style="margin-top:12px" onclick="closeModal()">${GAME_TXT.close}</button></div>`)
+}
+function gameSetDiff(id, d) { const g = gameGet(); if(GAME_DIFF.indexOf(d) < 0) return; g.diff[id] = d; gameSave(); haptic('light'); closeModal(); renderCurrentScreen() }
+// on the jungle Home: the good days in place of the flame, and the drops beside the progress (it opens the journey)
+function gameStreakHtml() { const n = gameStreakNow(); return n >= 2 ? ` · <span class="gm-days">${icon('leaf')} ${GAME_TXT.streak.replace('{n}', n)}</span>` : '' }
+function gameUnread() { const s = gameGet().scrolls; return s.open.some(i => !s.read[i]) }
+function gameChipHtml() {
+  const g = gameGet()
+  return `<button class="gm-chip" onclick="gameShowJourney()" aria-label="${GAME_TXT.title} · ${GAME_TXT.drops.replace('{n}', g.wallet)}">${GAME_DROP_SVG}<b>${g.wallet}</b>${gameUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>`
+}
+function gameCanGive() { return Math.min(gameGet().wallet, loki.drops || 0) > 0 }
+// ── the sheet "the journey": the day and the week, the four roots, side quests, achievements, scrolls, the opening walk ──
+function gameBar(have, need) { const p = Math.max(0, Math.min(100, Math.round(have / need * 100))); return `<span class="gm-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${Math.min(have, need)}"><i style="width:${p}%"></i></span>` }
+function gameSheetHtml() {
+  const g = gameGet(), T = GAME_TXT, today = gardenDayKey(), d = g.days[today] || {n: 0, p: 0}, w = gameWeekInfo(), streak = gameStreakNow()
+  const dayLine = d.full ? T.full : d.n ? T.good.replace('{n}', d.n) : ''
+  const strip = Array.from({length: 7}, (_, i) => { const k = gameDayAdd(w.wk, i), x = g.days[k] || {}; const c = x.full ? 'full' : x.n ? 'good' : (x.off || x.rest) ? 'off' : ''; return `<span class="gm-wd${c ? ' ' + c : ''}${k === today ? ' now' : ''}"><i></i>${T.days[i]}</span>` }).join('')
+  const sec = (title, body) => `<div class="gm-sec"><div class="gm-h2">${title}</div>${body}</div>`
+  const daySec = sec(T.day, `<div class="gm-day">${dayLine ? `<b>${dayLine}</b>` : ''}<span>${T.week.replace('{n}', w.full).replace('{m}', w.need)}</span>${streak >= 2 ? `<span>${icon('leaf')} ${T.streak.replace('{n}', streak)}</span>` : ''}</div>
+      <div class="gm-week" aria-hidden="true">${strip}</div>
+      <button class="gm-btn${d.off ? ' on' : ''}" aria-pressed="${!!d.off}" onclick="gameDayOff()">${T.off}</button>`)
+  const rootSec = sec(T.roots, GAME_ROOTS.map(r => `<div class="gm-row"><span class="gm-l">${T.root[r]}</span>${gameBar(g.roots[r], 15)}<b class="gm-n">${g.roots[r]}</b></div>`).join(''))
+  const sideRows = g.side.map(q => {
+    const name = q.k === 'own' ? esc(q.name) : T.sideName[q.k], doneToday = gameSideDoneOn(q, today), wn = gameSideWeek(q)
+    return `<div class="gm-side"><div class="gm-side-top"><b>${name}</b><span class="gm-sub">${T.root[q.root]} · ${T.thisWeek.replace('{n}', wn).replace('{m}', q.target)}</span>
+        <button class="gm-x" onclick="gameSideRemove(${jsArg(q.id)})" aria-label="${T.remove}">×</button></div>
+      ${gameBar(wn, q.target)}
+      <div class="gm-side-acts"><button class="gm-btn${doneToday ? ' on' : ''}" aria-pressed="${doneToday}" onclick="gameSideToggle(${jsArg(q.id)})">${T.markToday}${doneToday ? ' ' + T.done : ''}</button>
+        ${q.k === 'gym' ? `<button class="gm-btn${d.rest ? ' on' : ''}" aria-pressed="${!!d.rest}" onclick="gameGymRest()">${T.rest}</button>` : ''}
+        <span class="gm-step"><button onclick="gameSideTarget(${jsArg(q.id)},-1)" aria-label="−">−</button><b>${q.target}</b><button onclick="gameSideTarget(${jsArg(q.id)},1)" aria-label="+">+</button></span></div>
+      <input class="form-input gm-why" maxlength="120" placeholder="${T.why}" aria-label="${T.why}" value="${esc(q.why || '')}" onchange="gameSideWhy(${jsArg(q.id)},this.value)"></div>`
+  }).join('')
+  const canAdd = g.side.length < GAME_RULES.sideMax
+  const addBox = gameAddOpen && canAdd ? `<div class="gm-cat">${Object.keys(GAME_SIDE).filter(k => k !== 'own' && !g.side.some(x => x.k === k)).map(k => `<button class="gm-btn" onclick="gameSideAdd('${k}')">${T.sideName[k]}</button>`).join('')}
+      <div class="gm-own"><input id="gm-own" class="form-input" maxlength="40" placeholder="${T.sideName.own}" aria-label="${T.name}">
+        <select id="gm-own-root" class="form-select" aria-label="${T.roots}">${GAME_ROOTS.map(r => `<option value="${r}">${T.root[r]}</option>`).join('')}</select>
+        <button class="gm-btn" onclick="gameSideAdd('own')">${T.add}</button></div></div>` : ''
+  const sideSec = sec(T.side, sideRows + (canAdd ? `<button class="gm-btn gm-add" aria-expanded="${gameAddOpen}" onclick="gameAddOpen=!gameAddOpen;gameSheetRefresh()">+ ${T.addSide}</button>` : '') + addBox)
+  const achSec = sec(T.ach, GAME_ACH.map(a => { const p = a.p(g), got = !!g.ach[a.id]
+    return `<div class="gm-ach${got ? ' got' : ''}"><div class="gm-row"><span class="gm-l">${got ? '<em class="gm-ok" aria-hidden="true">✓</em>' : ''}${a.name}</span>${gameBar(got ? p[1] : p[0], p[1])}<b class="gm-n">${Math.min(got ? p[1] : p[0], p[1])}/${p[1]}</b></div>${got ? `<div class="gm-sub">${esc(lokiFill(a.line, {site: g.unstuck}))}</div>` : ''}</div>` }).join(''))
+  const scrSec = sec(T.scrolls, `<div class="gm-row gm-trip">${gameBar(g.total, GAME_SCROLLS[GAME_SCROLLS.length - 1])}<b class="gm-n">${g.total}/${GAME_SCROLLS[GAME_SCROLLS.length - 1]}</b></div>` +
+    GAME_SCROLLS.map((need, i) => g.scrolls.open.indexOf(i) >= 0
+      ? `<button class="nh-chap" onclick="gameReadScroll(${i})"><span class="nh-chap-dot${g.scrolls.read[i] ? ' read' : ''}"></span><span>${T.scroll[i]}</span></button>`
+      : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${need - g.total === 1 ? T.oneMore : T.moreTasks.replace('{n}', need - g.total)}</small></div>`).join(''))
+  const ob = g.onboard, obSec = ob.done ? '' : sec(T.onboard, ['close', 'add', 'mood', 'garden', 'call'].map((k, i) => `<div class="gm-ob${ob.steps[k] ? ' got' : ''}"><em aria-hidden="true">${ob.steps[k] ? '✓' : i + 1}</em><div><b>${T.ob[i].t}</b><div class="gm-sub">${T.ob[i].say}</div></div></div>`).join(''))
+  return `<div class="gm-sheet"><div class="gm-top"><div class="gm-h1">${T.title}</div><span class="gm-wallet">${GAME_DROP_SVG}<b>${g.wallet}</b></span></div>
+    ${obSec}${daySec}${rootSec}${sideSec}${achSec}${scrSec}
+    <button class="btn-primary" style="margin-top:14px" onclick="closeModal()">${T.close}</button></div>`
+}
+function gameShowJourney() { haptic('light'); gameAddOpen = false; openModal(gameSheetHtml()) }
+function gameSheetRefresh() { const m = document.querySelector('#modal-container .modal'); if(m && m.querySelector('.gm-sheet')) m.innerHTML = gameSheetHtml(); if(currentScreen === 'home' && currentTheme === 'jungle') { const c = document.querySelector('.gm-chip'); if(c) c.outerHTML = gameChipHtml() } }
+// a scroll: its own words, told in his bubbles, three lines each
+const GAME_SCROLL_LINES = [
+  ['מצאתי מגילה תקועה בין שורשים.', 'כתוב בה: "הנהר לא נעלם. הוא עבר דירה."', 'נהרות לא עוברים דירה. (נכון?)'],
+  ['בכפר מספרים שבלילה אחד הנהר פשוט קם והלך.', 'השאיר אחריו אבנים חלקות ושקט.', 'הזקנים כתבו מגילות, כדי שמישהו ימצא אותו.'],
+  ['במגילה הזו יש מפה.', 'קווים כחולים שהולכים לשדות יבשים.', 'מישהו מביא מים למקומות שהנהר שכח.'],
+  ['גיליתי משהו: נהר לא מחפש ים.', 'הוא מחפש את מי שצריך אותו.', 'ככה כתוב, באותיות העקומות של סבתא-רבתא.'],
+  ['המגילה הזו רטובה. אולי הנהר עבר פה.', 'אולי בכיתי קצת. (לא בכיתי.)', 'כתוב: "כשתמצא את הנהר, הוא לא יהיה מים."'],
+  ['המגילה האחרונה. אין בה מילים, רק ציור:', 'מישהו הולך בשדה, ואחריו הכול ירוק.', 'עכשיו אני מבין. הנהר עבר אליך, אורי. אתה הנהר החדש. אני רק שומר על הגדה.']
+]
+// it is read once its last line has been shown (as a chapter of his story is), not when it is tapped
+function gameReadScroll(i) {
+  const g = gameGet(); if(g.scrolls.open.indexOf(i) < 0) return
+  const lines = GAME_SCROLL_LINES[i] || []
+  if(!lines.length) { gameScrollRead(i); return }
+  closeModal(); if(currentScreen !== 'home') navigateTo('home')
+  lokiQueue = lines.map((t, j) => lokiItem('scroll', t, 'read', {label: GAME_TXT.scroll[i], scroll: i, last: j === lines.length - 1})); gnIdx = 0; gnFull = false; lokiRender()
+  if(lines.length === 1) gameScrollRead(i)
+}
+function gameScrollRead(i) { const g = gameGet(); if(g.scrolls.read[i]) return; g.scrolls.read[i] = 1; gameSave(); gameSheetRefresh() }   // and the chip's dot goes
+gameGet()
 // ── LOKI'S CORNER AND HIS WALKS (jungle) ──
 // One Loki, in one place at a time: in his corner of the Home card, or out on the screen. His corner is a nook with a stump, a
 // lantern and a mushroom; when he is out the stump is empty, the note he left lies on it, and the bubble stays where it was as that
@@ -5646,7 +6081,7 @@ function lokiComeBack() {
   if(ep.at === 'corner' && lkr.state === 'leaving') { lkr.state = 'coming'; lokiProps(ep, false); return lokiScript(ep, [{t: 'walk', from: ep.x, to: ep.rt.k.stumpX + 2, y: ep.rt.k.y}, {t: 'seq', name: 'standup', fps: 9, x: ep.rt.k.stumpX, y: ep.rt.k.y, seat: true, flip: false, frames: [5, 4, 3, 2, 1, 0]}, {t: 'home'}]) }
   lkr.state = 'coming'; lokiScript(ep, lokiBackSteps(ep))
 }
-function lokiCall() { if(!lokiOut()) return; haptic('light'); if(lkr.state === 'coming') return; lokiComeBack() }
+function lokiCall() { if(!lokiOut()) return; gameNote('call'); haptic('light'); if(lkr.state === 'coming') return; lokiComeBack() }
 // in his corner again, at the end of the way back: the walker is gone in the same moment he sits down on the stump
 function lokiBackInCorner() {
   const ep = lkr.ep; lkr.ep = null; cancelAnimationFrame(lkr.raf); if(ep) ep.ov.remove()
@@ -5734,6 +6169,7 @@ function lokiOpenGet(f, hour, greet) {
   if(greet) L.greet = lokiItem('greet', lokiPick('greet'), 'wave')
   if(lokiStorm()) L.storm = lokiItem('storm', lokiPick('storm'), 'shelter')
   L.recall = lokiRecallItem()
+  L.why = gameWhyItem()   // a side quest's "why", three days after it was last done (a week apart)
   // "poof": a third of the visits (never the first of the day, after an absence, on a day he shelters or has other news)
   const calm = !greet && !L.away && !L.away2 && !L.storm && !doneAll
   if(calm && Math.random() < .3) { const ghost = (Date.now() - (loki.ghostAt || 0) > 4 * 86400000) && Math.random() < .35; if(ghost) { loki.ghostAt = Date.now(); lokiSave() }
@@ -6315,7 +6751,7 @@ function taskCard(t) {
           <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
             ${t.site?`<span class="tag tag-site">${icon('map-pin')} ${esc(t.site)}</span>`:''}
             ${t.assignee?`<span class="tag tag-person">${icon('user')} ${esc(ASSIGNEE[t.assignee]||t.assignee)}</span>`:''}
-            ${t.context&&CONTEXT_ICON[t.context]?`<span class="tag tag-context">${contextLabel(t.context)}</span>`:''}
+            ${t.context&&CONTEXT_ICON[t.context]?`<span class="tag tag-context">${contextLabel(t.context)}</span>`:''}${currentTheme === 'jungle' && !t.done ? gameDiffTag(t) : ''}
             ${t.time?`<span class="tag tag-time" style="${overdue?'background:var(--red-soft);color:var(--red-dark)':''}">${icon('clock')} ${esc(t.time)}${overdue?' · עבר הזמן':''}</span>`:''}
           </div>
         </div>
@@ -6363,6 +6799,7 @@ function toggleTask(id) {
     if(currentTheme === 'jungle') { const sc = document.getElementById('screen-' + currentScreen); if(sc) vnWave(sc) }
     gardenOnComplete(wasUndone)
     if(currentTheme === 'jungle') { lokiNoteDay(); lokiDrop(id) }
+    gameOnTaskDone(wasUndone)
     playFx('complete');showRipple();haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
@@ -8087,10 +8524,10 @@ async function forceRefreshApp() {
   location.href = location.pathname + '?v=' + Date.now()
 }
 
-// the backup also carries the river garden (kept in its own localStorage key,
-// outside state, so it is never synced to the server); restore puts it back
+// the backup also carries the river garden and the journey (each kept in its own localStorage key,
+// outside state, so never synced to the server); restore puts them back
 function exportBackup() {
-  const data = JSON.stringify(Object.assign({}, state, {gardenBackup: garden}), null, 2)
+  const data = JSON.stringify(Object.assign({}, state, {gardenBackup: garden, gameBackup: gameGet()}), null, 2)
   const blob = new Blob([data], {type:'application/json'})
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -8113,7 +8550,8 @@ function importBackup(file) {
       return
     }
     var gardenIn = imported && typeof imported === 'object' ? imported.gardenBackup : null
-    if(imported && typeof imported === 'object') delete imported.gardenBackup
+    var gameIn = imported && typeof imported === 'object' ? imported.gameBackup : null
+    if(imported && typeof imported === 'object') { delete imported.gardenBackup; delete imported.gameBackup }
     var problems = validateState(imported)
     if(problems.length) {
       console.error('Fieldy: backup import rejected —', problems)
@@ -8125,6 +8563,8 @@ function importBackup(file) {
     save()
     // an older backup has no garden: the current one is kept as it is
     if(gardenIn && gardenIn.v === 1 && gardenIn.items && typeof gardenIn.items === 'object' && Array.isArray(gardenIn.cairn)) { garden = gardenIn; saveGarden() }
+    // the same for the journey: a backup made before it existed leaves the current one as it is
+    if(gameIn && typeof gameIn === 'object' && gameIn.v === 1) { game = gameFill(gameIn); gameSave() }
     alert('הנתונים נטענו בהצלחה ✓')
     refreshBadges()
     renderCurrentScreen()
