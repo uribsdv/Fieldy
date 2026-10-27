@@ -5659,8 +5659,15 @@ function gameSheetHtml() {
 }
 function gameShowJourney() { haptic('light'); gameAddOpen = false; openModal(gameSheetHtml()) }
 function gameSheetRefresh() { const m = document.querySelector('#modal-container .modal'); if(m && m.querySelector('.gm-sheet')) m.innerHTML = gameSheetHtml(); if(currentScreen === 'home' && currentTheme === 'jungle') { const c = document.querySelector('.gm-chip'); if(c) c.outerHTML = gameChipHtml() } }
-// a scroll: its own words, told in his bubbles (the six are only a frame for now: their words are still to be written)
-const GAME_SCROLL_LINES = [[], [], [], [], [], []]
+// a scroll: its own words, told in his bubbles, three lines each
+const GAME_SCROLL_LINES = [
+  ['מצאתי מגילה תקועה בין שורשים.', 'כתוב בה: "הנהר לא נעלם. הוא עבר דירה."', 'נהרות לא עוברים דירה. (נכון?)'],
+  ['בכפר מספרים שבלילה אחד הנהר פשוט קם והלך.', 'השאיר אחריו אבנים חלקות ושקט.', 'הזקנים כתבו מגילות, כדי שמישהו ימצא אותו.'],
+  ['במגילה הזו יש מפה.', 'קווים כחולים שהולכים לשדות יבשים.', 'מישהו מביא מים למקומות שהנהר שכח.'],
+  ['גיליתי משהו: נהר לא מחפש ים.', 'הוא מחפש את מי שצריך אותו.', 'ככה כתוב, באותיות העקומות של סבתא-רבתא.'],
+  ['המגילה הזו רטובה. אולי הנהר עבר פה.', 'אולי בכיתי קצת. (לא בכיתי.)', 'כתוב: "כשתמצא את הנהר, הוא לא יהיה מים."'],
+  ['המגילה האחרונה. אין בה מילים, רק ציור:', 'מישהו הולך בשדה, ואחריו הכול ירוק.', 'עכשיו אני מבין. הנהר עבר אליך, אורי. אתה הנהר החדש. אני רק שומר על הגדה.']
+]
 function gameReadScroll(i) {
   const g = gameGet(); if(g.scrolls.open.indexOf(i) < 0) return
   g.scrolls.read[i] = 1; gameSave()
