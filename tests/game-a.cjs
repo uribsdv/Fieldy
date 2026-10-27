@@ -97,7 +97,7 @@ srv.listen(0, async () => {
   r = await pg.evaluate(() => { const k = gardenDayKey(); C(T()); const d = G().days[k]; return [d.n, !!d.full, G().wallet] })
   eq(r, [1, false, 2], 'one task: a good day, not full')
   r = await pg.evaluate(() => { gameShowJourney(); return document.querySelector('.gm-day b').textContent })
-  eq(r, 'יום טוב · 1 משימות', 'the sheet calls it a good day')
+  eq(r, 'יום טוב · משימה אחת', 'the sheet calls it a good day')
   r = await pg.evaluate(() => { closeModal(); C(T()); C(T()); const d = G().days[gardenDayKey()]; return [d.p, !!d.full, G().wallet, lokiQueue.some(x => x && x.text === GAME_TXT.say.dayFull)] })
   eq(r, [3, true, 2 * 3 + 3, true], 'three tasks: a full day, +3 bonus, and he says so')
   r = await pg.evaluate(() => { C(T()); return G().wallet })

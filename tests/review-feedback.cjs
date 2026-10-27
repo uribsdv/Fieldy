@@ -151,7 +151,7 @@ async function finish(browser, base, theme, uncheck) {
       assert(!r.quickAdd && !r.finishBtn, 'checklist still shown: ' + JSON.stringify(r))
       assert(r.suggestion, 'suggestion block is gone: ' + JSON.stringify(r))
       assert(r.reviewedToday, 'review not saved')
-      assert(r.messages === 1 && r.undo && /^נשמר\. 1 משימות עברו ל'אחר כך'\./.test(r.undo), 'expected exactly the undo toast: ' + JSON.stringify(r))
+      assert(r.messages === 1 && r.undo && /^נשמר\. משימה אחת עברה ל'אחר כך'\./.test(r.undo), 'expected exactly the undo toast: ' + JSON.stringify(r))
       assert(!r.errs.length, r.errs.join('\n'))
     })
     await check('nothing moved: checklist gone, suggestion stays, one message ("נשמר. הכול מסודר.")', async () => {
