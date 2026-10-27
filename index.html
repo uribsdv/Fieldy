@@ -1478,7 +1478,7 @@ button:active{opacity:.85}
 /* Inline icons */
 .ic{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 /* Undo toast (shown for a few seconds after any delete) */
-#undo-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--t1);color:var(--surface-3);padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
+#undo-toast,#review-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--t1);color:var(--surface-3);padding:var(--space-2-5) var(--space-4);border-radius:var(--radius-pill);z-index:300;display:flex;gap:var(--space-4);align-items:center;font-size:var(--fs-base);box-shadow:var(--shadow-md);max-width:calc(100% - 32px);white-space:nowrap}
 #undo-toast button{color:var(--gold2);font-weight:700;font-size:var(--fs-base);padding:0 var(--space-1)}
 /* Voice input row under a text field */
 .voice-row{display:flex;align-items:center;gap:var(--space-1-5);margin:-4px 0 var(--space-2-5)}
@@ -2542,7 +2542,8 @@ const TRANSLATIONS = {
 
   // Undo toasts + task triage
   undo_task_deleted: {he:'המשימה נמחקה', en:'Task deleted'},
-  undo_moved_later: {he:'{n} משימות עברו ל"אחר כך"', en:'{n} tasks moved to "Later"'},
+  undo_moved_later: {he:"נשמר. {n} משימות עברו ל'אחר כך'.", en:'{n} tasks moved to "Later"'},
+  home_review_saved_none: {he:'נשמר. הכול מסודר.', en:'Saved. All set.'},
   undo_batched: {he:'המשימות קובצו ל"{b}"', en:'Tasks grouped into "{b}"'},
   triage_site: {he:'ב-{x}', en:'at {x}'},
   triage_date: {he:'לתאריך {x}', en:'for {x}'},
@@ -3992,9 +3993,10 @@ let taskReviewOpen = false
 let taskReviewUnchecked = new Set()   // task ids unchecked ("not relevant today") during the open review
 let taskReviewSuggestion = null       // {title, sub, go} once "סיימתי לסקור" runs
 let reviewSuggestionOpen = false
+let taskReviewDone = false            // "סיימתי לסקור" ran: the checklist is folded away, the suggestion stays (the toggle still closes it all)
 let focusEditOpen = false             // inline edit for "the most important thing today" in the briefing
 function toggleTaskReview() {
-  taskReviewOpen = !taskReviewOpen
+  taskReviewOpen = !taskReviewOpen; taskReviewDone = false
   if(!taskReviewOpen) { taskReviewSuggestion = null; reviewSuggestionOpen = false; taskReviewUnchecked = new Set() }
   if(currentScreen==='home') renderHome()
 }
@@ -4013,13 +4015,24 @@ function finishTaskReview() {
   const strip = function(arr){ return arr.filter(function(t){ if(removeIds.has(t.id)) { moved.push(t); return false } return true }) }
   const prevTasks = state.tasks
   setState({tasks: {now: strip(state.tasks.now), today: strip(state.tasks.today), later: [...state.tasks.later, ...moved]}, taskReviewedDate: getToday()})
+  // one message for the finish: the undo toast when something moved (it carries the "saved" words and the undo), else Loki's bubble in the jungle or a plain toast
   if(moved.length) offerUndo(tr('undo_moved_later').replace('{n}', moved.length), function(){ setState({tasks: prevTasks}) })
+  else if(currentTheme === 'jungle' && gnomeOn()) { lokiQueue = [lokiItem('review', tr('home_review_saved_none'), 'joy')]; gnIdx = 0; gnFull = false }
+  else reviewSavedToast(tr('home_review_saved_none'))
+  taskReviewDone = true
   taskReviewUnchecked = new Set()
   const mood = getCurrentMood()
   const nextUp = rankRightNow(mood ? mood.mood : null).find(function(it){ return it.kind === 'task' })
   taskReviewSuggestion = nextUp ? {title: nextUp.title, sub: nextUp.sub, go: nextUp.go} : null
   reviewSuggestionOpen = true
   if(currentScreen==='home') renderHome()
+}
+function reviewSavedToast(text) {
+  const old = document.getElementById('review-toast'); if(old) old.remove()
+  const el = document.createElement('div'); el.id = 'review-toast'; el.setAttribute('role', 'status')
+  el.innerHTML = '<span>' + esc(text) + '</span>'
+  document.body.appendChild(el)
+  setTimeout(function(){ el.remove() }, 4000)
 }
 function toggleReviewSuggestion() { reviewSuggestionOpen = !reviewSuggestionOpen; if(currentScreen==='home') renderHome() }
 function toggleFocusEdit(e) { if(e) e.stopPropagation(); focusEditOpen = !focusEditOpen; if(currentScreen==='home') renderHome() }
@@ -4040,14 +4053,14 @@ function taskReviewHtml() {
   const today = getToday(), reviewedToday = state.taskReviewedDate === today
   const items = [...state.tasks.now, ...state.tasks.today].filter(function(t){ return !t.done })
   return `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-    <div class="panel-label" style="margin-bottom:6px">${icon('clipboard')} ${tr('home_review_title')}</div>
+    ${taskReviewDone ? '' : `<div class="panel-label" style="margin-bottom:6px">${icon('clipboard')} ${tr('home_review_title')}</div>
     <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:6px">${tr('home_review_hint')}</div>
     ${items.length ? items.map(reviewChecklistRowHtml).join('') : `<div class="muted" style="font-size:var(--fs-sm);padding:6px 0">${tr('home_review_empty')}</div>`}
     <div style="display:flex;gap:8px;margin:10px 0">
       <input id="review-quick-add" class="form-input" placeholder="${tr('home_review_quick_add')}" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();reviewQuickAdd()}"/>
       <button onclick="reviewQuickAdd()" style="background:var(--surface-2);border-radius:var(--radius-md);padding:0 16px;color:var(--t2);font-weight:700">${icon('plus')}</button>
     </div>
-    <button id="finish-review-btn" class="btn-primary" onclick="finishTaskReview()">${icon('check')} ${tr('home_review_finish')}</button>
+    <button id="finish-review-btn" class="btn-primary" onclick="finishTaskReview()">${icon('check')} ${tr('home_review_finish')}</button>`}
     ${taskReviewSuggestion ? `<div style="margin-top:10px;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">
       <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleReviewSuggestion()">
         <span style="font-weight:700;color:var(--gold);font-size:var(--fs-base)">${icon('target')} ${tr('home_review_suggestion')}</span>
