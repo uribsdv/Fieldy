@@ -4256,6 +4256,7 @@ function aiLangInstruction() {
 // is useful even offline); the short AI narrative is generated ONCE per day
 // and cached in state.briefing — never re-fetched on every load.
 let briefingBusy = false, briefingError = '', briefingAutoTriedDate = null
+let lokiRefreshAsked = false, lokiNightNote = null   // "refresh" pressed (Loki answers it at night); his one line when it is ready
 function briefingFacts() {
   const today = getToday(), sites = [], seen = {}
   const add = (name, why, stuck) => { if(!name || seen[name]) return; seen[name] = 1; sites.push({name, why, stuck}) }
@@ -4289,6 +4290,8 @@ async function generateDailyBriefing() {
     briefingError = e.message || 'שגיאה'
   }
   briefingBusy = false
+  if(lokiRefreshAsked && !briefingError && gnomeOn() && lokiNight()) lokiNightWrote()   // asked for at night: one short line, and back to sleep
+  lokiRefreshAsked = false
   if(currentScreen === 'home') renderHome()
 }
 // Idempotent: called at boot and on every home render; only ever spends one
@@ -4302,7 +4305,7 @@ function ensureDailyBriefing() {
   briefingAutoTriedDate = today
   generateDailyBriefing()
 }
-function refreshBriefing() { if(briefingBusy) return; haptic('light'); generateDailyBriefing() }
+function refreshBriefing() { if(briefingBusy) return; haptic('light'); lokiRefreshAsked = true; generateDailyBriefing() }
 // The one "read later" drawer on the home screen: the 30-day mood trend, the
 // recurring-pattern note, the personal-pattern analysis and the server's
 // "noticed" items used to be four separate boxes competing for attention.
@@ -4883,7 +4886,7 @@ function gnomeCardHtml() {
   item = items[gnIdx] || {kind: 'none'}
   if(briefingBusy) { pose = 'think'; text = lokiLine('thinking') }
   else if(briefingError) { pose = 'portrait'; text = lokiLine('error'); sub = tr('home_briefing_error_prefix') + ' ' + briefingError; portrait = true }
-  else if(night) { pose = 'sleep'; text = lokiLine('night') }
+  else if(night) { pose = 'sleep'; text = lokiNightNote && Date.now() < lokiNightNote.until ? lokiNightNote.t : lokiLine('night') }
   else if(empty) { pose = 'laugh'; text = lokiLine('empty') }
   else { pose = item.pose; label = item.label; text = item.text }
   if(GN_DEBUG.pose && (GN_TAB[GN_DEBUG.pose] || LK_POSE[GN_DEBUG.pose])) pose = GN_DEBUG.pose
@@ -5169,7 +5172,7 @@ function lokiLine(name) { const c = lokiSticky[name]; if(c && Date.now() - c.at 
 function lokiOnTaskDone(left) {
   if(!gnomeOn()) return
   if(lokiOut()) { LOKI.react(left <= 0 ? 'dayDone' : 'taskDone'); return }      // out on Home: he answers where he is
-  if(currentScreen !== 'home' || left <= 0) return
+  if(currentScreen !== 'home' || left <= 0 || lokiNight()) return   // asleep: no bubble held over to the morning
   lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0
 }
 // ── his memory of the two of them (localStorage only, fieldy_loki_v1; he knows only what happens in the app) ──
@@ -5245,11 +5248,14 @@ function lokiTilt(x) {
   setTimeout(function(){ if(im.isConnected) im.style.rotate = '0deg' }, 750)
 }
 function lokiHop() { const im = document.querySelector('#jg-gnome .gn-img'); if(!im || reducedMotion()) return; im.classList.remove('gn-hop'); void im.offsetWidth; im.classList.add('gn-hop'); setTimeout(function(){ im.classList.remove('gn-hop') }, 420) }
+// a briefing Uri asked for at night is ready: he says so in one line, still asleep on his stump, and after a few seconds it is the night's line again
+const LOKI_NIGHT_WROTE = 'כתבתי. מחכה לך בבוקר.'   // kept outside LOKI: his banks stay main's, word for word
+function lokiNightWrote() { lokiNightNote = {t: LOKI_NIGHT_WROTE, until: Date.now() + 6000}; setTimeout(function(){ lokiNightNote = null; if(lokiNight()) lokiRender() }, 6030) }
 // a tap (or a long press) while he sleeps: he stays asleep on his stump and only murmurs another line of the night, in his bubble
 function lokiNightTap() {
   const cur = lokiSticky.night && lokiSticky.night.t
   let t = lokiPick('night'); if(t === cur) t = lokiPick('night')
-  lokiSticky.night = {t, at: Date.now()}; haptic('light')
+  lokiSticky.night = {t, at: Date.now()}; lokiNightNote = null; haptic('light')
   const el = document.querySelector('#jg-gnome .gn-t'); if(el) el.textContent = t
 }
 function lokiTap(e) {
