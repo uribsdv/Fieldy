@@ -6165,11 +6165,22 @@ function lokiLifeSync() {
   if(!lokiAllowed()) { if(lokiOut()) lokiSnapHome(); if(lkr.layer && lkr.layer.parentNode) lkr.layer.remove(); return }
   const ly = lokiLayer(); if(ly.parentNode !== scr) scr.appendChild(ly)
   if(!lokiAll) lokiLoadAll().then(function() { lokiLifeSync() }).catch(function(){})
-  lkr.geo = lokiGeo(); lokiPropsDraw()
-  if(lkr.ep) lokiReplace(lkr.ep)
+  const old = lkr.geo; lkr.geo = lokiGeo(); lokiPropsDraw()
+  if(lkr.ep && currentScreen === 'home' && lokiLost(lkr.ep, old)) lokiSnapHome(); else if(lkr.ep) lokiReplace(lkr.ep)   // (Home hidden is measured with no cards)
   if(LK_LAB) lokiLabDraw()
   if(window.ResizeObserver && !lokiRO) { lokiRO = new ResizeObserver(function() { clearTimeout(lokiRO.t); lokiRO.t = setTimeout(lokiLifeSync, 120) }) }
-  if(lokiRO) { lokiRO.disconnect(); const nh = scr.querySelector('.nh'); if(nh) lokiRO.observe(nh) }
+  // observed again only when Home's content is a new element: a new observe() always reports once, and that report calls this again
+  if(lokiRO) { const nh = scr.querySelector('.nh'); if(nh !== lokiRO.el) { lokiRO.disconnect(); lokiRO.el = nh; if(nh) lokiRO.observe(nh) } }
+}
+// the place he is on is gone from the map (its card hidden or removed, or an autoN key that now names another card): he is back on his stump
+function lokiLost(ep, old) {
+  const st = ep.steps[ep.si], sig = el => el.className + '|' + (el.textContent || '').trim().slice(0, 60)
+  return [ep.node, st && st.node].some(function(k) {
+    if(k == null || k === 'nook') return false
+    const n = lokiNode(k); if(!n) return true
+    const o = old && old.nodes[k]
+    return /^auto/.test(k) && !!(o && o.el && n.el) && o.el !== n.el && sig(o.el) !== sig(n.el)
+  })
 }
 window.addEventListener('resize', function() { clearTimeout(lkr.rz); lkr.rz = setTimeout(function() { if(currentScreen === 'home') lokiLifeSync() }, 150) })
 // ── the actor: one picture shown at a time (and the lit copy of the walk's crystal)
@@ -6312,13 +6323,14 @@ function lokiGoSteps(c, to, toDx, o) {
 }
 function lokiVineHold(v) { return Object.assign({}, v, {upRef: lokiNode(v.up).ref, dnRef: lokiNode(v.down).ref}) }
 function lokiCursor(ep) { return {node: ep.node, dx: ep.dx, face: ep.face == null ? 0 : ep.face} }
-function lokiScript(ep, steps) { ep.steps = steps; ep.si = 0; ep.t0 = performance.now(); ep.last = ep.t0; ep.paused = 0; cancelAnimationFrame(lkr.raf); clearTimeout(lkr.frz); lkr.raf = requestAnimationFrame(lokiTick) }
+function lokiScript(ep, steps) { ep.steps = steps; ep.si = 0; ep.t0 = performance.now(); ep.last = ep.t0; ep.paused = 0; cancelAnimationFrame(lkr.raf); clearTimeout(lkr.frz); lkr.parked = false; lkr.raf = requestAnimationFrame(lokiTick) }
 function lokiFrozen() { const g = lokiRoamGuard(); return !!g && g !== 'off' && g !== 'reduced' }
 function lokiTick(now) {
   const ep = lkr.ep; if(!ep) return
   if(!lokiAllowed()) return lokiSnapHome()
   // he stops where he is (in the middle of a step too) while Uri types, a sheet is open, Home is not in front, or the app is away
-  if(lokiFrozen()) { if(!ep.paused) ep.paused = now; lokiTickLater(250); return }
+  // (Home not in front, or the app away: nothing is looked at until lokiWake; the rest is looked at again every 250 ms)
+  if(lokiFrozen()) { if(!ep.paused) ep.paused = now; if(lokiAway()) { clearTimeout(lkr.frz); lkr.parked = true } else lokiTickLater(250); return }
   if(ep.paused) { ep.t0 += now - ep.paused; ep.paused = 0 }
   let st = ep.steps[ep.si]
   while(st) {
@@ -6332,6 +6344,13 @@ function lokiTick(now) {
   }
 }
 function lokiTickLater(ms) { clearTimeout(lkr.frz); lkr.frz = setTimeout(function() { lkr.raf = requestAnimationFrame(lokiTick) }, ms) }
+function lokiAway() { const g = lokiRoamGuard(); return g === 'hidden' || g === 'screen' }
+// Home in front again, or the app back: what stopped while he was away goes on
+function lokiWake() {
+  if(lokiAway()) return
+  if(lkr.parked) { lkr.parked = false; if(lkr.ep) { cancelAnimationFrame(lkr.raf); clearTimeout(lkr.frz); lkr.raf = requestAnimationFrame(lokiTick) } }
+  if(lkr.moveParked) { lkr.moveParked = false; if(lkr.state === 'perched') lokiMoveSchedule(5000) }
+}
 // distance covered at time t for a start and a stop of `acc` seconds and a top speed v; and the whole duration
 function lokiTrapezoid(D, v, acc) {
   const a = v / acc, ta = Math.min(acc, Math.sqrt(D / a)), da = a * ta * ta / 2, tc = Math.max(0, (D - 2 * da) / v), T = 2 * ta + tc, vm = a * ta
@@ -6505,12 +6524,13 @@ function lokiArrived(ep, line) {
   if(lkr.want) { const w = lkr.want; lkr.want = null; if(w.home) return lokiComeBack(); if(w.node && !lokiGoTo(w.node, Object.assign({}, w, {force: !!w.force}))) { if(w.line) lokiRoamSay(w.line, 5200) } else if(w.node) return }
   lokiMoveSchedule()
 }
-function lokiMoveSchedule(ms) { clearTimeout(lkr.moveTimer); lkr.moveTimer = setTimeout(lokiNextMove, ms != null ? ms : lokiRand(LK_TIME.dwell)) }
+function lokiMoveSchedule(ms) { clearTimeout(lkr.moveTimer); lkr.moveParked = false; lkr.moveTimer = setTimeout(lokiNextMove, ms != null ? ms : lokiRand(LK_TIME.dwell)) }
 function lokiNextMove() {
   const ep = lkr.ep; if(!ep || lkr.state !== 'perched') return
   if(!lokiAllowed()) return lokiSnapHome()
-  if(lokiFrozen()) return lokiMoveSchedule(5000)
+  if(lokiFrozen()) { if(lokiAway()) { lkr.moveParked = true; return } return lokiMoveSchedule(5000) }
   if(Date.now() >= lkr.outUntil || lokiNight()) return lokiComeBack()
+  lokiLifeSync(); if(lkr.ep !== ep) return      // the map as it is now (where Home is scrolled to), before he chooses where to go
   const t = lokiChoose(ep.node); if(!t || t.dx == null || (t.node === ep.node && Math.abs(t.dx - ep.dx) < 30)) return lokiMoveSchedule()
   lokiMoveTo(t.node, t.dx, t.line)
 }
@@ -6575,11 +6595,14 @@ function lokiWalkSchedule(ms) {
 function lokiScreenChange(screen) {
   if(screen === 'sites') lokiOnSites()
   if(screen !== 'home') { clearTimeout(lkr.timer); lkr.onHome = false; if(lkr.state === 'in') return }
-  else if(!lkr.onHome) { lkr.onHome = true; lkr.homeAt = Date.now(); if(lkr.state === 'in') lkr.walked = false; else if(Date.now() >= lkr.outUntil) setTimeout(function() { if(lkr.state === 'perched') lokiComeBack() }, 1500) }
+  else {
+    setTimeout(lokiWake, 0)                    // after navigateTo has put Home in front
+    if(!lkr.onHome) { lkr.onHome = true; lkr.homeAt = Date.now(); if(lkr.state === 'in') lkr.walked = false; else if(Date.now() >= lkr.outUntil) setTimeout(function() { if(lkr.state === 'perched') lokiComeBack() }, 1500) }
+  }
 }
 // for tests and the lab: out now (if a way is free; the guards still hold)
 async function lokiWalkNow(to) { lkr.walked = true; const ok = await lokiLeave(true, to); return ok ? {node: lkr.ep.node, steps: lkr.ep.steps.map(s => s.t + (s.name ? ':' + s.name : '') + (s.rev ? ':rev' : ''))} : null }
-document.addEventListener('visibilitychange', function() { if(document.visibilityState === 'visible' && lkr.state === 'perched' && Date.now() >= lkr.outUntil) setTimeout(lokiComeBack, 800) })
+document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') return; lokiWake(); if(lkr.state === 'perched' && Date.now() >= lkr.outUntil) setTimeout(lokiComeBack, 800) })
 // ── what the rest of the app asks of him: go somewhere, say something, react to something (the only ways he is moved or speaks)
 // what each event means while he is out: where he goes (if a drawn way leads there and his last move was 45 seconds ago or more), and what he says
 const LK_REACT = {
