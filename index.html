@@ -1199,6 +1199,10 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .gm-opt{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;margin-bottom:8px;padding:8px 14px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-base)}
 [data-theme="jungle"] .gm-opt.on{background:#D6EBD0;border:2px solid #2F7D46}
 [data-theme="jungle"] .gm-opt span{display:inline-flex;align-items:center;gap:4px;font-weight:700}
+[data-theme="jungle"] .gm-pick-h{margin:12px 0 8px}
+[data-theme="jungle"] .gm-roots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+[data-theme="jungle"] .gm-ropt{min-height:44px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid rgba(45,102,52,.3);color:var(--t1);font-size:var(--fs-base);font-weight:700}
+[data-theme="jungle"] .gm-ropt.on{background:#D6EBD0;border:2px solid #2F7D46}
 /* Loki out on the screen: a layer that takes no press (only he does), the frames stacked and shown one at a time (no blending), a puff when he comes and goes */
 .lk-roam{position:relative;display:block;height:0;z-index:30;pointer-events:none}
 [data-theme="jungle"] .lk-actor{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -2565,7 +2569,7 @@ const TRANSLATIONS = {
 
   // Undo toasts + task triage
   undo_task_deleted: {he:'המשימה נמחקה', en:'Task deleted'},
-  undo_moved_later: {he:"נשמר. {n} משימות עברו ל'אחר כך'.", en:'{n} tasks moved to "Later"'},
+  undo_moved_later: {he:"נשמר. {n} ל'אחר כך'.", en:'{n} tasks moved to "Later"'},   // he: {n} is gameCount(n, 'movedLater')
   home_review_saved_none: {he:'נשמר. הכול מסודר.', en:'Saved. All set.'},
   undo_batched: {he:'המשימות קובצו ל"{b}"', en:'Tasks grouped into "{b}"'},
   triage_site: {he:'ב-{x}', en:'at {x}'},
@@ -4039,7 +4043,7 @@ function finishTaskReview() {
   const prevTasks = state.tasks
   setState({tasks: {now: strip(state.tasks.now), today: strip(state.tasks.today), later: [...state.tasks.later, ...moved]}, taskReviewedDate: getToday()})
   // one message for the finish: the undo toast when something moved (it carries the "saved" words and the undo), else Loki's bubble in the jungle or a plain toast
-  if(moved.length) offerUndo(tr('undo_moved_later').replace('{n}', moved.length), function(){ setState({tasks: prevTasks}) })
+  if(moved.length) offerUndo(tr('undo_moved_later').replace('{n}', uiLang === 'he' ? gameCount(moved.length, 'movedLater') : moved.length), function(){ setState({tasks: prevTasks}) })
   else if(currentTheme === 'jungle' && gnomeOn()) { lokiQueue = [lokiItem('review', tr('home_review_saved_none'), 'joy')]; gnIdx = 0; gnFull = false }
   else reviewSavedToast(tr('home_review_saved_none'))
   taskReviewDone = true
@@ -5388,22 +5392,24 @@ const GAME_DIFF = [1, 2, 4, 8]                 // easy, medium, hard, legendary:
 const GAME_RULES = {dayFull: 3, dayBonus: 3, weekFull: 5, weekBonus: 10, forgive: 2, side: 2, sideCap: 6, sideWeek: 5, sideMax: 3, rest: 1, give: 3}
 const GAME_SCROLLS = [5, 20, 45, 90, 150, 250]  // tasks closed in all, for each of the six scrolls
 const GAME_ROOTS = ['field', 'people', 'learn', 'body']
-const GAME_LEARN = /ללמוד|למידה|לימוד|קורס|הדרכ|לקרוא|קריאה|תחקיר|הכשר|\b(course|learn|training|study|read)/i
+const GAME_LEARN = /ללמוד|למידה|לימוד|קורס|הדרכ|לקרוא(?!\s*ל)|קריאה|תחקיר|הכשר|\b(course|learn|training|study|read)/i   // "לקרוא ל..." is calling someone, not reading
+const GAME_BODY = /כושר|אימון|ריצה|לרוץ|הליכה|מדיטציה|שינה|לישון|נשימה|לנשום|יוגה|מתיחות|שחייה|לשחות|\b(gym|workout|run|walk|meditat|sleep|yoga|stretch|swim)/i
+const GAME_CALL = /להתקשר|לקרוא\s*ל|לדבר עם|שיחה עם|פגישה עם|לפגוש|\b(call|meet)/i     // a talk with someone
 // the side quests he knows: their root and weekly target (the gym and meditation are the logs the app already keeps)
 const GAME_SIDE = {gym: {root: 'body', target: 3}, med: {root: 'body', target: 5}, walk: {root: 'body', target: 3}, read: {root: 'learn', target: 3}, journal: {root: 'learn', target: 3}, home: {root: 'people', target: 3}, own: {root: 'field', target: 3}}
 const GAME_TXT = {
   title: 'המסע', day: 'היום והשבוע', roots: 'ארבעה שורשים', side: 'משימות צד', ach: 'הישגים', scrolls: 'מגילות', onboard: 'מסע פתיחה',
-  good: 'יום טוב · {n} משימות', full: 'יום מלא', week: 'שבוע: {n} מתוך {m} ימים מלאים', streak: '{n} ימים טובים',
+  good: 'יום טוב · {n}', full: 'יום מלא', week: 'שבוע: {n} מתוך {m}', streak: '{n}',
   off: 'יום חופשי', rest: 'יום מנוחה מאימון', addSide: 'הוסף משימת צד', why: 'למה זה חשוב לי?',
   diff: {1: 'קל', 2: 'בינוני', 4: 'קשה', 8: 'אגדי'}, root: {field: 'שטח', people: 'אנשים', learn: 'למידה', body: 'גוף ושקט'},
   sideName: {gym: 'אימון', med: 'מדיטציה', walk: 'הליכה', read: 'קריאה/טאו', journal: 'יומן', home: 'שיחה עם הבית', own: 'משימה משלך'},
   thisWeek: '{n}/{m} השבוע', markToday: 'היום', done: '✓', remove: 'הסר', name: 'שם', add: 'הוסף', soon: 'בקרוב',
-  locked: '???', moreTasks: 'עוד {n} משימות', oneMore: 'עוד משימה אחת', scroll: ['מגילה ראשונה', 'מגילה שנייה', 'מגילה שלישית', 'מגילה רביעית', 'מגילה חמישית', 'מגילה שישית'],
-  days: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'], drops: '{n} טיפות', pick: 'קושי', close: 'סגור',
+  locked: '???', moreTasks: 'עוד {n}', scroll: ['מגילה ראשונה', 'מגילה שנייה', 'מגילה שלישית', 'מגילה רביעית', 'מגילה חמישית', 'מגילה שישית'],
+  days: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'], drops: '{n}', pick: 'קושי', pickRoot: 'תחום', close: 'סגור',
   say: {
     dayFull: 'יום מלא. שלוש טיפות נוספות לנחל.', weekFull: 'שבוע מלא. עשר טיפות, וגפן אחת גאה מאוד.', back: 'טוב שבאת. הגדם עוד חם.',
     rest: 'שלושה אימונים ברצף. מחר אולי יום מנוחה? גם שורשים צריכים לנוח.', why: "פעם אמרת לי: '{why}'. אני רק מזכיר.",
-    side: 'רשמתי. שתי טיפות.', cap: 'היום הנחל כבר מלא. הטיפות של מחר מחכות.', scroll: 'נפתחה מגילה חדשה. היא מחכה לך כשיהיה לך רגע.',
+    side: 'רשמתי. {n}.', cap: 'היום הנחל כבר מלא. הטיפות של מחר מחכות.', scroll: 'נפתחה מגילה חדשה. היא מחכה לך כשיהיה לך רגע.',
     obDone: 'זהו. אתה מכיר את כל השבילים. מכאן זה הנחל שלך.'
   },
   ob: [
@@ -5414,6 +5420,9 @@ const GAME_TXT = {
     {t: 'קרא לי מהגדם', say: 'כשאני יוצא לטייל, לחיצה על הגדם מחזירה אותי. נסה.'}
   ]
 }
+// a count in Hebrew, for every {n} above: one is its own word ("משימה אחת"), two may have its own ("שתי טיפות"), the rest plural
+const GAME_COUNT = {task: ['משימה אחת', 'משימות'], drop: ['טיפה אחת', 'טיפות', 'שתי טיפות'], goodDay: ['יום טוב אחד', 'ימים טובים'], fullDay: ['יום מלא אחד', 'ימים מלאים'], movedLater: ['משימה אחת עברה', 'משימות עברו']}
+function gameCount(n, kind) { const w = GAME_COUNT[kind]; return n === 1 ? w[0] : n === 2 && w[2] ? w[2] : n + ' ' + w[1] }
 // the twelve achievements: always all shown, each with how far along it is ([have, need])
 const GAME_ACH = [
   {id: 'first', name: 'הצעד הראשון', line: 'הנה. צעד אחד. ככה מתחילים נחלים.', p: g => [g.total, 1]},
@@ -5432,14 +5441,14 @@ const GAME_ACH = [
 function gameTasks() { return [...state.tasks.now, ...state.tasks.today, ...state.tasks.later] }
 function gameFresh() {
   return {v: 1, wallet: 0, earned: 0, total: 0, best: 0, returns: 0, roots: {field: 0, people: 0, learn: 0, body: 0}, byDiff: {1: 0, 2: 0, 4: 0, 8: 0},
-    diff: {}, paid: {}, days: {}, weeks: {}, sideWeeks: {}, streak: {n: 0, last: ''}, ach: {}, scrolls: {open: [], read: {}}, side: [],
+    diff: {}, rootOf: {}, paid: {}, days: {}, weeks: {}, sideWeeks: {}, streak: {n: 0, last: ''}, ach: {}, scrolls: {open: [], read: {}}, side: [],
     whyAt: 0, unstuck: '', stuck: {}, onboard: {done: true, start: 0, steps: {}}}
 }
 // a saved (or restored) journey with anything missing filled in, so an older or partial one never breaks a screen
 function gameFill(o) {
   const f = gameFresh(), g = Object.assign({}, f, o)
   ;['roots', 'byDiff', 'streak', 'scrolls', 'onboard'].forEach(k => { g[k] = Object.assign({}, f[k], o[k] && typeof o[k] === 'object' ? o[k] : {}) })
-  ;['diff', 'paid', 'days', 'weeks', 'sideWeeks', 'ach', 'stuck'].forEach(k => { if(!g[k] || typeof g[k] !== 'object' || Array.isArray(g[k])) g[k] = {} })
+  ;['diff', 'rootOf', 'paid', 'days', 'weeks', 'sideWeeks', 'ach', 'stuck'].forEach(k => { if(!g[k] || typeof g[k] !== 'object' || Array.isArray(g[k])) g[k] = {} })
   if(!Array.isArray(g.side)) g.side = []
   if(!Array.isArray(g.scrolls.open)) g.scrolls.open = []
   if(!g.scrolls.read || typeof g.scrolls.read !== 'object') g.scrolls.read = {}
@@ -5460,6 +5469,7 @@ function gameSave() {
   gameTasks().forEach(t => { ids[t.id] = 1 })
   // a task that is gone can never be ticked again: its id is no longer needed
   Object.keys(g.diff).forEach(id => { if(!ids[id]) delete g.diff[id] })
+  Object.keys(g.rootOf).forEach(id => { if(!ids[id]) delete g.rootOf[id] })
   Object.keys(g.paid).forEach(id => { if(!ids[id]) delete g.paid[id] })
   try { localStorage.setItem(GAME_KEY, JSON.stringify(g)) } catch(e) {}
 }
@@ -5484,11 +5494,29 @@ function gameStreakNow() {
   return gameGap(s.last, gardenDayKey()) <= GAME_RULES.forgive ? s.n : 0     // gone quietly after three empty days unmarked, until two good days again
 }
 // which root a task grows: learning by its words, the field by a site, people by the phone, someone else or a name; the field otherwise
+// a name's sound, to find an English name written in Hebrew ("לדייב" is Dave, "לנובי" Novie): its consonants only, the letters that
+// sound alike as one (v/b/w and ב, k/c/q and כ/ק, ...), the vowels and the letters that stand for them (א, ה, ו, י, ע) dropped
+function gameNameKey(w) {
+  const L = {b: 'b', v: 'b', w: 'b', c: 'k', k: 'k', q: 'k', g: 'g', j: 'g', d: 'd', z: 'z', t: 't', l: 'l', m: 'm', n: 'n', s: 's', x: 'ks', p: 'p', f: 'p', r: 'r',
+    'ב': 'b', 'ג': 'g', 'ד': 'd', 'ז': 'z', 'ח': 'h', 'ט': 't', 'כ': 'k', 'ך': 'k', 'ק': 'k', 'ל': 'l', 'מ': 'm', 'ם': 'm', 'נ': 'n', 'ן': 'n', 'ס': 's', 'פ': 'p', 'ף': 'p', 'צ': 'ts', 'ץ': 'ts', 'ר': 'r', 'ש': 'sh', 'ת': 't'}
+  return String(w).toLowerCase().replace(/sh/g, 'ש').replace(/th/g, 't').replace(/ph/g, 'f').replace(/ck/g, 'k').split('').map(ch => L[ch] || '').join('').replace(/(.)\1+/g, '$1')
+}
+// a contact named in the text: as written, or (two sounds at least) a Hebrew word that sounds like one of the name's words, with or without a prefix (ל, ב, ו, ש, ה, מ, כ)
+function gameNamed(s) {
+  const words = s.split(/[^\u05d0-\u05eaA-Za-z']+/).filter(Boolean), keys = new Set()
+  words.forEach(w => { keys.add(gameNameKey(w)); if(/^[לבושהמכ]/.test(w) && w.length > 2) keys.add(gameNameKey(w.slice(1))) })
+  return (state.people || []).some(p => p && p.name && String(p.name).length >= 2 && (s.indexOf(p.name) >= 0 || String(p.name).split(/[^A-Za-z\u05d0-\u05ea]+/).some(n => { const k = gameNameKey(n); return k.length >= 2 && keys.has(k) })))
+}
+// which root a task grows: the one chosen by hand; else learning by its words, body and calm by its words, people when it is someone
+// else's or a talk with someone (that comes before a site), the field by a site, people by the phone or a name; the field otherwise
 function gameRoot(t) {
-  const s = String(t.text || '') + ' ' + String(t.note || '')
+  const o = game && game.rootOf && game.rootOf[t.id]; if(GAME_ROOTS.indexOf(o) >= 0) return o
+  const s = String(t.text || '') + ' ' + String(t.note || ''), named = gameNamed(s)
   if(GAME_LEARN.test(s)) return 'learn'
+  if(GAME_BODY.test(s)) return 'body'
+  if((t.assignee && t.assignee !== 'uri') || GAME_CALL.test(s) || (t.context === 'phone' && named)) return 'people'
   if(t.context === 'site' || t.site) return 'field'
-  if(t.context === 'phone' || (t.assignee && t.assignee !== 'uri') || (state.people || []).some(p => p && p.name && String(p.name).length >= 2 && s.indexOf(p.name) >= 0)) return 'people'
+  if(t.context === 'phone' || named) return 'people'
   return 'field'
 }
 // what Loki suggests: hard for the field, red or a stuck site; easy for a call that is not red; medium otherwise. Legendary only by hand.
@@ -5593,7 +5621,7 @@ function gameSidePay(q, say) {
   if(d.sp[q.id]) return
   d.sp[q.id] = 1; game.roots[q.root || 'body']++
   const room = GAME_RULES.sideCap - (d.sd || 0), n = Math.min(GAME_RULES.side, Math.max(0, room))
-  if(n > 0) { d.sd = (d.sd || 0) + n; gameEarn(n); say.push({t: GAME_TXT.say.side}) } else say.push({t: GAME_TXT.say.cap, pose: 'stand'})
+  if(n > 0) { d.sd = (d.sd || 0) + n; gameEarn(n); say.push({t: GAME_TXT.say.side.replace('{n}', gameCount(n, 'drop'))}) } else say.push({t: GAME_TXT.say.cap, pose: 'stand'})
   const wk = gardenWeekKey()
   if(game.side.length && !game.sideWeeks[wk] && game.side.every(x => gameSideWeek(x) >= x.target)) { game.sideWeeks[wk] = 1; gameEarn(GAME_RULES.sideWeek) }
 }
@@ -5661,32 +5689,39 @@ function gameScan() {
 const GAME_DROP_SVG = '<svg class="gm-drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.4 4.3 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 2.6-6.7 6-11z"/></svg>'
 function gameDiffTag(t) {
   const d = gameDiffOf(t), set = GAME_DIFF.indexOf(gameGet().diff[t.id]) >= 0
-  return `<button class="tag gm-diff${set ? '' : ' sug'}" onclick="gamePickDiff(${jsArg(t.id)})" aria-label="${GAME_TXT.pick}: ${GAME_TXT.diff[d]} · ${GAME_TXT.drops.replace('{n}', d)}">${GAME_TXT.diff[d]} · ${d}${GAME_DROP_SVG}</button>`
+  return `<button class="tag gm-diff${set ? '' : ' sug'}" onclick="gamePickDiff(${jsArg(t.id)})" aria-label="${GAME_TXT.pick}: ${GAME_TXT.diff[d]} · ${GAME_TXT.drops.replace('{n}', gameCount(d, 'drop'))}">${GAME_TXT.diff[d]} · ${d}${GAME_DROP_SVG}</button>`
 }
 function gamePickDiff(id) {
   const t = gameTasks().find(x => x.id === id); if(!t) return
-  const cur = gameDiffOf(t)
+  const cur = gameDiffOf(t), root = gameRoot(t)
   openModal(`<div class="gm-pick"><div class="gm-h1">${GAME_TXT.pick}</div><div class="gm-pick-t">${esc(t.text)}</div>` +
     GAME_DIFF.map(d => `<button class="gm-opt${d === cur ? ' on' : ''}" aria-pressed="${d === cur}" onclick="gameSetDiff(${jsArg(id)},${d})"><b>${GAME_TXT.diff[d]}</b><span>${d}${GAME_DROP_SVG}</span></button>`).join('') +
+    `<div class="gm-h2 gm-pick-h">${GAME_TXT.pickRoot}</div><div class="gm-roots">` +
+    GAME_ROOTS.map(r => `<button class="gm-ropt${r === root ? ' on' : ''}" aria-pressed="${r === root}" onclick="gameSetRoot(${jsArg(id)},'${r}')">${GAME_TXT.root[r]}</button>`).join('') + '</div>' +
     `<button class="btn-primary" style="margin-top:12px" onclick="closeModal()">${GAME_TXT.close}</button></div>`)
+}
+// a root chosen by hand wins over the guess, and is kept by the task's id; a task already closed keeps the root it was counted in
+function gameSetRoot(id, r) {
+  const t = gameTasks().find(x => x.id === id); if(!t || t.done || GAME_ROOTS.indexOf(r) < 0) return
+  gameGet().rootOf[id] = r; gameSave(); haptic('light'); gamePickDiff(id)
 }
 function gameSetDiff(id, d) { const g = gameGet(); if(GAME_DIFF.indexOf(d) < 0) return; g.diff[id] = d; gameSave(); haptic('light'); closeModal(); renderCurrentScreen() }
 // on the jungle Home: the good days in place of the flame, and the drops beside the progress (it opens the journey)
-function gameStreakHtml() { const n = gameStreakNow(); return n >= 2 ? ` · <span class="gm-days">${icon('leaf')} ${GAME_TXT.streak.replace('{n}', n)}</span>` : '' }
+function gameStreakHtml() { const n = gameStreakNow(); return n >= 2 ? ` · <span class="gm-days">${icon('leaf')} ${GAME_TXT.streak.replace('{n}', gameCount(n, 'goodDay'))}</span>` : '' }
 function gameUnread() { const s = gameGet().scrolls; return s.open.some(i => !s.read[i]) }
 function gameChipHtml() {
   const g = gameGet()
-  return `<button class="gm-chip" onclick="gameShowJourney()" aria-label="${GAME_TXT.title} · ${GAME_TXT.drops.replace('{n}', g.wallet)}">${GAME_DROP_SVG}<b>${g.wallet}</b>${gameUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>`
+  return `<button class="gm-chip" onclick="gameShowJourney()" aria-label="${GAME_TXT.title} · ${GAME_TXT.drops.replace('{n}', gameCount(g.wallet, 'drop'))}">${GAME_DROP_SVG}<b>${g.wallet}</b>${gameUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : ''}</button>`
 }
 function gameCanGive() { return Math.min(gameGet().wallet, loki.drops || 0) > 0 }
 // ── the sheet "the journey": the day and the week, the four roots, side quests, achievements, scrolls, the opening walk ──
 function gameBar(have, need) { const p = Math.max(0, Math.min(100, Math.round(have / need * 100))); return `<span class="gm-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${need}" aria-valuenow="${Math.min(have, need)}"><i style="width:${p}%"></i></span>` }
 function gameSheetHtml() {
   const g = gameGet(), T = GAME_TXT, today = gardenDayKey(), d = g.days[today] || {n: 0, p: 0}, w = gameWeekInfo(), streak = gameStreakNow()
-  const dayLine = d.full ? T.full : d.n ? T.good.replace('{n}', d.n) : ''
+  const dayLine = d.full ? T.full : d.n ? T.good.replace('{n}', gameCount(d.n, 'task')) : ''
   const strip = Array.from({length: 7}, (_, i) => { const k = gameDayAdd(w.wk, i), x = g.days[k] || {}; const c = x.full ? 'full' : x.n ? 'good' : (x.off || x.rest) ? 'off' : ''; return `<span class="gm-wd${c ? ' ' + c : ''}${k === today ? ' now' : ''}"><i></i>${T.days[i]}</span>` }).join('')
   const sec = (title, body) => `<div class="gm-sec"><div class="gm-h2">${title}</div>${body}</div>`
-  const daySec = sec(T.day, `<div class="gm-day">${dayLine ? `<b>${dayLine}</b>` : ''}<span>${T.week.replace('{n}', w.full).replace('{m}', w.need)}</span>${streak >= 2 ? `<span>${icon('leaf')} ${T.streak.replace('{n}', streak)}</span>` : ''}</div>
+  const daySec = sec(T.day, `<div class="gm-day">${dayLine ? `<b>${dayLine}</b>` : ''}<span>${T.week.replace('{n}', w.full).replace('{m}', gameCount(w.need, 'fullDay'))}</span>${streak >= 2 ? `<span>${icon('leaf')} ${T.streak.replace('{n}', gameCount(streak, 'goodDay'))}</span>` : ''}</div>
       <div class="gm-week" aria-hidden="true">${strip}</div>
       <button class="gm-btn${d.off ? ' on' : ''}" aria-pressed="${!!d.off}" onclick="gameDayOff()">${T.off}</button>`)
   const rootSec = sec(T.roots, GAME_ROOTS.map(r => `<div class="gm-row"><span class="gm-l">${T.root[r]}</span>${gameBar(g.roots[r], 15)}<b class="gm-n">${g.roots[r]}</b></div>`).join(''))
@@ -5711,7 +5746,7 @@ function gameSheetHtml() {
   const scrSec = sec(T.scrolls, `<div class="gm-row gm-trip">${gameBar(g.total, GAME_SCROLLS[GAME_SCROLLS.length - 1])}<b class="gm-n">${g.total}/${GAME_SCROLLS[GAME_SCROLLS.length - 1]}</b></div>` +
     GAME_SCROLLS.map((need, i) => g.scrolls.open.indexOf(i) >= 0
       ? `<button class="nh-chap" onclick="gameReadScroll(${i})"><span class="nh-chap-dot${g.scrolls.read[i] ? ' read' : ''}"></span><span>${T.scroll[i]}</span></button>`
-      : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${need - g.total === 1 ? T.oneMore : T.moreTasks.replace('{n}', need - g.total)}</small></div>`).join(''))
+      : `<div class="nh-chap gm-lock"><span class="nh-chap-dot read"></span><span>${T.locked}</span><small>${T.moreTasks.replace('{n}', gameCount(need - g.total, 'task'))}</small></div>`).join(''))
   const ob = g.onboard, obSec = ob.done ? '' : sec(T.onboard, ['close', 'add', 'mood', 'garden', 'call'].map((k, i) => `<div class="gm-ob${ob.steps[k] ? ' got' : ''}"><em aria-hidden="true">${ob.steps[k] ? '✓' : i + 1}</em><div><b>${T.ob[i].t}</b><div class="gm-sub">${T.ob[i].say}</div></div></div>`).join(''))
   return `<div class="gm-sheet"><div class="gm-top"><div class="gm-h1">${T.title}</div><span class="gm-wallet">${GAME_DROP_SVG}<b>${g.wallet}</b></span></div>
     ${obSec}${daySec}${rootSec}${sideSec}${achSec}${scrSec}
