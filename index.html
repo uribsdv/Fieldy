@@ -6425,9 +6425,10 @@ function lokiTick(now) {
     ep.si++; ep.t0 = now; st = ep.steps[ep.si]
   }
   if(lkr.ep === ep && ep.si < ep.steps.length) {
-    // standing still on a perch the picture changes every 1.6 s: looked at five times a second, not sixty
-    const cur = ep.steps[ep.si], lazy = cur && cur.t === 'life' && !(cur.L && cur.L.act) && !ep.tap && !ep.point && !ep.laugh
-    if(lazy) lokiTickLater(200); else lkr.raf = requestAnimationFrame(lokiTick)
+    // standing still on a perch the picture changes every 1.6 s: looked at five times a second, not sixty; a look, a page, a doze
+    // (0.8-9 frames a second) twice a frame
+    const cur = ep.steps[ep.si], a = cur && cur.L && cur.L.act, lazy = cur && cur.t === 'life' && !ep.tap && !ep.point && !ep.laugh
+    if(lazy) lokiTickLater(a ? Math.max(16, Math.min(200, Math.round(500 / a.fps))) : 200); else lkr.raf = requestAnimationFrame(lokiTick)
   }
 }
 function lokiTickLater(ms) { clearTimeout(lkr.frz); lkr.frz = setTimeout(function() { lkr.raf = requestAnimationFrame(lokiTick) }, ms) }
