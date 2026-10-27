@@ -2469,6 +2469,9 @@ const TRANSLATIONS = {
 
   mood_overwhelmed: {he:'מוצף', en:'Overwhelmed'}, mood_scattered: {he:'מפוזר', en:'Scattered'}, mood_tired: {he:'עייף', en:'Tired'}, mood_focused: {he:'פוקוס', en:'Focused'}, mood_motivated: {he:'מוטיבציה גבוהה', en:'Highly motivated'},
   home_greeting: {he:'בוקר טוב, אורי', en:'Good morning, Uri'},
+  home_greeting_afternoon: {he:'צהריים טובים, אורי', en:'Good afternoon, Uri'},
+  home_greeting_evening: {he:'ערב טוב, אורי', en:'Good evening, Uri'},
+  home_greeting_night: {he:'לילה טוב, אורי', en:'Good night, Uri'},
   home_streak_days: {he:'{n} ימים', en:'{n} days'},
   home_quote_label: {he:'ציטוט', en:'Quote'},
   home_quote_other: {he:'אחר', en:'Other'},
@@ -4527,7 +4530,7 @@ function renderHome() {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
           <div style="font-size:var(--fs-base);color:var(--t3);margin-bottom:4px">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
-          <div style="font-size:var(--fs-4xl);font-weight:800;color:var(--t1);letter-spacing:-0.01em">${tr('home_greeting')} ${icon('sun')}</div>
+          <div style="font-size:var(--fs-4xl);font-weight:800;color:var(--t1);letter-spacing:-0.01em">${homeGreeting()} ${icon('sun')}</div>
           <div style="font-size:var(--fs-base);color:var(--t3);margin-top:2px">Region II · Cagayan Valley</div>
         </div>
         <button onclick="navigateTo('settings')" aria-label="${tr('settings_title')}" style="background:var(--surface-2);border-radius:var(--radius-md);padding:8px 10px;color:var(--t2);font-size:var(--fs-xl)">${icon('settings')}</button>
@@ -4645,7 +4648,7 @@ function renderHomeNachal() {
       <div class="nh-top">
         <div class="nh-head">
           <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${(state.streak||0)>=2?` · ${icon('flame')} ${tr('home_streak_days').replace('{n}', state.streak)}`:''}</div>
-          <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-greet">${homeGreeting()} ${icon('sun')}</div>
           <div class="nh-region">Region II · Cagayan Valley</div>
           <div class="nh-stats">
             <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
@@ -4737,7 +4740,7 @@ function renderHomeJungle() {
       <div class="nh-top">
         <div class="nh-head">
           <div class="nh-date">${new Date().toLocaleDateString(uiLang==='en'?'en-US':'he-IL',{weekday:'long',day:'numeric',month:'long'})}${gameStreakHtml()}</div>
-          <div class="nh-greet">${tr('home_greeting')} ${icon('sun')}</div>
+          <div class="nh-greet">${homeGreeting()} ${icon('sun')}</div>
           <div class="nh-region">Region II · Cagayan Valley</div>
           <div class="nh-stats">
             <button onclick="navigateTo('tasks')"><b>${nowCount}</b> ${tr('home_stat_now')}</button><s>·</s>
@@ -4801,6 +4804,8 @@ const GN_DEBUG = (function(){ try { const q = new URLSearchParams(location.searc
 function gnomeOn() { return currentTheme === 'jungle' && localStorage.getItem('fieldy_jungle_gnome') !== '0' }
 function setGnome(on) { try { localStorage.setItem('fieldy_jungle_gnome', on ? '1' : '0') } catch(e) {} renderCurrentScreen() }
 function gnHour() { return GN_DEBUG.hour !== null && GN_DEBUG.hour !== undefined ? GN_DEBUG.hour : new Date().getHours() }
+// the Home greeting, by the hour (the same hour Loki keeps): 05-12 morning, 12-17 afternoon, 17-22 evening, 22-05 night
+function homeGreeting() { const h = gnHour(); return tr(h >= 5 && h < 12 ? 'home_greeting' : h >= 12 && h < 17 ? 'home_greeting_afternoon' : h >= 17 && h < 22 ? 'home_greeting_evening' : 'home_greeting_night') }
 const GN_PAD = 16     // clear margin around the lit copy of a drawing
 function gnPadBox(left, top, w, h) { return 'left:' + (left - GN_PAD).toFixed(1) + 'px;top:' + (top - GN_PAD).toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px;box-sizing:content-box;padding:' + GN_PAD + 'px' }
 function gnPoseHtml(key, extra) {
@@ -5240,8 +5245,16 @@ function lokiTilt(x) {
   setTimeout(function(){ if(im.isConnected) im.style.rotate = '0deg' }, 750)
 }
 function lokiHop() { const im = document.querySelector('#jg-gnome .gn-img'); if(!im || reducedMotion()) return; im.classList.remove('gn-hop'); void im.offsetWidth; im.classList.add('gn-hop'); setTimeout(function(){ im.classList.remove('gn-hop') }, 420) }
+// a tap (or a long press) while he sleeps: he stays asleep on his stump and only murmurs another line of the night, in his bubble
+function lokiNightTap() {
+  const cur = lokiSticky.night && lokiSticky.night.t
+  let t = lokiPick('night'); if(t === cur) t = lokiPick('night')
+  lokiSticky.night = {t, at: Date.now()}; haptic('light')
+  const el = document.querySelector('#jg-gnome .gn-t'); if(el) el.textContent = t
+}
 function lokiTap(e) {
-  if(!gnomeOn() || gnHour() >= 22 || gnHour() < 5 || briefingBusy) return
+  if(!gnomeOn() || briefingBusy) return
+  if(lokiNight()) { lokiNightTap(); return }
   haptic('light'); lokiTilt(e.clientX)
   const now = Date.now(); lokiTouch.taps = lokiTouch.taps.filter(t => now - t < 3000).concat([now])
   if(lokiTouch.taps.length >= 5) { if(!lokiTouch.tired) { lokiTouch.tired = true; lokiQueue = [lokiItem('tired', LOKI.touch.tired, 'laugh')]; gnIdx = 0; lokiRender() } return }
@@ -5254,6 +5267,7 @@ function lokiTap(e) {
 }
 function lokiHugTouch() {
   if(!gnomeOn() || briefingBusy) return
+  if(lokiNight()) { lokiNightTap(); return }   // asleep: no hug held over to the morning
   haptic('light'); loki.hugs = (loki.hugs || 0) + 1; lokiSave()
   lokiQueue = [lokiItem('hugged', LOKI.touch.hug, 'hug', {heart: true})]; gnIdx = 0; lokiRender()
 }
