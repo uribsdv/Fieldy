@@ -1160,7 +1160,7 @@ async function main() {
     resetLogs(); await page.goto(BASE + '?lang=1', { waitUntil: 'load' }); await page.waitForTimeout(300)
     await check('defaults to Hebrew/RTL; nav labels and Home text are Hebrew', async () => {
       const r = await page.evaluate(() => ({ dir: document.documentElement.getAttribute('dir'), lang: document.documentElement.getAttribute('lang'), navHome: document.querySelector('[data-i18n="nav_home"]').textContent, greeting: document.getElementById('screen-home').textContent }))
-      assert(r.dir === 'rtl' && r.lang === 'he' && r.navHome === 'בית' && /בוקר טוב/.test(r.greeting), JSON.stringify(r))
+      assert(r.dir === 'rtl' && r.lang === 'he' && r.navHome === 'בית' && /(בוקר טוב|צהריים טובים|ערב טוב|לילה טוב), אורי/.test(r.greeting), JSON.stringify(r))
     })
     await check('Settings screen offers a language toggle, defaulting to עברית selected', async () => {
       await page.evaluate(() => navigateTo('settings'))
@@ -1186,7 +1186,7 @@ async function main() {
     await check('Home screen — greeting, stat tiles, mood picker and the task-review/briefing accordion are all in English', async () => {
       await page.evaluate(() => navigateTo('home'))
       const t = await page.textContent('#screen-home')
-      assert(/Good morning, Uri/.test(t), 'greeting not translated: ' + t.slice(0, 200))
+      assert(/Good (morning|afternoon|evening|night), Uri/.test(t), 'greeting not translated: ' + t.slice(0, 200))
       assert(/How do you feel right now/.test(t), 'mood prompt not translated')
       assert(/Overwhelmed/.test(t) && /Highly motivated/.test(t), 'mood labels not translated: ' + t)
       await page.click('#task-review-toggle-btn')
