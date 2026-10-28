@@ -5007,7 +5007,10 @@ function gnomeAfterRender() {
     gnBlinkTimer = setTimeout(function() {
       const c = document.getElementById('jg-gnome'), im = c && c.querySelector('.gn-img')
       if(c && im && gnVisible && !reducedMotion() && GN_BLINK[im.dataset.pose] && !c.classList.contains('asleep')) { const p = im.dataset.pose; gnomeSet(im, GN_BLINK[p]); setTimeout(function(){ if(im.isConnected) gnomeSet(im, p) }, 140) }
-      if(document.getElementById('jg-gnome')) blink()
+      // the app away: no blink is waited for until it is back (nothing of his ticks in the background)
+      if(!document.getElementById('jg-gnome')) return
+      if(document.visibilityState === 'visible') return blink()
+      document.addEventListener('visibilitychange', function again() { if(document.visibilityState !== 'visible') return; document.removeEventListener('visibilitychange', again); clearTimeout(gnBlinkTimer); if(document.getElementById('jg-gnome')) blink() })
     }, 5000 + Math.random() * 3000)
   }
   blink()
