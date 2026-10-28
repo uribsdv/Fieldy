@@ -6388,7 +6388,7 @@ function lokiShow(ep, name, i, x, y, o) {
   // left, a walk lets it out over its first strides). Anywhere else (the vine, a seat on an edge) the frame is placed by its anchor.
   const torX = l => l + (fl ? im.naturalWidth - lokiTorso(im) : lokiTorso(im)) * k
   if(o.align) {
-    if(!ep.al || ep.al.key !== o.align) { const d = ep.lt != null && ep.ltNode === ep.node ? ep.lt - torX(left) : 0; ep.al = {key: o.align, off: Math.abs(d) <= 18 ? d : 0} }
+    if(!ep.al || ep.al.key !== o.align) { const d = ep.lt != null ? ep.lt - torX(left) : 0; ep.al = {key: o.align, off: Math.abs(d) <= 18 ? d : 0} }
     left += ep.al.off * (o.alignK != null ? o.alignK : 1)
   } else ep.al = null
   ep.lt = torX(left); ep.ltNode = ep.node
@@ -6476,7 +6476,7 @@ function lokiFaceSteps(c, node, to) {
 function lokiVineSteps(c, v, dir) {
   const up = lokiNode(v.up), dn = lokiNode(v.down), s = [], upDx = v.upX - up.ref, vDx = v.downX - dn.ref
   // the wind-up before a jump up to the vine (prep 1-3: standing, crouching, the deep crouch the jump's own crouch follows from)
-  const wound = !!lokiSeqReady('prep'), prep = (node, dx) => wound ? [{t: 'pk', name: 'prep', frames: [0, 1, 2], fps: 8, node, at: dx, flip: v.side < 0, align: true}] : []
+  const wound = !!lokiSeqReady('prep'), prep = (node, dx) => wound ? [{t: 'pk', name: 'prep', frames: [0, 1, 2], fps: 8, node, at: dx, flip: v.side < 0, align: true, toJump: lokiVineHold(v)}] : []
   if(v.topFloor) {   // from a floor at the top (the nook): a jump to the vine and off it at both ends
     const sv = lokiVineHold(v)
     if(dir < 0) { s.push(...lokiWalkSteps(c, v.up, upDx), ...lokiFaceSteps(c, v.up, v.side), ...prep(v.up, upDx)); s.push({t: 'grab', vine: v.key, v: sv, at: 'top', short: true, dir: v.side, wound}, {t: 'climb', vine: v.key, v: sv, dir: -1}, {t: 'grab', vine: v.key, v: sv, rev: true}); c.node = v.down; c.dx = vDx }
@@ -6507,8 +6507,9 @@ function lokiGoSteps(c, to, toDx, o) {
   for(const e of path) { const v = lokiVine(e.vine); if(!v) return null; s.push(...lokiVineSteps(c, v, e.dir)) }
   if(to === 'nook') {
     const nk = lokiNode('nook'), U = lokiSeqReady('standup')
-    s.push(...lokiWalkSteps(c, 'nook', nk.stump + lokiFeetOff(U, 5, LK_SEQ.standup.seatX, false) - nk.ref))
-    s.push(...lokiFaceSteps(c, 'nook', 0))
+    const T = lokiSeqReady('turn'), tf = T && T.met && T.met[3], body = U && tf ? (lokiTorso(U.imgs[5]) - LK_SEQ.standup.seatX) * U.k - (lokiTorso(T.imgs[3]) - tf.fc) * T.k : null
+    s.push(...lokiWalkSteps(c, 'nook', (body != null ? nk.stump + body : nk.stump + lokiFeetOff(U, 5, LK_SEQ.standup.seatX, false)) - nk.ref))
+    s.push(...lokiFaceSteps(c, 'nook', 0).map(t => Object.assign(t, {alignOut: true})))   // (its last frame where the stand-up's first has him)
     s.push({t: 'seq', name: 'standup', fps: 9, node: 'nook', dx: nk.stump - nk.ref, seat: true, flip: false, frames: [5, 4, 3, 2, 1, 0]})
     s.push({t: 'home'})
     return s
@@ -6659,7 +6660,7 @@ function lokiStep(ep, st, el) {
     }
     const g = st.go, d = g.tr.at(el), f = Math.floor(d / g.stride) % 12, body = g.b0 + g.dir * d
     ep.dir = g.dir; ep.face = g.dir; ep.node = st.node; ep.dx = body + g.off(f)
-    lokiShow(ep, 'walk', f, lokiNodeX(st.node, body), lokiNodeY(st.node), {flip: g.dir < 0, align: st, alignK: Math.max(0, 1 - d / 40)})
+    lokiShow(ep, 'walk', f, lokiNodeX(st.node, body), lokiNodeY(st.node), {flip: g.dir < 0, align: st, alignK: Math.max(0, 1 - d / Math.min(40, g.D * .7))})
     if(el >= g.tr.T) { ep.dx = st.to; return false }
     return true
   }
@@ -6669,7 +6670,7 @@ function lokiStep(ep, st, el) {
     // a turn: frame 0 faces the way he walks right, frame 3 faces Uri; the half toward the side he turns to is mirrored when that side is left
     if(st.turnTo != null) { const toward = f >= fr.length / 2 ? st.turnTo : st.from; flip = (toward || st.turnTo || st.from) < 0; if(f === fr.length - 1) { ep.face = st.turnTo; if(st.turnTo) ep.dir = st.turnTo } }
     const plant = !!LK_PLANT[st.name] && !st.seat, dx = plant && ep.node === st.node ? ep.dx : st.dx
-    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, dx), lokiNodeY(st.node), {seat: st.seat, flip, feet: plant, align: st.seat ? null : st})
+    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, dx), lokiNodeY(st.node), {seat: st.seat, flip, feet: plant, align: st.seat ? null : st, alignK: st.alignOut && fr.length > 1 ? 1 - f / (fr.length - 1) : 1})
     if(f === fr.length - 1 && el >= fr.length / st.fps * 1000) {
       if(st.seat && st.name === 'standup' && fr[f] === 5) { ep.node = st.node; ep.dx = st.dx + lokiFeetOff(S.standup, 5, LK_SEQ.standup.seatX, false) }   // up from the stump: on his feet in front of it
       return false
@@ -6723,7 +6724,15 @@ function lokiStep(ep, st, el) {
   if(st.t === 'pk') {
     const fr = st.frames, n = fr.length, f = Math.min(n - 1, Math.floor(el / 1000 * st.fps))
     if(st.unsit && f === 0 && ep.seat) ep.seat = null
-    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, st.at), lokiNodeY(st.node) + (st.dy || 0), {pk: true, flip: !!st.flip, align: st.align ? st : null})
+    let px = lokiNodeX(st.node, st.at)
+    if(st.toJump && n > 1) {   // the wind-up meets the jump's crouch (jump 2, placed on the vine by his raised hand) body to body
+      const v = lokiVineLive({vine: st.toJump.key, v: st.toJump}), J = S.jump, P = S[st.name]
+      if(v && J && P && !st.jd) { const jim = J.imgs[1], jfl = v.side < 0, jcx = v.handX != null ? v.handX : J.cx, jl = v.vx - (jfl ? jim.naturalWidth - jcx : jcx) * J.k, jt = jl + (jfl ? jim.naturalWidth - lokiTorso(jim) : lokiTorso(jim)) * J.k
+        const pim = P.imgs[fr[n - 1]], pf = P.json.frames[fr[n - 1]], pl = px - (st.flip ? pim.naturalWidth - pf.feet[0] : pf.feet[0]) * P.k, pt = pl + (st.flip ? pim.naturalWidth - lokiTorso(pim) : lokiTorso(pim)) * P.k
+        st.jd = jt - pt; if(Math.abs(st.jd) > 24) st.jd = 0 }
+      px += (st.jd || 0) * f / (n - 1) - (ep.al && ep.al.key === st ? ep.al.off * f / (n - 1) : 0)
+    }
+    lokiShow(ep, st.name, fr[f], px, lokiNodeY(st.node) + (st.dy || 0), {pk: true, flip: !!st.flip, align: st.align ? st : null})
     if(f === n - 1 && el >= n / st.fps * 1000) {
       if(st.sit) { ep.seat = st.sit; ep.node = st.node; ep.dx = st.sit.standDx; ep.face = 0 }
       if(st.unsit) { ep.node = st.node; ep.dx = st.standDx; ep.dir = ep.face = st.side }
