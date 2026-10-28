@@ -27,13 +27,13 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   r.writeHead(200, { 'Content-Type': { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' }[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r) })
 srv.listen(0, async () => {
   const B = 'http://127.0.0.1:' + srv.address().port + '/Fieldy/', br = await chromium.launch()
-  async function boot({ theme = 'jungle', state = EMPTY, game = { v: 1, onboard: { done: true } }, hour = 12, roam = false, reduced = false, gnome = true } = {}) {
-    const ctx = await br.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: reduced ? 'reduce' : 'no-preference' }), pg = await ctx.newPage()
+  async function boot({ theme = 'jungle', state = EMPTY, game = { v: 1, onboard: { done: true } }, hour = 12, roam = false, reduced = false, gnome = true, lab = false, W = 390 } = {}) {
+    const ctx = await br.newContext({ viewport: { width: W, height: 844 }, reducedMotion: reduced ? 'reduce' : 'no-preference' }), pg = await ctx.newPage()
     pg.errs = []; pg.on('pageerror', e => pg.errs.push(e.message))
     await pg.route('**/*', r => r.request().url().startsWith(B) ? r.continue() : r.abort())
     await pg.addInitScript(([s, t, g, roam, gnome]) => { if (sessionStorage.getItem('wg_seeded')) return; sessionStorage.setItem('wg_seeded', '1'); localStorage.clear(); localStorage.setItem('fieldy_v2', JSON.stringify(s)); localStorage.setItem('fieldy_theme', t)
       if (g) localStorage.setItem('fieldy_game_v1', JSON.stringify(g)); localStorage.setItem('fieldy_loki_roam', roam ? '1' : '0'); if (!gnome) localStorage.setItem('fieldy_jungle_gnome', '0') }, [state, theme, game, roam, gnome])
-    await pg.goto(B + '?gnomeHour=' + hour); await pg.waitForTimeout(500)
+    await pg.goto(B + '?gnomeHour=' + hour + (lab ? '&loki-lab=1' : '')); await pg.waitForTimeout(500)
     await pg.evaluate(() => {
       window.__n = 0
       window.T = (o = {}) => { const id = 'wg' + (++__n); state.tasks.today.push(Object.assign({ id, text: 'משימה ' + __n, site: null, assignee: 'uri', color: 'orange', context: null, done: false, createdAt: new Date(Date.now() - 3600e3).toISOString() }, o)); return id }
@@ -196,6 +196,48 @@ srv.listen(0, async () => {
   r = await pg.evaluate(() => gameCount(3, 'task'))
   eq(r, '3 משימות', 'gameCount itself unchanged for its own kinds')
   await done(pg)
+
+  head('world-1-fixes: Loki out, a task closed on the tasks screen (what Uri did)')
+  pg = null
+  for (let i = 0; i < 8 && !pg; i++) { const p = await boot({ roam: true, state: seededState() }); if (await p.evaluate(() => { lokiLifeSync(); return lkr.geo.vines.some(v => v.key === 'nook>flow') })) pg = p; else await p.context().close() }
+  if (!pg) ok(false, 'no way out for him in eight tries')
+  else {
+    await pg.evaluate(async () => { CL(); await lokiWalkNow('flow') }); await pg.waitForFunction(() => lkr.state === 'perched', null, { timeout: 60000 })
+    r = await pg.evaluate(async () => { navigateTo('tasks'); const id = T({ text: 'לבדוק משאבה' }); C(id); lokiQueue = []; const heard = lkr.lastReact, unheard = (lkr.rq.find(x => x.evt === 'guest') || { data: {} }).data.unheard
+      await new Promise(r => setTimeout(r, 1500)); navigateTo('home'); const t0 = Date.now(); for (let i = 0; i < 100 && !wg.last; i++) await new Promise(r => setTimeout(r, 100))
+      return { reacted: heard > 0, unheard: unheard === heard, at: wg.last ? Date.now() - t0 : null, g: wg.last && wg.last.g, where: wg.last && wg.last.where, drawn: wg.last && wg.last.drawn } })
+    ok(r.reacted && r.unheard, 'his own line for the close was said while the tasks screen was in front: marked unheard')
+    ok(r.g === 'kupa' && r.at !== null && r.at < 5000, 'back on Home, Kupa comes in seconds, not 45 s after the close (' + r.at + ' ms)')
+    ok(r.drawn === true, 'and is drawn: a clear place is found even with Loki out beside the card')
+    ok(r.where === 'beside' || r.where === 'card', 'his line is where it can be read (' + r.where + ')')
+    await pg.waitForTimeout(9000)
+    r = await pg.evaluate(async () => { CL(); const w = W(); w.day = { k: gardenDayKey(), n: 0, seen: {} }; lkr.rq = []; LOKI.react('taskDone'); worldQueue('kupa', 'field', ''); const x = lkr.rq.find(q => q.evt === 'guest'); wg.settledAt = 0; lokiReactTick(); return { unheard: x.data.unheard, came: !!wg.last } })
+    eq(r, { unheard: 0, came: false }, 'what he said on Home in front of Uri is heard: the 45 s still hold')
+    r = await pg.evaluate(() => { CL(); const a = lkr.ep.actor, keep = a.style.transform; a.style.transform = 'translateY(2000px)'; const where = worldTell(WORLD_GUESTS.kupa, 'שורה'); a.style.transform = keep; const card = (document.querySelector('#jg-gnome .gn-t') || {}).textContent; CL(); return { where, card } })
+    eq(r, { where: 'card', card: 'שורה' }, 'Loki out but out of sight (or behind the nav): the line goes to his card')
+    await done(pg)
+  }
+
+  head('world-1-fixes: the lab invites a guest')
+  pg = await boot({ lab: true, roam: true, state: seededState() })
+  r = await pg.evaluate(() => [...document.querySelectorAll('#lk-lab-panel button[data-a="guest"]')].map(b => b.dataset.v + ':' + b.textContent))
+  eq(r, ['kupa:הזמן: קופה', 'dragonfly:הזמן: השפירית', 'fireflies:הזמן: הגחליליות'], 'three buttons in the lab panel, one a creature')
+  r = await pg.evaluate(async () => { const out = []; const before = JSON.stringify(W()); for (const g of ['kupa', 'dragonfly', 'fireflies', 'kupa']) { CL(); document.querySelector('#lk-lab-panel button[data-v="' + g + '"]').click(); await new Promise(r => setTimeout(r, 200)); out.push(wg.last && wg.last.g) } return { out, kept: JSON.stringify(W()) === before } })
+  eq(r.out, ['kupa', 'dragonfly', 'fireflies', 'kupa'], 'each comes at once, Kupa twice in a row: no day limit, no waiting for Loki or a scroll')
+  ok(r.kept, 'a lab visit is not kept (no visit, no step, nothing in the journal or the day)')
+  await done(pg)
+  pg = await boot()
+  ok(await pg.evaluate(() => { worldInvite('kupa'); return wg.last === null && !document.getElementById('lk-lab-panel') }), 'without ?loki-lab=1: no panel, and an invite does nothing')
+  await done(pg)
+
+  head('world-1-fixes: the greeting keeps its sun beside it')
+  for (const W of [360, 390, 412]) for (const hour of [8, 13, 19]) {
+    pg = await boot({ W, hour, state: seededState() })
+    r = await pg.evaluate(() => { const el = document.querySelector('#screen-home .nh-greet'), ic = el.querySelector('svg'), rg = document.createRange(); rg.selectNodeContents(el); const tops = [...rg.getClientRects()].filter(q => q.width > 1).map(q => q.bottom); const e = el.getBoundingClientRect(), i = ic.getBoundingClientRect(); return { span: !!el.querySelector('.nh-gw'), oneLine: Math.max(...tops) - Math.min(...tops) < 4 && i.bottom <= e.top + parseFloat(getComputedStyle(el).lineHeight) + 1, fs: getComputedStyle(el).fontSize } })
+    if (hour === 13) ok(r.span && r.oneLine, W + ' px, 13:00: "צהריים טובים, אורי" and its sun on one line (' + r.fs + ')')
+    else ok(!r.span && r.fs === '28px', W + ' px, ' + hour + ':00: the greeting as it was (no new markup, 28px)')
+    await done(pg)
+  }
 
   head('only in the jungle, only with Loki')
   for (const theme of ['original', 'moss', 'aqua', 'nachal']) {
