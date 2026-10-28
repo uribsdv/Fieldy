@@ -11,7 +11,7 @@
    "file": "seatlook-01.webp",
    "source": "sit-look-1.png",
    "seat": [
-    195.7,
+    228.5,
     446
    ],
    "hang": 141.0,
@@ -26,7 +26,7 @@
    "file": "seatlook-02.webp",
    "source": "sit-look-2.png",
    "seat": [
-    180.2,
+    213.0,
     446
    ],
    "hang": 141.0,
@@ -41,7 +41,7 @@
    "file": "seatlook-03.webp",
    "source": "sit-look-3.png",
    "seat": [
-    212.2,
+    245.0,
     416
    ],
    "hang": 142.0,
@@ -56,7 +56,7 @@
    "file": "seatlook-04.webp",
    "source": "sit-look-4.png",
    "seat": [
-    174.7,
+    207.5,
     416
    ],
    "hang": 142.0,
@@ -67,5 +67,6 @@
    "legs_x": 154.0,
    "block_edge": 332
   }
- ]
+ ],
+ "body_note": "seat anchors moved +32.8 px (the set as a whole): the middle of his body as in sit-trans 4"
 }

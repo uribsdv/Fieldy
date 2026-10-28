@@ -139,6 +139,24 @@ srv.listen(0, async () => {
   eq([r.after, r.img], ['dragonfly', true], 'then it flies in (dragonfly-teal.png)')
   await done(pg)
 
+  head('the dragonfly with no scroll: after 20 s with Home in front (WORLD_RULES.scrollWait); a scroll brings it sooner')
+  pg = await boot({ state: FULL })
+  r = await pg.evaluate(async () => {
+    navigateTo('home'); const s = document.getElementById('screen-home'); s.scrollTop = 0; await new Promise(r => setTimeout(r, 100))
+    const at = (closeAgo, homeAgo) => { CL(); lkr.rq = []; const w = W(); w.day = { k: gardenDayKey(), n: 0, seen: {} }; worldQueue('dragonfly', 'learn', 'scroll'); const x = lkr.rq.find(q => q.evt === 'guest'); x.data.at = Date.now() - closeAgo; lkr.homeAt = Date.now() - homeAgo; wg.scrollAt = 0; return F() }
+    const scrollable = s.scrollHeight > s.clientHeight + 40
+    return { rule: WORLD_RULES.scrollWait, scrollable, at19: at(19000, 60000), at21: at(21000, 60000), homeLate: at(40000, 5000), homeLong: at(40000, 21000),
+      // on another screen nothing comes (the queue waits for Home), however long ago the close was
+      tasks: (() => { CL(); lkr.rq = []; const w = W(); w.day = { k: gardenDayKey(), n: 0, seen: {} }; navigateTo('tasks'); worldQueue('dragonfly', 'learn', 'scroll'); const x = lkr.rq.find(q => q.evt === 'guest'); x.data.at = Date.now() - 60000; lkr.homeAt = Date.now() - 60000; return F() })() }
+  })
+  ok(r.scrollable && r.rule === 20000, 'Home can be scrolled; the rule is 20 s')
+  ok(r.at19 === null, 'no scroll, 19 s on Home: it still waits')
+  eq(r.at21, 'dragonfly', 'no scroll, 21 s on Home: it comes')
+  ok(r.homeLate === null, 'closed 40 s ago but Home in front only 5 s: it waits (the 20 s count from when Home came to the front)')
+  eq(r.homeLong, 'dragonfly', '… and comes once Home has been in front 20 s')
+  ok(r.tasks === null, 'while another screen is in front it does not come')
+  await done(pg)
+
   head('the fireflies: people, at the day\'s end')
   pg = await boot()
   r = await pg.evaluate(() => { const id = T({ text: 'להתקשר לדייב' }); C(id); return Q() })

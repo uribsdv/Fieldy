@@ -11,7 +11,7 @@
    "file": "sitflat-01.webp",
    "source": "sit-down-3.png",
    "seat": [
-    161.5,
+    179.4,
     290
    ],
    "hang": 14.0,
@@ -26,7 +26,7 @@
    "file": "sitflat-02.webp",
    "source": "sit-down-4.png",
    "seat": [
-    170.5,
+    188.4,
     290
    ],
    "hang": 16.0,
@@ -37,5 +37,6 @@
    "legs_x": 152.5,
    "block_edge": 357
   }
- ]
+ ],
+ "body_note": "seat anchors moved +17.9 px (the set as a whole): the middle of his body as in sit-trans 4"
 }

@@ -1,5 +1,5 @@
 {
- "note": "Frames drawn after pack 4. Each entry under extra is a sequence (the same fields as LK_SEQ in index.html: dir, json or n, ref or kOf, floor, seat...). Once a sequence is listed here and its files are in its folder, the verbs that use it (LK_VERBS) become available, and the ways that need them open, with no change to the code. Expected names: hopup (G1), hopdown (G2), sitedge (G3), sitflat (G4), seatlook, seatread, seatwave, seatnap, seatpoint (G5). Pack 5 (v5): each set on its sheet's cell (cropped), kMul = walk-01 hat brim 142px / the sheet's brim; per frame in its json: seat = [edge_x, seat_y] (seated), feet = [x, y] and air (standing), u and dx (a hop: how far up between its two ledges, and how far from the ledge's edge). Kept out: the *-hires frames and crouch-b-1/2.",
+ "note": "Frames drawn after pack 4. Each entry under extra is a sequence (the same fields as LK_SEQ in index.html: dir, json or n, ref or kOf, floor, seat...). Once a sequence is listed here and its files are in its folder, the verbs that use it (LK_VERBS) become available, and the ways that need them open, with no change to the code. Expected names: hopup (G1), hopdown (G2), sitedge (G3), sitflat (G4), seatlook, seatread, seatwave, seatnap, seatpoint (G5). Pack 5 (v5): each set on its sheet's cell (cropped), kMul = walk-01 hat brim 142px / the sheet's brim; per frame in its json: seat = [edge_x, seat_y] (seated), feet = [x, y] and air (standing), u and dx (a hop: how far up between its two ledges, and how far from the ledge's edge). Kept out: the *-hires frames and crouch-b-1/2. | purposeful-roam: kMul of the standing sets to one standing height, the seated to one sitting height; sit-read-4 scaled up; seated anchors by the body.",
  "extra": {
   "sitedge": {
    "dir": "sit/edge",
@@ -12,42 +12,42 @@
    "dir": "sit/look",
    "json": "seatlook.json",
    "kOf": "walk",
-   "kMul": 0.7717,
+   "kMul": 0.8018,
    "ref": 0
   },
   "seatwave": {
    "dir": "sit/wave",
    "json": "seatwave.json",
    "kOf": "walk",
-   "kMul": 1.2241,
+   "kMul": 1.3955,
    "ref": 0
   },
   "seatread": {
    "dir": "sit/read",
    "json": "seatread.json",
    "kOf": "walk",
-   "kMul": 1.6136,
+   "kMul": 1.6539,
    "ref": 0
   },
   "sitflat": {
    "dir": "sit/flat",
    "json": "sitflat.json",
    "kOf": "walk",
-   "kMul": 0.8875,
+   "kMul": 1.2425,
    "ref": 0
   },
   "standpoint": {
    "dir": "stand/point",
    "json": "standpoint.json",
    "kOf": "walk",
-   "kMul": 1.136,
+   "kMul": 1.1246,
    "ref": 0
   },
   "thinking": {
    "dir": "stand/think",
    "json": "thinking.json",
    "kOf": "walk",
-   "kMul": 1.5778,
+   "kMul": 1.5384,
    "ref": 0
   },
   "laughing": {
@@ -61,7 +61,7 @@
    "dir": "stand/prep",
    "json": "prep.json",
    "kOf": "walk",
-   "kMul": 1.3922,
+   "kMul": 1.4423,
    "ref": 0
   },
   "hopup": {

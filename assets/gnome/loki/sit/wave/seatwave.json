@@ -11,7 +11,7 @@
    "file": "seatwave-01.webp",
    "source": "sit-wave-1.png",
    "seat": [
-    127.5,
+    127.4,
     263
    ],
    "hang": 84.0,
@@ -26,7 +26,7 @@
    "file": "seatwave-02.webp",
    "source": "sit-wave-2.png",
    "seat": [
-    118.0,
+    117.9,
     260
    ],
    "hang": 88.0,
@@ -41,7 +41,7 @@
    "file": "seatwave-03.webp",
    "source": "sit-wave-3.png",
    "seat": [
-    109.5,
+    109.4,
     246
    ],
    "hang": 84.0,
@@ -56,7 +56,7 @@
    "file": "seatwave-04.webp",
    "source": "sit-wave-4.png",
    "seat": [
-    117.0,
+    116.9,
     246
    ],
    "hang": 84.0,
@@ -67,5 +67,6 @@
    "legs_x": 104.0,
    "block_edge": 204
   }
- ]
+ ],
+ "body_note": "seat anchors moved -0.1 px (the set as a whole): the middle of his body as in sit-trans 4"
 }
