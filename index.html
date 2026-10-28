@@ -6823,7 +6823,10 @@ async function lokiLeave(forced, to, E) {
   if(!['walk', 'turn', 'jump', 'standup', 'idle', 'loop', 'ledge'].every(n => seqs[n])) { lkr.why = 'frames'; if(E) lokiErrandDrop(E, 'no frames'); return false }
   if(lkr.state !== 'in' || lokiRoamGuard()) { lkr.why = 'after loading: ' + (lkr.state !== 'in' ? lkr.state : lokiRoamGuard()); if(E && lkr.state === 'in') lokiErrandSoon(3000); return false }
   lokiLifeSync(); const geo = lkr.geo; if(!geo) { lkr.why = 'no map'; if(E) lokiErrandDrop(E, 'no map'); return false }
-  if(E && !lokiErrandReach(to)) { lokiErrandDrop(E, 'the flow of tasks is not in sight, or no drawn way to it'); return false }
+  if(E && !lokiErrandReach(to)) {
+    if(LK_ERRAND[E.kind].sight && lkr.geo.perches.some(q => q.key === to && q.ok) && lokiPath('nook', to)) { lkr.why = 'errand ' + E.kind + ': waiting for the corner to be in sight'; lokiErrandSight(); return false }
+    lokiErrandDrop(E, 'the flow of tasks is not in sight, or no drawn way to it'); return false
+  }
   const target = to ? {node: to, dx: lokiSpot(to)} : lokiChoose('nook'); if(!target || target.node === 'nook' || target.dx == null) { lkr.why = 'no way out'; if(E) lokiErrandDrop(E, 'no way out'); return false }
   const D = E && LK_ERRAND[E.kind], seat = D ? (D.seat ? lokiChooseSeat(to, target.dx, true) : null) : undefined
   if(D && D.seat === 2 && !seat) { lokiErrandDrop(E, 'no room to sit at the corner'); return false }
@@ -6979,11 +6982,13 @@ const LK_ERRAND = {
   guest:    {pri: 1, seat: 1, stay: 4000},       // and until the guest has gone (at most 20 s after it came)
   dayDone:  {pri: 2, seat: 0},                   // the last task of the day: he laughs
   taskDone: {pri: 3, seat: 1, stay: 15000},      // a wave and a line
-  point:    {pri: 4, seat: 1, stay: 12000},      // a stuck site, more tasks waiting: he points to them
-  brief:    {pri: 5, seat: 2, stay: 30000},      // the morning's briefing is ready: he sits and reads it
-  evening:  {pri: 6, seat: 2, stay: 180000},     // "sit with me": the evening's line, sitting, a doze now and then; until Uri leaves Home
-  quiet:    {pri: 7, seat: 2, stay: 60000}       // the quiet walk: sits and reads; in the day, after three hours of Home in front since the last
+  point:    {pri: 4, seat: 1, stay: 12000, sight: 1},      // a stuck site, more tasks waiting: he points to them
+  brief:    {pri: 5, seat: 2, stay: 30000, sight: 1},      // the morning's briefing is ready: he sits and reads it
+  evening:  {pri: 6, seat: 2, stay: 180000, sight: 1},     // "sit with me": the evening's line, sitting, a doze now and then; until Uri leaves Home
+  quiet:    {pri: 7, seat: 2, stay: 60000, sight: 1}       // the quiet walk: sits and reads; in the day, after three hours of Home in front since the last
 }
+// sight: it waits (its five minutes) for the corner of the flow of tasks to come into sight, looked at again when Home is scrolled; a guest
+// or a task closed is said at once, by his card, when the corner is not in sight
 const LK_ERRAND_WAIT = 300000                    // what happened while Home was not in front waits for it this long
 const LK_QUIET = {every: 3 * 3600000, from: 8, to: 18}
 function lokiErrandOk() { return lokiAllowed() && !lokiNight() }
@@ -7005,10 +7010,18 @@ function lokiErrandHere(kind, d) {
   return true      // a briefing, the evening, a walk: not while he is out on something else
 }
 function lokiErrandSoon(ms) { clearTimeout(lkr.eqT); if(lkr.eq.length) lkr.eqT = setTimeout(lokiErrandTry, ms) }
+// waiting for the corner to come into sight: Home's scroll looks again (a listener, no timer; gone once the queue is empty)
+function lokiErrandSight() {
+  const sc = document.getElementById('screen-home'); if(!sc || lkr.eqSight) return
+  lkr.eqSight = function() { if(!lkr.eq.length) { sc.removeEventListener('scroll', lkr.eqSight); lkr.eqSight = null; return } lokiErrandSoon(600) }
+  sc.addEventListener('scroll', lkr.eqSight, {passive: true})
+}
 // looked at when one is asked for, when Home comes to the front, when he is back on his stump; waiting (Uri typing, a sheet, a bubble in
 // his card) only while Home is in front and the app is here, and never past the errand's own five minutes
 function lokiErrandTry() {
-  const now = Date.now(); lkr.eq = lkr.eq.filter(x => x.exp > now); if(!lkr.eq.length) return
+  const now = Date.now(), old = lkr.eq.filter(x => x.exp <= now); lkr.eq = lkr.eq.filter(x => x.exp > now)
+  old.forEach(x => { if(x.card && currentScreen === 'home') x.card() })
+  if(!lkr.eq.length) return
   if(!lokiErrandOk()) { const q = lkr.eq; lkr.eq = []; q.forEach(x => { if(x.card) x.card() }); return }
   if(lkr.state !== 'in' || lkr.ep) return
   if(currentScreen !== 'home' || document.visibilityState !== 'visible') return
@@ -7202,6 +7215,7 @@ function lokiTopicsDue() {
   }
   lokiQuietDue()
   if(lokiSitting() && now - (r.jesterAt || 0) >= 3600000) { r.jesterAt = now; lokiSave(); LOKI.react('jester') }
+  if(lkr.eq.length) lokiErrandSoon(0)          // one waiting for the corner past its five minutes: his card says it
 }
 function lokiTopicsSoon() { clearTimeout(lkr.topicT); lkr.topicT = setTimeout(lokiTopicsDue, 800) }
 function lokiTopicsClock() { clearInterval(lkr.topicI); lkr.topicI = document.visibilityState === 'visible' ? setInterval(lokiTopicsDue, 30000) : 0 }

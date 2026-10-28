@@ -151,7 +151,19 @@ srv.listen(0, async () => {
   await pg.context().close()
   pg = await boot({ W: 360 })
   r = await pg.evaluate(() => { lokiErrand('quiet', {}); return new Promise(res => setTimeout(() => res({ state: lkr.state, why: lkr.why, scripts: __scripts.length }), 4000)) })
-  ok(r.scripts === 0 && /no room|not in sight|no way/.test(r.why), 'where there is no room to sit, no quiet walk (' + r.why + ')')
+  ok(r.scripts === 0 && /no room|in sight|no way/.test(r.why), 'where there is no room to sit (or the corner is not in sight), no quiet walk (' + r.why + ')')
+  await pg.context().close()
+
+  head('an errand that waits for the corner to come into sight (the evening, a briefing, a point): it goes when Home is scrolled to it')
+  pg = await boot({ hour: 20, scroll: 0 })
+  r = await pg.evaluate(async () => { lkr.eq = []; lokiErrand('evening', {}); await new Promise(r => setTimeout(r, 2500)); const before = { state: lkr.state, eq: lkr.eq.map(x => x.kind), why: lkr.why }
+    document.getElementById('screen-home').scrollTop = 150; await new Promise(r => setTimeout(r, 2500)); return { before, after: lkr.state } })
+  ok(r.before.state === 'in' && r.before.eq.join() === 'evening' && /in sight/.test(r.before.why), 'the corner not in sight: it waits, nothing ticking (' + r.before.why + ')')
+  ok(r.after === 'moving' || r.after === 'perched', 'Home scrolled to it: he goes (' + r.after + ')')
+  r = await pg.evaluate(() => { lokiSnapHome(); lkr.eq = []; return lokiErrand('taskDone', {}) })
+  await pg.evaluate(() => { document.getElementById('screen-home').scrollTop = 0 }); await pg.waitForTimeout(300)
+  r = await pg.evaluate(async () => { lkr.eq = []; lokiQueue = []; lokiOnTaskDone(2); await new Promise(r => setTimeout(r, 1500)); return { eq: lkr.eq.length, card: lokiQueue.map(i => i.kind).join(), state: lkr.state } })
+  ok(r.eq === 0 && r.card === 'taskdone' && r.state === 'in', 'a task closed with the corner not in sight: his card says it at once, as before (' + JSON.stringify(r) + ')')
   await pg.context().close()
 
   head('reduced motion, the switch off, the night: his card says it, he does not go out')
