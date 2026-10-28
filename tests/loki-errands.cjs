@@ -35,7 +35,7 @@ srv.listen(0, async () => {
     await pg.waitForTimeout(600)
     // each check starts from his stump with nothing waiting: the seeding above made tasks urgent again (the tasks tab's number went up)
     // and the seeded data has a stuck site (the first opening of the day): both real reasons to go out, not the ones being checked
-    await pg.evaluate(() => { const r = loki.react = loki.react || {}; r.point = getToday(); lokiSave(); lkr.badgeAt = Date.now(); lkr.eq = []; if (lkr.ep) lokiSnapHome() })
+    await pg.evaluate(() => { const r = loki.react = loki.react || {}; r.point = getToday(); lokiSave(); lkr.badgeAt = Date.now(); lkr.eq = []; if (lkr.ep) lokiSnapHome(); __scripts.length = 0 })
     await pg.waitForTimeout(300)
     return pg
   }
