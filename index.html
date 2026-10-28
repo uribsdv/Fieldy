@@ -5297,6 +5297,9 @@ function lokiTilt(x) {
 function lokiHop() { const im = document.querySelector('#jg-gnome .gn-img'); if(!im || reducedMotion()) return; im.classList.remove('gn-hop'); void im.offsetWidth; im.classList.add('gn-hop'); setTimeout(function(){ im.classList.remove('gn-hop') }, 420) }
 // a briefing Uri asked for at night is ready: he says so in one line, still asleep on his stump, and after a few seconds it is the night's line again
 const LOKI_NIGHT_WROTE = 'כתבתי. מחכה לך בבוקר.'   // kept outside LOKI: his banks stay main's, word for word
+// his point to a site stuck a week or more (an errand): only saying where it is and that it waits, with no blame in it (kept outside LOKI too)
+const LOKI_POINT_SITE = ['{site} ממתין שם. אני רק מראה איפה.', 'אתר אחד ממתין בשטח: {site}. כשיתאים לך.', '{site} עוד מחכה. הוא לא הולך לשום מקום, וגם אני לא.']
+function lokiPointLine(site) { const n = LOKI_POINT_SITE.length, i = ((loki.pointLine == null ? -1 : loki.pointLine) + 1) % n; loki.pointLine = i; lokiSave(); return lokiFill(LOKI_POINT_SITE[i], {site}) }
 function lokiNightWrote() { lokiNightNote = {t: LOKI_NIGHT_WROTE, until: Date.now() + 6000}; setTimeout(function(){ lokiNightNote = null; if(lokiNight()) lokiRender() }, 6030) }
 // a tap (or a long press) while he sleeps: he stays asleep on his stump and only murmurs another line of the night, in his bubble
 function lokiNightTap() {
@@ -7210,7 +7213,7 @@ function lokiTopicsDue() {
     const closedY = state.lastStreakDate === y || all.some(t => t.done && t.completedAt && t.completedAt >= +d0 && t.completedAt < +d1)
     if(state.lastStreakDate && state.lastStreakDate !== today && !closedY && r.emptyDay !== today) { r.emptyDay = today; LOKI.react('emptyDay') }
     const stuck = priorityStuckSites().find(st => daysStuck(st) >= 7)
-    if(stuck && r.point !== today) { r.point = today; lokiErrand('point', {line: lokiPick('stuck', {site: stuck.name})}) }
+    if(stuck && r.point !== today) { r.point = today; lokiErrand('point', {line: lokiPointLine(stuck.name)}) }
     lokiSave()
   }
   lokiQuietDue()

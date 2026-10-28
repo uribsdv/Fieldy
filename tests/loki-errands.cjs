@@ -104,6 +104,11 @@ srv.listen(0, async () => {
   ok(r.said.includes('בדיקה'), 'with its line')
   r = await pg.evaluate(() => { lkr.eq = []; lkr.badgeAt = 0; lkr.badgeLast = 0; refreshBadges(); const a = lkr.eq.map(x => x.kind + ':' + (x.d.line || '')); lkr.eq = []; refreshBadges(); const b = lkr.eq.length; lkr.eq = []; return { a, b } })
   ok(r.a.length === 1 && /^point:.*משימ/.test(r.a[0]) && r.b === 0, 'the tasks tab\'s number goes up: a point to the tasks waiting, and not again within two hours (' + r.a.join() + ')')
+  // the lines of the two triggers: where it is and that it waits, nothing that blames
+  r = await pg.evaluate(() => ({ site: LOKI_POINT_SITE.slice(), tasks: LOKI.trip.tasks.one.concat(LOKI.trip.tasks.many), filled: [lokiPointLine('באר קלוריה'), lokiPointLine('באר קלוריה'), lokiPointLine('באר קלוריה')] }))
+  const BLAME = /לא עשית|עוד לא|עדיין לא|פספס|נכשל|אשמ|מאשים|נעלב|למה לא|שכחת|הזנחת|תקוע בגללך|צריך כבר/
+  ok(r.site.length >= 3 && r.site.concat(r.tasks).every(l => !BLAME.test(l)) && r.site.every(l => /ממתין|מחכה/.test(l)), 'the lines for a stuck site and for more tasks waiting say where it is and that it waits, with no blame: ' + r.site.concat(r.tasks).join(' | '))
+  ok(new Set(r.filled).size === 3 && r.filled.every(l => l.includes('באר קלוריה')), 'the stuck site\'s lines take turns, with the site\'s name: ' + r.filled.join(' | '))
   r = await pg.evaluate(() => { lkr.eq = []; const x = loki.react; x.open = ''; x.point = ''; const st = priorityStuckSites().find(s => daysStuck(s) >= 7); lokiTopicsDue(); const q = lkr.eq.filter(e => e.kind === 'point').map(e => e.d.line); lkr.eq = []; return { site: st && st.name, q } })
   ok(!r.site || (r.q.length === 1 && r.q[0].includes(r.site)) || (r.q.length === 1 && /אתר/.test(r.q[0])), 'the day\'s first opening with a site stuck a week or more: a point to it (' + JSON.stringify(r) + ')')
 

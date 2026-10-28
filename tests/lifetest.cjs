@@ -91,23 +91,31 @@ r=await pg.evaluate(()=>({can:lokiCan('edgeSit',{}),canWith:lokiCan('edgeSit',{s
 ok(!r.can&&r.canWith&&!r.hop&&r.hopWith&&r.walk,'a verb is there only with its frames (sitting on an edge, a jump: only once their frames are loaded): '+JSON.stringify(r))
 r=await pg.evaluate(async()=>(await (await fetch('assets/gnome/loki/manifest.json')).json()).extra);{const P5=['sitedge','seatlook','seatwave','seatread','sitflat','standpoint','thinking','laughing','prep','hopup','hopdown','landup'],k=Object.keys(r||{});ok(k.length===P5.length&&P5.every(n=>r[n]&&r[n].dir&&r[n].json&&r[n].kOf==='walk'&&r[n].kMul>0),'the manifest has the twelve sets of pack 5 (and nothing else: crouch-b and the hires frames stay out): '+k.join(','))}
 
-// 2 the timings: first out 15-20 s after Home opens, a minute or two between visits, 5-15 minutes out, 45-150 s on a perch, a move at most every 45 s
+// 2 the timings (claude/loki-purposeful-roam): he goes out only on an errand, never by the clock; a stay lasts what its errand is for;
+// sent out by hand (the lab, these tests) he stays until his time out is up, with no moves of his own in between
 const STUB=`(()=>{const rec=[];const o=window.setTimeout;window.setTimeout=(f,ms)=>{rec.push(ms);return o(()=>{},1e9)};return ()=>{window.setTimeout=o;return rec}})()`
-r=await pg.evaluate(`(()=>{const out={};let d=${STUB};lkr.walked=false;lkr.homeAt=Date.now();lokiWalkSchedule();out.first=d()[0];d=${STUB};lkr.walked=true;lkr.backAt=Date.now();lokiWalkSchedule();out.home=d()[0];const m=[];for(let i=0;i<200;i++){d=${STUB};lokiMoveSchedule();m.push(d()[0])}out.dwell=[Math.min(...m),Math.max(...m)];clearTimeout(lkr.timer);clearTimeout(lkr.moveTimer);return out})()`)
-ok(r.first>=14500&&r.first<=20000,'first out 15-20 s after Home opens: '+r.first);ok(r.home>=59500&&r.home<=120000,'between visits, a minute or two on his stump: '+r.home)
-ok(r.dwell[0]>=45000&&r.dwell[1]<=150000,'on a perch 45-150 s before the next move: '+r.dwell)
+r=await pg.evaluate(`(()=>{const out={};lkr.eq=[];let d=${STUB};lkr.walked=false;lkr.homeAt=Date.now();lokiWalkSchedule();out.first=d();d=${STUB};lkr.walked=true;lkr.backAt=Date.now();lokiWalkSchedule();out.back=d();lkr.eq=[{kind:'taskDone',d:{},at:Date.now(),exp:Date.now()+300000,card:null}];d=${STUB};lokiWalkSchedule();out.waiting=d();lkr.eq=[];clearTimeout(lkr.eqT)
+  lkr.outUntil=Date.now()+300000;const m=[];for(let i=0;i<200;i++){d=${STUB};lokiMoveSchedule();m.push(d())}out.left=[Math.min(...m.map(x=>x[0])),Math.max(...m.map(x=>x[0]))];out.calls=Math.max(...m.map(x=>x.length));clearTimeout(lkr.timer);clearTimeout(lkr.moveTimer)
+  out.stay=Object.fromEntries(Object.entries(LK_ERRAND).map(([k,v])=>[k,[v.seat,v.stay||0]]));return out})()`)
+ok(r.first.length===0&&r.back.length===0,'no outing by the clock: Home opened, or back on his stump, with nothing waiting, no timer is set at all (opened: '+JSON.stringify(r.first)+', back: '+JSON.stringify(r.back)+')')
+ok(r.waiting.length===1&&r.waiting[0]===1500,'out again only for an errand waiting: then one look at it, 1.5 s later ('+JSON.stringify(r.waiting)+')')
+ok(JSON.stringify(r.stay)===JSON.stringify({guest:[1,4000],dayDone:[0,0],taskDone:[1,15000],point:[1,12000],brief:[2,30000],evening:[2,180000],quiet:[2,60000]})&&r.left[0]>=299000&&r.left[1]<=300000&&r.calls===1,'a stay lasts what its errand is for (guest 4 s after it, a task 15 s, a point 12 s, the briefing 30 s, the evening 3 min, the quiet walk 1 min, the day done: the laugh only); sent out by hand, one look when his time is up and no move before it ('+JSON.stringify(r.stay)+' / '+r.left+')')
 
 // 3 out to the flow of tasks, on to the garden, and called home: every frame recorded
 await pg.evaluate(()=>{lkr.trace=[];lokiQueue=[];lokiRender()});await pg.waitForTimeout(300)
 const before=(await look(pg)).txt
 const samples=[];let s
 const go=await pg.evaluate(async()=>await lokiWalkNow('flow'));retired('out: over the edge and down the vine','his way out is now the trunk, by a jump from the nook\'s floor')
-ok(!!go&&/^(seq:standup,)?seq:look,seq:turn,walk,(seq:turn,)?grab,climb,grab:rev/.test(go.steps.join(',')),'out: a look, a turn, along the nook\'s floor to its edge (a turn there only if he does not face the trunk yet), a jump to the trunk, down it, off it: '+(go&&go.steps.join(',')))
+const turns=await pg.evaluate(()=>lkr.ep.steps.filter(s=>s.name==='turn').map(s=>s.frames.join('')))
+ok(!!go&&/^(seq:standup,)?seq:turn,walk,pk:prep,grab,climb,grab:rev,walk,(pk:sitedge,arrive|seq:turn,arrive),life$/.test(go.steps.join(','))&&turns.every(t=>t==='210'||t==='123'),'out, straight: up (from the stump, if he sits on it), a quarter turn to the trunk, along the floor, the wind-up, the jump to the trunk, down it, off it, to the corner, and down on it or a quarter turn to Uri; no look about, and every turn a quarter turn ('+(go&&go.steps.join(','))+' / turns '+turns.join(' ')+')')
 r=await pg.evaluate(()=>({out:lkr.outUntil-Date.now()}));ok(r.out>=299000&&r.out<=900000,'out for 5-15 minutes: '+Math.round(r.out/1000)+' s')
 do{s=await look(pg);samples.push(s);await pg.waitForTimeout(120)}while(s.state!=='perched'&&samples.length<500)
 ok(s.state==='perched'&&s.node==='flow','he arrived at the flow of tasks and stays there: '+s.state+' '+s.node)
 r=await pg.evaluate(()=>({say:(document.querySelector('.lk-say')||{}).textContent||'',lines:[].concat(...Object.values(LOKI.trip.hour),LOKI.trip.tasks.one,LOKI.trip.tasks.many)}));ok(!r.say||r.lines.some(l=>l.replace('{n}','').split(' ').slice(0,2).join(' ')===r.say.replace(/\d+/,'').trim().split(' ').slice(0,2).join(' ')),'on arriving, a line of why he came (the hour, or the tasks waiting): '+r.say)
 ok(samples.slice(2).every(t=>t.stump&&t.note&&t.txt===before),'while he is out his nook shows the empty stump and the note, with the same words as the bubble')
+// on his feet out there he only stands while he does something: a wave, a point, a laugh, one after the other (up from the edge first if he sat)
+await pg.evaluate(()=>{if(lkr.ep&&lkr.ep.seat)lokiLabDo('unsit')});await pg.waitForTimeout(3500)
+for(const a of ['tap','point','laugh']){await pg.evaluate(a=>{lkr.ep[a]=true;cancelAnimationFrame(lkr.raf);clearTimeout(lkr.frz);lkr.raf=requestAnimationFrame(lokiTick)},a);await pg.waitForTimeout(2600)}
 // a lot of the rest, on the way down to the garden and back home
 await pg.evaluate(()=>{document.getElementById('screen-home').scrollTop=260});await pg.waitForTimeout(300)
 const second=await pg.evaluate(()=>{const g=lkr.geo,c=g.perches.filter(p=>p.ok&&p.key!=='flow'&&lokiPath('flow',p.key));return c.length?c[0].key:null})
@@ -122,16 +130,19 @@ ok(samples.every(t=>t.n<=1),'one Loki at every moment: '+JSON.stringify(samples.
 const overs=samples.filter(t=>t.over&&t.over.length);ok(overs.length===0,'never over text, icons, buttons or fields (his drawn outline, every 120 ms): '+overs.slice(0,3).map(t=>t.kind+'@'+t.state+'/'+t.node+'/'+t.step+' box '+(t.box?[t.box.left,t.box.top,t.box.right,t.box.bottom].map(Math.round):'')+': '+t.over.join(';')).join(' | '))
 const tfs=samples.filter(t=>t.tf);ok(tfs.every(t=>/^matrix\(1, 0, 0, 1, /.test(t.tf.actor)&&(t.tf.img===''||t.tf.img==='scaleX(-1)')),'nothing turned or resized: the picture only moves (and faces left by a mirror): '+JSON.stringify(tfs.find(t=>!/^matrix\(1, 0, 0, 1, /.test(t.tf.actor))||''))
 // the frames themselves
-const T=await pg.evaluate(async()=>{const ink={};const met=async src=>{if(ink[src])return ink[src];const im=new Image();im.src=src;await im.decode();return ink[src]=lokiFeet(im)};const out=[];for(const f of lkr.trace){const m=lkr.seq[f.name]&&lkr.seq[f.name].val;if(!m)continue;const im=m.imgs[f.i]||m.final;const t=await met(im.src);const W=im.naturalWidth;out.push({name:f.name,i:f.i,step:f.step,node:f.node,y:f.y,k:f.k,footY:f.top+t.fb*f.k,footX:f.left+(f.flip?W-t.fc:t.fc)*f.k,t:f.t})}return out})
+const T=await pg.evaluate(async()=>{const ink={};const met=async src=>{if(ink[src])return ink[src];const im=new Image();im.src=src;await im.decode();return ink[src]=lokiFeet(im)};const out=[];for(const f of lkr.trace){const m=lkr.seq[f.name]&&lkr.seq[f.name].val;if(!m)continue;const im=m.imgs[f.i]||m.final;const t=await met(im.src);const W=im.naturalWidth;out.push({name:f.name,i:f.i,step:f.step,node:f.node,y:f.y,k:f.k,footY:f.top+t.fb*f.k,footX:f.left+(f.flip?W-t.fc:t.fc)*f.k,bodyX:f.left+(f.flip?W-lokiTorso(im):lokiTorso(im))*f.k,t:f.t})}return out})
 ok(!T.some(f=>f.name==='slide'),'no slide: every frame is from a walk, a turn, a look, the stump, the jump to the trunk, the climb or the arrival over an edge: '+[...new Set(T.map(f=>f.name))].join(','))
 const line=f=>f.y+(f.name==='standup'?31:0)   // on the stump the frame is placed by its seat, 31px above the floor his feet are on
 const ground=T.filter(f=>['walk','turn','look','idle','wave'].includes(f.name)),gd=ground.map(f=>Math.abs(f.footY-f.y)),sd=T.filter(f=>f.name==='standup'&&f.i>=3).map(f=>Math.abs(f.footY-line(f)))
 ok(ground.length>200&&Math.max(...gd)<=2,'his feet on the line they stand on, every frame (walk, turn, look, breathing): max '+Math.max(...gd).toFixed(2)+'px over '+ground.length+' frames')
 ok(sd.length>5&&Math.max(...sd)<=2,'… and getting down onto the stump, feet on the floor until he sits (the sitting frames are placed by the seat on the stump, as drawn): max '+Math.max(...sd).toFixed(2)+'px')
-const G=new Set(['walk','turn','look','idle','wave','standup']);let tj=[];for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i];if(a.name!==b.name&&G.has(a.name)&&G.has(b.name)&&a.node===b.node)tj.push(Math.hypot(b.footX-a.footX,b.footY-a.footY))}
-ok(tj.length>=6&&Math.max(...tj)<=2,'where one sequence gives way to the next on the ground, his feet stay where they were (within 2px): max '+Math.max(...tj).toFixed(2)+' over '+tj.length)
-let steps=[];for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i];if(a.name===b.name&&a.node===b.node&&['turn','look','idle','wave'].includes(a.name))steps.push(Math.abs(b.footX-a.footX))}
-ok(steps.length>50&&Math.max(...steps)<=2,'standing in place (turning, looking, breathing) his feet do not move (max '+Math.max(...steps).toFixed(2)+'px a frame)')
+// where one sequence gives way to the next on the ground (claude/loki-purposeful-roam): the middle of his body stays where it was, not his feet
+const G=new Set(['walk','turn','idle','wave','standup','prep','standpoint','laughing']);let tj=[],tw=[];for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i];if(a.name!==b.name&&G.has(a.name)&&G.has(b.name)){tj.push(Math.abs(b.bodyX-a.bodyX));tw.push(a.name+'>'+b.name)}}
+const tjm=Math.max(...tj),tjw=tw[tj.indexOf(tjm)]
+ok(tj.length>=4&&tjm<=3,'where one sequence gives way to the next on the ground, the middle of his body stays where it was (within 3px): max '+tjm.toFixed(2)+' ('+tjw+') over '+tj.length+' seams: '+[...new Set(tw)].join(' '))
+// on his feet he stands only while he does something; while he does it, his feet do not move
+let steps=[];for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i];if(a.name===b.name&&a.node===b.node&&['wave','standpoint','laughing','thinking'].includes(a.name))steps.push(Math.hypot(b.footX-a.footX,b.footY-a.footY))}
+ok(steps.length>=10&&Math.max(...steps)<=1,'while he does something on his feet (a wave, a point, a laugh), his feet do not move (max '+Math.max(...steps).toFixed(2)+'px a frame over '+steps.length+' frames)')
 const wsteps=await pg.evaluate(()=>{const W=lkr.seq.walk.val;return 12.3*W.k});ok(wsteps>2&&wsteps<3.2,'a stride a cycle: the walk frames follow the distance ('+wsteps.toFixed(2)+'px a frame, within 5% at the end of a walk, so it stops on his feet)')
 const ys=[];for(let i=1;i<T.length;i++){const a=T[i-1],b=T[i];if(Math.abs(line(b)-line(a))>.01&&!['grab','climb','ledge'].includes(b.step)&&!['grab','climb','ledge'].includes(a.step)&&a.node===b.node)ys.push(a.name+'>'+b.name)}
 ok(ys.length===0,'up or down only on the trunk (the jump to it, the climb, off it): '+ys.slice(0,4).join(','))
