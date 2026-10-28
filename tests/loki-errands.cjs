@@ -33,6 +33,10 @@ srv.listen(0, async () => {
       window.__scripts = []; const o = lokiScript; window.lokiScript = function (ep, steps) { window.__lastSteps = steps; __scripts.push(steps.map(s => ({ t: s.t, name: s.name || '', frames: s.frames || null, kind: s.E ? s.E.kind : '' }))); return o.apply(this, arguments) }
     }, scroll)
     await pg.waitForTimeout(600)
+    // each check starts from his stump with nothing waiting: the seeding above made tasks urgent again (the tasks tab's number went up)
+    // and the seeded data has a stuck site (the first opening of the day): both real reasons to go out, not the ones being checked
+    await pg.evaluate(() => { const r = loki.react = loki.react || {}; r.point = getToday(); lokiSave(); lkr.badgeAt = Date.now(); lkr.eq = []; if (lkr.ep) lokiSnapHome() })
+    await pg.waitForTimeout(300)
     return pg
   }
   // send one errand and follow it home; what was shown, frame by frame (lkr.trace), with the middle of his body on screen
@@ -98,6 +102,10 @@ srv.listen(0, async () => {
   r = await run(pg, 'point', { line: 'בדיקה' })
   ok(r.went && (r.fr.some(f => f.name === 'seatlook' && f.i === 3) || r.fr.some(f => f.name === 'standpoint')), 'he points (sit-look 4 sitting, stand-point 1-2 on his feet)')
   ok(r.said.includes('בדיקה'), 'with its line')
+  r = await pg.evaluate(() => { lkr.eq = []; lkr.badgeAt = 0; lkr.badgeLast = 0; refreshBadges(); const a = lkr.eq.map(x => x.kind + ':' + (x.d.line || '')); lkr.eq = []; refreshBadges(); const b = lkr.eq.length; lkr.eq = []; return { a, b } })
+  ok(r.a.length === 1 && /^point:.*משימ/.test(r.a[0]) && r.b === 0, 'the tasks tab\'s number goes up: a point to the tasks waiting, and not again within two hours (' + r.a.join() + ')')
+  r = await pg.evaluate(() => { lkr.eq = []; const x = loki.react; x.open = ''; x.point = ''; const st = priorityStuckSites().find(s => daysStuck(s) >= 7); lokiTopicsDue(); const q = lkr.eq.filter(e => e.kind === 'point').map(e => e.d.line); lkr.eq = []; return { site: st && st.name, q } })
+  ok(!r.site || (r.q.length === 1 && r.q[0].includes(r.site)) || (r.q.length === 1 && /אתר/.test(r.q[0])), 'the day\'s first opening with a site stuck a week or more: a point to it (' + JSON.stringify(r) + ')')
 
   head('the morning briefing ready: he sits and reads it')
   r = await run(pg, 'brief', {}, 8)
