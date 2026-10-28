@@ -3569,6 +3569,7 @@ function refreshBadges() {
   var people = state.people.filter(function(p){return p.pending;}).length;
   var pairs = [['tasks',urgent],['sites',sites],['people',people]];
   try { pairs.push(['calendar', getEventsForDate(getToday()).length]); } catch(e) {}
+  try { lokiOnBadge(urgent) } catch(e) {}
   pairs.forEach(function(pair) {
     var b = document.getElementById('badge-'+pair[0]);
     if(b) {
@@ -4324,6 +4325,7 @@ async function generateDailyBriefing() {
   briefingBusy = false
   if(lokiRefreshAsked && !briefingError && gnomeOn() && lokiNight()) lokiNightWrote()   // asked for at night: one short line, and back to sleep
   lokiRefreshAsked = false
+  if(!briefingError && gnomeOn() && !lokiNight() && gnHour() < 12) lokiErrand('brief', {})
   if(currentScreen === 'home') renderHome()
 }
 // Idempotent: called at boot and on every home render; only ever spends one
@@ -5212,6 +5214,8 @@ function lokiLine(name) { const c = lokiSticky[name]; if(c && Date.now() - c.at 
 function lokiOnTaskDone(left) {
   if(!gnomeOn()) return
   if(lokiOut()) { LOKI.react(left <= 0 ? 'dayDone' : 'taskDone'); return }      // out on Home: he answers where he is
+  const card = () => { if(currentScreen !== 'home' || left <= 0 || lokiNight()) return; lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0; lokiRender() }
+  if(!lokiNight() && lokiErrand(left <= 0 ? 'dayDone' : 'taskDone', {}, card)) return
   if(currentScreen !== 'home' || left <= 0 || lokiNight()) return   // asleep: no bubble held over to the morning
   lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0
 }
@@ -5494,7 +5498,7 @@ const WORLD_GUESTS = {
   dragonfly: {file: 'dragonfly-teal.png', name: 'השפירית', short: 'השפירית', roots: ['learn'], w: 64},
   fireflies: {file: 'fireflies.png', name: 'הגחליליות', short: 'הגחליליות', roots: ['people'], w: 104}
 }
-const WORLD_RULES = {perDay: 3, settle: 1500, wait: 300000, evening: 18, log: 90}
+const WORLD_RULES = {perDay: 3, settle: 1500, wait: 300000, evening: 18, log: 90, scrollWait: 20000}   // scrollWait: the dragonfly comes after this long on Home even with no scroll
 const WORLD_FRIEND = [1, 3, 8, 15]          // visits for each step of a friendship
 const WORLD_COUNT = {visit: ['ביקור אחד', 'ביקורים', 'שני ביקורים'], meet: ['פגישה אחת', 'פגישות', 'שתי פגישות']}
 const WORLD_TXT = {
@@ -5916,7 +5920,7 @@ const LK_SEQ = {
   jump:    {dir: 'jump', json: 'jump.json', ref: 0},
   standup: {dir: 'poses/standup', json: 'standup.json', ref: 5, seatY: 460, seatX: 150},
   landing: {dir: 'poses/landing', json: 'landing.json', kOf: 'standup', cxOf: 'standup'},
-  idle:    {dir: 'poses/idle', json: 'idle.json', kOf: 'standup'},
+  idle:    {dir: 'poses/idle', json: 'idle.json', kOf: 'standup', kMul: 1.039},   // (its files are drawn a little smaller than the stand-up's: at one standing height with the rest)
   loop:    {dir: 'climb/loop', json: 'loop.json', kOf: 'ledge', feet: 319},
   ledge:   {dir: 'climb/ledge', json: 'ledge.json', refFile: 'final-stand.webp'}
 }
@@ -5956,7 +5960,7 @@ const LK_TIME = {first: [15, 20], out: [300, 900], dwell: [45, 150], gap: 45, ho
 const LK_SKIP = '.vn,.vine-deco,.jg-corner,#lk-roam,#jg-gnome .gn-stage,.gs-win,.jg-branch-v'   // drawings, not content: he may stand in front of them
 const LK_LAB = (function(){ try { return new URLSearchParams(location.search).get('loki-lab') === '1' } catch(e) { return false } })()
 const lkr = {state: 'in', ep: null, timer: 0, raf: 0, lastKey: 0, homeAt: 0, walked: false, backAt: 0, sitUntil: 0, sitTimer: 0, idleTimer: 0, playTimer: 0,
-  seq: {}, layer: null, geo: null, outUntil: 0, lastMove: 0, moveTimer: 0, recent: [], want: null, why: '', slow: 1, trace: null, extra: null, rq: [], rqT: 0, lastReact: 0}
+  seq: {}, layer: null, geo: null, outUntil: 0, lastMove: 0, moveTimer: 0, recent: [], want: null, why: '', slow: 1, trace: null, extra: null, rq: [], rqT: 0, lastReact: 0, eq: [], eqT: 0, homeSince: 0}
 function lokiRoamOn() { try { return localStorage.getItem('fieldy_loki_roam') !== '0' } catch(e) { return true } }
 function setLokiRoam(on) { try { localStorage.setItem('fieldy_loki_roam', on ? '1' : '0') } catch(e) {} if(!on) lokiSnapHome(); renderCurrentScreen(); if(on) lokiWalkSchedule() }
 function lokiOut() { return lkr.state !== 'in' }
@@ -5990,6 +5994,19 @@ function lokiFeet(img) {
   for(let y = Math.max(0, y1 - 6); y <= y1; y++) for(let x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 40) { sx += x; n++ }
   for(let y = y0; y <= Math.min(H - 1, y0 + 4); y++) for(let x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 40) { tx += x; tn++ }
   return {fc: n ? sx / n : W / 2, fb: y1, hx: tn ? tx / tn : W / 2, hy: y0}
+}
+// the middle of his body in one frame: where the drawing is, across, in the band 35-80% down it (the staff is thin: it hardly moves it);
+// measured once per image, the first time the frame is shown
+function lokiTorso(img) {
+  if(img._tor != null) return img._tor
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight
+  const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0)
+  const d = g.getImageData(0, 0, c.width, c.height).data, W = c.width, H = c.height; let y0 = -1, y1 = -1
+  for(let y = 0; y < H && y0 < 0; y++) for(let x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 40) { y0 = y; break }
+  for(let y = H - 1; y >= 0 && y1 < 0; y--) for(let x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 40) { y1 = y; break }
+  let sx = 0, n = 0
+  for(let y = Math.floor(y0 + .35 * (y1 - y0)); y < y0 + .8 * (y1 - y0); y++) for(let x = 0; x < W; x++) if(d[(y * W + x) * 4 + 3] > 40) { sx += x; n++ }
+  return img._tor = n ? sx / n : W / 2
 }
 function lokiImg(src) { return new Promise(function(res) { const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onload = function() { (im.decode ? im.decode() : Promise.resolve()).catch(function(){}).then(function() { res(im) }) }; im.onerror = function() { res(null) }; im.src = src }) }
 // frames drawn later are listed in the manifest ("extra": name -> the same fields as LK_SEQ); read once
@@ -6361,7 +6378,17 @@ function lokiShow(ep, name, i, x, y, o) {
     if(f && f.seat) { cx = f.seat[0]; fy = f.seat[1] } else if(f && f.feet) { cx = f.feet[0]; fy = f.feet[1] + (f.air || 0) }
   }
   if(o.cx != null) cx = o.cx
-  const left = x - (fl ? im.naturalWidth - cx : cx) * k, top = o.top != null ? o.top : y - fy * k
+  let left = x - (fl ? im.naturalWidth - cx : cx) * k
+  const top = o.top != null ? o.top : y - fy * k
+  // where one sequence gives way to another on the ground, the middle of his body stays where it was (not his feet): the new one is
+  // moved by the difference for as long as it lasts (o.align: what it lasts for, a step or an act; o.alignK: how much of the move is
+  // left, a walk lets it out over its first strides). Anywhere else (the vine, a seat on an edge) the frame is placed by its anchor.
+  const torX = l => l + (fl ? im.naturalWidth - lokiTorso(im) : lokiTorso(im)) * k
+  if(o.align) {
+    if(!ep.al || ep.al.key !== o.align) { const d = ep.lt != null && ep.ltNode === ep.node ? ep.lt - torX(left) : 0; ep.al = {key: o.align, off: Math.abs(d) <= 18 ? d : 0} }
+    left += ep.al.off * (o.alignK != null ? o.alignK : 1)
+  } else ep.al = null
+  ep.lt = torX(left); ep.ltNode = ep.node
   if(ep.img.src !== im.src) ep.img.src = im.src
   ep.actor.style.width = w.toFixed(1) + 'px'; ep.actor.style.height = h.toFixed(1) + 'px'
   ep.actor.style.transform = 'translate(' + left.toFixed(1) + 'px,' + top.toFixed(1) + 'px)'
@@ -6421,7 +6448,7 @@ function lokiNodeX(node, dx) { const n = lokiNode(node); return n ? n.ref + dx :
 function lokiNodeY(node) { const n = lokiNode(node); return n ? n.y : 0 }
 function lokiStepPos(ep, st) {
   if(!st || st.node == null) return null
-  const dx = st.t === 'pk' || st.t === 'hop' ? st.at : st.t === 'life' && ep.seat && ep.seat.node === st.node ? ep.seat.edgeDx : st.dx != null ? st.dx : ep.dx
+  const dx = st.t === 'pk' || st.t === 'hop' ? st.at : (st.t === 'life' || st.t === 'errand') && ep.seat && ep.seat.node === st.node ? ep.seat.edgeDx : st.dx != null ? st.dx : ep.dx
   return {x: lokiNodeX(st.node, dx), y: lokiNodeY(st.node)}
 }
 // a move is planned on a cursor (where he will be, which way he will face: 1 right, -1 left, 0 Uri), step by step; the steps do the moving
@@ -6429,23 +6456,28 @@ function lokiStepPos(ep, st) {
 function lokiWalkSteps(c, node, toDx) {
   const s = [], dir = toDx > c.dx ? 1 : -1
   if(Math.abs(toDx - c.dx) < 2) return s
-  if(c.face !== dir) s.push({t: 'seq', name: 'turn', fps: 7, node, dx: c.dx, frames: c.face === 0 ? [3, 2, 1, 0] : [0, 1, 2, 3, 2, 1, 0], turnTo: dir, from: c.face})
+  s.push(...lokiFaceSteps(c, node, dir))
   s.push({t: 'walk', node, from: c.dx, to: toDx})
   c.dx = toDx; c.face = dir
   return s
 }
-function lokiFaceSteps(c, node, to, fps) {   // a turn where he stands, to a side or to Uri
+// a turn where he stands: from facing Uri to a side or back, a quarter turn (three frames, quick); from one side to the other, one clean
+// flip with nothing in between (the next frame is simply drawn the other way round)
+function lokiFaceSteps(c, node, to) {
   if(c.face === to) return []
-  const fr = c.face === 0 ? [3, 2, 1, 0] : to === 0 ? [0, 1, 2, 3] : [0, 1, 2, 3, 2, 1, 0], st = {t: 'seq', name: 'turn', fps: fps || 7, node, dx: c.dx, frames: fr, turnTo: to, from: c.face}
-  c.face = to; return [st]
+  const from = c.face; c.face = to
+  if(from !== 0 && to !== 0) return []
+  return [{t: 'seq', name: 'turn', fps: 9, node, dx: c.dx, frames: from === 0 ? [2, 1, 0] : [1, 2, 3], turnTo: to, from}]
 }
 // along a vine, down from the upper node to the lower one, or up
 function lokiVineSteps(c, v, dir) {
   const up = lokiNode(v.up), dn = lokiNode(v.down), s = [], upDx = v.upX - up.ref, vDx = v.downX - dn.ref
+  // the wind-up before a jump up to the vine (prep 1-3: standing, crouching, the deep crouch the jump's own crouch follows from)
+  const wound = !!lokiSeqReady('prep'), prep = (node, dx) => wound ? [{t: 'pk', name: 'prep', frames: [0, 1, 2], fps: 8, node, at: dx, flip: v.side < 0, align: true}] : []
   if(v.topFloor) {   // from a floor at the top (the nook): a jump to the vine and off it at both ends
     const sv = lokiVineHold(v)
-    if(dir < 0) { s.push(...lokiWalkSteps(c, v.up, upDx), ...lokiFaceSteps(c, v.up, v.side)); s.push({t: 'grab', vine: v.key, v: sv, at: 'top', short: true, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: -1}, {t: 'grab', vine: v.key, v: sv, rev: true}); c.node = v.down; c.dx = vDx }
-    else { s.push(...lokiWalkSteps(c, v.down, vDx), ...lokiFaceSteps(c, v.down, v.side)); s.push({t: 'grab', vine: v.key, v: sv, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'grab', vine: v.key, v: sv, at: 'top', short: true, rev: true}); c.node = v.up; c.dx = upDx }
+    if(dir < 0) { s.push(...lokiWalkSteps(c, v.up, upDx), ...lokiFaceSteps(c, v.up, v.side), ...prep(v.up, upDx)); s.push({t: 'grab', vine: v.key, v: sv, at: 'top', short: true, dir: v.side, wound}, {t: 'climb', vine: v.key, v: sv, dir: -1}, {t: 'grab', vine: v.key, v: sv, rev: true}); c.node = v.down; c.dx = vDx }
+    else { s.push(...lokiWalkSteps(c, v.down, vDx), ...lokiFaceSteps(c, v.down, v.side), ...prep(v.down, vDx)); s.push({t: 'grab', vine: v.key, v: sv, dir: v.side, wound}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'grab', vine: v.key, v: sv, at: 'top', short: true, rev: true}); c.node = v.up; c.dx = upDx }
     c.face = v.side
     return s
   }
@@ -6457,9 +6489,9 @@ function lokiVineSteps(c, v, dir) {
     c.node = v.down; c.dx = vDx; c.face = v.side
   } else {
     s.push(...lokiWalkSteps(c, v.down, vDx))
-    s.push(...lokiFaceSteps(c, v.down, v.side))
+    s.push(...lokiFaceSteps(c, v.down, v.side), ...prep(v.down, vDx))
     const sv = lokiVineHold(v)
-    s.push({t: 'grab', vine: v.key, v: sv, dir: v.side}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'ledge', vine: v.key, v: sv})
+    s.push({t: 'grab', vine: v.key, v: sv, dir: v.side, wound}, {t: 'climb', vine: v.key, v: sv, dir: 1}, {t: 'ledge', vine: v.key, v: sv})
     c.node = v.up; c.dx = upDx; c.face = 0
   }
   return s
@@ -6469,7 +6501,6 @@ function lokiGoSteps(c, to, toDx, o) {
   o = o || {}
   const path = lokiPath(c.node, to); if(!path) return null
   const s = lokiUnsitSteps(c)
-  if(o.look) s.push({t: 'seq', name: 'look', fps: 2.6, node: c.node, dx: c.dx, flip: false})
   for(const e of path) { const v = lokiVine(e.vine); if(!v) return null; s.push(...lokiVineSteps(c, v, e.dir)) }
   if(to === 'nook') {
     const nk = lokiNode('nook'), U = lokiSeqReady('standup')
@@ -6479,19 +6510,21 @@ function lokiGoSteps(c, to, toDx, o) {
     s.push({t: 'home'})
     return s
   }
-  const seat = o.sit === false ? null : lokiChooseSeat(to, toDx, o.sit === true)
+  const seat = o.seat !== undefined ? o.seat : o.sit === false ? null : lokiChooseSeat(to, toDx, o.sit === true)
   if(seat) {   // to the corner, and down on its edge (sit-trans 1-4)
     s.push(...lokiWalkSteps(c, to, seat.standDx), ...lokiFaceSteps(c, to, seat.side))
     s.push(...lokiSitSteps(c, to, seat))
     s.push({t: 'arrive', node: to, dx: seat.standDx, line: o.line || null})
-    s.push({t: 'life', node: to, dx: seat.standDx})
-    return s
+  } else {
+    s.push(...lokiWalkSteps(c, to, toDx))
+    s.push(...lokiFaceSteps(c, to, 0))
+    s.push({t: 'arrive', node: to, dx: toDx, line: o.line || null})
   }
-  s.push(...lokiWalkSteps(c, to, toDx))
-  s.push(...lokiFaceSteps(c, to, 0, 6))
-  s.push({t: 'arrive', node: to, dx: toDx, line: o.line || null})
-  s.push({t: 'life', node: to, dx: toDx})
-  return s
+  if(!o.errand) { s.push({t: 'life', node: to, dx: seat ? seat.standDx : toDx}); return s }
+  // an errand: the one thing he came to do, and straight back the way he came (from wherever it leaves him)
+  s.push({t: 'errand', node: to, E: o.errand})
+  const back = lokiGoSteps(c, 'nook', null); if(!back) return null
+  return s.concat(back)
 }
 // ── sitting on the edge of a card (pack 5): at one of its top corners (the right one; the left, mirrored), where the straight part of its
 // edge begins; only where nothing readable or touchable is under his legs or around him, and inside the screen
@@ -6544,15 +6577,18 @@ function lokiChooseSeat(node, nearDx, always) {
   for(const sd of sides) { const st = lokiSeatAt(node, sd); if(st && !st.why) return st }
   return null
 }
+// (slowly: the drawing goes from his feet on the card to his legs over its edge between its second and third frames, so the second is held)
 function lokiSitSteps(c, node, seat) {
   c.seat = seat; c.face = 0
-  return [{t: 'pk', name: 'sitedge', frames: [0, 1, 2, 3], fps: 5, node, at: seat.edgeDx, flip: seat.side < 0, sit: seat}]
+  return [{t: 'pk', name: 'sitedge', frames: [0, 1, 1, 2, 3], fps: 4, node, at: seat.edgeDx, flip: seat.side < 0, sit: seat}]
 }
-// up from the edge (sit-trans the other way round), to where he stood before he sat
+// up from the edge (sit-trans the other way round), to where he stood before he sat; first back to his still sitting pose (sit-look 2),
+// whatever he was doing sitting (a doze, a page), so every way up starts from the same pose
 function lokiUnsitSteps(c) {
   const seat = c.seat; if(!seat) return []
   c.seat = null; c.dx = seat.standDx; c.face = seat.side
-  return [{t: 'pk', name: 'sitedge', frames: [3, 2, 1, 0], fps: 5, node: seat.node, at: seat.edgeDx, flip: seat.side < 0, unsit: true, standDx: seat.standDx, side: seat.side}]
+  const hub = lokiSeqReady('seatlook') ? [{t: 'pk', name: 'seatlook', frames: [1], fps: 3.3, node: seat.node, at: seat.edgeDx, flip: seat.side < 0}] : []
+  return hub.concat([{t: 'pk', name: 'sitedge', frames: [3, 2, 1, 1, 0], fps: 4, node: seat.node, at: seat.edgeDx, flip: seat.side < 0, unsit: true, standDx: seat.standDx, side: seat.side}])
 }
 function lokiVineHold(v) { return Object.assign({}, v, {upRef: lokiNode(v.up).ref, dnRef: lokiNode(v.down).ref}) }
 function lokiCursor(ep) { return {node: ep.node, dx: ep.dx, face: ep.face == null ? 0 : ep.face, seat: ep.seat || null} }
@@ -6574,7 +6610,7 @@ function lokiTick(now) {
   if(lkr.ep === ep && ep.si < ep.steps.length) {
     // standing still on a perch the picture changes every 1.6 s: looked at five times a second, not sixty; a look, a page, a doze
     // (0.8-9 frames a second) twice a frame
-    const cur = ep.steps[ep.si], a = cur && cur.L && cur.L.act, lazy = cur && cur.t === 'life' && !ep.tap && !ep.point && !ep.laugh
+    const cur = ep.steps[ep.si], a = cur && cur.L && cur.L.act, lazy = cur && (cur.t === 'life' || cur.t === 'errand') && !ep.tap && !ep.point && !ep.laugh
     if(lazy) lokiTickLater(a ? Math.max(16, Math.min(200, Math.round(500 / a.fps))) : 200); else lkr.raf = requestAnimationFrame(lokiTick)
   }
 }
@@ -6620,7 +6656,7 @@ function lokiStep(ep, st, el) {
     }
     const g = st.go, d = g.tr.at(el), f = Math.floor(d / g.stride) % 12, body = g.b0 + g.dir * d
     ep.dir = g.dir; ep.face = g.dir; ep.node = st.node; ep.dx = body + g.off(f)
-    lokiShow(ep, 'walk', f, lokiNodeX(st.node, body), lokiNodeY(st.node), {flip: g.dir < 0})
+    lokiShow(ep, 'walk', f, lokiNodeX(st.node, body), lokiNodeY(st.node), {flip: g.dir < 0, align: st, alignK: Math.max(0, 1 - d / 40)})
     if(el >= g.tr.T) { ep.dx = st.to; return false }
     return true
   }
@@ -6630,7 +6666,7 @@ function lokiStep(ep, st, el) {
     // a turn: frame 0 faces the way he walks right, frame 3 faces Uri; the half toward the side he turns to is mirrored when that side is left
     if(st.turnTo != null) { const toward = f >= fr.length / 2 ? st.turnTo : st.from; flip = (toward || st.turnTo || st.from) < 0; if(f === fr.length - 1) { ep.face = st.turnTo; if(st.turnTo) ep.dir = st.turnTo } }
     const plant = !!LK_PLANT[st.name] && !st.seat, dx = plant && ep.node === st.node ? ep.dx : st.dx
-    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, dx), lokiNodeY(st.node), {seat: st.seat, flip, feet: plant})
+    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, dx), lokiNodeY(st.node), {seat: st.seat, flip, feet: plant, align: st.seat ? null : st})
     if(f === fr.length - 1 && el >= fr.length / st.fps * 1000) {
       if(st.seat && st.name === 'standup' && fr[f] === 5) { ep.node = st.node; ep.dx = st.dx + lokiFeetOff(S.standup, 5, LK_SEQ.standup.seatX, false) }   // up from the stump: on his feet in front of it
       return false
@@ -6642,11 +6678,19 @@ function lokiStep(ep, st, el) {
     const v = lokiVineLive(st); if(!v) return false
     const J = S.jump, jf = (J.json && J.json.frames) || [], fps = 9
     const fr = st.short ? LK_SHORT_JUMP : [0, 1, 2, 3, 4, 5], ai = st.short ? lokiShortAir(J) : fr.map(i => jf[i] && jf[i].air_px || 0), n = fr.length
-    const p = Math.min(n - 1, Math.floor(el / 1000 * fps)), q = st.rev ? n - 1 - p : p, f = fr[q]
-    const air = j => ai[j] * J.k, u = Math.min(1, el / 1000 * fps - p), nq = st.rev ? Math.max(0, q - 1) : Math.min(n - 1, q + 1)
-    const y = (st.at === 'top' ? v.top : v.bot) - (air(q) + (air(nq) - air(q)) * (p >= n - 1 ? 0 : u))
+    // how long each frame is shown, in the order shown (q: its place in fr): after the wind-up the jump's standing frame is left out;
+    // a short hold where the jump meets the climb (its last frame up, its first frame down); landing, a hold on the jump's own crouch
+    if(!st.plan) {
+      const d = 1000 / fps, order = fr.map((_, i) => st.rev ? n - 1 - i : i).filter(q => !(st.wound && q === 0))
+      st.plan = order.map((q, i) => ({q, d: d + (!st.rev && i === order.length - 1 ? 120 : 0) + (st.rev && i === 0 ? 120 : 0) + (st.rev && fr[q] === 1 ? 180 : 0)}))
+      st.T = st.plan.reduce((a, b) => a + b.d, 0)
+    }
+    let p = 0, t = el; while(p < st.plan.length - 1 && t >= st.plan[p].d) { t -= st.plan[p].d; p++ }
+    const q = st.plan[p].q, f = fr[q], last = p >= st.plan.length - 1, nq = last ? q : st.plan[p + 1].q, u = Math.min(1, t / (1000 / fps))
+    const air = j => ai[j] * J.k
+    const y = (st.at === 'top' ? v.top : v.bot) - (air(q) + (air(nq) - air(q)) * (last ? 0 : u))
     ep.dir = v.side; lokiShow(ep, 'jump', f, v.vx, y, {flip: v.side < 0, cx: v.handX != null ? v.handX : undefined})   // the raised hand on the vine
-    if(p >= n - 1 && el >= n / fps * 1000) { if(st.rev) { const top = st.at === 'top'; ep.node = top ? v.up : v.down; ep.dx = (top ? v.upX : v.downX) - lokiNode(ep.node).ref; ep.dir = v.side; ep.face = v.side } return false }
+    if(last && el >= st.T) { if(st.rev) { const top = st.at === 'top'; ep.node = top ? v.up : v.down; ep.dx = (top ? v.upX : v.downX) - lokiNode(ep.node).ref; ep.dir = v.side; ep.face = v.side } return false }
     return true
   }
   if(st.t === 'climb') {
@@ -6672,10 +6716,11 @@ function lokiStep(ep, st, el) {
     return false
   }
   if(st.t === 'life') return lokiLife(ep, st, el)
+  if(st.t === 'errand') return lokiErrandStep(ep, st, el)
   if(st.t === 'pk') {
     const fr = st.frames, n = fr.length, f = Math.min(n - 1, Math.floor(el / 1000 * st.fps))
     if(st.unsit && f === 0 && ep.seat) ep.seat = null
-    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, st.at), lokiNodeY(st.node) + (st.dy || 0), {pk: true, flip: !!st.flip})
+    lokiShow(ep, st.name, fr[f], lokiNodeX(st.node, st.at), lokiNodeY(st.node) + (st.dy || 0), {pk: true, flip: !!st.flip, align: st.align ? st : null})
     if(f === n - 1 && el >= n / st.fps * 1000) {
       if(st.sit) { ep.seat = st.sit; ep.node = st.node; ep.dx = st.sit.standDx; ep.face = 0 }
       if(st.unsit) { ep.node = st.node; ep.dx = st.standDx; ep.dir = ep.face = st.side }
@@ -6690,51 +6735,47 @@ function lokiStep(ep, st, el) {
   if(st.t === 'home') { lokiBackInCorner(); return false }
   return false
 }
-// his life on a perch: breathing, now and then a look about, a turn away and back; a wave when he is tapped. (Sitting on an edge
-// needs its own frames, edgeSit; once they are there he sits, and lives sitting.)
+// his life on a perch when he was sent out by hand (the lab, the tests): still, with nothing done for its own sake (no look about, no turn
+// away and back, nothing read or thought on his feet for no reason); a wave when he is tapped, a point or a laugh when something asks for
+// one. Out on an errand his time there is the errand's (lokiErrandStep).
 function lokiLife(ep, st, el) {
   if(ep.seat && ep.seat.node === st.node) return lokiSeatLife(ep, st, el)
-  const x = lokiNodeX(st.node, ep.node === st.node ? ep.dx : st.dx), y = lokiNodeY(st.node), L = st.L || (st.L = {at: 0, act: null, next: 6000 + Math.random() * 8000}), S = ep.seqs
+  const x = lokiNodeX(st.node, ep.node === st.node ? ep.dx : st.dx), y = lokiNodeY(st.node), L = st.L || (st.L = {at: 0, act: null}), S = ep.seqs
+  lokiStandAsk(ep, L, el)
+  if(L.act) {
+    const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
+    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, a.pk ? {pk: true, flip: !!a.flip, align: a} : {flip: !!a.flip, feet: true, align: a}); return true }
+    L.act = null; L.at = el
+  }
+  lokiShow(ep, 'idle', 0, x, y, {flip: false, feet: true, align: L})
+  return true
+}
+// on his feet: what was asked of him (a tap: a wave; LOKI.react: a point, a laugh), as the act to play now
+function lokiStandAsk(ep, L, el) {
+  const S = ep.seqs
   if(ep.tap) { L.act = {name: 'wave', frames: [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], fps: 9, at: el}; ep.tap = false }
   if(ep.point) { ep.point = false; if(S.standpoint) L.act = {name: 'standpoint', frames: [0, 1, 1, 1, 1, 0], fps: 2, at: el, pk: true} }
   if(ep.laugh) { ep.laugh = false; if(S.laughing) L.act = {name: 'laughing', frames: [0, 1, 2, 1, 2, 1, 3], fps: 4, at: el, pk: true} }
-  if(!L.act && el - L.at > L.next) {
-    // now and then: a look about, a turn away and back; and with pack 5, a thought (a hand in his beard) or a page read on his feet
-    const r = Math.random()
-    L.act = S.thinking && r < .18 ? {name: 'thinking', frames: [0, 1, 2, 2, 1, 0, 3, 3, 0], fps: 1.6, at: el, pk: true}
-      : S.standpoint && r < .32 ? {name: 'standpoint', frames: [2, 3, 2, 3, 2, 3], fps: 1.2, at: el, pk: true}
-      : r < .74 ? {name: 'look', frames: [0, 1, 2, 3, 3, 2, 1, 0], fps: 2.6, at: el} : {name: 'turn', frames: [3, 2, 1, 0, 0, 1, 2, 3], fps: 4, at: el, flip: Math.random() < .5}
-  }
-  if(L.act) {
-    const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
-    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, a.pk ? {pk: true, flip: !!a.flip} : {flip: !!a.flip, feet: true}); return true }
-    L.act = null; L.at = el; L.next = 9000 + Math.random() * 12000
-  }
-  lokiShow(ep, 'idle', Math.floor(el / 1600) % 2, x, y, {flip: false, feet: true})
-  return true
 }
-// his life sitting on the edge: still in the day (sit-look 2), now and then a look about, a page or two of a book, a point; a wave when he
-// is tapped; in the evening (19:00-22:00) cross-legged, breathing (sit-down 3-4), and now and then dozing off (sit-wave 3-4)
+// sitting on the edge: still (sit-look 2, the pose every seated act starts and ends in); a wave when he is tapped, a point when asked.
+// (Cross-legged is not used: there are no frames between it and sitting with his legs over the edge.)
 function lokiSeatLife(ep, st, el) {
-  const s = ep.seat, x = lokiNodeX(st.node, s.edgeDx), y = lokiNodeY(st.node), fl = s.side < 0, S = ep.seqs, h = gnHour(), eve = h >= 19 && h < 22
-  const L = st.L || (st.L = {at: 0, act: null, next: 5000 + Math.random() * 7000})
-  if(ep.tap) { ep.tap = false; if(S.seatwave) L.act = {name: 'seatwave', frames: [0, 1, 0, 1, 0, 1, 0], fps: 4, at: el} }
-  if(ep.point) { ep.point = false; if(S.seatlook) L.act = {name: 'seatlook', frames: [1, 3, 3, 3, 3, 1], fps: 2, at: el} }
-  ep.laugh = false        // (laughing is drawn on his feet)
-  if(!L.act && el - L.at > L.next) {
-    const opts = eve ? [S.seatwave && {name: 'seatwave', frames: [2, 3, 2, 3, 2, 3, 2, 3], fps: .8}, S.seatlook && {name: 'seatlook', frames: [1, 0, 0, 1, 2, 2, 1], fps: 2.2}]
-      : [S.seatlook && {name: 'seatlook', frames: [1, 0, 0, 1, 2, 2, 1], fps: 2.2}, S.seatread && {name: 'seatread', frames: [0, 1, 2, 3, 2, 1, 2, 3, 2, 1, 0], fps: 1.4}, S.seatlook && Math.random() < .25 && {name: 'seatlook', frames: [1, 3, 3, 3, 1], fps: 1.6}]
-    const c = opts.filter(Boolean)
-    if(c.length) L.act = Object.assign({at: el}, c[Math.floor(Math.random() * c.length)]); else { L.at = el; L.next = 9000 + Math.random() * 12000 }
-  }
+  const s = ep.seat, x = lokiNodeX(st.node, s.edgeDx), y = lokiNodeY(st.node), fl = s.side < 0
+  const L = st.L || (st.L = {at: 0, act: null})
+  lokiSeatAsk(ep, L, el)
   if(L.act) {
     const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
     if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, {pk: true, flip: fl}); return true }
-    L.act = null; L.at = el; L.next = 9000 + Math.random() * 12000
+    L.act = null; L.at = el
   }
-  if(eve && S.sitflat && s.flat) lokiShow(ep, 'sitflat', Math.floor(el / 1600) % 2, x, y, {pk: true, flip: fl})
-  else lokiShow(ep, S.seatlook ? 'seatlook' : 'sitedge', S.seatlook ? 1 : 3, x, y, {pk: true, flip: fl})
+  lokiShow(ep, ep.seqs.seatlook ? 'seatlook' : 'sitedge', ep.seqs.seatlook ? 1 : 3, x, y, {pk: true, flip: fl})
   return true
+}
+function lokiSeatAsk(ep, L, el) {
+  const S = ep.seqs
+  if(ep.tap) { ep.tap = false; if(S.seatwave) L.act = {name: 'seatwave', frames: [0, 1, 0, 1, 0, 1, 0], fps: 4, at: el} }
+  if(ep.point) { ep.point = false; if(S.seatlook) L.act = {name: 'seatlook', frames: [1, 3, 3, 3, 3, 1], fps: 2, at: el} }
+  ep.laugh = false        // (laughing is drawn on his feet)
 }
 // ── a hop (pack 5): up onto a ledge (a wind-up, the jump, the landing crouch) or down off one. Each frame is placed by where its feet are
 // between the two ledges it was drawn with (u: 0 on the one he leaves, 1 on the one he lands on) and how far from the edge (dx), at the
@@ -6762,14 +6803,18 @@ function lokiHopSteps(c, node, kind, edgeDx, h, dir, land) {
   return s
 }
 // ── going out, moving on, coming back
-async function lokiLeave(forced, to) {
+// out of his corner: on an errand (E), to the corner of the flow of tasks; by hand (the lab, the tests), to the place asked
+async function lokiLeave(forced, to, E) {
   if(lkr.state !== 'in') return false
-  const g = lokiLeaveGuard(); lkr.why = g; if(g && !(forced && (g === 'bubble' || g === 'asleep'))) { lokiWalkSchedule(g === 'typing' || g === 'bubble' ? 8000 : 20000); return false }
-  let seqs; try { seqs = await lokiLoadAll() } catch(e) { lkr.why = 'frames'; lokiWalkSchedule(60000); return false }
-  if(!['walk', 'turn', 'look', 'jump', 'standup', 'idle', 'loop', 'ledge'].every(n => seqs[n])) { lkr.why = 'frames'; lokiWalkSchedule(60000); return false }
-  if(lkr.state !== 'in' || lokiRoamGuard()) { lkr.why = 'after loading: ' + (lkr.state !== 'in' ? lkr.state : lokiRoamGuard()); return false }
-  lokiLifeSync(); const geo = lkr.geo; if(!geo) { lkr.why = 'no map'; lokiWalkSchedule(20000); return false }
-  const target = to ? {node: to, dx: lokiSpot(to)} : lokiChoose('nook'); if(!target || target.node === 'nook' || target.dx == null) { lkr.why = 'no way out'; lokiWalkSchedule(30000); return false }
+  const g = lokiLeaveGuard(); lkr.why = g; if(g && !(forced && (g === 'bubble' || g === 'asleep'))) { if(E) lokiErrandSoon(3000); return false }
+  let seqs; try { seqs = await lokiLoadAll() } catch(e) { lkr.why = 'frames'; if(E) lokiErrandDrop(E, 'no frames'); return false }
+  if(!['walk', 'turn', 'jump', 'standup', 'idle', 'loop', 'ledge'].every(n => seqs[n])) { lkr.why = 'frames'; if(E) lokiErrandDrop(E, 'no frames'); return false }
+  if(lkr.state !== 'in' || lokiRoamGuard()) { lkr.why = 'after loading: ' + (lkr.state !== 'in' ? lkr.state : lokiRoamGuard()); if(E && lkr.state === 'in') lokiErrandSoon(3000); return false }
+  lokiLifeSync(); const geo = lkr.geo; if(!geo) { lkr.why = 'no map'; if(E) lokiErrandDrop(E, 'no map'); return false }
+  if(E && !lokiErrandReach(to)) { lokiErrandDrop(E, 'the flow of tasks is not in sight, or no drawn way to it'); return false }
+  const target = to ? {node: to, dx: lokiSpot(to)} : lokiChoose('nook'); if(!target || target.node === 'nook' || target.dx == null) { lkr.why = 'no way out'; if(E) lokiErrandDrop(E, 'no way out'); return false }
+  const D = E && LK_ERRAND[E.kind], seat = D ? (D.seat ? lokiChooseSeat(to, target.dx, true) : null) : undefined
+  if(D && D.seat === 2 && !seat) { lokiErrandDrop(E, 'no room to sit at the corner'); return false }
   const nk = geo.nodes.nook, sitting = Date.now() < lkr.sitUntil
   // where his feet are as he stands in his corner (up from the stump, or as the card draws him standing)
   const startDx = (sitting ? nk.stump + lokiFeetOff(seqs.standup, 5, LK_SEQ.standup.seatX, false) : nk.fig + lokiFeetOff(seqs.idle, 0, seqs.idle.cx, false)) - nk.ref
@@ -6777,13 +6822,19 @@ async function lokiLeave(forced, to) {
   ep.actor.addEventListener('pointerup', function(e) { e.stopPropagation(); if(lkr.ep !== ep) return; haptic('light'); ep.tap = true; lokiRoamSay(lokiPick('roamTap')); if(!lokiFrozen()) { clearTimeout(lkr.frz); cancelAnimationFrame(lkr.raf); lkr.raf = requestAnimationFrame(lokiTick) } })
   const steps = []
   if(sitting) steps.push({t: 'seq', name: 'standup', fps: 9, node: 'nook', dx: nk.stump - nk.ref, seat: true, flip: false})
-  const way = lokiGoSteps({node: 'nook', dx: startDx, face: 0}, target.node, target.dx, {look: true, line: target.line}); if(!way) { ep.actor.remove(); lkr.why = 'no way'; lokiWalkSchedule(30000); return false }
+  const way = lokiGoSteps({node: 'nook', dx: startDx, face: 0}, target.node, target.dx, E ? {seat, errand: E, line: lokiErrandLine(E)} : {line: target.line}); if(!way) { ep.actor.remove(); lkr.why = 'no way'; if(E) lokiErrandDrop(E, 'no way'); return false }
+  if(E) lkr.eq = lkr.eq.filter(x => x !== E)
   lkr.why = ''; lkr.walked = true; clearTimeout(lkr.timer); lkr.ep = ep
-  lkr.outUntil = Date.now() + lokiRand(LK_TIME.out); lkr.lastMove = Date.now(); lkr.recent = [target.node + ':' + Math.round(target.dx)]
+  lkr.outUntil = Date.now() + (E ? 1200000 : lokiRand(LK_TIME.out)); lkr.lastMove = Date.now(); lkr.recent = [target.node + ':' + Math.round(target.dx)]
   lokiShow(ep, sitting ? 'standup' : 'idle', 0, sitting ? nk.stump : nk.fig, nk.y, {seat: sitting, flip: false})
   lkr.state = 'moving'; lkr.sitUntil = 0; lokiRender()     // the corner empties in the same moment he appears in it
   lokiScript(ep, steps.concat(way))
   return true
+}
+// an errand's place: the perch is there, its edge in sight (with enough of the card under it to be seen as a card), and a drawn way leads to it
+function lokiErrandReach(to) {
+  const g = lkr.geo, p = g && g.perches.find(q => q.key === to && q.ok)
+  return !!p && !!lokiPath('nook', to) && p.y > g.scrTop + 20 && p.y + 60 < g.scrBottom
 }
 // a place on a perch (his offset from its left): the middle of the longest room, or near x
 function lokiSpot(node, nearDx, avoidDx) {
@@ -6828,17 +6879,16 @@ function lokiArrived(ep, line) {
   lkr.state = 'perched'; lkr.lastMove = Date.now(); lkr.recent = lkr.recent.concat([ep.node + ':' + Math.round(ep.dx)]).slice(-3)
   if(line) lokiRoamSay(line, 5200)
   if(lkr.want) { const w = lkr.want; lkr.want = null; if(w.home) return lokiComeBack(); if(w.node && !lokiGoTo(w.node, Object.assign({}, w, {force: !!w.force}))) { if(w.line) lokiRoamSay(w.line, 5200) } else if(w.node) return }
-  lokiMoveSchedule()
+  if(!ep.errand && !(ep.steps[ep.si + 1] || {}).E) lokiMoveSchedule()
 }
-function lokiMoveSchedule(ms) { clearTimeout(lkr.moveTimer); lkr.moveParked = false; lkr.moveTimer = setTimeout(lokiNextMove, ms != null ? ms : lokiRand(LK_TIME.dwell)) }
+// sent out by hand: looked at again when his time out is up (no moves of his own on the card any more: he stays, and then goes home)
+function lokiMoveSchedule(ms) { clearTimeout(lkr.moveTimer); lkr.moveParked = false; lkr.moveTimer = setTimeout(lokiNextMove, ms != null ? ms : Math.max(1000, lkr.outUntil - Date.now())) }
 function lokiNextMove() {
   const ep = lkr.ep; if(!ep || lkr.state !== 'perched') return
   if(!lokiAllowed()) return lokiSnapHome()
   if(lokiFrozen()) { if(lokiAway()) { lkr.moveParked = true; return } return lokiMoveSchedule(5000) }
   if(Date.now() >= lkr.outUntil || lokiNight()) return lokiComeBack()
-  lokiLifeSync(); if(lkr.ep !== ep) return      // the map as it is now (where Home is scrolled to), before he chooses where to go
-  const t = lokiChoose(ep.node); if(!t || t.dx == null || (t.node === ep.node && Math.abs(t.dx - ep.dx) < 30)) return lokiMoveSchedule()
-  lokiMoveTo(t.node, t.dx, t.line)
+  lokiMoveSchedule()
 }
 function lokiMoveTo(node, dx, line) {
   const ep = lkr.ep; if(!ep) return false
@@ -6859,7 +6909,7 @@ function lokiCall() { if(!lokiOut()) return; gameNote('call'); haptic('light'); 
 function lokiBackInCorner() {
   const ep = lkr.ep; lkr.ep = null; cancelAnimationFrame(lkr.raf); clearTimeout(lkr.frz); clearTimeout(lkr.moveTimer); if(ep) ep.actor.remove(); lokiSayClear()
   lkr.state = 'in'; lkr.backAt = Date.now(); lkr.sitUntil = Date.now() + 20000; lkr.want = null
-  lokiRender(); lokiWalkSchedule()
+  lokiRender(); lokiErrandSoon(1500)
 }
 // at once, with no walk: he was switched off, the theme changed, reduced motion came on
 function lokiSnapHome() {
@@ -6889,14 +6939,8 @@ function lokiRoamSay(text, ms) {
   b.style.left = at[0].toFixed(1) + 'px'; b.style.top = at[1].toFixed(1) + 'px'; b.style.visibility = ''
   setTimeout(function() { if(b.isConnected) b.remove() }, ms || 3600)
 }
-// when he sets out: 15-20 seconds after Home is opened (once a visit), then a minute or two after he came back
-function lokiWalkSchedule(ms) {
-  if(lkr.state !== 'in') return
-  clearTimeout(lkr.timer)
-  if(currentScreen !== 'home' || !lokiAllowed()) return
-  const wait = ms != null ? ms : !lkr.walked ? Math.max(500, lkr.homeAt + lokiRand(LK_TIME.first) - Date.now()) : Math.max(500, lkr.backAt + lokiRand(LK_TIME.home) - Date.now())
-  lkr.timer = setTimeout(function() { lokiLeave(false) }, wait)
-}
+// he no longer sets out by the clock (claude/loki-purposeful-roam): only on an errand. Home drawn: one waiting is looked at
+function lokiWalkSchedule() { if(lkr.state === 'in' && currentScreen === 'home') lokiErrandSoon(1500) }
 // another screen: if he is out he stays where he is (stopped, Home is not in front) and is there when Home comes back
 function lokiScreenChange(screen) {
   worldMoved(); if(screen !== 'home') worldGone()
@@ -6905,11 +6949,135 @@ function lokiScreenChange(screen) {
   else {
     setTimeout(lokiWake, 0)                    // after navigateTo has put Home in front
     if(!lkr.onHome) { lkr.onHome = true; lkr.homeAt = Date.now(); if(lkr.state === 'in') lkr.walked = false; else if(Date.now() >= lkr.outUntil) setTimeout(function() { if(lkr.state === 'perched') lokiComeBack() }, 1500) }
+    if(lkr.state === 'in') lokiErrandSoon(1500)
   }
+  // the evening's sitting lasts until Uri leaves Home: when Home is back he goes home
+  if(screen !== 'home' && lkr.ep && lkr.ep.errand && lkr.ep.errand.kind === 'evening') lkr.ep.errand.endNow = true
+  lokiHomeClock()
 }
 // for tests and the lab: out now (if a way is free; the guards still hold)
 async function lokiWalkNow(to) { lkr.walked = true; const ok = await lokiLeave(true, to); return ok ? {node: lkr.ep.node, steps: lkr.ep.steps.map(s => s.t + (s.name ? ':' + s.name : '') + (s.rev ? ':rev' : ''))} : null }
-document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') return; lokiWake(); if(lkr.state === 'perched' && Date.now() >= lkr.outUntil) setTimeout(lokiComeBack, 800) })
+document.addEventListener('visibilitychange', function() { lokiHomeClock(); lokiTopicsClock(); if(document.visibilityState !== 'visible') return; lokiWake(); if(lkr.state === 'perched' && Date.now() >= lkr.outUntil) setTimeout(lokiComeBack, 800); if(lkr.state === 'in') lokiErrandSoon(1500) })
+// ── errands (claude/loki-purposeful-roam): he goes out only for a reason, does the one thing it is for, and comes straight back:
+// up from the stump, straight to the corner of the flow of tasks, the act, home. A thing that does not need the place is said from his
+// stump, as before; out there he stands only while he does something.
+// seat: 1 he sits on the corner when there is room for him, else does it on his feet; 2 only sitting (no room: his card says it instead);
+// 0 on his feet. stay: how long he stays sitting (ms). On his feet: the act, and home.
+const LK_ERRAND = {
+  guest:    {pri: 1, seat: 1, stay: 4000},       // and until the guest has gone (at most 20 s after it came)
+  dayDone:  {pri: 2, seat: 0},                   // the last task of the day: he laughs
+  taskDone: {pri: 3, seat: 1, stay: 15000},      // a wave and a line
+  point:    {pri: 4, seat: 1, stay: 12000},      // a stuck site, more tasks waiting: he points to them
+  brief:    {pri: 5, seat: 2, stay: 30000},      // the morning's briefing is ready: he sits and reads it
+  evening:  {pri: 6, seat: 2, stay: 180000},     // "sit with me": the evening's line, sitting, a doze now and then; until Uri leaves Home
+  quiet:    {pri: 7, seat: 2, stay: 60000}       // the quiet walk: sits and reads; in the day, after three hours of Home in front since the last
+}
+const LK_ERRAND_WAIT = 300000                    // what happened while Home was not in front waits for it this long
+const LK_QUIET = {every: 3 * 3600000, from: 8, to: 18}
+function lokiErrandOk() { return lokiAllowed() && !lokiNight() }
+// asked for by what happened: true when he sees to it (now, or as soon as Home is in front and free); false: his card says it, as before.
+// card: what his card does instead, if it turns out he cannot go (no way out at this scroll, no room to sit for an errand that sits)
+function lokiErrand(kind, d, card) {
+  if(!LK_ERRAND[kind] || !lokiErrandOk()) return false
+  if(lkr.ep) return lokiErrandHere(kind, d || {})
+  const now = Date.now()
+  lkr.eq = lkr.eq.filter(x => x.kind !== kind).concat([{kind, d: d || {}, at: now, exp: now + LK_ERRAND_WAIT, card: card || null}]).sort((a, b) => LK_ERRAND[a.kind].pri - LK_ERRAND[b.kind].pri)
+  lokiErrandSoon(400); return true
+}
+// he is out already: it is seen to where he is (a line beside him, and the act it asks for)
+function lokiErrandHere(kind, d) {
+  const ep = lkr.ep
+  if(kind === 'guest') { worldArrive(d, !!d.lab); ep.tap = true; return true }
+  if(kind === 'taskDone' || kind === 'dayDone') { lokiRoamSay(lokiPick(kind), 5200); if(kind === 'dayDone') ep.laugh = true; else ep.tap = true; lkr.lastReact = Date.now(); return true }
+  if(kind === 'point') { if(d.line) lokiRoamSay(d.line, 5200); ep.point = true; lkr.lastReact = Date.now(); return true }
+  return true      // a briefing, the evening, a walk: not while he is out on something else
+}
+function lokiErrandSoon(ms) { clearTimeout(lkr.eqT); if(lkr.eq.length) lkr.eqT = setTimeout(lokiErrandTry, ms) }
+// looked at when one is asked for, when Home comes to the front, when he is back on his stump; waiting (Uri typing, a sheet, a bubble in
+// his card) only while Home is in front and the app is here, and never past the errand's own five minutes
+function lokiErrandTry() {
+  const now = Date.now(); lkr.eq = lkr.eq.filter(x => x.exp > now); if(!lkr.eq.length) return
+  if(!lokiErrandOk()) { const q = lkr.eq; lkr.eq = []; q.forEach(x => { if(x.card) x.card() }); return }
+  if(lkr.state !== 'in' || lkr.ep) return
+  if(currentScreen !== 'home' || document.visibilityState !== 'visible') return
+  // a task closed and a guest for it: the guest's errand is the one (it greets, and the close is part of it)
+  const x = lkr.eq[0]
+  if((x.kind === 'taskDone' || x.kind === 'dayDone') && lkr.rq.some(q => q.evt === 'guest' && q.data.at >= x.at - 3000)) { lkr.eq.shift(); return lokiErrandTry() }
+  const g = lokiLeaveGuard(); if(g) return lokiErrandSoon(3000)
+  lokiLeave(false, 'flow', x)
+}
+// it cannot be done out there now: his card does it instead (or nothing, for an errand that has no card of its own)
+function lokiErrandDrop(E, why) {
+  lkr.eq = lkr.eq.filter(x => x !== E); lkr.why = 'errand ' + E.kind + ': ' + why
+  if(E.kind === 'quiet') lkr.quietWait = Date.now() + 600000      // no room to sit: the quiet walk is looked at again in ten minutes
+  if(E.card) E.card()
+  lokiErrandSoon(400)
+}
+// the line he says as he gets there
+function lokiErrandLine(E) {
+  const k = E.kind
+  if(k === 'taskDone' || k === 'dayDone' || k === 'evening') return lokiPick(k)
+  if(k === 'point') return E.d.line || null
+  if(k === 'brief') { const f = briefingFacts(), n = (f.sites || []).length; return lokiPick('brief', {x: n}, s => !/\{x\}/.test(s) || n === 2) }
+  return null      // the guest says its own (worldArrive); the quiet walk is quiet
+}
+// the errand itself, where he came to: what he does (sitting: from and back to his still pose; on his feet: the act, and that is all), how
+// long he stays, and then the steps home that follow it
+function lokiErrandStep(ep, st, el) {
+  const E = st.E, D = LK_ERRAND[E.kind], seated = !!(ep.seat && ep.seat.node === st.node), L = st.L || (st.L = {at: 0, act: null})
+  if(!st.go) {
+    st.go = true; ep.errand = E; L.plan = []
+    if(E.kind === 'guest') { worldArrive(E.d, !!E.d.lab); st.guestEnd = el + (WORLD_DUR[E.d.g] || 8000) }
+    const read = (sec) => { const fr = []; while(fr.length < sec * 1.4) fr.push(0, 1, 2, 3, 2, 1, 2, 3, 2, 1); return {name: 'seatread', frames: fr.slice(0, Math.floor(sec * 1.4)).concat([0]), fps: 1.4} }
+    if(seated) {
+      if(E.kind === 'guest' || E.kind === 'taskDone') L.plan.push({name: 'seatwave', frames: [0, 1, 0, 1, 0], fps: 4})
+      if(E.kind === 'point') L.plan.push({name: 'seatlook', frames: [1, 3, 3, 3, 3, 1], fps: 2})
+      if(E.kind === 'brief' || E.kind === 'quiet') L.plan.push(read(D.stay / 1000 - 2))
+      st.end = el + D.stay; if(st.guestEnd) st.end = Math.max(st.end, st.guestEnd + D.stay)
+    } else {
+      const S = ep.seqs
+      if(E.kind === 'dayDone' && S.laughing) L.plan.push({name: 'laughing', frames: [0, 1, 2, 1, 2, 1, 3], fps: 4, pk: true})
+      else if(E.kind === 'point' && S.standpoint) L.plan.push({name: 'standpoint', frames: [0, 1, 1, 1, 1, 0], fps: 2, pk: true})
+      else L.plan.push({name: 'wave', frames: [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], fps: 9})
+      st.end = 0
+    }
+    lkr.lastReact = Date.now()
+  }
+  // what was asked of him while he is there (a tap, LOKI.react)
+  if(seated) lokiSeatAsk(ep, L, el); else lokiStandAsk(ep, L, el)
+  if(!L.act && L.plan.length) L.act = Object.assign({at: el}, L.plan.shift())
+  // the evening: a doze now and then, from his still pose and back to it (sit-wave 3-4)
+  if(seated && !L.act && E.kind === 'evening' && ep.seqs.seatwave && el - L.at > (L.gap || (L.gap = 20000 + Math.random() * 15000))) { L.act = {name: 'seatwave', frames: [2, 3, 2, 3, 2, 3, 2, 3], fps: .8, at: el}; L.gap = 0 }
+  const x = seated ? lokiNodeX(st.node, ep.seat.edgeDx) : lokiNodeX(st.node, ep.dx), y = lokiNodeY(st.node), fl = seated ? ep.seat.side < 0 : false
+  if(L.act) {
+    const a = L.act, f = Math.floor((el - a.at) / 1000 * a.fps)
+    if(f < a.frames.length) { lokiShow(ep, a.name, a.frames[f], x, y, seated ? {pk: true, flip: fl} : a.pk ? {pk: true, flip: fl, align: a} : {flip: fl, feet: true, align: a}); return true }
+    L.act = null; L.at = el
+    if(!seated && !L.plan.length) return lokiErrandDone(ep)          // on his feet: the act was the errand
+  }
+  if(!seated) return lokiErrandDone(ep)
+  if(E.endNow || el >= st.end) return lokiErrandDone(ep)
+  lokiShow(ep, ep.seqs.seatlook ? 'seatlook' : 'sitedge', ep.seqs.seatlook ? 1 : 3, x, y, {pk: true, flip: fl})
+  return true
+}
+function lokiErrandDone(ep) { ep.errand = null; lkr.state = 'coming'; return false }
+// the quiet walk: three hours of Home in front since the last one (counted only while Home is in front and the app is here)
+function lokiHomeClock() {
+  const on = currentScreen === 'home' && document.visibilityState === 'visible', now = Date.now()
+  if(lkr.homeSince && !on) { loki.homeMs = (loki.homeMs || 0) + now - lkr.homeSince; lkr.homeSince = 0; lokiSave() }
+  else if(!lkr.homeSince && on) lkr.homeSince = now
+}
+function lokiQuietDue() {
+  const h = gnHour(), ms = (loki.homeMs || 0) + (lkr.homeSince ? Date.now() - lkr.homeSince : 0)
+  if(!lokiErrandOk() || h < LK_QUIET.from || h >= LK_QUIET.to || lkr.state !== 'in' || lkr.eq.length || ms < LK_QUIET.every || Date.now() < (lkr.quietWait || 0)) return
+  lokiErrand('quiet', {})
+}
+// more urgent tasks than a moment ago (the tasks tab's number went up): he points to them, at most once in two hours
+function lokiOnBadge(n) {
+  const was = lkr.badgeLast; lkr.badgeLast = n
+  if(was == null || n <= was || Date.now() - (lkr.badgeAt || 0) < 7200000 || !gnomeOn()) return
+  if(lokiErrand('point', {line: lokiDestLine({k: 'tasks', n})})) lkr.badgeAt = Date.now()
+}
 // ── what the rest of the app asks of him: go somewhere, say something, react to something (the only ways he is moved or speaks)
 // what each event means while he is out: where he goes (if a drawn way leads there and his last move was 45 seconds ago or more), and what he says
 const LK_REACT = {
@@ -6930,6 +7098,7 @@ function lokiGoTo(target, o) {
   const node = typeof target === 'string' ? target : target && target.dataset && target.dataset.lokiPerch
   const n = node && lokiNode(node); if(!n || (!n.ok && node !== 'nook')) return false
   if(node === 'nook') { lokiComeBack(); return true }
+  if(lkr.ep.errand || (lkr.ep.steps.some(s => s.E) && !o.force)) return false      // on an errand: he stays where it is
   if(lkr.state === 'moving') { lkr.want = Object.assign({node}, o); return true }
   if(!o.force && Date.now() - lkr.lastMove < LK_TIME.gap * 1000) return false
   return lokiMoveTo(node, o.dx != null ? o.dx : lokiSpot(node, null, ep.node === node ? ep.dx : null), o.line || null)
@@ -6943,7 +7112,7 @@ function lokiReact(evt, data) {
   data = data || {}
   const line = e.line ? e.line(data) : null, go = typeof e.go === 'function' ? e.go(data) : e.go
   lkr.lastReact = Date.now()
-  if(go && lkr.state === 'perched' && lokiGoTo(go, {line})) return true
+  if(go && lkr.state === 'perched' && !lkr.ep.errand && lokiGoTo(go, {line})) return true
   if(evt === 'badge' || evt === 'stuck') lkr.ep.point = true      // where he cannot go, he points (standing: stand-point 1-2; sitting: sit-look 4)
   if(evt === 'dayDone') lkr.ep.laugh = true                         // the day done: he laughs (on his feet; laugh 1-4)
   if(line) lokiRoamSay(line, 5200)
@@ -6990,13 +7159,14 @@ function lokiReactTick() {
   const now = Date.now(); lkr.rq = lkr.rq.filter(x => x.exp > now && (!LK_TOPIC[x.evt].sitting || lokiSitting()))
   if(!lkr.rq.length) return
   const wait = worldUnheard(lkr.rq[0]) ? 0 : LK_REACT_GAP - (now - lkr.lastReact)
+  if(document.visibilityState !== 'visible') return          // the app away: looked at again when it is back (its visibilitychange)
   if(wait > 0 || !lokiReactFree()) return lokiReactSoon(Math.max(wait, 3000))
   // a guest first in line: gone if it can no longer come today; not ready yet, the others go first (or it is looked at again soon)
   if(lkr.rq[0].evt === 'guest') {
     const r = worldReady(lkr.rq[0])
     if(r === 'no') { lkr.rq.shift(); return lokiReactTick() }
     if(r === 'wait') { if(lkr.rq.length < 2) return lokiReactSoon(600); lkr.rq.push(lkr.rq.shift()) }
-    else { const g = lkr.rq.shift(); lkr.lastReact = now; worldArrive(g.data); if(lkr.rq.length) lokiReactSoon(LK_REACT_GAP); return }
+    else { const g = lkr.rq.shift(); lkr.lastReact = now; if(lkr.ep || !lokiErrand('guest', g.data, () => worldArrive(g.data))) worldArrive(g.data); if(lkr.rq.length) lokiReactSoon(LK_REACT_GAP); return }
   }
   const x = lkr.rq.shift(), T = LK_TOPIC[x.evt], line = lokiPick(T.bank, x.data)
   lkr.lastReact = now; lkr.lastTopic = {evt: x.evt, line, at: now}
@@ -7008,18 +7178,22 @@ function lokiReactTick() {
 function lokiTopicsDue() {
   if(!gnomeOn() || currentScreen !== 'home') return
   const today = getToday(), y = getTodayPlus(-1), r = loki.react = loki.react || {}, h = gnHour(), now = Date.now()
-  if(h >= 19 && h < 22 && r.evening !== today) { r.evening = today; lokiSave(); LOKI.react('evening') }
+  if(h >= 19 && h < 22 && r.evening !== today) { r.evening = today; lokiSave(); if(!lokiErrand('evening', {}, () => LOKI.react('evening'))) LOKI.react('evening') }
   if(r.open !== today) {
     r.open = today
     const all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later], d0 = new Date(y + 'T00:00:00'), d1 = new Date(today + 'T00:00:00')
     const closedY = state.lastStreakDate === y || all.some(t => t.done && t.completedAt && t.completedAt >= +d0 && t.completedAt < +d1)
     if(state.lastStreakDate && state.lastStreakDate !== today && !closedY && r.emptyDay !== today) { r.emptyDay = today; LOKI.react('emptyDay') }
+    const stuck = priorityStuckSites().find(st => daysStuck(st) >= 7)
+    if(stuck && r.point !== today) { r.point = today; lokiErrand('point', {line: lokiPick('stuck', {site: stuck.name})}) }
     lokiSave()
   }
+  lokiQuietDue()
   if(lokiSitting() && now - (r.jesterAt || 0) >= 3600000) { r.jesterAt = now; lokiSave(); LOKI.react('jester') }
 }
 function lokiTopicsSoon() { clearTimeout(lkr.topicT); lkr.topicT = setTimeout(lokiTopicsDue, 800) }
-setInterval(lokiTopicsDue, 30000)
+function lokiTopicsClock() { clearInterval(lkr.topicI); lkr.topicI = document.visibilityState === 'visible' ? setInterval(lokiTopicsDue, 30000) : 0 }
+lokiTopicsClock()
 // the sites screen opened: a site stuck a week or more is something for him to say, once a day
 function lokiOnSites() {
   if(!gnomeOn()) return
@@ -7079,7 +7253,9 @@ function worldReady(x) {
   if(!worldOn() || !worldCan(d.g)) return 'no'
   if(worldNight()) return 'wait'
   if(now - wg.settledAt < WORLD_RULES.settle) return 'wait'
-  if(d.ctx === 'scroll') { const s = document.getElementById('screen-home'); if(s && s.scrollHeight > s.clientHeight + 40 && wg.scrollAt < d.at) return 'wait' }
+  // the dragonfly: a scroll of Home brings it at once; with none, it comes after 20 s with Home in front (counted from the close, or from
+  // when Home came to the front, whichever was later)
+  if(d.ctx === 'scroll') { const s = document.getElementById('screen-home'), onHome = currentScreen === 'home' ? now - Math.max(d.at, lkr.homeAt || 0) : 0; if(s && s.scrollHeight > s.clientHeight + 40 && wg.scrollAt < d.at && onHome < WORLD_RULES.scrollWait) return 'wait' }
   return 'ok'
 }
 function worldMoved() { wg.settledAt = Date.now() }
@@ -7225,6 +7401,8 @@ function lokiLabDraw() {
     '<div class="lk-lab-row">' + [['sit', '', 'sit'], ['unsit', '', 'stand up'], ['p5', 'slook', 'look·s'], ['p5', 'spoint', 'point·s'], ['p5', 'sread', 'read·s'], ['p5', 'swave', 'wave·s'], ['p5', 'snap', 'doze'], ['p5', 'flat', 'cross-legged'],
       ['p5', 'point', 'point'], ['p5', 'read', 'read'], ['p5', 'think', 'think'], ['p5', 'laugh', 'laugh'], ['p5', 'prep', 'wind-up'], ['hop', 'up:44', 'hop ↑44'], ['hop', 'up:28', 'hop ↑28'], ['hop', 'up:60', 'hop ↑60'], ['hop', 'down:32', 'hop ↓32'], ['hop', 'down:56', 'hop ↓56']]
       .map(b => '<button data-a="' + b[0] + '" data-v="' + b[1] + '">' + b[2] + '</button>').join('') + '</div>' +
+    // the errands, each sent now (he goes, does it, comes back; a guest sent this way is not kept)
+    '<div class="lk-lab-row">' + [['guest', 'אורח'], ['taskDone', 'משימה'], ['dayDone', 'יום מלא'], ['point', 'הצבעה'], ['brief', 'תדריך'], ['evening', 'ערב'], ['quiet', 'שקט']].map(b => '<button data-a="errand" data-v="' + b[0] + '">שליחות: ' + b[1] + '</button>').join('') + '</div>' +
     // the world's guests, each invited now (not kept, no limits)
     '<div class="lk-lab-row">' + Object.keys(WORLD_GUESTS).map(g => '<button data-a="guest" data-v="' + g + '">הזמן: ' + WORLD_GUESTS[g].short + '</button>').join('') + '</div>'
 }
@@ -7257,6 +7435,12 @@ function lokiLabP5(a, v) {
 }
 function lokiLabDo(a, v) {
   if(a === 'guest') return worldInvite(v)
+  if(a === 'errand') {
+    if(lkr.ep) { lkr.why = 'out already'; return lokiLabDraw() }
+    const d = v === 'guest' ? {g: 'kupa', root: 'field', ctx: '', at: Date.now(), lab: true} : v === 'point' ? {line: lokiDestLine({k: 'tasks', n: 2})} : {}
+    lkr.eq = []; if(!lokiErrand(v, d)) lkr.why = 'no errand: switched off, reduced motion or night'
+    lokiErrandSoon(0); setTimeout(lokiLabDraw, 300); return
+  }
   if(a === 'sit' || a === 'unsit' || a === 'p5' || a === 'hop') return lokiLabP5(a, v)
   if(a === 'out') { lokiWalkNow(v || undefined).then(lokiLabDraw); return }
   if(a === 'home') { lokiCall(); return }
@@ -7269,7 +7453,7 @@ function lokiLabDo(a, v) {
   if(a === 'walk') { const r = n.runs.find(r => ep.dx + n.ref >= r[0] - 1 && ep.dx + n.ref <= r[1] + 1) || n.runs[0]; const to = (+v > 0 ? r[1] : r[0]) - n.ref; lokiMoveTo(ep.node, to, null); return }
   if(a === 'act') { const st = ep.steps[ep.si]; if(st && st.t === 'life') { const L = st.L || (st.L = {at: 0}); const el = (performance.now() - ep.t0) * lkr.slow; L.act = v === 'wave' ? {name: 'wave', frames: [0, 1, 2, 3, 4, 3, 2, 3, 4, 5], fps: 9, at: el} : v === 'look' ? {name: 'look', frames: [0, 1, 2, 3, 3, 2, 1, 0], fps: 2.6, at: el} : {name: 'turn', frames: [3, 2, 1, 0, 0, 1, 2, 3], fps: 4, at: el} } }
 }
-setInterval(function() { if(LK_LAB && currentScreen === 'home') { const p = document.getElementById('lk-lab-panel'), s = p && p.querySelector('.lk-lab-st'); if(s && !document.body.classList.contains('lk-lab-hide')) s.textContent = lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) + ' · ' + ((lkr.ep.steps[lkr.ep.si] || {}).t || '') : '') + (lkr.why ? ' · ' + lkr.why : '') } }, 500)
+if(LK_LAB) setInterval(function() { if(LK_LAB && currentScreen === 'home') { const p = document.getElementById('lk-lab-panel'), s = p && p.querySelector('.lk-lab-st'); if(s && !document.body.classList.contains('lk-lab-hide')) s.textContent = lkr.state + (lkr.ep ? ' · ' + lkr.ep.node + ' ' + Math.round(lkr.ep.dx) + ' · ' + ((lkr.ep.steps[lkr.ep.si] || {}).t || '') : '') + (lkr.why ? ' · ' + lkr.why : '') } }, 500)
 // ── his nook in the card: the stump, the lantern (lit by drop-shadow) and the mushroom; the note on the stump when he is out
 const LK_NOOK_AT = {stump: 54, fig: 65}     // x in the stage: the stump's middle, and his own middle when he stands up from it
 function lokiNookHtml(mode) {
