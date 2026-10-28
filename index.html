@@ -1132,6 +1132,33 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .nh-loki-plant img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
 [data-theme="jungle"] .nh-loki-plant b{display:block;font-size:var(--fs-base);color:var(--t1)}
 [data-theme="jungle"] .nh-loki-plant small{font-size:var(--fs-sm);color:var(--t2)}
+/* the garden of the roots (in the garden's sheet): four beds, each plant a button (a tap waters it), a crystal and a flower at its edges */
+[data-theme="jungle"] .wd-beds{margin:0 0 14px;padding:12px 12px 10px;border-radius:16px;background:rgba(255,255,255,.6);border:1px solid rgba(45,102,52,.22)}
+[data-theme="jungle"] .wd-intro{margin:-4px 0 8px}
+[data-theme="jungle"] .wd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+[data-theme="jungle"] .wd-bed{display:flex;flex-direction:column;min-width:0;padding:6px 6px 8px;border-radius:14px;background:linear-gradient(to bottom,rgba(214,235,208,.25),rgba(214,235,208,.7))}
+[data-theme="jungle"] .wd-plot{position:relative;height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:3px solid rgba(92,64,40,.35);overflow:visible}
+[data-theme="jungle"] .wd-btn{display:flex;align-items:flex-end;justify-content:center;padding:0;margin:0;background:none;border:0;min-width:44px;min-height:44px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+[data-theme="jungle"] .wd-btn:focus-visible{outline:2px solid #2F7D46;outline-offset:2px;border-radius:10px}
+[data-theme="jungle"] .wd-plant{display:block;max-width:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.25));transform-origin:50% 100%}
+[data-theme="jungle"] .wd-plant.wd-seed{filter:grayscale(1) brightness(.6);opacity:.35}
+[data-theme="jungle"] .wd-plant.wd-rest{filter:saturate(.7) brightness(.95) drop-shadow(0 2px 2px rgba(20,40,20,.2))}   /* a young one resting (a grown one has its own resting drawing) */
+[data-theme="jungle"] .wd-crystal{position:absolute;left:2px;bottom:0;width:20px;height:auto;filter:drop-shadow(0 1px 2px rgba(20,40,20,.3))}
+[data-theme="jungle"] .wd-flower{position:absolute;right:0;bottom:0;width:30px;height:auto}
+[data-theme="jungle"] .wd-glow{-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent);mask-image:radial-gradient(closest-side,#000 72%,transparent)}   /* the glow's own canvas has straight edges */
+[data-theme="jungle"] .wd-cap{display:flex;flex-direction:column;gap:1px;padding:6px 2px 0}
+[data-theme="jungle"] .wd-cap b{font-size:var(--fs-base);color:var(--t1)}
+[data-theme="jungle"] .wd-wet{font-style:italic}
+[data-theme="jungle"] .wd-plant.wd-woke{animation:wd-wake .9s ease-out both}
+@keyframes wd-wake{0%{transform:scale(.97,.9)}55%{transform:scale(1.02,1.05)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] .wd-plant.wd-woke{animation:none}}
+/* the flowers that opened, on Home's garden card: small, on the right bank of the pond, under the card's own words and buttons */
+[data-theme="jungle"] .wd-hflowers{position:absolute;right:6px;top:118px;width:64px;height:110px;z-index:1;pointer-events:none}
+[data-theme="jungle"] .wd-hf{position:absolute;height:44px;width:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+[data-theme="jungle"] .wd-hf0{right:2px;bottom:0}
+[data-theme="jungle"] .wd-hf1{right:30px;bottom:14px;height:40px}
+[data-theme="jungle"] .wd-hf2{right:8px;bottom:44px;height:38px}
+[data-theme="jungle"] .wd-hf3{right:34px;bottom:56px;height:34px}
 /* the story: the button under him, a small dot on what has not been read, the list of the chapters that are open */
 [data-theme="jungle"] .gn-story{position:relative}
 [data-theme="jungle"] .gn-story-dot{display:inline-block;width:8px;height:8px;margin-inline-start:6px;border-radius:50%;background:#E8A23A;box-shadow:0 0 5px rgba(232,162,58,.9)}
@@ -3968,7 +3995,7 @@ function gardenHomeHtml() {
   if(!nachalLike()) return ''
   const sc = gardenSceneNow()
   const html = '<div class="nh-garden" role="button" tabindex="0" onclick="showGarden()" onkeydown="if(event.key===\'Enter\')showGarden()">' +
-    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev) + '</div>' +
+    '<div class="gs-win">' + gardenSceneHtml(sc.stage, sc.prev) + '</div>' + worldHomeFlowersHtml() +
     '<div class="nh-garden-top"><div class="nh-garden-t">' + tr('garden_title') + ' <span>' + (garden.cairn.length || garden.leaves ? tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) : tr('garden_empty')) + '</span></div>' + gardenGrewHtml(sc) + '</div>' +
     (garden.cairn.length || garden.leaves ? '<div class="nh-garden-pile">' + gardenCairnHtml() + '</div>' : '') +
     '<div class="nh-garden-acts"><span class="nh-garden-b">' + tr('garden_open') + '</span>' +
@@ -3987,6 +4014,7 @@ function showGarden() {
       ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
       : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
     (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.webp"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div><button class="nh-chap-open" onclick="showLokiStory()">' + tr('gn_story') + (lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : '') + '</button></div>' : '') +
+    worldBedsHtml() +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -5532,14 +5560,39 @@ const WORLD_TXT = {
     fireflies: ['', 'גחליליות ראשונות. הן מאירות בשקט.', 'הגחליליות מכירות אותך כבר.', 'הגחליליות חברות שלך. הן מחכות לערב.', 'הגחליליות מאירות לך את השביל הביתה.']
   }
 }
-function worldFresh() { return {v: 1, met: {}, day: {k: '', n: 0, seen: {}}, log: []} }
+// ── the garden of the roots (stage 2): a plant for each root, grown by game.roots (no count of its own); a flower and a crystal at
+// the edge of its bed as the root grows on. A plant not watered (a tap, free) for seven days rests; it never wilts, dies or goes back.
+const WORLD_DIR_G = 'assets/world/garden/'
+const WORLD_PLANTS = {
+  field:  {file: 'plant-field-banana', name: 'הבננה', sleep: 'הבננה נחה. נגיעה תעיר אותה.', woke: 'הבננה התעוררה ומתמתחת.'},
+  people: {file: 'plant-people-sampaguita', name: 'הסמפגיטה', sleep: 'הסמפגיטה נחה. נגיעה תעיר אותה.', woke: 'הסמפגיטה התעוררה. יש ריח של ערב.'},
+  learn:  {file: 'plant-learn-bamboo', name: 'הבמבוק', sleep: 'הבמבוק נח. נגיעה תעיר אותו.', woke: 'הבמבוק התעורר ומתיישר.'},
+  body:   {file: 'plant-body-orchid', name: 'הסחלב', sleep: 'הסחלב נח. נגיעה תעיר אותו.', woke: 'הסחלב התעורר ופותח עלה.'}
+}
+// tasks of a root for each stage: a seedling at the first, young at 3 (a full day), grown at 8 (the "four roots" achievement); the flower
+// at 15 (the root's own achievement), the crystal at 30. Rest after 7 days without watering.
+const WORLD_GROW = [1, 3, 8], WORLD_BLOOM = {flower: 15, crystal: 30}, WORLD_REST_DAYS = 7
+// the drawings' sizes (webp px, each with 18 px of clear margin around the drawing: the 30 px of the pack at .6)
+const WORLD_G_DIM = {'plant-body-orchid': [[223, 145], [248, 223], [277, 314], [274, 275]], 'plant-field-banana': [[209, 129], [224, 215], [257, 311], [285, 247]],
+  'plant-learn-bamboo': [[200, 176], [211, 240], [257, 314], [264, 274]], 'plant-people-sampaguita': [[188, 128], [211, 235], [261, 301], [268, 282]]}
+const WORLD_G_PAD = 18, WORLD_G_K = .4      // css px per webp px for the plants (a grown one about 125 px tall)
+const WORLD_G_TXT = {
+  title: 'ערוגות השורשים', intro: 'כל משימה שנסגרת מצמיחה את השורש שלה. נגיעה בצמח משקה אותו.',
+  stage: ['הערוגה מחכה לזרע', 'נבט', 'צעיר', 'בוגר'], rest: 'נח', watered: 'השקית היום', water: 'להשקות את {name}',
+  next: 'עוד {n} של {root} לשלב הבא', toFlower: 'עוד {n} של {root} עד פרח', toCrystal: 'עוד {n} של {root} עד גביש', full: 'פרח וגביש בשולי הערוגה',
+  flower: 'פרח', crystal: 'גביש'
+}
+function worldFresh() { return {v: 1, met: {}, day: {k: '', n: 0, seen: {}}, log: [], garden: {water: {}, tap: {}}} }
 // a saved world with anything missing filled in (an older journey has none: it starts empty, nothing else changes)
 function worldFill(o) {
   const f = worldFresh(); if(!o || typeof o !== 'object' || Array.isArray(o)) return f
-  const w = {v: 1, met: {}, day: f.day, log: []}
+  const w = {v: 1, met: {}, day: f.day, log: [], garden: f.garden}
   if(o.met && typeof o.met === 'object' && !Array.isArray(o.met)) Object.keys(WORLD_GUESTS).forEach(g => { const m = o.met[g]; if(m && typeof m === 'object') w.met[g] = {n: Math.max(0, +m.n || 0), first: String(m.first || ''), last: String(m.last || '')} })
   if(o.day && typeof o.day === 'object') w.day = {k: String(o.day.k || ''), n: Math.max(0, +o.day.n || 0), seen: o.day.seen && typeof o.day.seen === 'object' && !Array.isArray(o.day.seen) ? o.day.seen : {}}
   if(Array.isArray(o.log)) w.log = o.log.filter(x => x && WORLD_GUESTS[x.g] && +x.ts).slice(-WORLD_RULES.log)
+  // the garden: the day each plant was last watered (or first seen), and the day it was last watered by a tap
+  w.garden = {water: {}, tap: {}}
+  ;['water', 'tap'].forEach(k => { const m = o.garden && typeof o.garden === 'object' && o.garden[k]; if(m && typeof m === 'object' && !Array.isArray(m)) GAME_ROOTS.forEach(r => { if(/^\d{4}-\d\d-\d\d$/.test(m[r])) w.garden[k][r] = m[r] }) })
   return w
 }
 // the twelve achievements: always all shown, each with how far along it is ([have, need])
@@ -7382,6 +7435,56 @@ function worldDraw(g) {
 }
 document.addEventListener('visibilitychange', function() { if(document.visibilityState !== 'visible') return worldGone(); if(lkr.rq.length) lokiReactSoon(1500) })
 // ── the field journal: in the journey's sheet, after the scrolls; every creature, its friendship, the last meetings
+// ── the garden of the roots: in the garden's sheet (jungle), under Loki's own plant; the flowers that opened also on Home's garden card
+// the day each plant was last watered; one never seen before counts as watered today (nothing rests on the first day it is seen)
+function worldGarden() {
+  const gd = gameGet().world.garden, k = gardenDayKey(); let ch = false
+  GAME_ROOTS.forEach(r => { if(!gd.water[r]) { gd.water[r] = k; ch = true } })
+  if(ch) gameSave()
+  return gd
+}
+function worldPlant(r) {
+  const n = gameGet().roots[r] || 0, st = n >= WORLD_GROW[2] ? 3 : n >= WORLD_GROW[1] ? 2 : n >= WORLD_GROW[0] ? 1 : 0
+  const gd = worldGarden(), today = gardenDayKey(), days = gameDaysBetween(gd.water[r], today)
+  return {r, n, st, rest: st > 0 && days >= WORLD_REST_DAYS, wateredToday: gd.tap[r] === today, flower: n >= WORLD_BLOOM.flower, crystal: n >= WORLD_BLOOM.crystal}
+}
+function worldEvening() { const h = gnHour(); return h >= WORLD_RULES.evening || h < 5 }
+function worldFlowerSrc(r) { return WORLD_DIR_G + 'flower-' + r + (worldEvening() ? '-glow' : '') + '.webp' }
+// the frame: its own stage; resting, a grown plant lies down in its resting drawing (frame 4, drawn grown), a younger one rests in its own
+function worldPlantImg(p, extra) {
+  const P = WORLD_PLANTS[p.r], f = p.st === 0 ? 1 : p.rest && p.st === 3 ? 4 : p.st, d = WORLD_G_DIM[P.file][f - 1], K = WORLD_G_K
+  return '<img class="wd-plant' + (p.st === 0 ? ' wd-seed' : '') + (p.rest && f !== 4 ? ' wd-rest' : '') + (extra || '') + '" alt="" decoding="async" src="' + WORLD_DIR_G + P.file + '-' + f + '.webp" style="width:' + (d[0] * K).toFixed(1) + 'px;height:' + (d[1] * K).toFixed(1) + 'px;margin-bottom:-' + (WORLD_G_PAD * K).toFixed(1) + 'px">'
+}
+function worldBedHtml(r, woke) {
+  const p = worldPlant(r), P = WORLD_PLANTS[r], T = WORLD_G_TXT, root = GAME_TXT.root[r]
+  const cnt = n => gameCount(n, 'task'), fill = (t, n) => t.replace('{n}', cnt(n)).replace('{root}', root)
+  const line = woke ? P.woke : p.rest ? P.sleep : p.st < 3 ? fill(T.next, WORLD_GROW[p.st] - p.n) : !p.flower ? fill(T.toFlower, WORLD_BLOOM.flower - p.n) : !p.crystal ? fill(T.toCrystal, WORLD_BLOOM.crystal - p.n) : T.full
+  const plant = p.st === 0 ? '<span class="wd-btn wd-none" aria-hidden="true">' + worldPlantImg(p) + '</span>'
+    : '<button class="wd-btn" onclick="worldWater(\'' + r + '\')" aria-label="' + T.water.replace('{name}', P.name) + '">' + worldPlantImg(p, woke ? ' wd-woke' : '') + '</button>'
+  return '<div class="wd-bed" data-root="' + r + '" data-stage="' + p.st + '"' + (p.rest ? ' data-rest="1"' : '') + '><div class="wd-plot">' +
+    (p.crystal ? '<img class="wd-crystal" alt="' + T.crystal + '" decoding="async" src="' + WORLD_DIR_G + 'crystal-' + r + '.webp">' : '') + plant +
+    (p.flower ? '<img class="wd-flower' + (worldEvening() ? ' wd-glow' : '') + '" alt="' + T.flower + '" decoding="async" src="' + worldFlowerSrc(r) + '">' : '') + '</div>' +
+    '<div class="wd-cap"><b>' + P.name.replace(/^ה/, '') + '</b><span class="gm-sub">' + T.stage[p.st] + (p.rest ? ' · ' + T.rest : '') + ' · ' + root + '</span>' +
+    '<span class="gm-sub wd-line"' + (woke ? ' role="status"' : '') + '>' + esc(line) + '</span>' + (p.wateredToday && !woke && p.st > 0 ? '<span class="gm-sub wd-wet">' + T.watered + '</span>' : '') + '</div></div>'
+}
+function worldBedsHtml(woke) {
+  if(currentTheme !== 'jungle') return ''
+  return '<div class="wd-beds"><div class="gm-h2">' + WORLD_G_TXT.title + '</div><div class="gm-sub wd-intro">' + WORLD_G_TXT.intro + '</div><div class="wd-grid">' +
+    GAME_ROOTS.map(r => worldBedHtml(r, woke === r)).join('') + '</div></div>'
+}
+// a tap: watered today (free: no drop), and awake if it was resting; the bed is drawn again with a word of it
+function worldWater(r) {
+  if(GAME_ROOTS.indexOf(r) < 0) return
+  const was = worldPlant(r); if(!was.st) return
+  const gd = worldGarden(); gd.water[r] = gd.tap[r] = gardenDayKey(); gameSave(); haptic('light')
+  const el = document.querySelector('.wd-beds'); if(el) el.outerHTML = worldBedsHtml(was.rest ? r : null)
+}
+// Home's garden card (jungle): the flowers that opened, small, on the right bank of the pond (none until a root reaches 15)
+function worldHomeFlowersHtml() {
+  if(currentTheme !== 'jungle') return ''
+  const open = GAME_ROOTS.filter(r => (gameGet().roots[r] || 0) >= WORLD_BLOOM.flower); if(!open.length) return ''
+  return '<div class="wd-hflowers" aria-hidden="true">' + open.map((r, i) => '<img alt="" loading="lazy" decoding="async" class="wd-hf wd-hf' + i + (worldEvening() ? ' wd-glow' : '') + '" src="' + worldFlowerSrc(r) + '">').join('') + '</div>'
+}
 function worldJournalHtml() {
   const w = gameGet().world, T = WORLD_TXT, all = Object.keys(WORLD_GUESTS).reduce((s, g) => s + (w.met[g] ? w.met[g].n : 0), 0)
   const rows = Object.keys(WORLD_GUESTS).map(g => {
