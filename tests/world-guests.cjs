@@ -53,7 +53,7 @@ srv.listen(0, async () => {
   head('the data: inside fieldy_game_v1, filled in safely')
   pg = await boot({ game: { v: 1, total: 4, onboard: { done: true } } })
   r = await pg.evaluate(() => ({ w: W(), saved: JSON.parse(localStorage.getItem('fieldy_game_v1')).total }))
-  eq(r.w, { v: 1, met: {}, day: { k: '', n: 0, seen: {} }, log: [], garden: { water: {}, tap: {} } }, 'a journey saved before the world: an empty world, nothing else touched')
+  eq(r.w, { v: 1, met: {}, day: { k: '', n: 0, seen: {} }, log: [], garden: { water: {}, tap: {}, base: { field: 0, people: 0, learn: 0, body: 0 } } }, 'a journey saved before the world: an empty world, nothing else touched')
   eq(r.saved, 4, 'the journey itself as it was')
   r = await pg.evaluate(() => { localStorage.setItem('fieldy_game_v1', JSON.stringify({ v: 1, world: 'x' })); game = null; const a = W()
     localStorage.setItem('fieldy_game_v1', JSON.stringify({ v: 1, world: { met: [], day: 5, log: 'y' } })); game = null; const b = W()

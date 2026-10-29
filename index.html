@@ -7448,7 +7448,10 @@ function worldGarden() {
 }
 // the garden starts empty: the roots as they stand the first time it counts, kept once
 function worldBase() {
-  const gd = gameGet().world.garden; if(!gd.base) { gd.base = {}; GAME_ROOTS.forEach(r => { gd.base[r] = Math.max(0, +gameGet().roots[r] || 0) }); gameSave() }
+  const gd = gameGet().world.garden; let ch = false
+  if(!gd.base) { gd.base = {}; GAME_ROOTS.forEach(r => { gd.base[r] = Math.max(0, +gameGet().roots[r] || 0) }); ch = true }
+  GAME_ROOTS.forEach(r => { const n = Math.max(0, +gameGet().roots[r] || 0); if(gd.base[r] > n) { gd.base[r] = n; ch = true } })     // roots rebuilt lower: the base comes down with them, so growth never freezes
+  if(ch) gameSave()
   return gd.base
 }
 // the tasks of a root since the garden began (game.roots itself is never touched)

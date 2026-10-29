@@ -106,6 +106,15 @@ srv.listen(0, async () => {
   eq(await pg.evaluate(() => { showGarden(); return [G().world.garden.base, BED('field').stage, BED('field').line] }), [{ field: 10, people: 3, learn: 0, body: 7 }, 1, 'עוד 1 משימה של שטח לשלב הבא'.replace('1 משימה', 'משימה אחת')], 'a good base is kept: field 12 − 10 = 2: a seedling')
   await done(pg)
 
+  head('roots rebuilt lower than the base: the base comes down with them')
+  pg = await boot({ game: { v: 1, roots: { field: 30, people: 12, learn: 5, body: 0 }, world: { garden: { water: {}, tap: {}, base: { field: 30, people: 12, learn: 5, body: 0 } } }, onboard: { done: true } } })
+  r = await pg.evaluate(() => { const g = G(); g.roots = { field: 20, people: 12, learn: 2, body: 0 }; gameSave(); showGarden(); const a = [G().world.garden.base, BED('field').stage, BED('learn').stage]
+    closeModal(); g.roots.field = 21; g.roots.learn = 3; gameSave(); showGarden(); return [a, [G().world.garden.base, BED('field').stage, BED('field').line, BED('learn').stage], G().roots] })
+  eq(r[0], [{ field: 20, people: 12, learn: 2, body: 0 }, 0, 0], 'roots fell to 20 and 2: base follows, beds empty, never below zero')
+  eq(r[1], [{ field: 20, people: 12, learn: 2, body: 0 }, 1, 'עוד 2 משימות של שטח לשלב הבא', 1], 'one more of field and learn: a seedling each, growth not frozen')
+  eq(r[2], { field: 21, people: 12, learn: 3, body: 0 }, 'game.roots itself as set')
+  await done(pg)
+
   head('resting after seven days, never going back; a tap wakes it, for free')
   pg = await boot()
   r = await pg.evaluate(() => [6, 7, 30].map(ago => { SET(8, ago); const b = BED('field'); return [ago, b.stage, b.rest, b.frame] }))
