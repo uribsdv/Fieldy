@@ -78,10 +78,11 @@ srv.listen(0, async () => {
   let worst = 0, where = ''
   for (let i = 1; i < r.fr.length; i++) { const a = r.fr[i - 1], b = r.fr[i]; if (a.name !== b.name && GROUND.includes(a.name) && GROUND.includes(b.name) && a.node === b.node) { const d = Math.abs(b.tx - a.tx); if (d > worst) { worst = d; where = a.name + '>' + b.name } } }
   ok(worst <= 2, 'where one sequence gives way to the next on the ground, the middle of his body stays where it was (worst ' + worst.toFixed(1) + ' px, ' + (where || 'none') + ')')
-  // the sit: sit-trans 1,2,2,3,4 at 4 fps; up: the still pose first, then 4,3,2,2,1
-  const sitSt = (r.scripts[0] || []).filter(s => s.name === 'sitedge').map(s => s.frames.join(''))
-  if (seated) ok(sitSt[0] === '01123' && sitSt[1] === '32110', 'down onto the edge slowly (frames ' + sitSt.join(' / ') + '), and up again the same way')
-  if (seated) { const i = (r.scripts[0] || []).findIndex(s => s.name === 'sitedge' && s.frames.join('') === '32110'); ok(i > 0 && r.scripts[0][i - 1].name === 'seatlook' && r.scripts[0][i - 1].frames.join('') === '1', 'up from the edge always from his still sitting pose (sit-look 2)') }
+  // onto his vine and off it (claude/world-3-peek: he sits on his vine, not on a card's corner): down the climb, a puff, sitting on it facing
+  // out; a puff, and back up the climb. Off it always from his still sitting pose (sit-look 2)
+  const st0 = (r.scripts[0] || []).map(s => s.t), ei = st0.indexOf('errand')
+  if (seated) ok(ei > 2 && st0[ei - 3] === 'climb' && st0[ei - 2] === 'puff' && st0[ei - 1] === 'arrive' && st0[ei + 1] === 'puff' && st0[ei + 2] === 'climb', 'on his vine: down the climb, a puff, sitting on it; a puff, and back up the climb (' + st0.slice(Math.max(0, ei - 3), ei + 3).join(' ') + ')')
+  if (seated) { const last = r.fr.filter(f => f.step === 'errand').pop(); ok(!!last && last.name === 'seatlook' && last.i === 1, 'off his vine always from his still sitting pose (sit-look 2): ' + (last && last.name + ' ' + last.i)) }
   // the wind-up before the jump to the vine, the jump's standing frame left out after it, a hold where it meets the climb, the landing
   const prepAt = steps.indexOf('pk:prep'), grabAt = steps.indexOf('grab')
   ok(prepAt >= 0 && grabAt === prepAt + 1, 'the wind-up (prep 1-3) right before the jump up to the vine')
@@ -130,7 +131,7 @@ srv.listen(0, async () => {
   head('the evening (20:00): sitting with Uri, a doze now and then from his still pose and back to it; never cross-legged')
   pg = await boot({ hour: 20 })
   r = await run(pg, 'evening', {}, 12)
-  ok(r.went && r.fr.some(f => f.name === 'seatlook'), 'he sits on the corner: ' + seqs(r.fr).join(' '))
+  ok(r.went && r.fr.some(f => f.name === 'seatlook'), 'he sits on his vine: ' + seqs(r.fr).join(' '))
   ok(!r.fr.some(f => f.name === 'sitflat'), 'never cross-legged (no frames between it and his legs over the edge)')
   const rs = runs(r.fr); let hub = true; rs.forEach((x, i) => { if (x.name === 'seatwave') { const a = rs[i - 1], b = rs[i + 1]; if (!a || a.name !== 'seatlook' || (b && b.name !== 'seatlook')) hub = false } })
   ok(hub && rs.some(x => x.name === 'seatwave'), 'every doze starts and ends in his still sitting pose (sit-look 2)')
@@ -159,16 +160,16 @@ srv.listen(0, async () => {
   ok(r.scripts === 0 && /no room|in sight|no way/.test(r.why), 'where there is no room to sit (or the corner is not in sight), no quiet walk (' + r.why + ')')
   await pg.context().close()
 
-  head('an errand that waits for the corner to come into sight (the evening, a briefing, a point): it goes when Home is scrolled to it')
+  head('an errand that waits for his vine to come into sight (the evening, a briefing, a point): it goes when Home is scrolled to it')
   pg = await boot({ hour: 20, scroll: 0 })
-  r = await pg.evaluate(async () => { lkr.eq = []; lokiErrand('evening', {}); await new Promise(r => setTimeout(r, 2500)); const before = { state: lkr.state, eq: lkr.eq.map(x => x.kind), why: lkr.why }
-    document.getElementById('screen-home').scrollTop = 150; await new Promise(r => setTimeout(r, 2500)); return { before, after: lkr.state } })
-  ok(r.before.state === 'in' && r.before.eq.join() === 'evening' && /in sight/.test(r.before.why), 'the corner not in sight: it waits, nothing ticking (' + r.before.why + ')')
+  r = await pg.evaluate(async () => { const sc = document.getElementById('screen-home'); sc.scrollTop = sc.scrollHeight; await new Promise(r => setTimeout(r, 400)); lkr.eq = []; lokiErrand('evening', {}); await new Promise(r => setTimeout(r, 2500)); const before = { state: lkr.state, eq: lkr.eq.map(x => x.kind), why: lkr.why }
+    sc.scrollTop = 0; await new Promise(r => setTimeout(r, 2500)); return { before, after: lkr.state } })
+  ok(r.before.state === 'in' && r.before.eq.join() === 'evening' && /in sight/.test(r.before.why), 'his vine not in sight (Home scrolled down past it): it waits, nothing ticking (' + r.before.why + ')')
   ok(r.after === 'moving' || r.after === 'perched', 'Home scrolled to it: he goes (' + r.after + ')')
   r = await pg.evaluate(() => { lokiSnapHome(); lkr.eq = []; return lokiErrand('taskDone', {}) })
-  await pg.evaluate(() => { document.getElementById('screen-home').scrollTop = 0 }); await pg.waitForTimeout(300)
+  await pg.evaluate(() => { const sc = document.getElementById('screen-home'); sc.scrollTop = sc.scrollHeight }); await pg.waitForTimeout(400)
   r = await pg.evaluate(async () => { lkr.eq = []; lokiQueue = []; lokiOnTaskDone(2); await new Promise(r => setTimeout(r, 1500)); return { eq: lkr.eq.length, card: lokiQueue.map(i => i.kind).join(), state: lkr.state } })
-  ok(r.eq === 0 && r.card === 'taskdone' && r.state === 'in', 'a task closed with the corner not in sight: his card says it at once, as before (' + JSON.stringify(r) + ')')
+  ok(r.eq === 0 && r.card === 'taskdone' && r.state === 'in', 'a task closed with his vine not in sight: his card says it at once, as before (' + JSON.stringify(r) + ')')
   await pg.context().close()
 
   head('reduced motion, the switch off, the night: his card says it, he does not go out')

@@ -32,7 +32,8 @@ srv.listen(0, async () => {
       localStorage.setItem('fieldy_loki_roam', roam ? '1' : '0'); if (!gnome) localStorage.setItem('fieldy_jungle_gnome', '0'); localStorage.setItem('fieldy_gnome_wave', new Date().toISOString().slice(0, 10)) }, [seededState(), theme, roam, gnome])
     await pg.goto(B + '?gnomeHour=' + hour); await pg.waitForTimeout(600)
     // nothing of his own going on at the start: no errand waiting, no bubble
-    await pg.evaluate(() => { lkr.eq = []; clearTimeout(lkr.eqT); if (lkr.ep) lokiSnapHome(); lokiQueue = []; gnGreet = false; if (currentScreen === 'home') lokiRender() })
+    // and no quiet peek by chance (one is asked for by hand where it is checked)
+    await pg.evaluate(() => { lkr.eq = []; clearTimeout(lkr.eqT); if (lkr.ep) lokiSnapHome(); lokiQueue = []; gnGreet = false; if (currentScreen === 'home') lokiRender(); loki.peekQuietAt = Date.now() })
     return pg
   }
   const done = async pg => { ok(pg.errs.length === 0, 'no page errors' + (pg.errs.length ? ': ' + pg.errs.join(' | ') : '')); await pg.context().close() }
@@ -86,7 +87,7 @@ srv.listen(0, async () => {
   ok(r.last && r.last.why === 'quiet' && r.last.line === null && r.at, 'with nothing to say, now and then: a quiet peek (' + (r.last && r.last.kind) + ')')
   r = await pg.evaluate(async () => { const real = Math.random; Math.random = () => 0; navigateTo('people'); await new Promise(r => setTimeout(r, 2400)); Math.random = real; return pk.last.screen })
   eq(r, 'calendar', 'and not again within four hours')
-  r = await pg.evaluate(async () => { const real = Math.random; Math.random = () => .9; loki.peekQuietAt = 0; navigateTo('sites'); loki.react = { field: getToday(), pkSite: getToday() }; await new Promise(r => setTimeout(r, 2400)); Math.random = real; return pk.last.screen })
+  r = await pg.evaluate(async () => { const real = Math.random; Math.random = () => .9; loki.peekQuietAt = 0; loki.react = { field: getToday(), pkSite: getToday() }; navigateTo('sites'); await new Promise(r => setTimeout(r, 2400)); Math.random = real; return pk.last.screen })
   eq(r, 'calendar', 'not every visit either (one in four)')
   await done(pg)
 
