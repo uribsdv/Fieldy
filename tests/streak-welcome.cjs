@@ -87,7 +87,7 @@ srv.listen(0, async () => {
     const line = r.bank.find(x => x.t === r.t)
     ok(r.kind === 'welcome' && !!line, 'three days away, at ' + hour + ':00: the welcome, in his card: ' + r.t)
     ok(line && (!line.h || line.h === part), 'a line for any hour or for the ' + part + ' (' + (line && (line.h || 'any')) + ')')
-    ok(!/\d/.test(r.t) && !/ימים|איפה|למה|קרה/.test(r.t), 'no count of days, no "where were you", no question about what happened')
+    ok(!/\d/.test(r.t) && !/ימים|(^|\s)איפה|למה|קרה|\?/.test(r.t), 'no count of days, no "where were you", no question about what happened')
     r = await pg.evaluate(() => ({ figs: document.querySelectorAll('#jg-gnome .gn-img').length, roam: document.querySelectorAll('.lk-roam .gn-img, .lk-peek .lk-pk').length, turtle: !!document.querySelector('#jg-gnome [data-pose="turtle"]') }))
     ok(r.figs === 1 && r.roam === 0 && !r.turtle, 'one Loki only, and not the turtle with a count of days')
     if (hour === 9) {
