@@ -31,7 +31,7 @@ srv.listen(0, async () => {
     await pg.evaluate(() => {
       window.G = () => gameGet()
       // the roots at n each (or as given), watered `ago` days ago, the sheet opened
-      window.SET = (roots, ago) => { closeModal(); const g = gameGet(); g.roots = typeof roots === 'number' ? { field: roots, people: roots, learn: roots, body: roots } : Object.assign({ field: 0, people: 0, learn: 0, body: 0 }, roots); if (ago != null) { const d = new Date(); d.setDate(d.getDate() - ago); GAME_ROOTS.forEach(r => { g.world.garden.water[r] = gardenDayKey(d); delete g.world.garden.tap[r] }) } gameSave(); showGarden() }
+      window.SET = (roots, ago) => { closeModal(); const g = gameGet(); g.world.garden.base = { field: 0, people: 0, learn: 0, body: 0 }; g.roots = typeof roots === 'number' ? { field: roots, people: roots, learn: roots, body: roots } : Object.assign({ field: 0, people: 0, learn: 0, body: 0 }, roots); if (ago != null) { const d = new Date(); d.setDate(d.getDate() - ago); GAME_ROOTS.forEach(r => { g.world.garden.water[r] = gardenDayKey(d); delete g.world.garden.tap[r] }) } gameSave(); showGarden() }
       window.BED = r => { const b = document.querySelector('.wd-bed[data-root="' + r + '"]'); if (!b) return null; const im = b.querySelector('.wd-plant'); return { stage: +b.dataset.stage, rest: !!b.dataset.rest, frame: +(im.src.match(/-(\d)\.webp$/) || [])[1], restCss: im.classList.contains('wd-rest'), button: !!b.querySelector('button.wd-btn'), flower: (b.querySelector('.wd-flower') || {}).src || '', crystal: (b.querySelector('.wd-crystal') || {}).src || '', line: (b.querySelector('.wd-line') || {}).textContent, wet: !!b.querySelector('.wd-wet') } }
     })
     return pg
@@ -43,7 +43,7 @@ srv.listen(0, async () => {
   head('the data: world.garden inside fieldy_game_v1, filled in safely')
   pg = await boot({ game: { v: 1, total: 9, roots: { field: 4 }, world: { met: { kupa: { n: 2 } } }, onboard: { done: true } } })
   r = await pg.evaluate(() => ({ g: G().world.garden, total: G().total, field: G().roots.field, kupa: G().world.met.kupa.n }))
-  eq(r, { g: { water: {}, tap: {} }, total: 9, field: 4, kupa: 2 }, 'a world saved before the garden: an empty garden, the rest as it was')
+  eq(r, { g: { water: {}, tap: {}, base: { field: 4, people: 0, learn: 0, body: 0 } }, total: 9, field: 4, kupa: 2 }, 'a world saved before the garden: an empty garden (counting from the roots as they stand), the rest as it was')
   r = await pg.evaluate(() => { localStorage.setItem('fieldy_game_v1', JSON.stringify({ v: 1, world: { garden: 'x' } })); game = null; const a = G().world.garden
     localStorage.setItem('fieldy_game_v1', JSON.stringify({ v: 1, world: { garden: { water: { field: '2026-10-01', people: 'soon', owl: '2026-10-01' }, tap: [] } } })); game = null; const b = G().world.garden; return [a, b] })
   eq(r[0], { water: {}, tap: {} }, 'a garden that is not an object: built afresh')
@@ -70,6 +70,49 @@ srv.listen(0, async () => {
   eq(r, 'עוד שתי משימות של שטח לשלב הבא'.replace('שתי משימות', '2 משימות'), 'what is left, counted through gameCount: ' + r)
   r = await pg.evaluate(() => { SET({ field: 2 }, 0); return BED('field').line })
   eq(r, 'עוד משימה אחת של שטח לשלב הבא', 'and one: "' + r + '"')
+  await done(pg)
+
+  head('counting from the day the garden opened: an old journey starts from empty beds')
+  const OLD = { v: 1, total: 120, roots: { field: 40, people: 9, learn: 4, body: 25 }, onboard: { done: true } }
+  pg = await boot({ game: OLD })
+  r = await pg.evaluate(() => { showGarden(); return ['field', 'people', 'learn', 'body'].map(k => { const b = BED(k); return [b.stage, !!b.flower, !!b.crystal, /הערוגה מחכה לזרע/.test(document.querySelector('.wd-bed[data-root="' + k + '"]').textContent)] }) })
+  eq(r, [[0, false, false, true], [0, false, false, true], [0, false, false, true], [0, false, false, true]], 'high roots, none of them grown: four empty beds, "the bed waits for its seed"')
+  eq(await pg.evaluate(() => [G().world.garden.base, G().roots, G().total]), [{ field: 40, people: 9, learn: 4, body: 25 }, { field: 40, people: 9, learn: 4, body: 25 }, 120], 'base = the roots as they stood; game.roots and the total untouched')
+  eq(await pg.evaluate(() => { renderHome(); return document.querySelectorAll('#screen-home .wd-hf').length }), 0, 'no flower on Home for a root that was at 40 before the garden')
+  await pg.screenshot({ path: process.env.SHOTS ? path.join(process.env.SHOTS, 'old-user-garden.png') : '/dev/null' }).catch(() => {})
+  // one task of the root: a seedling; then by the thresholds 3, 8 (the base stays)
+  r = await pg.evaluate(() => { const close = n => { for (let i = 0; i < n; i++) { const id = 'ob' + Math.random().toString(36).slice(2); state.tasks.today.push({ id, text: 'לבדוק אתר בשטח', assignee: 'uri', color: 'orange', done: false, createdAt: new Date(Date.now() - 3600e3).toISOString() }); toggleTask(id) } }
+    const out = []; closeModal(); showGarden(); out.push(BED('field').stage); closeModal(); close(1); showGarden(); out.push([BED('field').stage, BED('field').line, BED('people').stage, G().roots.field])
+    closeModal(); close(1); showGarden(); out.push(BED('field').stage); closeModal(); close(1); showGarden(); out.push([BED('field').stage, BED('field').line]); closeModal(); close(4); showGarden(); out.push(BED('field').stage); closeModal(); close(1); showGarden(); out.push([BED('field').stage, BED('field').line]); return out })
+  eq(r[0], 0, 'before any task: empty')
+  eq(r[1], [1, 'עוד 2 משימות של שטח לשלב הבא', 0, 41], 'one task of field: a seedling, two more to the next stage; the other beds still empty (roots.field 41)')
+  eq(r[2], 1, 'two tasks: still a seedling')
+  eq(r[3], [2, 'עוד 5 משימות של שטח לשלב הבא'], 'three: young, five more to grown')
+  eq(r[4], 2, 'seven: young')
+  eq(r[5], [3, 'עוד 7 משימות של שטח עד פרח'], 'eight: grown, seven more to the flower')
+  eq(await pg.evaluate(() => G().world.garden.base), { field: 40, people: 9, learn: 4, body: 25 }, 'base unchanged after all of it')
+  r = await pg.evaluate(() => { for (let i = 0; i < 3; i++) { closeModal(); showGarden(); renderHome() } game = null; closeModal(); showGarden(); return G().world.garden.base })
+  eq(r, { field: 40, people: 9, learn: 4, body: 25 }, 'opened again and loaded again: base never retaken')
+  await done(pg)
+  pg = await boot({ game: OLD })
+  r = await pg.evaluate(() => { const g = G(); g.roots.field = 55; gameSave(); showGarden(); return [BED('field').stage, G().world.garden.base.field] })
+  eq(r, [3, 40], 'the base taken at boot holds at 40: roots 55 is 15 tasks since, a grown plant (and its flower)')
+  await done(pg)
+  // a broken base is taken afresh; a good one is kept
+  pg = await boot({ game: { v: 1, roots: { field: 12, people: 3, learn: 0, body: 7 }, world: { garden: { water: {}, tap: {}, base: { field: 'x', people: -2 } } }, onboard: { done: true } } })
+  eq(await pg.evaluate(() => { showGarden(); return [G().world.garden.base, BED('field').stage] }), [{ field: 12, people: 3, learn: 0, body: 7 }, 0], 'a broken base: taken afresh from the roots as they stand')
+  await done(pg)
+  pg = await boot({ game: { v: 1, roots: { field: 12, people: 3, learn: 0, body: 7 }, world: { garden: { water: {}, tap: {}, base: { field: 10, people: 3, learn: 0, body: 7 } } }, onboard: { done: true } } })
+  eq(await pg.evaluate(() => { showGarden(); return [G().world.garden.base, BED('field').stage, BED('field').line] }), [{ field: 10, people: 3, learn: 0, body: 7 }, 1, 'עוד 1 משימה של שטח לשלב הבא'.replace('1 משימה', 'משימה אחת')], 'a good base is kept: field 12 − 10 = 2: a seedling')
+  await done(pg)
+
+  head('roots rebuilt lower than the base: the base comes down with them')
+  pg = await boot({ game: { v: 1, roots: { field: 30, people: 12, learn: 5, body: 0 }, world: { garden: { water: {}, tap: {}, base: { field: 30, people: 12, learn: 5, body: 0 } } }, onboard: { done: true } } })
+  r = await pg.evaluate(() => { const g = G(); g.roots = { field: 20, people: 12, learn: 2, body: 0 }; gameSave(); showGarden(); const a = [G().world.garden.base, BED('field').stage, BED('learn').stage]
+    closeModal(); g.roots.field = 21; g.roots.learn = 3; gameSave(); showGarden(); return [a, [G().world.garden.base, BED('field').stage, BED('field').line, BED('learn').stage], G().roots] })
+  eq(r[0], [{ field: 20, people: 12, learn: 2, body: 0 }, 0, 0], 'roots fell to 20 and 2: base follows, beds empty, never below zero')
+  eq(r[1], [{ field: 20, people: 12, learn: 2, body: 0 }, 1, 'עוד 2 משימות של שטח לשלב הבא', 1], 'one more of field and learn: a seedling each, growth not frozen')
+  eq(r[2], { field: 21, people: 12, learn: 3, body: 0 }, 'game.roots itself as set')
   await done(pg)
 
   head('resting after seven days, never going back; a tap wakes it, for free')

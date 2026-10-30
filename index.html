@@ -5633,6 +5633,9 @@ function worldFill(o) {
   if(Array.isArray(o.log)) w.log = o.log.filter(x => x && WORLD_GUESTS[x.g] && +x.ts).slice(-WORLD_RULES.log)
   // the garden: the day each plant was last watered (or first seen), and the day it was last watered by a tap
   w.garden = {water: {}, tap: {}}
+  // base: the roots as they stood when the garden first counted (absent until then; a broken one is dropped and taken afresh)
+  const bs = o.garden && typeof o.garden === 'object' && o.garden.base
+  if(bs && typeof bs === 'object' && !Array.isArray(bs) && GAME_ROOTS.every(r => Number.isFinite(+bs[r]) && +bs[r] >= 0)) { w.garden.base = {}; GAME_ROOTS.forEach(r => { w.garden.base[r] = Math.floor(+bs[r]) }) }
   ;['water', 'tap'].forEach(k => { const m = o.garden && typeof o.garden === 'object' && o.garden[k]; if(m && typeof m === 'object' && !Array.isArray(m)) GAME_ROOTS.forEach(r => { if(/^\d{4}-\d\d-\d\d$/.test(m[r])) w.garden[k][r] = m[r] }) })
   return w
 }
@@ -7677,10 +7680,20 @@ function worldGarden() {
   const gd = gameGet().world.garden, k = gardenDayKey(); let ch = false
   GAME_ROOTS.forEach(r => { if(!gd.water[r]) { gd.water[r] = k; ch = true } })
   if(ch) gameSave()
-  return gd
+  return worldBase() && gd
 }
+// the garden starts empty: the roots as they stand the first time it counts, kept once
+function worldBase() {
+  const gd = gameGet().world.garden; let ch = false
+  if(!gd.base) { gd.base = {}; GAME_ROOTS.forEach(r => { gd.base[r] = Math.max(0, +gameGet().roots[r] || 0) }); ch = true }
+  GAME_ROOTS.forEach(r => { const n = Math.max(0, +gameGet().roots[r] || 0); if(gd.base[r] > n) { gd.base[r] = n; ch = true } })     // roots rebuilt lower: the base comes down with them, so growth never freezes
+  if(ch) gameSave()
+  return gd.base
+}
+// the tasks of a root since the garden began (game.roots itself is never touched)
+function worldGrown(r) { return Math.max(0, (+gameGet().roots[r] || 0) - worldBase()[r]) }
 function worldPlant(r) {
-  const n = gameGet().roots[r] || 0, st = n >= WORLD_GROW[2] ? 3 : n >= WORLD_GROW[1] ? 2 : n >= WORLD_GROW[0] ? 1 : 0
+  const n = worldGrown(r), st = n >= WORLD_GROW[2] ? 3 : n >= WORLD_GROW[1] ? 2 : n >= WORLD_GROW[0] ? 1 : 0
   const gd = worldGarden(), today = gardenDayKey(), days = gameDaysBetween(gd.water[r], today)
   return {r, n, st, rest: st > 0 && days >= WORLD_REST_DAYS, wateredToday: gd.tap[r] === today, flower: n >= WORLD_BLOOM.flower, crystal: n >= WORLD_BLOOM.crystal}
 }
@@ -7718,7 +7731,7 @@ function worldWater(r) {
 // Home's garden card (jungle): the flowers that opened, small, on the right bank of the pond (none until a root reaches 15)
 function worldHomeFlowersHtml() {
   if(currentTheme !== 'jungle') return ''
-  const open = GAME_ROOTS.filter(r => (gameGet().roots[r] || 0) >= WORLD_BLOOM.flower); if(!open.length) return ''
+  const open = GAME_ROOTS.filter(r => worldGrown(r) >= WORLD_BLOOM.flower); if(!open.length) return ''
   return '<div class="wd-hflowers" aria-hidden="true">' + open.map((r, i) => '<img alt="" loading="lazy" decoding="async" class="wd-hf wd-hf' + i + (worldEvening() ? ' wd-glow' : '') + '" src="' + worldFlowerSrc(r) + '">').join('') + '</div>'
 }
 function worldJournalHtml() {
