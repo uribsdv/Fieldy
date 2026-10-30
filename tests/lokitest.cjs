@@ -22,7 +22,9 @@ function serve(ROOT){return new Promise(res=>{const s=http.createServer((q,r)=>{
   await pg.goto(B);await pg.evaluate(st=>{localStorage.clear();localStorage.setItem('fieldy_v2',JSON.stringify(st));localStorage.setItem('fieldy_theme','jungle')},seededState());await pg.goto(B+'?gnomeHour=12');await pg.waitForTimeout(800);pg.srv=s;return pg}
  const A=await boot(mainDir()),G=await boot(ROOT)
  const dump=pg=>pg.evaluate(()=>JSON.stringify({LOKI,LOKI_STORY:typeof LOKI_STORY!=='undefined'?LOKI_STORY:null}))
- ok(await dump(A)===await dump(G),"Loki's banks and story are the same as main's, word for word")
+ // one line of taskDone was rewritten on purpose (claude/streak-welcome-back): main's, with that line alone replaced, is the bank to match
+ const TASKDONE_OLD='אתה רואה את כל מה שלא עשית. אני רואה מכאן מישהו שלא הפסיק לנסות.',TASKDONE_NEW='הנה עוד משהו שנעשה. אני רושם אותו אצלי, ליד כל השאר.'
+ ok((await dump(A)).split(JSON.stringify(TASKDONE_OLD)).join(JSON.stringify(TASKDONE_NEW))===await dump(G),"Loki's banks and story are the same as main's, word for word (one taskDone line replaced)")
  const css=pg=>pg.evaluate(()=>{const e=document.querySelector('#jg-gnome');if(!e)return null;const t=[...e.querySelectorAll('*')].find(x=>x.children.length===0&&x.textContent.trim().length>8);return t?getComputedStyle(t).fontStyle+'|'+getComputedStyle(t).fontFamily:null})
  const cg=await css(G);ok(cg!==null&&cg===await css(A),"his bubble's font and slant are main's ("+cg+')')
  const banks=await G.evaluate(()=>{const out=[];const walk=(o,p)=>{if(Array.isArray(o)){if(o.length>=6&&o.every(x=>typeof x==='string'||(x&&typeof x.t==='string')))out.push(p)}else if(o&&typeof o==='object')for(const k in o)walk(o[k],p?p+'.'+k:k)};walk(LOKI,'');return out})
