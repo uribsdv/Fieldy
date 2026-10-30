@@ -318,7 +318,9 @@ srv.listen(0, async () => {
   eq(r, 1, 'unreadable JSON: built afresh')
   await done(pg)
   // the first load built from what is already there: the garden's days, the done tasks, Loki's waiting drops; nothing lost
-  const today = '2026-10-27', st = seededState()
+  const today = '2026-10-27'
+  // seededState() reads the real date in Node; build it with Date pinned to the same day the page's clock is fixed to
+  const st = (RealDate => { global.Date = class extends RealDate { constructor(...a) { super(...(a.length ? a : [+at(today)])) } static now() { return +at(today) } }; try { return seededState() } finally { global.Date = RealDate } })(Date)
   st.tasks.today.push({ id: 'old1', text: 'ללמוד קורס', site: null, assignee: 'uri', color: 'orange', context: null, done: true, completedAt: +at('2026-10-20') }, { id: 'old2', text: 'בשטח', site: 'Santa Cruz', assignee: 'uri', color: 'orange', context: 'site', done: true })
   const gd = { v: 1, items: {}, cairn: [], leaves: 0, days: { '2026-10-25': { valid: 3 }, '2026-10-26': { valid: 1 } }, weeks: {} }
   const lk = { v: 1, bag: {}, last: {}, hardAt: 0, hardDays: {}, hugs: 0, drops: 5, water: 4 }
