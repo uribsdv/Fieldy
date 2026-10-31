@@ -358,6 +358,18 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-calm.on{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-calm u{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;border:2px solid #3A5B4A}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-mood{margin-top:2px}
+/* more feelings (jungle): the row under the five, and the sheet of nineteen (a circle of its colour until its drawing comes) */
+[data-theme="jungle"] .feel-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;flex-wrap:wrap}
+[data-theme="jungle"] .feel-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1.5px solid;border-radius:999px;font-size:var(--fs-sm);font-weight:700}
+[data-theme="jungle"] .feel-chip i{width:9px;height:9px;border-radius:50%}
+[data-theme="jungle"] .feel-more{margin-inline-start:auto;min-height:32px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--t2);font-size:var(--fs-sm);font-weight:600}
+[data-theme="jungle"] .feel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
+[data-theme="jungle"] .feel-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 2px;border-radius:var(--radius-lg);border:1.5px solid transparent;background:none;color:var(--t1)}
+[data-theme="jungle"] .feel-tile.on{border-color:var(--feel);background:color-mix(in srgb,var(--feel) 10%,transparent)}
+[data-theme="jungle"] .feel-tile b{font-size:var(--fs-sm);font-weight:600;line-height:1.25;text-align:center}
+[data-theme="jungle"] .feel-art{width:58px;height:58px;border-radius:50%;background:var(--feel);opacity:.85;overflow:hidden;display:block}
+[data-theme="jungle"] .feel-tile.has-art .feel-art{background:none;opacity:1}
+[data-theme="jungle"] .feel-art img{width:100%;height:100%;object-fit:contain;display:block}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog{margin-top:14px}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:6px;text-shadow:0 1px 3px rgba(4,14,10,.5)}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row b{color:#fff}
@@ -2182,6 +2194,33 @@ const MOOD_LIB = {
     ]}
 }
 const MOOD_ORDER = ['overwhelmed','scattered','tired','focused','motivated']
+// the more feelings (jungle only): nineteen more on the mood leaf, behind "עוד אפשרויות". Each is logged by logMood like the five
+// (the same record), and gives the same engine what it needs: a limit on the list (like overwhelmed, tired, scattered, or none) and
+// a few short lines. In the other themes they are not seen at all (moodShown): not on the card, not in a pattern, not in the trend.
+const MOOD_MORE = ['calm','stressed','drained','inspired','stuck','anxious','connected','content','loaded','sick','angry','proud','restless','curious','lonely','loving','surprised','patient','sad']
+Object.assign(MOOD_LIB, {
+  calm:      {label:'רגוע', icon:'feather', color:'#2C6B5E', taskLimit:null, more:true, actions:['זמן טוב למשימה שצריכה ראש שקט.', 'אפשר להתקדם בקצב הזה. אין לאן למהר.']},
+  stressed:  {label:'לחוץ', icon:'zap', color:'#A33A2A', taskLimit:1, more:true, actions:['רק הדבר האחד שלמטה. השאר מחכה.', 'אפשר להתחיל מהחלק הכי קטן שלו.']},
+  drained:   {label:'מרוקן', icon:'battery', color:'#5B4A86', taskLimit:2, more:true, actions:['היום מספיק מעט. שני דברים קטנים, וזהו.', 'מה שלא חייב היום יכול לחכות למחר.']},
+  inspired:  {label:'מלא השראה', icon:'lightbulb', color:'#8A5300', taskLimit:null, more:true, actions:['רגע טוב להתחיל משהו שחיכה לרעיון.', 'כדאי לרשום את הרעיונות לפני שהם עפים.']},
+  stuck:     {label:'תקוע', icon:'lock', color:'#5C5648', taskLimit:2, more:true, actions:['אם בא לך, אפשר לבחור משהו קטן אחר, רק כדי לזוז.', 'אם בא לך, משפט אחד על מה שתקוע, כאן למטה. בלי לפתור.']},
+  anxious:   {label:'חרד', icon:'activity', color:'#9C3644', taskLimit:1, more:true, actions:['רק דבר אחד מוצג למטה. זה מספיק לעכשיו.', 'את השאר אפשר להשאיר בצד בינתיים.']},
+  connected: {label:'מחובר', icon:'link', color:'#24687A', taskLimit:null, more:true, actions:['אולי רגע טוב לשיחה שחיכתה.', 'זמן טוב למשימה שעושים יחד עם מישהו.']},
+  content:   {label:'מרוצה', icon:'smile', color:'#3D6B2E', taskLimit:null, more:true, actions:['אפשר להמשיך מכאן, בלי לחפש עוד.', 'שווה לרשום מה עבד היום.']},
+  loaded:    {label:'עמוס', icon:'layers', color:'#A23D24', taskLimit:1, more:true, actions:['רק הדבר האחד שלמטה. השאר מחכה בתור.', 'את כל השאר אפשר לכתוב בצד ולחזור אליו אחר כך.']},
+  sick:      {label:'חולה', icon:'coffee', color:'#5F5A7A', taskLimit:2, more:true, actions:['היום מספיק מעט. רק מה שאי אפשר לדחות.', 'מה שלא בוער יכול לחכות.']},
+  angry:     {label:'כועס', icon:'flame', color:'#A0322E', taskLimit:2, more:true, actions:['אם בא לך, אפשר להתחיל ממשימה שלא קשורה לזה.', 'אם בא לך, לכתוב את זה כאן למטה, רק בשבילך.']},
+  proud:     {label:'גאה', icon:'sparkles', color:'#8A5A0A', taskLimit:null, more:true, actions:['שווה לרשום מה הצלחת, שיהיה גם לימים אחרים.', 'מכאן אפשר לקחת עוד צעד, אם מתחשק.']},
+  restless:  {label:'חסר מנוחה', icon:'wind', color:'#8F5A00', taskLimit:2, more:true, actions:['שני דברים קצרים, אחד אחרי השני.', 'אפשר להתחיל ממשהו שעושים בתנועה, בשטח או בטלפון.']},
+  curious:   {label:'סקרן', icon:'compass', color:'#2D5F8A', taskLimit:null, more:true, actions:['זמן טוב לברר משהו חדש על אחד האתרים.', 'אפשר לפתוח את השאלה שחיכתה.']},
+  lonely:    {label:'בודד', icon:'moon', color:'#4B5878', taskLimit:2, more:true, actions:['אם בא לך, הודעה קצרה למישהו.', 'אם בא לך, שני דברים קטנים, ולא יותר.']},
+  loving:    {label:'אוהב', icon:'flower', color:'#A23B6A', taskLimit:null, more:true, actions:['אולי רגע טוב להגיד תודה למישהו.', 'אפשר לקחת את החום הזה לשיחה הבאה.']},
+  surprised: {label:'מופתע', icon:'sun', color:'#7A5C00', taskLimit:null, more:true, actions:['אפשר לעצור רגע ולראות מה השתנה.', 'אם משהו חדש הגיע, אפשר לרשום אותו לפני שממשיכים.']},
+  patient:   {label:'סבלני', icon:'hourglass', color:'#4E6B3A', taskLimit:null, more:true, actions:['זמן טוב למשימה ארוכה שצריכה סבלנות.', 'אפשר לסגור עכשיו את מה שדורש תשומת לב לפרטים.']},
+  sad:       {label:'עצוב', icon:'cloud', color:'#4A5A85', taskLimit:2, more:true, actions:['אם בא לך, שני דברים קטנים. גם פחות זה בסדר.', 'אם בא לך, אפשר להתחיל ממשהו פשוט שלא דורש הרבה.']}
+})
+// a mood is seen everywhere, except one of the more feelings outside the jungle (an unknown key is left as it was)
+function moodShown(m) { return !(MOOD_LIB[m] && MOOD_LIB[m].more) || currentTheme === 'jungle' }
 
 // ── LEADERSHIP DEVELOPMENT ────────────────────────
 function leadField(id, label, value) {
@@ -2314,12 +2353,12 @@ function getCurrentMood() {
   if(!state.moods || !state.moods.length) return null
   var recent = state.moods[state.moods.length-1]
   var cutoff = Date.now() - 4*60*60*1000 // active for 4h after logging
-  if(!recent || recent.ts < cutoff) return null
+  if(!recent || recent.ts < cutoff || !moodShown(recent.mood)) return null
   return recent
 }
 
 function logMood(mood, source) {
-  if(!MOOD_LIB[mood]) return
+  if(!MOOD_LIB[mood] || !moodShown(mood)) return
   var now = new Date()
   var lib = MOOD_LIB[mood]
   var entry = {ts: now.getTime(), date: getToday(), hour: now.getHours(), weekday: now.getDay(), mood: mood, source: source || 'manual', actions: pickRandom(lib.actions, Math.min(3, lib.actions.length))}
@@ -2341,6 +2380,7 @@ function getMoodPatterns() {
   if(!state.moods || state.moods.length < 5) return []
   var blocks = {}
   state.moods.forEach(function(m) {
+    if(!moodShown(m.mood)) return
     var wd = (m.weekday != null) ? m.weekday : new Date(m.ts).getDay()
     var hr = (m.hour != null) ? m.hour : new Date(m.ts).getHours()
     var block = hr < 12 ? 'morning' : (hr < 17 ? 'afternoon' : 'evening')
@@ -2542,6 +2582,13 @@ const TRANSLATIONS = {
   settings_refresh_btn: {he:'רענן עכשיו', en:'Refresh now'},
 
   mood_overwhelmed: {he:'מוצף', en:'Overwhelmed'}, mood_scattered: {he:'מפוזר', en:'Scattered'}, mood_tired: {he:'עייף', en:'Tired'}, mood_focused: {he:'פוקוס', en:'Focused'}, mood_motivated: {he:'מוטיבציה גבוהה', en:'Highly motivated'},
+  mood_calm: {he:'רגוע', en:'Calm'}, mood_stressed: {he:'לחוץ', en:'Stressed'}, mood_drained: {he:'מרוקן', en:'Drained'}, mood_inspired: {he:'מלא השראה', en:'Inspired'},
+  mood_stuck: {he:'תקוע', en:'Stuck'}, mood_anxious: {he:'חרד', en:'Anxious'}, mood_connected: {he:'מחובר', en:'Connected'}, mood_content: {he:'מרוצה', en:'Content'},
+  mood_loaded: {he:'עמוס', en:'Swamped'}, mood_sick: {he:'חולה', en:'Unwell'}, mood_angry: {he:'כועס', en:'Angry'}, mood_proud: {he:'גאה', en:'Proud'},
+  mood_restless: {he:'חסר מנוחה', en:'Restless'}, mood_curious: {he:'סקרן', en:'Curious'}, mood_lonely: {he:'בודד', en:'Lonely'}, mood_loving: {he:'אוהב', en:'Loving'},
+  mood_surprised: {he:'מופתע', en:'Surprised'}, mood_patient: {he:'סבלני', en:'Patient'}, mood_sad: {he:'עצוב', en:'Sad'},
+  home_mood_more: {he:'עוד אפשרויות', en:'More options'}, feel_sheet_title: {he:'עוד תחושות', en:'More feelings'},
+  feel_sheet_sub: {he:'בחירה אחת נרשמת כמו בכרטיס.', en:'One choice is logged just like on the card.'},
   home_greeting: {he:'בוקר טוב, אורי', en:'Good morning, Uri'},
   home_greeting_afternoon: {he:'צהריים טובים, אורי', en:'Good afternoon, Uri'},
   home_greeting_evening: {he:'ערב טוב, אורי', en:'Good evening, Uri'},
@@ -2636,6 +2683,10 @@ const TRANSLATIONS = {
   moodnote_overwhelmed: {he:'מצב מוצף: מוצג רק הדבר האחד הכי חשוב. השאר מחכה.', en:'Overwhelmed: showing only the single most important thing. The rest can wait.'},
   moodnote_scattered: {he:'מצב מפוזר: שני דברים קטנים וברורים, לא יותר.', en:'Scattered: two small, clear things — no more.'},
   moodnote_tired: {he:'מצב עייף: קודם מה שנסגר בטלפון. השטח מחכה למחר.', en:'Tired: phone-first. The field can wait for tomorrow.'},
+  moodnote_more_one: {he:'מוצג רק הדבר האחד הכי חשוב. השאר מחכה.', en:'Showing only the single most important thing. The rest can wait.'},
+  moodnote_more_tired: {he:'קודם מה שנסגר בטלפון. השטח מחכה למחר.', en:'Phone-first. The field can wait for tomorrow.'},
+  moodnote_more_two: {he:'שני דברים קטנים וברורים, לא יותר.', en:'Two small, clear things — no more.'},
+  moodnote_more_gentle: {he:'שני דברים, אם בא לך. השאר מחכה בשקט.', en:'Two things, if you feel like it. The rest waits quietly.'},
   trend_title: {he:'{n} הימים האחרונים', en:'Last {n} days'},
   trend_start: {he:'לפני {n} יום', en:'{n} days ago'},
   trend_today: {he:'היום', en:'Today'},
@@ -4055,6 +4106,11 @@ const MOOD_RANK_BIAS = {
   focused:     {phone:-5, office:10, site:10,  note:null},
   motivated:   {phone:0,  office:5,  site:15,  note:null}
 }
+// the more feelings (jungle): each leans like the mood it stands beside; the ones with "if you like" a little, toward the phone
+;['stressed', 'anxious', 'loaded'].forEach(m => { MOOD_RANK_BIAS[m] = {phone:15, office:0, site:-20, note:'moodnote_more_one'} })
+;['drained', 'sick'].forEach(m => { MOOD_RANK_BIAS[m] = {phone:20, office:0, site:-25, note:'moodnote_more_tired'} })
+MOOD_RANK_BIAS.restless = {phone:15, office:5, site:-10, note:'moodnote_more_two'}
+;['stuck', 'lonely', 'sad', 'angry'].forEach(m => { MOOD_RANK_BIAS[m] = {phone:10, office:5, site:-5, note:'moodnote_more_gentle'} })
 const PRIORITY_HEX = {red:'#ef4444',orange:'#e8940c',green:'#1a8f7a'}
 let rightNowExpanded = false   // "הצג הכל" escape hatch while a mood limit is active
 // ── ACCORDIONS ────────────────────────────────────
@@ -4549,8 +4605,47 @@ function moodPickerHtml(curMood) {
               <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
             </button>`
           }).join('')}
-        </div>
+        </div>${currentTheme === 'jungle' ? feelMoreRowHtml(curMood) : ''}
       </div>`
+}
+// ── MORE FEELINGS (jungle): "עוד אפשרויות" under the five, and the sheet of nineteen ──
+// The one chosen from the sheet is shown on the card as the active one (the five stay as they are). A drawing for each comes later,
+// as assets/feelings/feel-<key>.webp listed in assets/feelings/manifest.json; until then its slot is a circle of its colour. The
+// manifest and the drawings are fetched only when the sheet is opened, never on load.
+const FEEL_DIR = 'assets/feelings/'
+let feelArt = null   // the promise of the keys that have a drawing (read once, when the sheet first opens)
+function feelMoreRowHtml(curMood) {
+  const m = curMood && MOOD_LIB[curMood.mood] && MOOD_LIB[curMood.mood].more ? curMood.mood : null, d = m && MOOD_LIB[m]
+  return `<div class="feel-row">${m ? `<span class="feel-chip" style="border-color:${d.color};color:${d.color};background:${d.color}18" aria-current="true"><i style="background:${d.color}" aria-hidden="true"></i>${tr('mood_'+m)}</span>` : ''}<button class="feel-more" onclick="showMoreFeelings()" aria-haspopup="dialog">${tr('home_mood_more')}</button></div>`
+}
+function feelTileHtml(k, cur) {
+  const d = MOOD_LIB[k], on = cur === k
+  return `<button class="feel-tile${on ? ' on' : ''}" data-feel="${k}" onclick="pickMoreFeeling('${k}')" aria-pressed="${on}" style="--feel:${d.color}"><span class="feel-art" aria-hidden="true"></span><b>${tr('mood_'+k)}</b></button>`
+}
+function showMoreFeelings() {
+  if(currentTheme !== 'jungle') return
+  const cur = getCurrentMood(), k = cur ? cur.mood : null
+  openModal('<div class="feel-sheet" role="dialog" aria-label="' + tr('feel_sheet_title') + '">' +
+    '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:2px">' + tr('feel_sheet_title') + '</div>' +
+    '<div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:14px">' + tr('feel_sheet_sub') + '</div>' +
+    '<div class="feel-grid">' + MOOD_MORE.map(m => feelTileHtml(m, k)).join('') + '</div>' +
+    '<button class="btn-primary" style="margin-top:16px" onclick="closeModal()">' + tr('btn_close') + '</button></div>')
+  feelArtShow()
+}
+// the drawings that have come, each in its slot; a file not listed in the manifest is never asked for
+function feelArtShow() {
+  if(!feelArt) feelArt = fetch(FEEL_DIR + 'manifest.json').then(r => r.ok ? r.json() : {}).catch(() => ({})).then(function(m) {
+    const have = {}; ((m && m.files) || []).forEach(f => { const x = /^feel-([a-z]+)\.webp$/.exec(f); if(x && MOOD_LIB[x[1]] && MOOD_LIB[x[1]].more) have[x[1]] = 1 }); return have })
+  feelArt.then(function(have) {
+    document.querySelectorAll('.feel-sheet .feel-tile').forEach(function(b) {
+      const k = b.dataset.feel, slot = b.querySelector('.feel-art'); if(!have[k] || !slot || slot.firstChild) return
+      const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onload = function() { b.classList.add('has-art') }; im.src = FEEL_DIR + 'feel-' + k + '.webp'; slot.appendChild(im)
+    })
+  })
+}
+function pickMoreFeeling(k) {
+  if(!MOOD_LIB[k] || !MOOD_LIB[k].more) return
+  closeModal(); logMood(k, 'manual')
 }
 function moodTipHtml(curMood, moodDef) {
   return moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
@@ -4926,7 +5021,7 @@ function gnPoseHtml(key, extra) {
 }
 function gnomeWaveToday() { const d = gardenDayKey(); if(localStorage.getItem('fieldy_gnome_wave') === d) return false; try { localStorage.setItem('fieldy_gnome_wave', d) } catch(e) {} return true }
 // what he has to say, in order; each: {kind, label, text, pose, edit}
-function gnItems(greet) {
+function gnItems(greet, askOk) {
   const f = briefingFacts(), items = [], all = [...state.tasks.now, ...state.tasks.today, ...state.tasks.later]
   const cached = (state.briefing && state.briefing.date === getToday() && state.briefing.text) ? state.briefing.text : ''
   const doneAll = all.length > 0 && all.every(t => t.done)
@@ -4947,6 +5042,8 @@ function gnItems(greet) {
   else if(L.recall) opening.push(L.recall)
   else if(doneAll) opening.push(L.done || (L.done = lokiItem('done', lokiPick('dayDone'), 'joy')))
   else if(L.char) opening.push(L.char)
+  if(askOk && L.ask === undefined) L.ask = lokiFeelAskItem(gnHour(), L)
+  if(askOk && L.ask && !feelLoggedToday()) opening.push(L.ask)
   // 2. the briefing, up to five bubbles; 3. at the end, one line of wisdom, only when the situation calls for one. Six at most in all.
   const brief = []
   if(f.focus) brief.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
@@ -4964,7 +5061,7 @@ function gnomeCardHtml() {
   const greet = gnGreet
   // a new user's empty day still gets the opening walk's next step, and a scroll he was asked to read (or a guest) is told on any day
   const empty = !briefingHasContent(f) && !gameOnboardItem() && !(!night && lokiQueue.some(x => x && (x.kind === 'scroll' || x.kind === 'guest')))
-  const base = gnItems(greet && !night && !empty), q = lokiQueue.filter(Boolean)
+  const base = gnItems(greet && !night && !empty, !night && !empty && !briefingBusy && !briefingError), q = lokiQueue.filter(Boolean)
   let items = q.length && !night ? q.concat(base) : base, item, pose, label = '', text, portrait = false, sub = ''
   const welcome = lokiOpen && lokiOpen.welcome
   const wave = items.length && items[0].kind === 'greet' && !gnWaved
@@ -5024,7 +5121,7 @@ function gnomeSlotHtml() {
   const full = gnFull ? dailyBriefingHtml() : ''
   return gnomeCardHtml() + (gnFull ? `<div class="gn-full">${full || `<div class="card"><div class="muted" style="font-size:var(--fs-sm)">${tr('home_briefing_no_server')}</div></div>`}<button class="gn-btn gn-close" onclick="toggleGnFull()">${tr('gn_less')}</button></div>` : '')
 }
-function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'scroll') gameScrollRead(lokiQueue[gnIdx].scroll) } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'welcome' && lokiOpen) lokiOpen.welcome = null; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
+function gnNext() { const el = document.getElementById('jg-gnome'); if(!el) return; haptic('light'); const nq = lokiQueue.filter(Boolean).length; if(nq && gnIdx < nq) { gnIdx++; if(gnIdx >= nq) { lokiQueue = []; gnIdx = 0 } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'story') { lokiStoryState().read[lokiQueue[gnIdx].chap] = 1; lokiSave() } else if(lokiQueue[gnIdx] && lokiQueue[gnIdx].last && lokiQueue[gnIdx].kind === 'scroll') gameScrollRead(lokiQueue[gnIdx].scroll) } else if(el.dataset.kind === 'greet') gnGreet = false; else if(el.dataset.kind === 'welcome' && lokiOpen) lokiOpen.welcome = null; else if(el.dataset.kind === 'ask' && lokiOpen) lokiOpen.ask = null; else if(el.dataset.kind === 'away' && lokiOpen) { if(lokiOpen.away) lokiOpen.away = null; else lokiOpen.away2 = null } else if(el.dataset.kind === 'recall' && lokiOpen) lokiOpen.recall = null; else if(el.dataset.kind === 'poof' && lokiOpen) lokiOpen.poof = null; else if(el.dataset.kind === 'storm' && lokiOpen) lokiOpen.storm = null; else if(el.dataset.kind === 'invite') { loki.ritualDay = getToday(); lokiSave() } else if(el.dataset.kind === 'help' && lokiOpen) lokiOpen.help = null; else if(el.dataset.kind === 'gift' && lokiOpen) { lokiOpen.gift = null; loki.gift = null; loki.giftAt = Date.now(); lokiSave() } else gnIdx++; el.outerHTML = gnomeCardHtml(); gnomeAfterRender(); jungleDress('home') }
 function toggleGnFull() { gnFull = !gnFull; if(currentScreen === 'home') renderHome() }
 // motion: breathing/sway/glow are CSS (paused off-screen, off with reduced motion); the wave and the blink are timed here
 function gnomeSet(img, key) { const t = GN_TAB[key] || LK_POSE[key]; if(!t) return; const tmp = document.createElement('div'); tmp.innerHTML = gnPoseHtml(key); const n = tmp.querySelector('.gn-img'); img.src = n.src; img.style.cssText = n.style.cssText; img.dataset.pose = key }
@@ -5165,6 +5262,46 @@ const LOKI = {
 // moods that already exist on the leaf -> the bank that answers them; the heavy ones also offer a hug
 const LOKI_MOOD = {overwhelmed: {bank: ['hard', 'pressed', 'tired'], hug: true, pose: 'listen'}, scattered: {bank: ['pressed'], hug: true, pose: 'listen'}, tired: {bank: ['tired'], hug: true, pose: 'listen'},
   focused: {bank: ['good'], hug: false, pose: 'joy'}, motivated: {bank: ['good'], hug: false, pose: 'joy'}}
+// the more feelings (jungle): for the heavy ones (lonely, sad, anxious, angry, stuck) one short quiet line of being there: no advice,
+// no question, nothing to fix. Four small banks: presence, warmth, a light lift, plainness. The others answer from the banks above.
+Object.assign(LOKI.mood, {
+  presence: ['אני פה. לא צריך שום דבר עכשיו.', 'יושב לידך. בשקט.', 'אני כאן, על הגדם. לא הולך לשום מקום.', 'שנינו פה. זה מספיק לרגע הזה.'],
+  warmth: ['שמח שאתה פה, גם ביום כזה.', 'שמרתי לך מקום בצל.', 'היער מחזיק אותך קצת היום. גם אני.', 'עלה רך אחד, בשבילך.'],
+  light: ['גם אבן תקועה זזה בסוף, כשהמים ממשיכים לזרום.', 'הנהר מוצא דרך. לאט, אבל מוצא.', 'היום לא צריך להיות יותר ממה שהוא.'],
+  simple: ['אין מה לפתור עכשיו.', 'רק רגע אחד. זהו.', 'שקט. העלים זזים, ואני פה.', 'לא צריך מילים.']
+})
+Object.assign(LOKI_MOOD, {
+  lonely: {bank: ['presence', 'warmth'], hug: false, pose: 'listen'}, sad: {bank: ['presence', 'warmth', 'simple'], hug: false, pose: 'listen'},
+  anxious: {bank: ['presence', 'simple'], hug: false, pose: 'listen'}, angry: {bank: ['presence', 'simple'], hug: false, pose: 'listen'},
+  stuck: {bank: ['light', 'simple'], hug: false, pose: 'listen'},
+  stressed: {bank: ['pressed'], hug: true, pose: 'listen'}, loaded: {bank: ['pressed'], hug: true, pose: 'listen'}, restless: {bank: ['pressed'], hug: true, pose: 'listen'},
+  drained: {bank: ['tired'], hug: true, pose: 'listen'}, sick: {bank: ['warmth'], hug: false, pose: 'listen'},
+  calm: {bank: ['good'], hug: false, pose: 'joy'}, inspired: {bank: ['good'], hug: false, pose: 'joy'}, connected: {bank: ['good'], hug: false, pose: 'joy'},
+  content: {bank: ['good'], hug: false, pose: 'joy'}, proud: {bank: ['good'], hug: false, pose: 'joy'}, curious: {bank: ['good'], hug: false, pose: 'joy'},
+  surprised: {bank: ['good'], hug: false, pose: 'joy'}, loving: {bank: ['good'], hug: false, pose: 'joy'}, patient: {bank: ['good'], hug: false, pose: 'joy'}
+})
+// once a day, when no feeling was logged yet: one soft line after the usual opening that points at the card. Never at night (22-05),
+// never on the visit of a welcome back (that day is skipped), never a push, nothing on the card, and nothing comes of no answer.
+// The day it was said is kept in game.world.day.seen (the world's day, which starts empty each day): no key of its own.
+const LOKI_FEEL_ASK = [
+  {t: 'איך עובר עליך היום? יש לי פה כרטיס, אם בא לך.', h: ''},
+  {t: 'העלה למעלה מחכה, אם מתחשק לסמן איך היום.', h: ''},
+  {t: 'בוקר. אם בא לך לסמן איך הוא מתחיל, הכרטיס פה.', h: 'morning'},
+  {t: 'בוקר רך. יש לי פה כרטיס של תחושות, אם מתחשק.', h: 'morning'},
+  {t: 'צהריים. אם בא לך, אפשר לסמן איך עובר היום.', h: 'afternoon'},
+  {t: 'אמצע היום. כרטיס התחושות פה, בלי לחץ.', h: 'afternoon'},
+  {t: 'ערב. אם מתחשק לסמן איך היה, יש לי פה כרטיס.', h: 'evening'},
+  {t: 'ערב שקט. הכרטיס פה, אם בא לך.', h: 'evening'}
+]
+function feelLoggedToday() { const t = getToday(); return (state.moods || []).some(m => m && m.date === t && m.source !== 'auto') }
+function lokiFeelAskItem(hour, L) {
+  if(!worldOn() || hour >= 22 || hour < 5) return undefined   // at night: not today yet, asked again in the morning
+  const d = worldDay(); if(d.seen.feelAsk) return null
+  d.seen.feelAsk = 1; gameSave()
+  if(L.welcome || feelLoggedToday()) return null
+  const part = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening', pool = LOKI_FEEL_ASK.filter(x => !x.h || x.h === part)
+  return lokiItem('ask', pool[Math.floor(Math.random() * pool.length)].t, 'stand')
+}
 const LK_POSE = {gift: [137, 275, 68], hug: [223, 273, 112], lantern: [228, 276, 125], laugh: [141, 271, 72], 'stuck-hat': [197, 280, 100], 'water-plant': [163, 226, 105],
   turtle: [165, 241, 108], listen: [277, 255, 140], fishing: [279, 262, 150], 'sit-river': [228, 260, 130], peek: [223, 268, 90], shelter: [196, 237, 100],
   hang: [243, 262, 125], slide: [232, 268, 112], 'sit-dangle-a': [107, 208, 45], 'sit-dangle-b': [108, 210, 52], 'sit-lantern': [170, 195, 105], 'sneak-still': [107, 202, 62]}   // [file width, height, head-centre x]
@@ -5346,7 +5483,7 @@ function lokiWelcomeItem(hour) {
 }
 document.addEventListener('visibilitychange', function() {
   const now = Date.now()
-  if(document.visibilityState === 'hidden') { loki.lastSeen = now; lokiSave(); return }
+  if(document.visibilityState === 'hidden') { loki.lastSeen = now; lokiSave(); if(lokiOpen && lokiOpen.ask) lokiOpen.ask = null; return }
   lokiAwayFrom = loki.lastSeen || 0; lokiAwayMs = now - (loki.lastSeen || now); loki.lastSeen = now; lokiSave()
   if(lokiAwayMs >= 2 * 3600000 && gnomeOn()) { lokiOpen = null; if(currentScreen === 'home') renderHome() }
 })
@@ -7135,6 +7272,7 @@ function lokiWalkSchedule() { if(lkr.state === 'in' && currentScreen === 'home')
 function lokiScreenChange(screen) {
   try { lokiPeekVisit(screen) } catch(e) {}
   worldMoved(); if(screen !== 'home') worldGone()
+  try { if(screen !== 'home' && lokiOpen && lokiOpen.ask) lokiOpen.ask = null } catch(e) {}   // the day's line about the card is for this visit only
   if(screen === 'sites') lokiOnSites()
   if(screen !== 'home') { clearTimeout(lkr.timer); lkr.onHome = false; if(lkr.state === 'in') return }
   else {
@@ -8655,7 +8793,7 @@ function moodTrendHtml(days) {
   days = days || 30
   const moods = state.moods || []
   if(moods.length < 3) return ''
-  const byDay = {}; moods.forEach(m => { byDay[m.date] = m.mood })
+  const byDay = {}; moods.forEach(m => { if(moodShown(m.mood)) byDay[m.date] = m.mood })
   const today = new Date(getToday() + 'T00:00:00')
   const W = 360, H = 22, gap = 2, w = (W - gap * (days - 1)) / days
   let rects = ''; const counts = {}
@@ -8666,7 +8804,7 @@ function moodTrendHtml(days) {
       rects += `<rect class="mood-day" x="${x}" y="2" width="${w.toFixed(2)}" height="${H - 4}" rx="3" fill="${MOOD_LIB[mood].color}"><title>${key} · ${tr('mood_'+mood)}</title></rect>`
     } else rects += `<rect x="${x}" y="${H / 2 - 1}" width="${w.toFixed(2)}" height="2" rx="1" fill="var(--line)"/>`
   }
-  const legend = MOOD_ORDER.filter(m => counts[m]).map(m => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${MOOD_LIB[m].color}"></span>${icon(MOOD_LIB[m].icon)} ${tr('mood_'+m)} · ${counts[m]}</span>`).join('')
+  const legend = MOOD_ORDER.concat(MOOD_MORE).filter(m => counts[m]).map(m => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-sm);color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${MOOD_LIB[m].color}"></span>${icon(MOOD_LIB[m].icon)} ${tr('mood_'+m)} · ${counts[m]}</span>`).join('')
   return `<div id="mood-trend">
     <div class="panel-label" style="margin-bottom:6px">${icon('bar-chart-2')} ${tr('trend_title').replace('{n}', days)}</div>
     <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;direction:ltr"><span>${tr('trend_start').replace('{n}', days)}</span><span>${tr('trend_today')}</span></div>
