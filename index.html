@@ -5263,19 +5263,20 @@ const LOKI = {
 const LOKI_MOOD = {overwhelmed: {bank: ['hard', 'pressed', 'tired'], hug: true, pose: 'listen'}, scattered: {bank: ['pressed'], hug: true, pose: 'listen'}, tired: {bank: ['tired'], hug: true, pose: 'listen'},
   focused: {bank: ['good'], hug: false, pose: 'joy'}, motivated: {bank: ['good'], hug: false, pose: 'joy'}}
 // the more feelings (jungle): for the heavy ones (lonely, sad, anxious, angry, stuck) one short quiet line of being there: no advice,
-// no question, nothing to fix. Four small banks: presence, warmth, a light lift, plainness. The others answer from the banks above.
-Object.assign(LOKI.mood, {
+// no question, nothing to fix. Four small banks of their own (LOKI stays as it was): presence, warmth, a light lift, plainness.
+// The others answer from the banks above.
+const LOKI_FEEL = {
   presence: ['אני פה. לא צריך שום דבר עכשיו.', 'יושב לידך. בשקט.', 'אני כאן, על הגדם. לא הולך לשום מקום.', 'שנינו פה. זה מספיק לרגע הזה.'],
   warmth: ['שמח שאתה פה, גם ביום כזה.', 'שמרתי לך מקום בצל.', 'היער מחזיק אותך קצת היום. גם אני.', 'עלה רך אחד, בשבילך.'],
   light: ['גם אבן תקועה זזה בסוף, כשהמים ממשיכים לזרום.', 'הנהר מוצא דרך. לאט, אבל מוצא.', 'היום לא צריך להיות יותר ממה שהוא.'],
   simple: ['אין מה לפתור עכשיו.', 'רק רגע אחד. זהו.', 'שקט. העלים זזים, ואני פה.', 'לא צריך מילים.']
-})
+}
 Object.assign(LOKI_MOOD, {
-  lonely: {bank: ['presence', 'warmth'], hug: false, pose: 'listen'}, sad: {bank: ['presence', 'warmth', 'simple'], hug: false, pose: 'listen'},
-  anxious: {bank: ['presence', 'simple'], hug: false, pose: 'listen'}, angry: {bank: ['presence', 'simple'], hug: false, pose: 'listen'},
-  stuck: {bank: ['light', 'simple'], hug: false, pose: 'listen'},
+  lonely: {feel: true, bank: ['presence', 'warmth'], hug: false, pose: 'listen'}, sad: {feel: true, bank: ['presence', 'warmth', 'simple'], hug: false, pose: 'listen'},
+  anxious: {feel: true, bank: ['presence', 'simple'], hug: false, pose: 'listen'}, angry: {feel: true, bank: ['presence', 'simple'], hug: false, pose: 'listen'},
+  stuck: {feel: true, bank: ['light', 'simple'], hug: false, pose: 'listen'},
   stressed: {bank: ['pressed'], hug: true, pose: 'listen'}, loaded: {bank: ['pressed'], hug: true, pose: 'listen'}, restless: {bank: ['pressed'], hug: true, pose: 'listen'},
-  drained: {bank: ['tired'], hug: true, pose: 'listen'}, sick: {bank: ['warmth'], hug: false, pose: 'listen'},
+  drained: {bank: ['tired'], hug: true, pose: 'listen'}, sick: {feel: true, bank: ['warmth'], hug: false, pose: 'listen'},
   calm: {bank: ['good'], hug: false, pose: 'joy'}, inspired: {bank: ['good'], hug: false, pose: 'joy'}, connected: {bank: ['good'], hug: false, pose: 'joy'},
   content: {bank: ['good'], hug: false, pose: 'joy'}, proud: {bank: ['good'], hug: false, pose: 'joy'}, curious: {bank: ['good'], hug: false, pose: 'joy'},
   surprised: {bank: ['good'], hug: false, pose: 'joy'}, loving: {bank: ['good'], hug: false, pose: 'joy'}, patient: {bank: ['good'], hug: false, pose: 'joy'}
@@ -5341,7 +5342,7 @@ function lokiPickFor(name, ctx, general) {
   lokiSave(); return bank[i]
 }
 function lokiPick(name, vars, ok) {
-  const bank = name.split('.').reduce((o, k) => o[k], LOKI), n = bank.length
+  const bank = name.split('.').reduce((o, k) => o[k], name.slice(0, 5) === 'feel.' ? {feel: LOKI_FEEL} : LOKI), n = bank.length
   let bag = (loki.bag[name] || []).filter(i => i < n)
   if(!bag.length) { bag = Array.from({length: n}, (_, i) => i); for(let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]] }
     if(n > 1 && bag[0] === loki.last[name]) { const j = 1 + Math.floor(Math.random() * (n - 1)); [bag[0], bag[j]] = [bag[j], bag[0]] } }   // a full round, and not the line just told first
@@ -5362,7 +5363,7 @@ function lokiItem(kind, text, pose, extra) { return Object.assign({kind, label: 
 // what to say to the mood the leaf has just been given (only the moods it already has)
 function lokiMoodItem(mood) {
   const m = LOKI_MOOD[mood]; if(!m) return null
-  const line = lokiPick('mood.' + m.bank[Math.floor(Math.random() * m.bank.length)]), obj = typeof line === 'object'
+  const line = lokiPick((m.feel ? 'feel.' : 'mood.') + m.bank[Math.floor(Math.random() * m.bank.length)]), obj = typeof line === 'object'
   return lokiItem('mood', obj ? line.t : line, obj && line.p ? line.p : m.pose, {hug: m.hug, mood})
 }
 // three heavy days in a row ("overwhelmed" on three dates one after the other): one gentle line, once a week at most

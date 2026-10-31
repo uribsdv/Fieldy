@@ -78,7 +78,7 @@ srv.listen(0, async () => {
   const before = await pg.evaluate(() => Object.keys(state.moods[state.moods.length - 1]).sort().join())
   await pg.click('.feel-more'); await pg.waitForTimeout(200)
   await pg.click('.feel-tile[data-feel="sad"]'); await pg.waitForTimeout(250)
-  r = await pg.evaluate(() => { const m = state.moods[state.moods.length - 1]; return { m, keys: Object.keys(m).sort().join(), sheet: !!document.querySelector('.feel-sheet'), chip: (document.querySelector('.nh-mood .feel-chip') || {}).textContent, cur: (getCurrentMood() || {}).mood, limit: moodLimit('sad'), saved: JSON.parse(localStorage.getItem('fieldy_v2')).moods.slice(-1)[0].mood, loki: document.getElementById('jg-gnome').textContent, banks: ['presence', 'warmth', 'simple'].flatMap(b => LOKI.mood[b]) } })
+  r = await pg.evaluate(() => { const m = state.moods[state.moods.length - 1]; return { m, keys: Object.keys(m).sort().join(), sheet: !!document.querySelector('.feel-sheet'), chip: (document.querySelector('.nh-mood .feel-chip') || {}).textContent, cur: (getCurrentMood() || {}).mood, limit: moodLimit('sad'), saved: JSON.parse(localStorage.getItem('fieldy_v2')).moods.slice(-1)[0].mood, loki: document.getElementById('jg-gnome').textContent, banks: ['presence', 'warmth', 'simple'].flatMap(b => LOKI_FEEL[b]) } })
   ok(r.m.mood === 'sad' && r.m.source === 'manual' && r.saved === 'sad', 'logged as "sad", source manual, saved in state.moods')
   ok(r.keys === before, 'the record has the same fields as before: ' + r.keys)
   ok(!r.sheet && r.chip === 'עצוב' && r.cur === 'sad', 'the sheet closed and the card shows "עצוב" as the active one')
