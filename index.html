@@ -5080,10 +5080,10 @@ function gnomeAfterRender() {
   }
   lokiSettle()
   if(lkr.onHome === undefined) { lkr.onHome = true; lkr.homeAt = Date.now() }
-  clearTimeout(lkr.sitTimer); clearTimeout(lkr.idleTimer)
+  clearTimeout(lkr.sitTimer); clearTimeout(lkr.idleTimer); lokiIdleUnwake()
   if(currentTheme === 'jungle' && gnomeOn()) lokiWarm()
   if(!lokiOut() && Date.now() < lkr.sitUntil) lkr.sitTimer = setTimeout(lokiRender, lkr.sitUntil - Date.now() + 30)   // up from the stump, back to his poses
-  { const im = document.querySelector('#jg-gnome .gn-img'); if(im && /^idle:/.test(im.dataset.pose || '') && !reducedMotion()) { const br = function() { const i2 = document.querySelector('#jg-gnome .gn-img'); if(!i2 || !/^idle:/.test(i2.dataset.pose || '')) return; const n = i2.dataset.pose === 'idle:0' ? 1 : 0, tmp = document.createElement('div'); tmp.innerHTML = lokiStageSeqHtml('idle', n); const f = tmp.firstChild; if(f) { i2.src = f.src; i2.style.cssText = f.style.cssText; i2.dataset.pose = f.dataset.pose } lkr.idleTimer = setTimeout(br, 1700) }; lkr.idleTimer = setTimeout(br, 1700) } }   // breathing while he stands in his corner
+  { const im = document.querySelector('#jg-gnome .gn-img'); if(im && /^idle:/.test(im.dataset.pose || '') && !reducedMotion()) { const br = function() { const i2 = document.querySelector('#jg-gnome .gn-img'); if(!i2 || !/^idle:/.test(i2.dataset.pose || '')) return; const n = i2.dataset.pose === 'idle:0' ? 1 : 0, tmp = document.createElement('div'); tmp.innerHTML = lokiStageSeqHtml('idle', n); const f = tmp.firstChild; if(f) { i2.src = f.src; i2.style.cssText = f.style.cssText; i2.dataset.pose = f.dataset.pose } lokiIdleNext(br) }; lokiIdleNext(br) } }   // breathing while he stands in his corner
   lokiWalkSchedule()
   if(currentTheme === 'jungle') lokiLifeSync()      // his layer back inside Home, the map measured again
   clearTimeout(gnBlinkTimer)
@@ -5099,6 +5099,16 @@ function gnomeAfterRender() {
   }
   blink()
 }
+
+// his breathing in his corner, a frame every 1.7 s: only while the app is in front; away, nothing waits (one listener brings it
+// back, at the same pace, when the app is in front again)
+function lokiIdleNext(br) {
+  lokiIdleUnwake()
+  if(document.visibilityState === 'visible') { lkr.idleTimer = setTimeout(br, 1700); return }
+  lkr.idleWake = function() { if(document.visibilityState !== 'visible') return; clearTimeout(lkr.idleTimer); lokiIdleNext(br) }
+  document.addEventListener('visibilitychange', lkr.idleWake)
+}
+function lokiIdleUnwake() { if(lkr.idleWake) { document.removeEventListener('visibilitychange', lkr.idleWake); lkr.idleWake = null } }
 
 // ── LOKI (jungle) ──
 // The gnome has a name and a character (LOKI_CHARACTER.md): a mischievous, tender, very short-spoken friend who
