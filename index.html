@@ -1264,6 +1264,10 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 @media (prefers-reduced-motion:reduce){[data-theme="jungle"] .gn-lamp,[data-theme="jungle"] .lk-spr.lk-g{animation:none}}
 [data-theme="jungle"] .lk-puff svg{width:100%;height:100%;fill:#FFE29A;filter:drop-shadow(0 0 5px rgba(255,205,90,.95)) drop-shadow(0 0 11px rgba(255,190,80,.6));animation:gn-spark .22s ease-out both}
 @media (prefers-reduced-motion:reduce){.lk-roam{display:none}}
+/* the whisper after a close (calmWhisper): a small dark pill just above the nav, taking no press; a fade, none in reduced motion */
+[data-theme="jungle"] .calm-w{position:fixed;z-index:95;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:6px 14px;border-radius:99px;background:rgba(6,30,25,.86);color:#F0F8F3;font-size:var(--fs-sm);line-height:1.4;text-align:center;pointer-events:none;animation:calm-in .7s ease-out both}
+@keyframes calm-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] .calm-w{animation:none}}
 /* Loki on the other screens (a peek): a layer over the page that takes no press, under the nav and any sheet */
 .lk-peek{position:fixed;inset:0;z-index:90;pointer-events:none}
 [data-theme="jungle"] .lk-pk{position:absolute;overflow:hidden;pointer-events:none}
@@ -3181,7 +3185,8 @@ const playSaveChime = () => { playTone(523,0.25,'triangle',0.16); setTimeout(()=
 // meetings and the field, and every action also confirms itself visually
 // (ripple, check, "נשמר"), so sound is never the only signal. The Tao
 // screen's ambient water and the meditation narration have their own mute.
-function soundOn() { return localStorage.getItem('fieldy_sound') !== '0' }
+// (in the jungle they start off: until the toggle is turned on there, no sound; one turned on once stays on)
+function soundOn() { const v = localStorage.getItem('fieldy_sound'); return v === null ? currentTheme !== 'jungle' : v !== '0' }
 function setSoundOn(on) { localStorage.setItem('fieldy_sound', on ? '1' : '0'); if(on) playFx('save') }
 function setHapticsOn(on) { localStorage.setItem('fieldy_haptics', on ? '1' : '0'); if(on) haptic('light') }
 const FX = {complete: () => playTaskComplete(), add: () => playTaskAdd(), save: () => playSaveChime(), done: () => playTibetanBowl()}
@@ -3862,11 +3867,20 @@ function gardenWeekRollover() {
 let gardenChain = Promise.resolve()
 function gardenOnComplete(task) {
   if(!nachalLike()) return
+  gardenShow(gardenTally(task), true)
+}
+// what a close brings the garden (counted at once): the find's id or null, and whether it closed the day
+function gardenTally(task) {
   const k = gardenRoll(task)
   const d = gardenDay()
   const closeDay = d.valid >= GARDEN_RULES.dayMinTasks && !d.closed
   if(closeDay) { d.closed = true; garden.cairn.push(gardenStone()); garden.freshStone = true }
   saveGarden()
+  return {k, closeDay}
+}
+// the drop into the tasks icon, and then the find and the stone flying home (fly false: the drop alone, what was found is in the garden)
+function gardenShow(r, fly) {
+  const k = fly ? r.k : null, closeDay = fly && r.closeDay
   gardenChain = gardenChain.then(async function(){
     await gardenDropFx()
     if(k) await gardenFlyFx(rewardSrc(k), tr('garden_found').replace('{n}', rewardName(k)) + (REWARDS[k].rarity >= 2 ? ' · ' + tr('rarity_' + REWARDS[k].rarity) : ''), REWARDS[k].rarity >= 3)
@@ -5258,14 +5272,17 @@ function lokiHereItem(ctx) { const h = lokiPickFor('here', ctx || lokiContexts(n
 // a line for a state he stays in (thinking, resting, ...): the same for a minute, so a redraw does not change what he is saying
 const lokiSticky = {}
 function lokiLine(name) { const c = lokiSticky[name]; if(c && Date.now() - c.at < 60000) return c.t; const t = lokiPick(name); lokiSticky[name] = {t, at: Date.now()}; return t }
-// a task has just been closed on Home: one short bubble for it (not when it was the last one: that has its own)
-function lokiOnTaskDone(left) {
-  if(!gnomeOn()) return
-  if(lokiOut()) { LOKI.react(left <= 0 ? 'dayDone' : 'taskDone'); return }      // out on Home: he answers where he is
-  const card = () => { if(currentScreen !== 'home' || left <= 0 || lokiNight()) return; lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0; lokiRender() }
-  if(!lokiNight() && lokiErrand(left <= 0 ? 'dayDone' : 'taskDone', {}, card)) return
-  if(currentScreen !== 'home' || left <= 0 || lokiNight()) return   // asleep: no bubble held over to the morning
-  lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy')]; gnIdx = 0
+// a task has just been closed on Home: one short bubble for it (not when it was the last one: that has its own). True when he answers it
+// (here, out beside his card, or on an errand that waits for Home); extra goes on his card's bubble (calmBefore: a label, the close's time)
+function lokiOnTaskDone(left, extra) {
+  if(!gnomeOn()) return false
+  if(lokiOut()) return LOKI.react(left <= 0 ? 'dayDone' : 'taskDone')      // out on Home: he answers where he is
+  const card = () => { if(currentScreen !== 'home' || left <= 0 || lokiNight()) return; lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy', extra)]; gnIdx = 0; lokiRender() }
+  if(!lokiNight() && lokiErrand(left <= 0 ? 'dayDone' : 'taskDone', {}, card)) return true
+  if(currentScreen !== 'home' || lokiNight()) return false   // asleep: no bubble held over to the morning
+  if(left <= 0) return true     // the last one: his card's own "the day is done" says it
+  lokiQueue = [lokiItem('taskdone', lokiPick('taskDone'), 'joy', extra)]; gnIdx = 0
+  return true
 }
 // ── his memory of the two of them (localStorage only, fieldy_loki_v1; he knows only what happens in the app) ──
 // Moments are kept in a small log: the day with the most tasks closed, a stuck site that got going, a long streak, the
@@ -7517,9 +7534,10 @@ function lokiPeekVisit(screen) {
 }
 // a task closed on the tasks screen: he answers there (and the errand that waits for Home for it is let go: it was answered)
 function lokiPeekOnDone(left) {
-  if(currentScreen !== 'tasks' || !lokiPeekOk()) return
+  if(currentScreen !== 'tasks' || !lokiPeekOk()) return false
   const kind = left <= 0 ? 'dayDone' : 'taskDone', t0 = Date.now()
   setTimeout(function() { lokiPeek(kind, lokiPick(kind)).then(ok => { if(ok) lkr.eq = lkr.eq.filter(x => !((x.kind === 'taskDone' || x.kind === 'dayDone') && x.at >= t0 - 3000)) }) }, 600)
+  return true
 }
 // three heavy days in a row: hard3 joins the existing line, once for the streak (it is known by its first day)
 function lokiHard3() {
@@ -8487,6 +8505,59 @@ function deleteTask(id) {
   })
 }
 
+// ── the quiet answer to a close (the jungle) ──
+// Each close gets one answer that can be seen, by what matters most: the day closed or a rare find, a word from the journey,
+// Loki's line, and only then the whisper. Loki answers where he is, as before (his card, beside it, a peek on the tasks
+// screen); when he does, the garden's flight is not shown (the find and the stone are counted and wait in the garden, and
+// on his card's bubble what the garden brought is its label), and a word from the journey comes before his own line.
+// When nobody answers (Loki off, asleep, the peek already seen on this visit, another screen), the garden flies what it
+// found, and with nothing found and no guest coming, one short line is whispered above the nav: no Loki, no sound, a fade
+// (none in reduced motion), gone after four seconds, not after a close less than ten seconds after the one before it.
+// The whisper's round is kept with Loki's (fieldy_loki_v1, loki.calm): every line once before any comes again.
+const CALM_WHISPER = ['נרשם.', 'עוד אחת מאחוריך.', 'זה נעשה. אפשר לנשום.', 'הנחל שמע.', 'צעד קטן, צעד אמיתי.', 'סגור. אין לאן למהר.',
+  'היער שם לב.', 'טיפה נוספה לנחל.', 'אחת פחות על הכתפיים.', 'זה מספיק לרגע הזה.', 'עשית את זה.', 'רגע של שקט, מגיע לך.',
+  'עוד עלה נפתח.', 'משהו זז היום.', 'אפשר להניח את זה.', 'בקצב שלך.', 'זה נחשב.', 'המים ממשיכים לזרום.', 'נקודה קטנה של אור.', 'טוב. הלאה, כשתרצה.']
+const CALM_RULES = {gap: 10000, show: 4000}
+let calmLast = 0
+// before the close reaches the screen: what the garden brought, and whether Loki answers it where it can be seen now
+function calmBefore(task, left) {
+  const g = gardenTally(task), at = Date.now()
+  const label = g.closeDay ? tr('garden_day_closed') : g.k ? tr('garden_found').replace('{n}', rewardName(g.k)) + (REWARDS[g.k].rarity >= 2 ? ' · ' + tr('rarity_' + REWARDS[g.k].rarity) : '') : ''
+  const said = lokiOnTaskDone(left, label ? {label, calm: at} : {calm: at}), peek = lokiPeekOnDone(left)
+  return {g, at, seen: peek || (said && currentScreen === 'home' && document.visibilityState === 'visible')}
+}
+// after it: the journey's word before his line on Home; and when nobody answered, the garden's flight or the whisper (an errand
+// that waits for Home for this close is let go: it was answered where it happened)
+function calmAfter(calm) {
+  const prev = calmLast; calmLast = calm.at
+  if(calm.seen) {
+    const q = lokiQueue.filter(Boolean), i = q.findIndex(x => x.kind === 'taskdone' && x.calm === calm.at)
+    if(currentScreen === 'home' && i >= 0 && q.some(x => x.kind === 'game')) {
+      const label = q[i].label; q.splice(i, 1); const gi = q.findIndex(x => x.kind === 'game'); if(label && !q[gi].label) q[gi] = Object.assign({}, q[gi], {label})
+      lokiQueue = q; gnIdx = 0; lokiRender()
+    }
+    return
+  }
+  // a guest asked for on Home comes in seconds and answers it; asked for from another screen it waits for Home, a moment of its own
+  const found = !!(calm.g.k || calm.g.closeDay), guest = currentScreen === 'home' && lkr.rq.some(x => x.evt === 'guest' && x.data.at >= calm.at)
+  const whisper = !found && !guest && calm.at - prev >= CALM_RULES.gap
+  if(found || whisper) lkr.eq = lkr.eq.filter(x => !((x.kind === 'taskDone' || x.kind === 'dayDone') && x.at >= calm.at - 3000))
+  if(whisper) calmWhisper()
+}
+function calmPick() {
+  const c = loki.calm = loki.calm || {}, n = CALM_WHISPER.length
+  let bag = (Array.isArray(c.bag) ? c.bag : []).filter(i => i >= 0 && i < n)
+  if(!bag.length) { bag = Array.from({length: n}, (_, i) => i); for(let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]] } if(bag[0] === c.last) bag.push(bag.shift()) }
+  const i = bag.shift(); c.bag = bag; c.last = i; lokiSave()
+  return CALM_WHISPER[i]
+}
+// a small line just above the nav, where the closed task was (a task closed leaves the list it was in, on Home and on the tasks screen)
+function calmWhisper() {
+  document.querySelectorAll('.calm-w').forEach(e => e.remove())
+  const el = document.createElement('div'); el.className = 'calm-w'; el.setAttribute('role', 'status'); el.textContent = calmPick()
+  document.body.appendChild(el)
+  setTimeout(function() { el.remove() }, CALM_RULES.show)
+}
 function toggleTask(id) {
   const wasUndone = [...state.tasks.now,...state.tasks.today,...state.tasks.later].find(t=>t.id===id&&!t.done)
   const now = Date.now()
@@ -8500,16 +8571,18 @@ function toggleTask(id) {
       patch.lastStreakDate = today
     }
   }
-  if(wasUndone && currentTheme === 'jungle') { const left = [...state.tasks.now,...state.tasks.today,...state.tasks.later].filter(t => !t.done && t.id !== id).length; lokiOnTaskDone(left); lokiPeekOnDone(left) }
+  let calm = null
+  if(wasUndone && currentTheme === 'jungle') { const left = [...state.tasks.now,...state.tasks.today,...state.tasks.later].filter(t => !t.done && t.id !== id).length; calm = calmBefore(wasUndone, left) }
   // in the river theme the tasks icon's water waits for the drop to land
   if(wasUndone && nachalLike() && !reducedMotion()) navWaterHoldUntil = Date.now() + 470
   setState(patch)
   if(wasUndone){
     if(currentTheme === 'jungle') { const sc = document.getElementById('screen-' + currentScreen); if(sc) vnWave(sc) }
-    gardenOnComplete(wasUndone)
+    if(calm) gardenShow(calm.g, !calm.seen); else gardenOnComplete(wasUndone)
     if(currentTheme === 'jungle') { lokiNoteDay(); lokiDrop(id) }
     gameOnTaskDone(wasUndone)
-    playFx('complete');showRipple();haptic('success');
+    if(calm) calmAfter(calm)
+    playFx('complete'); if(currentTheme !== 'jungle') showRipple(); haptic('success');
     logEvent('task_completed', {id, text: wasUndone.text, assignee: wasUndone.assignee||null, context: wasUndone.context||null})
   }
 }
