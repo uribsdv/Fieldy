@@ -370,6 +370,10 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 [data-theme="jungle"] .feel-art{width:58px;height:58px;border-radius:50%;background:var(--feel);opacity:.85;overflow:hidden;display:block}
 [data-theme="jungle"] .feel-tile.has-art .feel-art{background:none;opacity:1}
 [data-theme="jungle"] .feel-art img{width:100%;height:100%;object-fit:contain;display:block}
+/* the one chosen: a ring of its colour round the drawing (a gap of the sheet between them) and its name in its colour, bold */
+[data-theme="jungle"] .feel-tile.on{border-width:2px}
+[data-theme="jungle"] .feel-tile.on .feel-art{box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--feel)}
+[data-theme="jungle"] .feel-tile.on b{color:var(--feel);font-weight:800}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog{margin-top:14px}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row{display:flex;justify-content:space-between;font-size:var(--fs-base);color:var(--nh-on-dark2);margin-bottom:6px;text-shadow:0 1px 3px rgba(4,14,10,.5)}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog-row b{color:#fff}

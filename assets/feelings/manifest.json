@@ -1,4 +1,24 @@
 {
  "note": "The drawings of the more feelings (jungle). One file per feeling, feel-<key>.webp, in this folder; list each one under files as it arrives, and the sheet shows it in its slot (a file not listed is never fetched). Until then the slot is a circle of the feeling's colour. Keys: calm stressed drained inspired stuck anxious connected content loaded sick angry proud restless curious lonely loving surprised patient sad.",
- "files": []
+ "files": [
+  "feel-calm.webp",
+  "feel-stressed.webp",
+  "feel-drained.webp",
+  "feel-inspired.webp",
+  "feel-stuck.webp",
+  "feel-anxious.webp",
+  "feel-connected.webp",
+  "feel-content.webp",
+  "feel-loaded.webp",
+  "feel-sick.webp",
+  "feel-angry.webp",
+  "feel-proud.webp",
+  "feel-restless.webp",
+  "feel-curious.webp",
+  "feel-lonely.webp",
+  "feel-loving.webp",
+  "feel-surprised.webp",
+  "feel-patient.webp",
+  "feel-sad.webp"
+ ]
 }

@@ -57,8 +57,12 @@ srv.listen(0, async () => {
   await pg.click('.feel-more'); await pg.waitForTimeout(250)
   r = await pg.evaluate(() => ({ tiles: [...document.querySelectorAll('.feel-sheet .feel-tile')].map(b => b.dataset.feel), names: [...document.querySelectorAll('.feel-sheet .feel-tile b')].map(b => b.textContent), circles: [...document.querySelectorAll('.feel-sheet .feel-art')].filter(a => getComputedStyle(a).borderRadius === '50%' && a.getBoundingClientRect().width > 40).length }))
   ok(r.tiles.join() === MORE.join(), 'the sheet has the nineteen, in order: ' + r.names.join(', '))
-  ok(r.circles === 19, 'each has its slot, a circle (no drawing yet)')
-  ok(pg.reqs.some(u => /feelings\/manifest\.json/.test(u)) && !pg.reqs.some(u => /feel-[a-z]+\.webp/.test(u)), 'opening it reads the manifest, and asks for no drawing it does not list')
+  ok(r.circles === 19, 'each has its slot, a circle')
+  await pg.waitForTimeout(600)
+  r = await pg.evaluate(() => ({ list: [...document.querySelectorAll('.feel-sheet .feel-tile.has-art')].map(b => b.dataset.feel), imgs: [...document.querySelectorAll('.feel-sheet .feel-art img')].map(i => i.naturalWidth) }))
+  const drawn = pg.reqs.filter(u => /feelings\/feel-[a-z]+\.webp/.test(u)).map(u => u.match(/feel-([a-z]+)\.webp/)[1])
+  ok(pg.reqs.some(u => /feelings\/manifest\.json/.test(u)) && drawn.sort().join() === MORE.slice().sort().join() && !pg.reqs.some(u => /extra/.test(u)), 'opening it reads the manifest and its 19 drawings, each once, and nothing else (no extras)')
+  ok(r.list.length === 19 && r.imgs.every(w => w === 256), 'every slot shows its drawing (256 px)')
   await pg.click('.feel-sheet .btn-primary'); await pg.waitForTimeout(150)
   ok(await pg.evaluate(() => !document.querySelector('#modal-container .feel-sheet')), 'the close button closes it')
   await done(pg)
@@ -69,7 +73,7 @@ srv.listen(0, async () => {
   await pg.route('**/assets/feelings/feel-calm.webp', r => r.fulfill({ contentType: 'image/png', body: fs.readFileSync(path.join(ROOT, 'icon-32.png')) }))
   await pg.evaluate(() => showMoreFeelings()); await pg.waitForTimeout(400)
   r = await pg.evaluate(() => ({ calm: !!document.querySelector('.feel-tile[data-feel="calm"].has-art img'), others: document.querySelectorAll('.feel-sheet .feel-art img').length }))
-  ok(r.calm && r.others === 1, 'feel-calm.webp is shown, the other eighteen stay circles')
+  ok(r.calm && r.others === 1, 'a manifest that lists only feel-calm.webp: it is shown, the other eighteen stay circles (not fetched)')
   await done(pg)
 
   head('a choice is logged with its key and shown on the card')
@@ -84,6 +88,22 @@ srv.listen(0, async () => {
   ok(!r.sheet && r.chip === 'עצוב' && r.cur === 'sad', 'the sheet closed and the card shows "עצוב" as the active one')
   ok(r.limit === 2, 'sad: two tasks at most ("if you like")')
   ok(r.banks.some(t => r.loki.includes(t)) && !/\?/.test(r.banks.join('')), 'Loki answers with one quiet line of his banks (no question in any of them)')
+  // the chosen one in the sheet, for each of the nineteen: its name in its colour on its tint, over the drawing's tile, at 4.5:1 at least
+  r = await pg.evaluate(keys => {
+    const lum = c => { const v = c.map(x => x / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2] }
+    const rgb = s => (s.match(/[\d.]+/g) || []).map(Number), out = {}
+    keys.forEach(k => {
+      state.moods.push({ ts: Date.now(), date: getToday(), hour: 10, weekday: 1, mood: k, source: 'manual', actions: [] }); showMoreFeelings()
+      const b = document.querySelector('.feel-tile.on'), sheet = rgb(getComputedStyle(document.querySelector('#modal-container .modal')).backgroundColor), fg = rgb(getComputedStyle(b.querySelector('b')).color)
+      const bgc = getComputedStyle(b).backgroundColor, m = bgc.match(/srgb ([\d.]+) ([\d.]+) ([\d.]+) \/ ([\d.]+)/), tint = m ? [m[1] * 255, m[2] * 255, m[3] * 255] : fg, a = m ? +m[4] : 0
+      const bg = sheet.map((v, i) => tint[i] * a + v * (1 - a)), x = lum(fg), y = lum(bg)
+      out[k] = { c: (Math.max(x, y) + .05) / (Math.min(x, y) + .05), ring: /6px/.test(getComputedStyle(b.querySelector('.feel-art')).boxShadow), bold: +getComputedStyle(b.querySelector('b')).fontWeight >= 700 }
+      closeModal(); state.moods.pop()
+    })
+    return out
+  }, MORE)
+  const low = Object.entries(r).sort((a, b) => a[1].c - b[1].c)[0]
+  ok(Object.values(r).every(v => v.c >= 4.5 && v.ring && v.bold), 'chosen in the sheet: a ring round the drawing, its name bold in its colour, 4.5:1 or more for all 19 (lowest ' + low[0] + ' ' + low[1].c.toFixed(2) + ')')
   await pg.evaluate(() => logMood('focused', 'manual'))
   ok(await pg.evaluate(() => !document.querySelector('.nh-mood .feel-chip') && getCurrentMood().mood === 'focused'), 'one of the five chosen after: the chip is gone, the egg is active')
   await done(pg)
