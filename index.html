@@ -2982,6 +2982,7 @@ function navigateTo(screen, ctx=null) {
   if(nachalLike()) placeNavInd(true)
   
   currentScreen = screen
+  try { if(game && game.world && game.world.timer) tmSchedule() } catch(e) {}   // leaving Tasks drops the once-a-second timeout at once
   renderCurrentScreen()
   
   // Scroll to top
@@ -4956,6 +4957,7 @@ function tmSchedule() {
   clearTimeout(tmT); tmT = null
   const t = tmGet(); if(!t || !t.end || t.done || document.visibilityState === 'hidden' || currentTheme !== 'jungle') return
   const left = t.end - Date.now(), shown = currentScreen === 'tasks' || !!document.querySelector('#modal-container .tm-sheet')
+  // once a second only while its strip is on screen (Tasks, or its sheet); anywhere else, one timeout at the end
   tmT = setTimeout(tmTick, shown ? Math.min(left, (left % 1000) || 1000) + 20 : left + 20)
 }
 function tmTick() {
@@ -10891,7 +10893,7 @@ function toggleVoice(targetId) {
 }
 
 // ── MODAL ─────────────────────────────────────────
-function closeModal() { stopVoiceInput(); document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null }
+function closeModal() { stopVoiceInput(); document.getElementById('modal-container').innerHTML=''; pendingPhoto=null; editingTaskId=null; editingSiteName=null ; try { if(game && game.world && game.world.timer) tmSchedule() } catch(e) {} }
 
 // ── CLAUDE API ────────────────────────────────────
 const SYSTEM_PROMPT = buildSystemPrompt()
