@@ -381,6 +381,13 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 [data-theme="jungle"] .tm-pick{display:block;width:100%;text-align:start;padding:14px 16px;margin-bottom:10px;border-radius:var(--radius-xl);border:1px solid var(--line);background:var(--surface);color:var(--t1)}
 [data-theme="jungle"] .tm-pick b{display:block;font-size:var(--fs-lg);font-weight:700;margin-bottom:3px}
 [data-theme="jungle"] .tm-pick small{display:block;font-size:var(--fs-base);color:var(--t2);line-height:1.45}
+/* the tomato (jungle pomodoro): a fixed 170x320 box; one CSS animation of 31 steps over the work phase, started from game.world.timer with a negative delay. Frame 31 (ripe) is only the end. */
+[data-theme="jungle"] .tm-tomw{display:flex;justify-content:center;margin:0 0 8px}
+[data-theme="jungle"] .tm-tom{display:block;flex:none;width:170px;height:320px;direction:ltr;background:url(assets/tomato/tomato-strip.webp) 0 0/5440px 320px no-repeat;background-position-x:calc(var(--f,0) * -170px)}
+[data-theme="jungle"] .tm-tom.grow{animation:tm-grow calc(var(--tot) * 1ms) steps(31,end) forwards;animation-delay:calc(var(--el) * -1ms)}
+[data-theme="jungle"] .tm-tom.grow.hold{animation-play-state:paused}
+@keyframes tm-grow{from{background-position-x:0}to{background-position-x:-5270px}}
+@media (prefers-reduced-motion:reduce){[data-theme="jungle"] .tm-tom.grow{animation:none}}
 /* more feelings (jungle): the row under the five, and the sheet of nineteen (a circle of its colour until its drawing comes) */
 [data-theme="jungle"] .feel-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;flex-wrap:wrap}
 [data-theme="jungle"] .feel-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1.5px solid;border-radius:999px;font-size:var(--fs-sm);font-weight:700}
@@ -4999,9 +5006,27 @@ const TM_TXT = {
   pause: 'השהה', resume: 'המשך', stop: 'עצור', skip: 'דלג',
   fiveDone: 'חמש דקות עברו. אפשר להמשיך, או לעצור כאן.', fiveMore: 'עוד 5', finish: 'סיום',
   workDone: 'סבב העבודה הסתיים. הפסקה של {m} דקות?', breakDone: 'ההפסקה נגמרה. עוד סבב עבודה?',
-  startBreak: 'התחל הפסקה', startWork: 'התחל עבודה', ended: 'הסתיים'
+  startBreak: 'התחל הפסקה', startWork: 'התחל עבודה', ended: 'הסתיים',
+  tomGrow: 'העגבנייה גדלה', tomRipe: 'העגבנייה בשלה'
 }
+const TM_STRIP = 'assets/tomato/tomato-strip.webp', TM_FRAMES = 32
 let tmT = null   // the one timeout
+function tmReduced() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches } catch(e) { return false } }
+// the frame of the work phase now (0..30; 31 is only the end), from its end time and length
+function tmFrame(t) { const tot = TM_MIN.work * 60000, el = Math.max(0, Math.min(tot, tot - tmLeft(t))); return Math.min(TM_FRAMES - 2, Math.floor(el / tot * (TM_FRAMES - 1))) }
+// the tomato of a pomodoro: growing while its work phase runs (paused with it), ripe from the end of the work phase on, until the next work phase begins
+function tmTomHtml(t) {
+  if(!t || t.kind !== 'pomo') return ''
+  const grow = t.phase === 'work' && !t.done, tot = TM_MIN.work * 60000
+  const el = grow ? Math.max(0, Math.min(tot - 1, tot - tmLeft(t))) : 0
+  const f = grow ? tmFrame(t) : TM_FRAMES - 1
+  return `<div class="tm-tomw"><i class="tm-tom${grow ? ' grow' + (t.end ? '' : ' hold') : ''}" role="img" aria-label="${grow ? TM_TXT.tomGrow : TM_TXT.tomRipe}" style="--f:${f};--tot:${tot};--el:${Math.round(el)}"></i></div>`
+}
+// with reduced motion nothing moves: the still frame is set again from the clock's own update, when it has changed
+function tmTomStill(t) {
+  if(!tmReduced() || !t || t.kind !== 'pomo' || t.phase !== 'work' || t.done) return
+  const f = tmFrame(t); document.querySelectorAll('.tm-tom.grow').forEach(e => { if(e.style.getPropertyValue('--f') !== String(f)) e.style.setProperty('--f', f) })
+}
 function tmGet() { const w = gameGet().world; return w.timer || null }
 function tmSet(t) { const w = gameGet().world; if(t) w.timer = t; else delete w.timer; gameSave() }
 function tmLeft(t) { return t.end ? Math.max(0, t.end - Date.now()) : (t.left || 0) }
@@ -5011,6 +5036,7 @@ function tmStart(kind, phase) {
   const old = tmGet(), round = kind === 'pomo' && old && old.kind === 'pomo' ? old.round : 0
   phase = phase || (kind === 'five' ? 'five' : 'work')
   tmSet({kind, phase, round, end: Date.now() + TM_MIN[phase] * 60000, left: 0, done: false})
+  if(kind === 'pomo') { try { new Image().src = TM_STRIP } catch(e) {} }   // the strip is fetched only when a pomodoro begins
   haptic('light'); closeModal(); tmRefresh()
 }
 function tmPause() { const t = tmGet(); if(!t || !t.end) return; t.left = tmLeft(t); t.end = 0; tmSet(t); tmRefresh() }
@@ -5030,17 +5056,18 @@ function tmHeadHtml() {
   return `<button class="tm-head${t ? ' on' : ''}" onclick="showTimers()" aria-haspopup="dialog" aria-label="${TM_TXT.btn}">${icon('clock')}<span${run ? ' class="tm-clock"' : ''}>${run ? tmClock(tmLeft(t)) : t ? TM_TXT.ended : TM_TXT.btn}</span></button>`
 }
 // the strip at the top of the task list (only while a timer is kept)
-function tmStripHtml() {
+function tmStripHtml(inSheet) {
   const t = tmGet(); if(!t || currentTheme !== 'jungle') return ''
+  const tom = inSheet ? '' : tmTomHtml(t)
   const T = TM_TXT, pomo = t.kind === 'pomo', btn = (f, label, main) => `<button class="tm-b${main ? ' main' : ''}" onclick="${f}">${label}</button>`
   const dots = pomo ? `<span class="tm-dots" aria-label="${T.round.replace('{n}', Math.min(TM_ROUNDS, (t.round % TM_ROUNDS) + (t.done && t.phase === 'work' ? 0 : 1)))}">${Array.from({length: TM_ROUNDS}, (_, i) => `<i${i < (t.round % TM_ROUNDS || (t.round && t.done && t.phase === 'work' ? TM_ROUNDS : 0)) ? ' class="on"' : ''}></i>`).join('')}</span>` : ''
   if(t.done) {
     const line = t.kind === 'five' ? T.fiveDone : t.phase === 'work' ? T.workDone.replace('{m}', TM_MIN[tmNextBreak(t)]) : T.breakDone
     const go = t.kind === 'five' ? btn("tmStart('five')", T.fiveMore, true) : t.phase === 'work' ? btn("tmStart('pomo','" + tmNextBreak(t) + "')", T.startBreak, true) : btn("tmStart('pomo','work')", T.startWork, true)
-    return `<div class="tm-strip done" role="status"><div class="tm-row"><span class="tm-line">${line}</span>${dots}</div><div class="tm-acts">${go}${btn('tmStop()', T.finish)}</div></div>`
+    return `<div class="tm-strip done" role="status">${tom}<div class="tm-row"><span class="tm-line">${line}</span>${dots}</div><div class="tm-acts">${go}${btn('tmStop()', T.finish)}</div></div>`
   }
   const left = tmLeft(t), total = TM_MIN[t.phase] * 60000, pct = Math.round((1 - left / total) * 100)
-  return `<div class="tm-strip" data-phase="${t.phase}"><div class="tm-row"><span class="tm-k">${T.phase[t.phase]}${t.end ? '' : ' · ' + T.paused}</span>${dots}<b class="tm-clock" aria-live="off">${tmClock(left)}</b></div>
+  return `<div class="tm-strip" data-phase="${t.phase}">${tom}<div class="tm-row"><span class="tm-k">${T.phase[t.phase]}${t.end ? '' : ' · ' + T.paused}</span>${dots}<b class="tm-clock" aria-live="off">${tmClock(left)}</b></div>
       <div class="tm-bar"><i style="width:${pct}%"></i></div>
       <div class="tm-acts">${t.end ? btn('tmPause()', T.pause) : btn('tmResume()', T.resume, true)}${pomo ? btn('tmSkip()', T.skip) : ''}${btn('tmStop()', T.stop)}</div></div>`
 }
@@ -5064,17 +5091,18 @@ function tmTick() {
   if(Date.now() >= t.end) { tmEnd(t, document.visibilityState !== 'hidden'); return tmRefresh() }
   const bar = document.querySelector('.tm-strip .tm-bar i')
   document.querySelectorAll('.tm-clock').forEach(c => { c.textContent = tmClock(tmLeft(t)) })
+  tmTomStill(t)
   if(bar) bar.style.width = Math.round((1 - tmLeft(t) / (TM_MIN[t.phase] * 60000)) * 100) + '%'
   tmSchedule()
 }
-document.addEventListener('visibilitychange', function() { if(document.visibilityState === 'hidden') { clearTimeout(tmT); tmT = null } else if(game && game.world && game.world.timer) tmRefresh() })
+document.addEventListener('visibilitychange', function() { if(document.visibilityState === 'hidden') { clearTimeout(tmT); tmT = null; document.querySelectorAll('.tm-tom.grow').forEach(e => e.classList.add('hold')) } else if(game && game.world && game.world.timer) tmRefresh() })
 function showTimers() {
   if(currentTheme !== 'jungle') return
   const T = TM_TXT, t = tmGet()
   const card = (kind, title, sub) => `<button class="tm-pick" onclick="tmStart('${kind}')"><b>${title}</b><small>${sub}</small></button>`
   openModal('<div class="tm-sheet" role="dialog" aria-label="' + T.title + '">' +
     '<div style="font-size:var(--fs-2xl);font-weight:800;margin-bottom:12px">' + T.title + '</div>' +
-    (t ? '<div class="tm-slot tm-in-sheet">' + tmStripHtml() + '</div>' : '') +
+    (t ? '<div class="tm-slot tm-in-sheet">' + tmStripHtml(true) + '</div>' : '') +
     card('five', T.five, T.fiveSub) + card('pomo', T.pomo, T.pomoSub) +
     '<button class="btn-primary" style="margin-top:14px" onclick="closeModal()">' + T.close + '</button></div>')
   tmSchedule()
