@@ -372,6 +372,10 @@ mark.hl{background:rgba(var(--accent-rgb),.2);color:inherit;border-radius:4px;pa
 [data-theme="jungle"] .feel-art img{width:100%;height:100%;object-fit:contain;display:block}
 /* the one chosen: a ring of its colour round the drawing (a gap of the sheet between them) and its name in its colour, bold */
 [data-theme="jungle"] .feel-tile.on{border-width:2px}
+[data-theme="jungle"] .feel-card-art{display:inline-flex}
+[data-theme="jungle"] .feel-card-art.has-art{width:44px;height:44px;border-radius:50%;overflow:hidden}
+[data-theme="jungle"] .feel-card-art img{width:100%;height:100%;object-fit:contain;display:block}
+[data-theme="jungle"] .feel-card-art.has-art.on{overflow:visible;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--feel)}
 [data-theme="jungle"] .feel-tile.on .feel-art{box-shadow:0 0 0 3px var(--surface),0 0 0 6px var(--feel)}
 [data-theme="jungle"] .feel-tile.on b{color:var(--feel);font-weight:800}
 :is([data-theme="nachal"],[data-theme="jungle"]) .nh-prog{margin-top:14px}
@@ -2203,25 +2207,25 @@ const MOOD_ORDER = ['overwhelmed','scattered','tired','focused','motivated']
 // a few short lines. In the other themes they are not seen at all (moodShown): not on the card, not in a pattern, not in the trend.
 const MOOD_MORE = ['calm','stressed','drained','inspired','stuck','anxious','connected','content','loaded','sick','angry','proud','restless','curious','lonely','loving','surprised','patient','sad']
 Object.assign(MOOD_LIB, {
-  calm:      {label:'רגוע', icon:'feather', color:'#2C6B5E', taskLimit:null, more:true, actions:['זמן טוב למשימה שצריכה ראש שקט.', 'אפשר להתקדם בקצב הזה. אין לאן למהר.']},
-  stressed:  {label:'לחוץ', icon:'zap', color:'#A33A2A', taskLimit:1, more:true, actions:['רק הדבר האחד שלמטה. השאר מחכה.', 'אפשר להתחיל מהחלק הכי קטן שלו.']},
-  drained:   {label:'מרוקן', icon:'battery', color:'#5B4A86', taskLimit:2, more:true, actions:['היום מספיק מעט. שני דברים קטנים, וזהו.', 'מה שלא חייב היום יכול לחכות למחר.']},
-  inspired:  {label:'מלא השראה', icon:'lightbulb', color:'#8A5300', taskLimit:null, more:true, actions:['רגע טוב להתחיל משהו שחיכה לרעיון.', 'כדאי לרשום את הרעיונות לפני שהם עפים.']},
-  stuck:     {label:'תקוע', icon:'lock', color:'#5C5648', taskLimit:2, more:true, actions:['אם בא לך, אפשר לבחור משהו קטן אחר, רק כדי לזוז.', 'אם בא לך, משפט אחד על מה שתקוע, כאן למטה. בלי לפתור.']},
-  anxious:   {label:'חרד', icon:'activity', color:'#9C3644', taskLimit:1, more:true, actions:['רק דבר אחד מוצג למטה. זה מספיק לעכשיו.', 'את השאר אפשר להשאיר בצד בינתיים.']},
-  connected: {label:'מחובר', icon:'link', color:'#24687A', taskLimit:null, more:true, actions:['אולי רגע טוב לשיחה שחיכתה.', 'זמן טוב למשימה שעושים יחד עם מישהו.']},
-  content:   {label:'מרוצה', icon:'smile', color:'#3D6B2E', taskLimit:null, more:true, actions:['אפשר להמשיך מכאן, בלי לחפש עוד.', 'שווה לרשום מה עבד היום.']},
-  loaded:    {label:'עמוס', icon:'layers', color:'#A23D24', taskLimit:1, more:true, actions:['רק הדבר האחד שלמטה. השאר מחכה בתור.', 'את כל השאר אפשר לכתוב בצד ולחזור אליו אחר כך.']},
-  sick:      {label:'חולה', icon:'coffee', color:'#5F5A7A', taskLimit:2, more:true, actions:['היום מספיק מעט. רק מה שאי אפשר לדחות.', 'מה שלא בוער יכול לחכות.']},
-  angry:     {label:'כועס', icon:'flame', color:'#A0322E', taskLimit:2, more:true, actions:['אם בא לך, אפשר להתחיל ממשימה שלא קשורה לזה.', 'אם בא לך, לכתוב את זה כאן למטה, רק בשבילך.']},
-  proud:     {label:'גאה', icon:'sparkles', color:'#8A5A0A', taskLimit:null, more:true, actions:['שווה לרשום מה הצלחת, שיהיה גם לימים אחרים.', 'מכאן אפשר לקחת עוד צעד, אם מתחשק.']},
-  restless:  {label:'חסר מנוחה', icon:'wind', color:'#8F5A00', taskLimit:2, more:true, actions:['שני דברים קצרים, אחד אחרי השני.', 'אפשר להתחיל ממשהו שעושים בתנועה, בשטח או בטלפון.']},
-  curious:   {label:'סקרן', icon:'compass', color:'#2D5F8A', taskLimit:null, more:true, actions:['זמן טוב לברר משהו חדש על אחד האתרים.', 'אפשר לפתוח את השאלה שחיכתה.']},
-  lonely:    {label:'בודד', icon:'moon', color:'#4B5878', taskLimit:2, more:true, actions:['אם בא לך, הודעה קצרה למישהו.', 'אם בא לך, שני דברים קטנים, ולא יותר.']},
-  loving:    {label:'אוהב', icon:'flower', color:'#A23B6A', taskLimit:null, more:true, actions:['אולי רגע טוב להגיד תודה למישהו.', 'אפשר לקחת את החום הזה לשיחה הבאה.']},
-  surprised: {label:'מופתע', icon:'sun', color:'#7A5C00', taskLimit:null, more:true, actions:['אפשר לעצור רגע ולראות מה השתנה.', 'אם משהו חדש הגיע, אפשר לרשום אותו לפני שממשיכים.']},
-  patient:   {label:'סבלני', icon:'hourglass', color:'#4E6B3A', taskLimit:null, more:true, actions:['זמן טוב למשימה ארוכה שצריכה סבלנות.', 'אפשר לסגור עכשיו את מה שדורש תשומת לב לפרטים.']},
-  sad:       {label:'עצוב', icon:'cloud', color:'#4A5A85', taskLimit:2, more:true, actions:['אם בא לך, שני דברים קטנים. גם פחות זה בסדר.', 'אם בא לך, אפשר להתחיל ממשהו פשוט שלא דורש הרבה.']}
+  calm:      {label:'רגוע', icon:'feather', color:'#2C6B5E', taskLimit:null, more:true, actions:[]},
+  stressed:  {label:'לחוץ', icon:'zap', color:'#A33A2A', taskLimit:1, more:true, actions:['אם בא לך, נשיפה ארוכה ואיטית, יותר ארוכה מהשאיפה.', 'אם בא לך, אפשר להתחיל מהחלק הכי קטן.']},
+  drained:   {label:'מרוקן', icon:'battery', color:'#5B4A86', taskLimit:2, more:true, actions:['אם בא לך, להקטין למה שחייב היום.']},
+  inspired:  {label:'מלא השראה', icon:'lightbulb', color:'#8A5300', taskLimit:null, more:true, actions:[]},
+  stuck:     {label:'תקוע', icon:'lock', color:'#5C5648', taskLimit:2, more:true, actions:['אם בא לך, הצעד הכי קטן שאפשר לעשות עכשיו.', 'אם בא לך, לעבור למשימה אחרת.']},
+  anxious:   {label:'חרד', icon:'activity', color:'#9C3644', taskLimit:1, more:true, actions:['אם בא לך, נשיפה ארוכה ואיטית, יותר ארוכה מהשאיפה.', 'אם בא לך, תרגיל 5-4-3-2-1 (5 דברים שרואים, 4 שמרגישים, 3 ששומעים, 2 שמריחים, 1 שטועמים).']},
+  connected: {label:'מחובר', icon:'link', color:'#24687A', taskLimit:null, more:true, actions:[]},
+  content:   {label:'מרוצה', icon:'smile', color:'#3D6B2E', taskLimit:null, more:true, actions:[]},
+  loaded:    {label:'עמוס', icon:'layers', color:'#A23D24', taskLimit:1, more:true, actions:['אם בא לך, להקטין למה שחייב היום.']},
+  sick:      {label:'חולה', icon:'coffee', color:'#5F5A7A', taskLimit:2, more:true, actions:[]},
+  angry:     {label:'כועס', icon:'flame', color:'#A0322E', taskLimit:2, more:true, actions:['אם בא לך, לעצור כמה דקות לפני שמגיבים.', 'אם בא לך, לכתוב את זה כאן למטה.']},
+  proud:     {label:'גאה', icon:'sparkles', color:'#8A5A0A', taskLimit:null, more:true, actions:[]},
+  restless:  {label:'חסר מנוחה', icon:'wind', color:'#8F5A00', taskLimit:2, more:true, actions:['אם בא לך, תנועה קצרה, הליכה של 2–5 דקות.']},
+  curious:   {label:'סקרן', icon:'compass', color:'#2D5F8A', taskLimit:null, more:true, actions:[]},
+  lonely:    {label:'בודד', icon:'moon', color:'#4B5878', taskLimit:2, more:true, actions:['אם בא לך, הודעה קצרה לאדם אחד.']},
+  loving:    {label:'אוהב', icon:'flower', color:'#A23B6A', taskLimit:null, more:true, actions:[]},
+  surprised: {label:'מופתע', icon:'sun', color:'#7A5C00', taskLimit:null, more:true, actions:[]},
+  patient:   {label:'סבלני', icon:'hourglass', color:'#4E6B3A', taskLimit:null, more:true, actions:[]},
+  sad:       {label:'עצוב', icon:'cloud', color:'#4A5A85', taskLimit:2, more:true, actions:['אם בא לך, דבר קטן אחד שנעים או משמעותי.']}
 })
 // a mood is seen everywhere, except one of the more feelings outside the jungle (an unknown key is left as it was)
 function moodShown(m) { return !(MOOD_LIB[m] && MOOD_LIB[m].more) || currentTheme === 'jungle' }
@@ -4598,15 +4602,18 @@ function quotePanelHtml() { var qod = getQuoteOfTheDay(); return qod ? creamPane
         <div data-content="he" style="font-size:var(--fs-lg);line-height:1.6;color:var(--t1);font-style:italic;text-align:center">"${esc(qod.text)}"</div>
       `) : '' }
 function moodPickerHtml(curMood) {
+  const jg = currentTheme === 'jungle'
+  if(jg) feelCardSoon()
   return `<div class="card" style="margin-top:16px">
         <div style="font-size:var(--fs-base);font-weight:700;margin-bottom:10px">${tr('home_mood_prompt')}</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">
           ${MOOD_ORDER.map(m=>{
             const d = MOOD_LIB[m]
             const active = curMood && curMood.mood===m
-            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?d.color:'var(--line)'};background:${active?d.color+'18':'var(--surface)'};text-align:center">
-              <div style="display:flex;justify-content:center;margin-bottom:2px">${iconBadge(d.icon, d.color)}</div>
-              <div style="font-size:9.5px;font-weight:600;color:${active?d.color:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
+            const c = jg ? (FEEL5_INK[m] || d.color) : d.color   // jungle: the ink of the feeling, dark enough for its label (4.5:1)
+            return `<button onclick="logMood('${m}','manual')" style="padding:8px 1px;border-radius:var(--radius-lg);border:1.5px solid ${active?c:'var(--line)'};background:${active?c+'18':'var(--surface)'};text-align:center">
+              <div style="display:flex;justify-content:center;margin-bottom:2px">${jg ? feelCardArtHtml(m, d, c, active) : iconBadge(d.icon, d.color)}</div>
+              <div style="font-size:9.5px;font-weight:600;color:${active?c:'var(--t2)'};margin-top:2px;line-height:1.2">${tr('mood_'+m)}</div>
             </button>`
           }).join('')}
         </div>${currentTheme === 'jungle' ? feelMoreRowHtml(curMood) : ''}
@@ -4617,7 +4624,42 @@ function moodPickerHtml(curMood) {
 // as assets/feelings/feel-<key>.webp listed in assets/feelings/manifest.json; until then its slot is a circle of its colour. The
 // manifest and the drawings are fetched only when the sheet is opened, never on load.
 const FEEL_DIR = 'assets/feelings/'
-let feelArt = null   // the promise of the keys that have a drawing (read once, when the sheet first opens)
+let feelArt = null   // the promise of the keys that have a drawing (read once, by whichever of the card or the sheet comes first)
+// The five of the card use the same drawings (feel-overwhelmed ... feel-motivated), jungle only. They are asked for once, after the
+// first paint of the card (never before it), and until one has loaded its slot keeps the old badge; once loaded it stays loaded, so
+// every later render draws it directly. Ink: the colour of the ring and of the active label, dark enough on the card (4.5:1).
+const FEEL5_INK = {overwhelmed:'#962A25', scattered:'#774A00', tired:'#5F3DB0', focused:'#155A4A', motivated:'#724300'}
+let feelCardAsked = false, feelCardReady = {}
+function feelCardArtHtml(m, d, c, active) {
+  if(!feelCardReady[m]) return '<span class="feel-card-art" data-feel5="' + m + '"' + (active ? ' data-on="1"' : '') + '>' + iconBadge(d.icon, d.color) + '</span>'
+  return '<span class="feel-card-art has-art' + (active ? ' on' : '') + '" data-feel5="' + m + '" style="--feel:' + c + '"><img src="' + FEEL_DIR + 'feel-' + m + '.webp" alt="" decoding="async"></span>'
+}
+function feelCardSoon() {
+  if(feelCardAsked) return
+  feelCardAsked = true
+  requestAnimationFrame(function() { requestAnimationFrame(feelCardLoad) })   // after the first paint of the card
+}
+function feelCardLoad() {
+  feelArtKeys().then(function(have) {
+    MOOD_ORDER.forEach(function(m) {
+      if(!have[m]) return
+      const im = new Image()
+      im.onload = function() {
+        feelCardReady[m] = true
+        document.querySelectorAll('.feel-card-art[data-feel5="' + m + '"]').forEach(function(slot) {
+          if(slot.classList.contains('has-art')) return
+          slot.outerHTML = feelCardArtHtml(m, MOOD_LIB[m], FEEL5_INK[m] || MOOD_LIB[m].color, slot.dataset.on === '1')
+        })
+      }
+      im.src = FEEL_DIR + 'feel-' + m + '.webp'
+    })
+  })
+}
+function feelArtKeys() {
+  if(!feelArt) feelArt = fetch(FEEL_DIR + 'manifest.json').then(r => r.ok ? r.json() : {}).catch(() => ({})).then(function(m) {
+    const have = {}; ((m && m.files) || []).forEach(f => { const x = /^feel-([a-z]+)\.webp$/.exec(f); if(x && MOOD_LIB[x[1]] && (MOOD_LIB[x[1]].more || MOOD_ORDER.indexOf(x[1]) >= 0)) have[x[1]] = 1 }); return have })
+  return feelArt
+}
 function feelMoreRowHtml(curMood) {
   const m = curMood && MOOD_LIB[curMood.mood] && MOOD_LIB[curMood.mood].more ? curMood.mood : null, d = m && MOOD_LIB[m]
   return `<div class="feel-row">${m ? `<span class="feel-chip" style="border-color:${d.color};color:${d.color};background:${d.color}18" aria-current="true"><i style="background:${d.color}" aria-hidden="true"></i>${tr('mood_'+m)}</span>` : ''}<button class="feel-more" onclick="showMoreFeelings()" aria-haspopup="dialog">${tr('home_mood_more')}</button></div>`
@@ -4638,9 +4680,7 @@ function showMoreFeelings() {
 }
 // the drawings that have come, each in its slot; a file not listed in the manifest is never asked for
 function feelArtShow() {
-  if(!feelArt) feelArt = fetch(FEEL_DIR + 'manifest.json').then(r => r.ok ? r.json() : {}).catch(() => ({})).then(function(m) {
-    const have = {}; ((m && m.files) || []).forEach(f => { const x = /^feel-([a-z]+)\.webp$/.exec(f); if(x && MOOD_LIB[x[1]] && MOOD_LIB[x[1]].more) have[x[1]] = 1 }); return have })
-  feelArt.then(function(have) {
+  feelArtKeys().then(function(have) {
     document.querySelectorAll('.feel-sheet .feel-tile').forEach(function(b) {
       const k = b.dataset.feel, slot = b.querySelector('.feel-art'); if(!have[k] || !slot || slot.firstChild) return
       const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onload = function() { b.classList.add('has-art') }; im.src = FEEL_DIR + 'feel-' + k + '.webp'; slot.appendChild(im)
@@ -4651,14 +4691,21 @@ function pickMoreFeeling(k) {
   if(!MOOD_LIB[k] || !MOOD_LIB[k].more) return
   closeModal(); logMood(k, 'manual')
 }
+// the lines a logged mood shows: its own picks (kept on the record), but for the more feelings only those still in the library
+// (a record written before the lines were trimmed would otherwise show an old one for up to four hours)
+function moodTipLines(curMood, moodDef) {
+  const own = curMood.actions && moodDef.more ? curMood.actions.filter(a => moodDef.actions.indexOf(a) >= 0) : curMood.actions
+  return own && own.length ? own : moodDef.actions.slice(0, 3)
+}
 function moodTipHtml(curMood, moodDef) {
+  if(moodDef && !moodDef.actions.length) return ''   // a good feeling: no panel, only Loki's short answer
   return moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
-          <button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>
+          ${moodDef.actions.length > 3 ? `<button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>` : ''}
         </div>
         ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
-        ${(curMood.actions||moodDef.actions.slice(0,3)).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
+        ${moodTipLines(curMood, moodDef).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
         <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>

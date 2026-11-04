@@ -1,5 +1,5 @@
 {
- "note": "The drawings of the more feelings (jungle). One file per feeling, feel-<key>.webp, in this folder; list each one under files as it arrives, and the sheet shows it in its slot (a file not listed is never fetched). Until then the slot is a circle of the feeling's colour. Keys: calm stressed drained inspired stuck anxious connected content loaded sick angry proud restless curious lonely loving surprised patient sad.",
+ "note": "The drawings of the more feelings (jungle). One file per feeling, feel-<key>.webp, in this folder; list each one under files as it arrives, and the sheet shows it in its slot (a file not listed is never fetched). Until then the slot is a circle of the feeling's colour. Keys: calm stressed drained inspired stuck anxious connected content loaded sick angry proud restless curious lonely loving surprised patient sad. The five of the card (overwhelmed scattered tired focused motivated) use the same drawings, replacing their old badges.",
  "files": [
   "feel-calm.webp",
   "feel-stressed.webp",
@@ -19,6 +19,11 @@
   "feel-loving.webp",
   "feel-surprised.webp",
   "feel-patient.webp",
-  "feel-sad.webp"
+  "feel-sad.webp",
+  "feel-overwhelmed.webp",
+  "feel-scattered.webp",
+  "feel-tired.webp",
+  "feel-focused.webp",
+  "feel-motivated.webp"
  ]
 }
