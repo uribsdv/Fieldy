@@ -22,9 +22,9 @@ const ok = (c, m) => { if (c) pass++; else fail++; console.log('  ' + (c ? '✓ 
 const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (!p.startsWith('/Fieldy/')) { r.writeHead(404); return r.end() } p = p.slice(8) || 'index.html'; const f = path.join(ROOT, p); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end() }
   r.writeHead(200, { 'Content-Type': { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' }[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r) })
 const FIVE = ['overwhelmed', 'scattered', 'tired', 'focused', 'motivated']
-const NOTIPS = ['calm', 'inspired', 'connected', 'content', 'proud', 'curious', 'surprised', 'loving', 'patient', 'sick']
+
 const MORE = ['calm', 'stressed', 'drained', 'inspired', 'stuck', 'anxious', 'connected', 'content', 'loaded', 'sick', 'angry', 'proud', 'restless', 'curious', 'lonely', 'loving', 'surprised', 'patient', 'sad']
-const MOOD_LIB_EMPTY = (o, k) => !o[k].tip && o[k].lines === 0
+
 const daysAgo = days => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - days); return +d }
 srv.listen(0, async () => {
   const B = 'http://127.0.0.1:' + srv.address().port + '/Fieldy/', br = await chromium.launch()
@@ -159,37 +159,30 @@ srv.listen(0, async () => {
     await done(pg)
   }
 
-  head('the tip panel: only for the feelings that have a line')
+  head('the tip panel: every feeling has one (its lines and its if-then plan are tested in feelings-recs.cjs)')
   pg = await boot()
-  r = await pg.evaluate(keys => {
+  r = await pg.evaluate(() => {
     const out = {}; let err = ''
     Object.keys(MOOD_LIB).forEach(k => {
-      state.moods.push({ ts: Date.now(), date: getToday(), hour: 10, weekday: 1, mood: k, source: 'manual', actions: k.length ? MOOD_LIB[k].actions.slice(0, 3) : [] })
-      try { moodPanelOpen = true; renderHome(); const h = document.getElementById('screen-home').innerHTML; const tip = document.getElementById('brain-dump-input'); out[k] = { tip: !!tip, lines: tip ? [...tip.parentNode.querySelectorAll('[data-content="he"]')].length : 0, reroll: !!(tip && tip.parentNode.querySelector('[onclick="rerollMoodTip()"]')) }; if (/undefined|NaN/.test(h)) err += k + ' ' } catch (e) { err += k + ':' + e.message + ' ' }
+      state.moods.push({ ts: Date.now(), date: getToday(), hour: 10, weekday: 1, mood: k, source: 'manual', actions: MOOD_LIB[k].actions.slice(0, 3) })
+      try { moodPanelOpen = true; renderHome(); const h = document.getElementById('screen-home').innerHTML; const tip = document.getElementById('brain-dump-input'); out[k] = { tip: !!tip, lines: tip ? [...tip.parentNode.querySelectorAll('div[data-content="he"]')].length : 0, reroll: !!(tip && tip.parentNode.querySelector('[onclick="rerollMoodTip()"]')) }; if (/undefined|NaN/.test(h)) err += k + ' ' } catch (e) { err += k + ':' + e.message + ' ' }
       try { rerollMoodTip() } catch (e) { err += 'reroll ' + k + ':' + e.message + ' ' }
       state.moods.pop()
     })
     return { out, err }
-  }, NOTIPS)
+  })
   ok(r.err === '', 'every feeling renders and re-rolls with no error and no "undefined" on the card' + (r.err ? ': ' + r.err : ''))
-  ok(NOTIPS.every(k => !r.out[k].tip) && NOTIPS.every(k => MOOD_LIB_EMPTY(r.out, k)), 'calm, inspired, connected, content, proud, curious, surprised, loving, patient and sick: no panel (nothing left, no empty space)')
-  const withTip = Object.keys(r.out).filter(k => !NOTIPS.includes(k))
-  ok(withTip.length === 24 - 10 && withTip.every(k => r.out[k].tip && r.out[k].lines >= 1), 'the other fourteen have the panel, each with its lines: ' + withTip.map(k => k + ':' + r.out[k].lines).join(' '))
-  ok(['overwhelmed', 'scattered', 'tired', 'focused', 'motivated'].every(k => r.out[k].lines === 3 && r.out[k].reroll) && MORE.filter(k => r.out[k].tip).every(k => !r.out[k].reroll), 'the original five are as they were (three lines, "another" button); the new ones with one or two lines have no "another" button')
-  r = await pg.evaluate(() => { const g = k => MOOD_LIB[k].actions; return { anx: g('anxious'), str: g('stressed'), ang: g('angry'), res: g('restless'), stu: g('stuck'), lon: g('lonely'), sad: g('sad'), lo: g('loaded'), dr: g('drained'), sick: g('sick').length, limits: ['stressed:1', 'anxious:1', 'loaded:1', 'angry:2', 'stuck:2', 'lonely:2', 'sad:2', 'restless:2', 'drained:2', 'sick:2'].every(x => MOOD_LIB[x.split(':')[0]].taskLimit === +x.split(':')[1]) && ['calm', 'patient'].every(k => MOOD_LIB[k].taskLimit === null), five: Object.keys(MOOD_LIB).slice(0, 5).map(k => MOOD_LIB[k].actions.length).join() } })
-  ok(r.anx.length === 2 && /5-4-3-2-1/.test(r.anx[1]) && /נשיפה ארוכה/.test(r.anx[0]) && r.str.length === 2 && /נשיפה ארוכה/.test(r.str[0]) && /החלק הכי קטן/.test(r.str[1]), 'anxious: a long exhale, 5-4-3-2-1; stressed: the same exhale, the smallest part')
-  ok(r.ang.length === 2 && r.res.length === 1 && r.stu.length === 2 && r.lon.length === 1 && r.sad.length === 1 && r.lo.length === 1 && r.dr.length === 1 && r.sick === 0, 'angry two, restless one, stuck two, lonely one, sad one, loaded one, drained one, sick none')
-  ok([].concat(r.anx, r.str, r.ang, r.res, r.stu, r.lon, r.sad, r.lo, r.dr).every(t => /^אם בא לך/.test(t) && t.length < 100), 'each line is "if you like", short')
-  ok(r.limits && r.five === '6,6,6,4,5', 'taskLimit untouched; the original five untouched (6,6,6,4,5 lines)')
+  ok(Object.keys(r.out).length === 24 && Object.values(r.out).every(v => v.tip && v.lines >= 2), 'all 24 have the panel, with lines and the if-then row')
+  ok(FIVE.every(k => r.out[k].lines === 4 && r.out[k].reroll) && MORE.every(k => !r.out[k].reroll), 'the original five: three lines + the plan, with the "another" button; the new ones have at most three lines, so no "another" button')
+  r = await pg.evaluate(() => ({ limits: ['stressed:1', 'anxious:1', 'loaded:1', 'angry:2', 'stuck:2', 'lonely:2', 'sad:2', 'restless:2', 'drained:2', 'sick:2'].every(x => MOOD_LIB[x.split(':')[0]].taskLimit === +x.split(':')[1]) && ['calm', 'patient'].every(k => MOOD_LIB[k].taskLimit === null), five: Object.keys(MOOD_LIB).slice(0, 5).map(k => MOOD_LIB[k].actions.length).join() }))
+  ok(r.limits && r.five === '6,6,6,4,5', 'taskLimit untouched; the original five keep their lines (6,6,6,4,5)')
   await done(pg)
 
-  head('a feeling logged before the lines were trimmed')
-  pg = await boot({ moods: [{ ts: Date.now() - 1000, date: new Date().toISOString().slice(0, 10), hour: 10, weekday: new Date().getDay(), mood: 'anxious', source: 'manual', actions: ['רק דבר אחד מוצג למטה. זה מספיק לעכשיו.', 'את השאר אפשר להשאיר בצד בינתיים.'] }, { ts: Date.now() - 500, date: new Date().toISOString().slice(0, 10), hour: 10, weekday: new Date().getDay(), mood: 'calm', source: 'manual', actions: ['זמן טוב למשימה שצריכה ראש שקט.'] }] })
+  head('a feeling logged before the lines changed')
+  pg = await boot({ moods: [{ ts: Date.now() - 1000, date: new Date().toISOString().slice(0, 10), hour: 10, weekday: new Date().getDay(), mood: 'anxious', source: 'manual', actions: ['רק דבר אחד מוצג למטה. זה מספיק לעכשיו.', 'את השאר אפשר להשאיר בצד בינתיים.'] }] })
   await pg.evaluate(() => { moodPanelOpen = true; renderHome() })
-  ok(await pg.evaluate(() => !document.getElementById('brain-dump-input')), 'calm with an old line on its record: no panel')
-  await pg.evaluate(() => { state.moods.pop(); renderHome() })
-  r = await pg.evaluate(() => [...document.getElementById('brain-dump-input').parentNode.querySelectorAll('[data-content="he"]')].map(x => x.textContent))
-  ok(r.length === 2 && !/רק דבר אחד/.test(r.join('')) && /נשיפה ארוכה/.test(r[0]), 'anxious with the old lines on its record: the new ones are shown, not the old')
+  r = await pg.evaluate(() => [...document.getElementById('brain-dump-input').parentNode.querySelectorAll('div[data-content="he"]')].map(x => x.textContent))
+  ok(r.length >= 3 && !/רק דבר אחד/.test(r.join('')) && /נשיפה/.test(r[0]), 'anxious with the old lines on its record: the current ones are shown, not the old')
   await done(pg)
 
   head('a choice is logged with its key and shown on the card')
@@ -231,7 +224,7 @@ srv.listen(0, async () => {
     keys.forEach(k => { const d = MOOD_LIB[k]; out[k] = [d.label, d.color, d.taskLimit, d.actions.length, !!ICONS[d.icon], tr('mood_' + k) !== 'mood_' + k, !!LOKI_MOOD[k]] })
     return out
   }, MORE)
-  ok(Object.values(r).every(v => v[0] && /^#[0-9A-F]{6}$/i.test(v[1]) && v[3] <= 3 && v[4] && v[5] && v[6]), 'each has label, color, taskLimit, 0-3 actions, an icon, a name and an answer of Loki')
+  ok(Object.values(r).every(v => v[0] && /^#[0-9A-F]{6}$/i.test(v[1]) && v[3] >= 1 && v[3] <= 3 && v[4] && v[5] && v[6]), 'each has label, color, taskLimit, 1-3 actions, an icon, a name and an answer of Loki')
   r = await pg.evaluate(() => { const L = k => MOOD_LIB[k].taskLimit; return { one: ['loaded', 'stressed', 'anxious'].every(k => L(k) === L('overwhelmed')), tired: ['drained', 'sick'].every(k => L(k) === L('tired')), sc: L('restless') === L('scattered'), none: ['calm', 'inspired', 'connected', 'content', 'proud', 'curious', 'surprised', 'loving', 'patient'].every(k => L(k) === null), two: ['stuck', 'lonely', 'sad', 'angry'].every(k => L(k) === 2 && MOOD_LIB[k].actions.every(a => /אם בא לך/.test(a))) } })
   ok(r.one && r.tired && r.sc && r.none && r.two, 'the limits as asked: like overwhelmed, like tired, like scattered, none, two with "אם בא לך"')
   // six of the new keys on the same weekday afternoon, and the trend of the last days
