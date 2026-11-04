@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The tomato on the pomodoro (claude/timers), jungle only: a fixed 170x320 box, one CSS animation of 31 steps over the 25-minute work phase,
+// The tomato on the pomodoro (claude/timers), jungle only: a 127.5x240 box (170:320), one CSS animation of 31 steps over the 25-minute work phase,
 // started from game.world.timer with a negative delay. Frame 00 at the start; frame 31 (ripe) only at the end of the work phase and through
 // the break; paused with the timer; a still frame under reduced motion; the strip is fetched only when a pomodoro begins; no new localStorage key.
 // Run: node tests/tomato.cjs     Exit code 0 = all checks passed, 1 = at least one failed.   ROOT=<dir> runs it against another checkout.
@@ -14,12 +14,13 @@ let pass = 0, fail = 0
 const ok = (c, m) => { if (c) pass++; else fail++; console.log('  ' + (c ? '✓ ' : '✕ ') + m) }
 const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (!p.startsWith('/Fieldy/')) { r.writeHead(404); return r.end() } p = p.slice(8) || 'index.html'; const f = path.join(ROOT, p); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end() }
   r.writeHead(200, { 'Content-Type': { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json' }[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r) })
+const stripMode = { v: '' }
 srv.listen(0, async () => {
   const B = 'http://127.0.0.1:' + srv.address().port + '/Fieldy/', br = await chromium.launch()
   async function boot({ theme = 'jungle', reduced = false } = {}) {
     const ctx = await br.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: reduced ? 'reduce' : 'no-preference' }), pg = await ctx.newPage()
     pg.errs = []; pg.reqs = []; pg.on('pageerror', e => pg.errs.push(e.message)); pg.on('request', q => pg.reqs.push(q.url()))
-    await pg.route('**/*', r => r.request().url().startsWith(B) ? r.continue() : r.abort())
+    await pg.route('**/*', async r => { const u = r.request().url(); if (!u.startsWith(B)) return r.abort(); if (/tomato-strip/.test(u) && stripMode.v === 'fail') return r.abort(); if (/tomato-strip/.test(u) && stripMode.v === 'slow') await new Promise(res => setTimeout(res, 1800)); r.continue() })
     await pg.addInitScript(([s, t]) => {
       window.__timers = []; const wrap = k => { const o = window[k]; window[k] = function (f, ms) { window.__timers.push({ k, ms, by: (new Error().stack || '').split('\n').slice(2, 4).join(' ') }); return o.apply(this, arguments) } }
       wrap('setTimeout'); wrap('setInterval')
@@ -36,9 +37,17 @@ srv.listen(0, async () => {
 
   const done = async pg => { ok(pg.errs.length === 0, 'no page errors' + (pg.errs.length ? ': ' + pg.errs.join(' | ') : '')); await pg.context().close() }
   const head = s => console.log('\n' + s)
+  const st = pg => pg.evaluate(() => ({ t: gameGet().world.timer || null, saved: (JSON.parse(localStorage.getItem('fieldy_game_v1')).world || {}).timer || null, strip: (document.querySelector('#screen-tasks .tm-strip') || {}).textContent || '' }))
   const W = 25 * 60000
   // the frame shown: the strip is 170 px per frame, read from the computed background position
-  const frame = pg => pg.evaluate(() => { const e = document.querySelector('#screen-tasks .tm-tom'); if (!e) return null; return Math.round(-parseFloat(getComputedStyle(e).backgroundPositionX) / 170) })
+  // the frame on show: the animated one when the strip is in, else the single file (00 or 31)
+  const frame = pg => pg.evaluate(() => { const w = document.querySelector('#screen-tasks .tm-tomw'); if (!w) return null; const e = w.querySelector('.tm-tom'), im = w.querySelector('.tm-still')
+    if (e && getComputedStyle(e).display !== 'none') return Math.round(-parseFloat(getComputedStyle(e).backgroundPositionX) / 127.5)
+    return +/tomato-(\d\d)\.webp/.exec(im.getAttribute('src'))[1] })
+  // never an empty box: something is on show, drawn, with a size
+  const shown = pg => pg.evaluate(() => { const w = document.querySelector('#screen-tasks .tm-tomw'); if (!w) return null; const e = w.querySelector('.tm-tom'), im = w.querySelector('.tm-still'), r = w.getBoundingClientRect()
+    const live = e && getComputedStyle(e).display !== 'none', imgOk = im && getComputedStyle(im).display !== 'none' && im.complete && im.naturalWidth > 0
+    return { live: !!live, imgOk: !!imgOk, h: Math.round(r.height), w: Math.round(r.width * 10) / 10, any: !!live || !!imgOk } })
   const anim = pg => pg.evaluate(() => { const e = document.querySelector('#screen-tasks .tm-tom'); const a = e ? e.getAnimations() : []; return { n: a.length, state: a[0] && a[0].playState, t: a[0] && a[0].currentTime, dur: a[0] && a[0].effect.getTiming().duration, w: e && e.offsetWidth, h: e && e.offsetHeight } })
   const startPomo = async pg => { await pg.evaluate(() => navigateTo('tasks')); await pg.click('.tm-head'); await pg.click('.tm-pick >> nth=1'); await pg.waitForTimeout(250) }
   // the timer set to a point in its work phase, and the strip drawn again from it (as a refresh or a return does)
@@ -54,12 +63,12 @@ srv.listen(0, async () => {
   await pg.evaluate(() => tmStop())
   await pg.click('.tm-head'); await pg.click('.tm-pick >> nth=1'); await pg.waitForTimeout(250)
   ok(pg.reqs.filter(u => /tomato-strip\.webp/.test(u)).length >= 1, 'the strip is fetched when the pomodoro starts')
-  ok(pg.reqs.filter(u => /tomato-\d\d\.webp/.test(u)).length === 0, 'the 32 single frames are never fetched')
+  ok(pg.reqs.filter(u => /tomato-\d\d\.webp/.test(u)).map(u => u.slice(-7, -5)).sort().join() === '00,31', 'only the two single frames are fetched, 00 and 31: ' + pg.reqs.filter(u => /tomato-\d\d\.webp/.test(u)).map(u => u.slice(-7, -5)).join())
   ok(await frame(pg) === 0, 'frame 00 at the start')
   r = await anim(pg)
-  ok(r.n === 1 && r.state === 'running' && r.dur === W && r.w === 170 && r.h === 320, 'one animation, running, ' + W / 60000 + ' minutes long, on a 170x320 box (' + r.w + 'x' + r.h + ')')
+  ok(r.n === 1 && r.state === 'running' && r.dur === W && r.h === 240 && Math.abs(r.w - 127.5) < 1, 'one animation, running, ' + W / 60000 + ' minutes long, on a 127.5x240 box (' + r.w + 'x' + r.h + ')')
   r = await pg.evaluate(() => { const e = document.querySelector('.tm-tom'), bg = getComputedStyle(e); return { img: /tomato-strip\.webp/.test(bg.backgroundImage), size: bg.backgroundSize, steps: /steps\(31/.test(bg.animationTimingFunction) } })
-  ok(r.img && r.size === '5440px 320px' && r.steps, 'background is the strip (5440x320), timed in steps(31)')
+  ok(r.img && r.size === '4080px 240px' && r.steps, 'background is the strip (scaled to 240 tall), timed in steps(31)')
   ok(JSON.stringify((await pg.evaluate(() => Object.keys(localStorage).sort()))) === JSON.stringify(lsBefore.concat(lsBefore.includes('fieldy_game_v1') ? [] : ['fieldy_game_v1']).sort()), 'no localStorage key was added by it')
   await done(pg)
 
@@ -110,6 +119,70 @@ srv.listen(0, async () => {
   await pg.evaluate(() => tmStop()); await pg.waitForTimeout(150)
   ok(await frame(pg) === null, 'stopped for good: no tomato')
   await done(pg)
+
+  head('a skip is not a ripe tomato; a real end is; the break shows the single file')
+  pg = await boot(); await startPomo(pg); await at(pg, 900000)
+  await pg.evaluate(() => tmSkip()); await pg.waitForTimeout(250)
+  r = await st(pg)
+  ok(r.t.done && r.t.phase === 'work' && r.t.sk === 1 && r.saved.sk === 1, 'skip: the round is counted, one small field says it was skipped (saved)')
+  ok(await frame(pg) === 0 && (await shown(pg)).imgOk, 'after a skip: frame 00 (the single file), quietly')
+  ok(!/טעות|לא הצלחת|פספס|כישלון/.test(r.strip) && /סבב העבודה הסתיים/.test(r.strip), 'and the same plain line as ever, no blame')
+  await pg.evaluate(() => tmStart('pomo', 'short')); await pg.waitForTimeout(250)
+  ok(await frame(pg) === 0 && (await st(pg)).t.sk === 1, 'the break after a skip: still frame 00')
+  await pg.evaluate(() => tmStart('pomo', 'work')); await pg.waitForTimeout(250)
+  r = await st(pg); ok(r.t.sk === 0 && await frame(pg) === 0, 'the next round: the field is clear, it grows from 00')
+  await pg.evaluate(() => { const t = gameGet().world.timer; t.end = Date.now() - 1; tmTick() }); await pg.waitForTimeout(250)
+  r = await st(pg); ok(r.t.sk === 0 && await frame(pg) === 31 && (await shown(pg)).imgOk, 'run out for real: frame 31, the single file')
+  await pg.evaluate(() => tmStart('pomo', 'short')); await pg.waitForTimeout(250)
+  r = await shown(pg); ok(await frame(pg) === 31 && r.imgOk && !r.live, 'the break: the single file 31 is on show (' + r.w + 'x' + r.h + ')')
+  await pg.evaluate(() => tmSkip()); await pg.waitForTimeout(250)
+  ok(await frame(pg) === 31, 'skipping the break itself keeps the ripe one')
+  await done(pg)
+
+  head('an old saved state with no skip field loads fine')
+  pg = await boot(); await startPomo(pg)
+  await pg.evaluate(() => { const g = JSON.parse(localStorage.getItem('fieldy_game_v1')); g.world.timer = { kind: 'pomo', phase: 'work', round: 1, end: 0, left: 0, done: true }; localStorage.setItem('fieldy_game_v1', JSON.stringify(g)) })
+  await pg.reload(); await pg.waitForTimeout(600); await pg.evaluate(() => navigateTo('tasks')); await pg.waitForTimeout(250)
+  r = await st(pg); ok(r.t && r.t.done && r.t.sk === 0 && await frame(pg) === 31, 'a finished work round without the field counts as run out: frame 31')
+  await pg.evaluate(() => { const g = JSON.parse(localStorage.getItem('fieldy_game_v1')); g.world.timer = { kind: 'pomo', phase: 'work', round: 0, end: Date.now() + 750000, left: 0, done: false }; localStorage.setItem('fieldy_game_v1', JSON.stringify(g)) })
+  await pg.reload(); await pg.waitForTimeout(600); await pg.evaluate(() => navigateTo('tasks')); await pg.waitForTimeout(400)
+  ok(await frame(pg) === 15, 'a running one without the field: frame 15 at 12:30')
+  await done(pg)
+
+  head('the box is never empty: at the start, while the strip is coming, if it fails, in the break')
+  for (const mode of ['slow', 'fail']) {
+    stripMode.v = mode; pg = await boot(); await pg.evaluate(() => { navigateTo('tasks'); tmStart('pomo') })
+    const samples = []; await pg.waitForTimeout(150)   // the 40 KB single file is decoded in this time
+    for (let i = 0; i < 12; i++) { samples.push(await shown(pg)); await pg.waitForTimeout(250) }
+    ok(samples.every(x => x && x.any), mode + ': at every moment something is drawn (' + samples.filter(x => x.imgOk).length + ' still, ' + samples.filter(x => x.live).length + ' animated of 12)')
+    ok(samples[0].imgOk && await frame(pg) !== null, mode + ': the first thing on show is the single frame 00')
+    if (mode === 'fail') {
+      await at(pg, 750000); await pg.waitForTimeout(300)
+      r = await shown(pg); ok(!r.live && r.imgOk && await frame(pg) === 0, 'fail: the strip never came, the still 00 stays, no animation, no error')
+      await pg.evaluate(() => { const t = gameGet().world.timer; t.end = Date.now() - 1; tmTick() }); await pg.waitForTimeout(250)
+      ok(await frame(pg) === 31 && (await shown(pg)).imgOk, 'fail: still 31 at the end')
+    } else {
+      ok(samples[samples.length - 1].live, 'slow: the strip took over when it came')
+    }
+    stripMode.v = ''; await done(pg)
+  }
+  pg = await boot(); await pg.evaluate(() => { navigateTo('tasks'); tmStart('pomo') }); await pg.waitForTimeout(300)
+  await pg.evaluate(() => tmPause()); await pg.waitForTimeout(200); r = await shown(pg); ok(r && r.any, 'paused: not empty')
+  await pg.evaluate(() => { tmResume(); tmSkip() }); await pg.waitForTimeout(200); r = await shown(pg); ok(r && r.any, 'skipped: not empty')
+  await done(pg)
+
+  head('compact: the plant area is 240 tall and the task list stays in view (360x800 and 412x915)')
+  for (const [vw, vh] of [[360, 800], [412, 915]]) {
+    for (const [label, setup] of [['growing', () => {}], ['ripe, break over', () => { const t = gameGet().world.timer; t.end = Date.now() - 1; tmTick() }], ['paused', () => tmPause()]]) {
+      pg = await boot(); await pg.setViewportSize({ width: vw, height: vh }); await startPomo(pg); await pg.evaluate(setup); await pg.waitForTimeout(500); await pg.evaluate(() => { document.getElementById('screen-tasks').scrollTop = 0 })
+      r = await pg.evaluate(() => { const w = document.querySelector('#screen-tasks .tm-tomw').getBoundingClientRect(), st = document.querySelector('#screen-tasks .tm-strip').getBoundingClientRect(), card = document.querySelector('#screen-tasks .card'), c = card && card.getBoundingClientRect(), sc = document.getElementById('screen-tasks'), nav = document.getElementById('nav').getBoundingClientRect()
+        return { h: Math.round(w.height), w: Math.round(w.width * 10) / 10, strip: Math.round(st.height), cardTop: c && Math.round(c.top), cardBottom: c && Math.round(c.bottom), nav: Math.round(nav.top), vh: innerHeight, overflowX: document.documentElement.scrollWidth > innerWidth, sw: Math.round(st.right - st.left) } })
+      ok(r.h === 240 && r.h <= 260 && Math.abs(r.w / r.h - 170 / 320) < 0.01, vw + ' ' + label + ': plant area ' + r.w + 'x' + r.h + ', the original proportion')
+      ok(r.cardTop !== null && r.cardBottom <= r.nav && !r.overflowX, vw + ' ' + label + ': strip ' + r.strip + ' tall; the first task is in view with no scrolling (' + r.cardTop + '-' + r.cardBottom + ' above the nav at ' + r.nav + ')')
+      if (label === 'growing') await pg.screenshot({ path: path.join(ROOT, 'preview/timers/size-' + vw + '.png') })
+      await pg.context().close()
+    }
+  }
 
   head('reduced motion: a still frame, changed by the clock\'s own update')
   pg = await boot({ reduced: true }); await startPomo(pg)
