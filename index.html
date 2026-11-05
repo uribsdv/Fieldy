@@ -1211,6 +1211,44 @@ html[data-theme="jungle"] .nav-badge{background:linear-gradient(180deg,#A5513B,#
 [data-theme="jungle"] .wd-plant.wd-woke{animation:wd-wake .9s ease-out both}
 @keyframes wd-wake{0%{transform:scale(.97,.9)}55%{transform:scale(1.02,1.05)}100%{transform:none}}
 @media (prefers-reduced-motion:reduce){[data-theme="jungle"] .wd-plant.wd-woke{animation:none}}
+/* the garden scene (jungle): a full-height painting you pan sideways, above the page and below the nav; every layer in the painting's own units (--u = 1/1440 of its height) */
+.gsc{position:fixed;top:0;left:0;right:0;bottom:var(--gsc-nav,0px);z-index:90;background:#08130f;color:#eef7f1}
+.gsc-sc{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:none;touch-action:pan-x}
+.gsc-sc::-webkit-scrollbar{display:none}
+.gsc-world{--h:max(calc(100dvh - var(--gsc-nav,0px)),133.334vw);--u:calc(var(--h) / 1440);--n:0;position:relative;height:var(--h);width:calc(var(--h) * .75);overflow:hidden}
+.gsc-bg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.gsc-nt{opacity:var(--n);transition:opacity 2.4s ease}
+.gsc-gw,.gsc-fw{position:absolute;inset:0;pointer-events:none}
+.gsc-gw{opacity:calc(.5 + .5 * var(--n));transition:opacity 2.4s ease}
+.gsc-fw.nq{opacity:var(--n);transition:opacity 2.4s ease}
+.gsc-gl{position:absolute;border-radius:50%;transform:translate(-50%,-50%);animation:gsc-fk var(--d) linear infinite}
+.gsc-gl.door{width:34%;aspect-ratio:1;background:radial-gradient(circle,rgba(255,190,84,.62) 0,rgba(255,160,50,.22) 38%,transparent 68%)}
+.gsc-gl.door.b{width:15%;background:radial-gradient(circle,rgba(255,226,150,.8) 0,rgba(255,190,84,.25) 50%,transparent 72%)}
+.gsc-gl.lan{width:11%;aspect-ratio:1;background:radial-gradient(circle,rgba(255,206,110,.75) 0,rgba(255,170,60,.22) 45%,transparent 70%)}
+.gsc-gl.lotus{width:15%;aspect-ratio:1;background:radial-gradient(circle,rgba(210,255,248,.55) 0,rgba(140,240,230,.16) 45%,transparent 70%);animation-name:gsc-pulse}
+@keyframes gsc-fk{0%{opacity:.78}8%{opacity:1}15%{opacity:.86}31%{opacity:.97}44%{opacity:.7}58%{opacity:1}71%{opacity:.88}86%{opacity:.76}100%{opacity:.78}}
+@keyframes gsc-pulse{0%,100%{opacity:.35}50%{opacity:.9}}
+.gsc-ff{position:absolute;width:calc(var(--u) * 11);height:calc(var(--u) * 11);margin:calc(var(--u) * -5.5) 0 0 calc(var(--u) * -5.5);border-radius:50%;background:radial-gradient(circle,#fffbd0 0,rgba(255,235,120,.85) 28%,rgba(190,255,120,.25) 55%,transparent 72%);opacity:0;pointer-events:none;animation:gsc-drift var(--dd) ease-in-out var(--dl) infinite alternate,gsc-blink var(--db) ease-in-out var(--dl) infinite}
+@keyframes gsc-drift{from{translate:0 0}to{translate:var(--dx) var(--dy)}}
+@keyframes gsc-blink{0%,100%{opacity:.05}45%{opacity:.95}60%{opacity:.7}}
+.gsc.still .gsc-gw,.gsc.still .gsc-fw{display:none}
+.gsc.still .gsc-woke{animation:none}
+.gsc.hid *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.gsc-gw,.gsc-fw{display:none}.gsc-nt,.gsc-gw,.gsc-fw.nq{transition:none}.gsc-woke{animation:none!important}}
+.gsc-pl{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.gsc-pl img{display:block;max-width:none;filter:drop-shadow(0 2px 2px rgba(20,40,20,.3));transform-origin:50% 100%}
+.gsc-pl .gsc-seed{filter:grayscale(1) brightness(.6);opacity:.35}
+.gsc-pl .gsc-rest{filter:saturate(.7) brightness(.95)}
+.gsc-woke{animation:wd-wake .9s ease-out both}
+.gsc-fl{position:absolute;bottom:0;right:-30%;width:calc(var(--u) * 30);height:auto}
+.gsc-cr{position:absolute;bottom:0;left:-30%;width:calc(var(--u) * 24);height:auto}
+.gsc-bed{position:absolute;padding:0;margin:0;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.gsc-bed:focus-visible{outline:2px solid #ffcf6b;outline-offset:2px}
+.gsc-lb{position:absolute;transform:translate(-50%,0);padding:2px 9px;border-radius:999px;background:rgba(8,20,16,.72);border:1px solid rgba(214,240,228,.28);color:#eef7f1;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;direction:rtl}
+.gsc-x{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));inset-inline-start:12px;min-width:44px;min-height:44px;padding:0 16px;border-radius:999px;background:rgba(8,20,16,.72);border:1px solid rgba(214,240,228,.32);color:#eef7f1;font-size:15px;font-weight:700;cursor:pointer;direction:rtl}
+.gsc-x:focus-visible{outline:2px solid #ffcf6b;outline-offset:2px}
+.gsc-line{position:absolute;left:12px;right:12px;bottom:10px;margin:0 auto;max-width:420px;padding:8px 14px;border-radius:14px;background:rgba(8,20,16,.78);border:1px solid rgba(214,240,228,.24);color:#eef7f1;font-size:14px;line-height:1.45;text-align:center;direction:rtl;pointer-events:none}
+.gsc-line:empty{display:none}
 /* the flowers that opened, on Home's garden card: small, on the right bank of the pond, under the card's own words and buttons */
 [data-theme="jungle"] .wd-hflowers{position:absolute;right:6px;top:118px;width:64px;height:110px;z-index:1;pointer-events:none}
 [data-theme="jungle"] .wd-hf{position:absolute;height:44px;width:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
@@ -2579,6 +2617,8 @@ const TRANSLATIONS = {
   settings_loki_storm: {he:'יום סערה היום: לוקי מתחבא מתחת לעלה', en:'Stormy today: Loki shelters under the leaf'},
   jg_flow: {he:'המשך הזרימה', en:'Keep the flow'},
   jg_more_hint: {he:'ציטוט היום, תובנות, מחוץ לעבודה, שאל את Fieldy', en:'Quote of the day, insights, outside work, Ask Fieldy'},
+  garden_scene_open: {he:'פתח את גן השורשים', en:'Open the roots garden'},
+  settings_garden_motion: {he:'תנועה בגן השורשים (גחליליות והבהוב אור)', en:'Motion in the roots garden (fireflies, flickering light)'},
   settings_jungle_branch: {he:'ענף התקדמות מתחת לברכה', en:'Progress vine under the greeting'},
   settings_jungle_people: {he:'אייקון אנשים בניווט', en:'People icon in the nav'},
   settings_jungle_people_roots: {he:'דמויות עם שורשים', en:'Figures with roots'},
@@ -3057,6 +3097,7 @@ function navigateTo(screen, ctx=null) {
     target.addEventListener('animationend', function(){ target.classList.remove('enter') }, {once:true})
   }
   
+  if(typeof sceneClose === 'function') sceneClose()
   // Update nav
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
   const activeBtn = document.querySelector(`.nav-btn[data-screen="${screen}"]`)
@@ -4148,7 +4189,7 @@ function showGarden() {
       ? '<div class="nh-garden-pond-t">' + tr('garden_summary').replace('{d}', garden.cairn.length).replace('{l}', garden.leaves) + '</div><div class="nh-garden-pile">' + gardenCairnHtml() + '</div>'
       : (found ? '' : '<div class="nh-garden-empty"><img alt="" src="assets/leaves/droplet-round.png"><div>' + tr('garden_pond_empty') + '</div></div>')) + '</div>' +
     (currentTheme === 'jungle' && gnomeOn() ? '<div class="nh-loki-plant"><img alt="" src="assets/garden/loki-plant/stage' + lokiPlantStage() + '.webp"><div><b>' + tr('garden_loki_plant') + '</b><small>' + tr('garden_loki_s' + lokiPlantStage()) + '</small></div><button class="nh-chap-open" onclick="showLokiStory()">' + tr('gn_story') + (lokiStoryUnread() ? '<i class="gn-story-dot" aria-hidden="true"></i>' : '') + '</button></div>' : '') +
-    worldBedsHtml() +
+    worldBedsHtml() + (currentTheme === 'jungle' ? '<button class="btn-primary gsc-open" style="margin:0 0 14px" onclick="sceneOpen()">' + tr('garden_scene_open') + '</button>' : '') +
     '<div class="nh-garden-grid">' + ids.map(function(k){
       const n = garden.items[k] || 0
       return '<div class="nh-tile' + (n ? '' : ' locked') + '" data-id="' + k + '"><div class="nh-tile-art"><img alt="" src="' + rewardSrc(k) + '"></div>' +
@@ -6028,6 +6069,7 @@ function worldFill(o) {
   // base: the roots as they stood when the garden first counted (absent until then; a broken one is dropped and taken afresh)
   const bs = o.garden && typeof o.garden === 'object' && o.garden.base
   if(bs && typeof bs === 'object' && !Array.isArray(bs) && GAME_ROOTS.every(r => Number.isFinite(+bs[r]) && +bs[r] >= 0)) { w.garden.base = {}; GAME_ROOTS.forEach(r => { w.garden.base[r] = Math.floor(+bs[r]) }) }
+  if(o.garden && typeof o.garden === 'object' && o.garden.still === true) w.garden.still = true      // the garden scene's motion switched off (Settings)
   ;['water', 'tap'].forEach(k => { const m = o.garden && typeof o.garden === 'object' && o.garden[k]; if(m && typeof m === 'object' && !Array.isArray(m)) GAME_ROOTS.forEach(r => { if(/^\d{4}-\d\d-\d\d$/.test(m[r])) w.garden[k][r] = m[r] }) })
   // the timer on the Tasks header (jungle; absent when none runs): kept only when whole
   const tm = o.timer
@@ -8131,6 +8173,103 @@ function worldHomeFlowersHtml() {
   if(currentTheme !== 'jungle') return ''
   const open = GAME_ROOTS.filter(r => worldGrown(r) >= WORLD_BLOOM.flower); if(!open.length) return ''
   return '<div class="wd-hflowers" aria-hidden="true">' + open.map((r, i) => '<img alt="" loading="lazy" decoding="async" class="wd-hf wd-hf' + i + (worldEvening() ? ' wd-glow' : '') + '" src="' + worldFlowerSrc(r) + '">').join('') + '</div>'
+}
+// ── the garden scene (jungle): the four beds painted into one garden you pan sideways, opened from the garden's sheet. The plants are the
+// roots' own (worldPlant: stages, resting and watering exactly as in the sheet); the painting only holds them. Day and night follow the sun.
+const SC = {"beds":[{"slot":"field","label":"שטח","c":[27.1,62.1],"p":[[16.67,58.33],[28.15,57.5],[38.43,63.61],[38.52,64.51],[31.76,66.88],[21.85,65.97],[18.33,62.08]],"size":"large"},{"slot":"body","label":"גוף ושקט","c":[50.0,62.3],"p":[[45.28,61.04],[49.91,60.28],[54.54,62.71],[53.98,64.51],[52.22,64.79],[48.7,64.03],[46.02,62.43]],"size":"small"},{"slot":"people","label":"אנשים","c":[37.0,56.3],"p":[[42.69,56.11],[42.69,56.6],[34.72,58.33],[30.65,56.53],[30.65,56.04],[37.41,54.58],[39.54,54.72]],"size":"medium"},{"slot":"learning","label":"למידה","c":[47.0,54.7],"p":[[51.76,54.72],[46.3,56.6],[41.2,53.89],[49.35,53.4]],"size":"small"}],"lights":{"door":[73.6,36.4],"lanterns":[[56.7,16.3],[88.4,19.6],[48.1,35],[94.3,31.8]],"lotus":[73.6,93.2]},"sun":{"lat":17,"lonFromTimezone":true,"fullDayAboveDeg":2,"fullNightBelowDeg":-8}}
+const SC_DIR = 'assets/garden-scene/', SC_ROOT = {field: 'field', people: 'people', learning: 'learn', body: 'body'}
+const SC_SIZE = {large: .8, medium: .6, small: .46}          // webp px -> painting units, by the size of the bed
+let scTm = 0, scOpen = false
+function scEl(t, c, css) { const e = document.createElement(t); if(c) e.className = c; if(css) e.style.cssText = css; return e }
+// the sun's height here (date, the time zone's longitude, a fixed latitude); full day above +2 degrees, full night below -8
+function sunAlt(d) {
+  const rad = Math.PI / 180, n = d.getTime() / 86400000 + 2440587.5 - 2451545, L = (280.46 + .9856474 * n) % 360, g = ((357.528 + .9856003 * n) % 360) * rad,
+    lam = (L + 1.915 * Math.sin(g) + .02 * Math.sin(2 * g)) * rad, eps = (23.439 - 4e-7 * n) * rad,
+    dec = Math.asin(Math.sin(eps) * Math.sin(lam)), ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)),
+    lon = -d.getTimezoneOffset() / 60 * 15, ha = ((280.46061837 + 360.98564736629 * n + lon) % 360) * rad - ra, la = SC.sun.lat * rad
+  return Math.asin(Math.sin(la) * Math.sin(dec) + Math.cos(la) * Math.cos(dec) * Math.cos(ha)) / rad
+}
+function sceneDark(alt) { return Math.max(0, Math.min(1, (SC.sun.fullDayAboveDeg - alt) / (SC.sun.fullDayAboveDeg - SC.sun.fullNightBelowDeg))) }
+// motion is off when the person switched it off (world.garden.still, in the game record) or the system asks for less
+function sceneStill() { return !!gameGet().world.garden.still || reducedMotion() }
+function setGardenStill(on) {
+  gameGet().world.garden.still = !on; if(on) delete gameGet().world.garden.still; gameSave()
+  const g = document.getElementById('gsc'); if(g) g.classList.toggle('still', sceneStill())
+}
+function sceneApply() {
+  const g = document.getElementById('gsc'); if(!g) return
+  const w = g.querySelector('.gsc-world'), v = sceneDark(sunAlt(new Date()))
+  if(v > 0 && !w.querySelector('.gsc-nt')) { const im = scEl('img', 'gsc-bg gsc-nt'); im.alt = ''; im.width = 1080; im.height = 1440; im.decoding = 'async'; im.src = SC_DIR + 'night.webp'; w.insertBefore(im, w.querySelector('.gsc-day').nextSibling) }
+  w.style.setProperty('--n', v.toFixed(3)); g.dataset.dark = v.toFixed(3)
+}
+// once a minute, only while the page is seen: no timer at all in a hidden page
+function sceneTick() { clearTimeout(scTm); if(!scOpen || document.hidden) return; sceneApply(); scTm = setTimeout(sceneTick, 60000) }
+function sceneVis() { const g = document.getElementById('gsc'); if(g) g.classList.toggle('hid', document.hidden); if(document.hidden) clearTimeout(scTm); else sceneTick() }
+function sceneFrame(p) { return p.st === 0 ? 1 : p.rest && p.st === 3 ? 4 : p.st }
+function sceneBeds(woke) {
+  return SC.beds.map(b => {
+    const r = SC_ROOT[b.slot], p = worldPlant(r), P = WORLD_PLANTS[r], f = sceneFrame(p), d = WORLD_G_DIM[P.file][f - 1], S = SC_SIZE[b.size], u = 'var(--u)'
+    const xs = b.p.map(q => q[0]), ys = b.p.map(q => q[1]), x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys)
+    const name = P.name + ', ' + GAME_TXT.root[r] + ', ' + WORLD_G_TXT.stage[p.st] + (p.rest ? ', ' + WORLD_G_TXT.rest : '')
+    return '<div class="gsc-pl" data-root="' + r + '" data-stage="' + p.st + '"' + (p.rest ? ' data-rest="1"' : '') + ' style="left:' + b.c[0] + '%;top:' + b.c[1] + '%;z-index:' + Math.round(b.c[1] * 10) + '">' +
+      (p.crystal ? '<img class="gsc-cr" alt="" decoding="async" src="' + WORLD_DIR_G + 'crystal-' + r + '.webp">' : '') +
+      '<img class="' + (p.st === 0 ? 'gsc-seed' : '') + (p.rest && f !== 4 ? ' gsc-rest' : '') + (woke === r ? ' gsc-woke' : '') + '" alt="" decoding="async" src="' + WORLD_DIR_G + P.file + '-' + f + '.webp" style="width:calc(' + u + ' * ' + (d[0] * S).toFixed(1) + ');height:calc(' + u + ' * ' + (d[1] * S).toFixed(1) + ');margin-bottom:calc(' + u + ' * -' + (WORLD_G_PAD * S).toFixed(1) + ')">' +
+      (p.flower ? '<img class="gsc-fl' + '" alt="" decoding="async" src="' + worldFlowerSrc(r) + '">' : '') + '</div>' +
+      '<span class="gsc-lb" style="left:' + b.c[0] + '%;top:' + (b.c[1] + 1.2) + '%;z-index:' + Math.round(b.c[1] * 10 + 1) + '">' + b.label + '</span>' +
+      (p.st > 0 ? '<button class="gsc-bed" data-root="' + r + '" data-slot="' + b.slot + '" data-bb="' + [x0, y0, x1, y1].join(',') + '" aria-label="' + WORLD_G_TXT.water.replace('{name}', P.name) + '. ' + name + '" onclick="sceneWater(\'' + r + '\')" style="z-index:' + Math.round(1000 - (x1 - x0) * 10) + ';left:' + ((x0 + x1) / 2).toFixed(2) + '%;top:' + ((y0 + y1) / 2).toFixed(2) + '%;width:max(' + (x1 - x0).toFixed(2) + '%,44px);height:max(' + (y1 - y0).toFixed(2) + '%,44px);transform:translate(-50%,-50%)"></button>' : '')
+  }).join('')
+}
+// the click area is the bed's polygon; a bed too small to press (under 44 px either way) takes its whole box, widened to 44 px
+function sceneFit() {
+  const w = document.querySelector('#gsc .gsc-world'); if(!w) return
+  const W = w.offsetWidth, H = w.offsetHeight
+  w.querySelectorAll('.gsc-bed').forEach(btn => {
+    const b = SC.beds.filter(x => x.slot === btn.dataset.slot)[0], bb = btn.dataset.bb.split(',').map(Number), bw = (bb[2] - bb[0]) / 100 * W, bh = (bb[3] - bb[1]) / 100 * H
+    if(bw >= 44 && bh >= 44) btn.style.clipPath = 'polygon(' + b.p.map(q => ((q[0] - bb[0]) / (bb[2] - bb[0]) * 100).toFixed(2) + '% ' + ((q[1] - bb[1]) / (bb[3] - bb[1]) * 100).toFixed(2) + '%').join(',') + ')'
+    else btn.style.clipPath = ''
+  })
+}
+function sceneDraw(woke) {
+  const w = document.querySelector('#gsc .gsc-world'); if(!w) return
+  const old = w.querySelector('.gsc-beds'); if(old) old.remove()
+  const h = scEl('div', 'gsc-beds'); h.innerHTML = sceneBeds(woke); w.appendChild(h); sceneFit()
+}
+function sceneWater(r) {
+  const was = worldPlant(r); if(!was.st) return
+  const P = WORLD_PLANTS[r]; worldWater(r)
+  const line = document.querySelector('#gsc .gsc-line'); sceneDraw(was.rest ? r : null)
+  if(line) line.textContent = was.rest ? P.woke : P.name + ': ' + WORLD_G_TXT.watered
+}
+function sceneOpen() {
+  if(currentTheme !== 'jungle' || scOpen) return
+  closeModal(); scOpen = true
+  const g = scEl('div', 'gsc' + (sceneStill() ? ' still' : '')), nav = document.getElementById('nav'), nh = nav && nav.style.display !== 'none' ? Math.max(0, Math.round(window.innerHeight - nav.getBoundingClientRect().top)) : 0      // the scene ends where the (floating) nav begins
+  g.id = 'gsc'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-label', WORLD_G_TXT.title); g.style.setProperty('--gsc-nav', nh + 'px')
+  g.innerHTML = '<div class="gsc-sc" dir="ltr"><div class="gsc-world"><img class="gsc-bg gsc-day" alt="" width="1080" height="1440" decoding="async" src="' + SC_DIR + 'day.webp"><div class="gsc-fx"></div></div></div>' +
+    '<button class="gsc-x" onclick="sceneClose()">' + tr('btn_close') + '</button><div class="gsc-line" role="status"></div>'
+  document.body.appendChild(g)
+  const w = g.querySelector('.gsc-world'), fx = g.querySelector('.gsc-fx'); let s = 42
+  const R = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646 }
+  const gw = scEl('div', 'gsc-gw'), L = SC.lights, glow = (c, x, y, d) => gw.appendChild(scEl('div', 'gsc-gl ' + c, 'left:' + x + '%;top:' + y + '%;--d:' + d + 's;animation-delay:-' + (R() * d).toFixed(2) + 's'))
+  glow('door', L.door[0], L.door[1], 7.3); glow('door b', L.door[0], L.door[1] + .2, 4.1)
+  L.lanterns.forEach((q, i) => glow('lan', q[0], q[1], [5.3, 6.1, 4.7, 6.7][i])); glow('lotus', L.lotus[0], L.lotus[1], 3.4)
+  fx.appendChild(gw)
+  const fwD = scEl('div', 'gsc-fw'), fwN = scEl('div', 'gsc-fw nq')      // eight stay by day as pale motes, the rest fade in with the dark
+  for(let i = 0; i < 24; i++) {
+    const x = 6 + R() * 88, y = 14 + R() * 80, dx = (R() * 60 - 30).toFixed(1), dy = (R() * 50 - 35).toFixed(1)
+    ;(i < 8 ? fwD : fwN).appendChild(scEl('div', 'gsc-ff', 'left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%;--dx:calc(var(--u) * ' + dx + ');--dy:calc(var(--u) * ' + dy + ');--dd:' + (7 + R() * 9).toFixed(1) + 's;--db:' + (2.6 + R() * 3.4).toFixed(1) + 's;--dl:-' + (R() * 9).toFixed(1) + 's'))
+  }
+  fx.appendChild(fwD); fx.appendChild(fwN)
+  sceneDraw(); sceneApply()
+  const sc = g.querySelector('.gsc-sc'); sc.scrollLeft = (w.offsetWidth - sc.clientWidth) * .42      // centred between the beds and the stream
+  document.addEventListener('visibilitychange', sceneVis); window.addEventListener('resize', sceneFit); document.addEventListener('keydown', sceneKey)
+  sceneTick(); g.querySelector('.gsc-x').focus()
+}
+function sceneKey(e) { if(e.key === 'Escape') sceneClose() }
+function sceneClose() {
+  clearTimeout(scTm); scOpen = false
+  document.removeEventListener('visibilitychange', sceneVis); window.removeEventListener('resize', sceneFit); document.removeEventListener('keydown', sceneKey)
+  const g = document.getElementById('gsc'); if(g) g.remove()
 }
 function worldJournalHtml() {
   const w = gameGet().world, T = WORLD_TXT, all = Object.keys(WORLD_GUESTS).reduce((s, g) => s + (w.met[g] ? w.met[g].n : 0), 0)
@@ -10607,6 +10746,7 @@ function renderSettings() {
         </div>
         ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-gnome" ${gnomeOn()?'checked':''} onchange="setGnome(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_gnome')}</label>${gnomeOn() ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-loki-roam" ${lokiRoamOn()?'checked':''} onchange="setLokiRoam(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_loki_roam')}</label><label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-loki-storm" ${lokiStorm()?'checked':''} onchange="setLokiStorm(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_loki_storm')}</label>` : ''}
         <label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-jg-branch" ${jgBranchOn()?'checked':''} onchange="setJgBranch(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_jungle_branch')}</label>
+        ${currentTheme === 'jungle' ? `<label style="display:flex;align-items:center;gap:10px;font-size:var(--fs-base);color:var(--t1);margin-top:12px;cursor:pointer"><input type="checkbox" id="pref-garden-motion" ${gameGet().world.garden.still?'':'checked'} onchange="setGardenStill(this.checked)" style="width:18px;height:18px;accent-color:var(--gold)"> ${tr('settings_garden_motion')}</label>` : ''}
         <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:var(--fs-base);color:var(--t1)">${tr('settings_jungle_people')}
           ${['people','people-sprout'].map(v=>`<button onclick="setJgPeopleIcon('${v==='people'?'roots':'sprout'}')" aria-pressed="${jgPeopleIcon()===v}" aria-label="${tr(v==='people'?'settings_jungle_people_roots':'settings_jungle_people_sprout')}" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:2px solid ${jgPeopleIcon()===v?'var(--gold)':'var(--line)'};background:var(--surface)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${JG_NAV_ICONS[v]}</svg></button>`).join('')}
         </div>` : ''}
