@@ -50,6 +50,12 @@
 body{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;background:var(--ink);color:var(--t1);direction:rtl;height:100vh;overflow:hidden;font-weight:400;font-size:var(--fs-lg)}
 /* English UI mode: swap font order (Latin-first) and let dir=ltr (set on <html>) flip layout; only the interface, never Tao/meditation content or AI output, is ever in English. */
 body.lang-en{font-family:'IBM Plex Sans','IBM Plex Sans Hebrew',system-ui,sans-serif;direction:ltr}
+/* English is left to right: inputs and the few inline right-aligned or RTL blocks follow it */
+body.lang-en .form-input,body.lang-en .gsc-lb,body.lang-en .gsc-x,body.lang-en .gsc-line{direction:ltr}
+body.lang-en [style*="direction:rtl"]{direction:ltr!important}
+body.lang-en [style*="text-align:right"]{text-align:left!important}
+/* Hebrew content and Hebrew user text inside the English interface: each paragraph takes the direction of its own first letter */
+body.lang-en div,body.lang-en li,body.lang-en textarea,body.lang-en input{unicode-bidi:plaintext}
 .font-display{font-family:'IBM Plex Sans Hebrew','IBM Plex Sans',system-ui,sans-serif;font-weight:700;letter-spacing:-0.01em}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 textarea,select,input{font-family:inherit}
@@ -2331,6 +2337,7 @@ const TRANSLATIONS = {
   settings_vacation_hint: {he:'מופיע כתזכורת למה אתה עובד. משתנה לעיתים רחוקות, ולכן הוא כאן ולא במסך הבית.', en:"A reminder of what you're working toward. Rarely changes, so it lives here rather than on the home screen."},
 
   empty_default: {he:'אין פריטים', en:'No items'},
+  home_insights_one: {he:'1 פריטים', en:'1 item'},
   display_name_default: {he:'אורי', en:'Uri'},
   settings_display_name: {he:'שם תצוגה', en:'Display name'},
   settings_display_name_hint: {he:'השם שמופיע בברכה במסך הבית.', en:'The name in the greeting on Home.'},
@@ -2680,7 +2687,7 @@ const TRANSLATIONS = {
   game_name: {he:'שם', en:'Name'},
   game_add: {he:'הוסף', en:'Add'},
   game_soon: {he:'בקרוב', en:'Soon'},
-  game_more_tasks: {he:'עוד {n}', en:'{n} more'},
+  game_more_tasks: {he:'עוד {n}', en:'{n} to go'},
   game_pick: {he:'קושי', en:'Difficulty'},
   game_pick_root: {he:'תחום', en:'Area'},
   game_close: {he:'סגור', en:'Close'},
@@ -2722,7 +2729,7 @@ const TRANSLATIONS = {
   world_journal: {he:'יומן שטח', en:'Field journal'},
   world_empty: {he:'עוד לא היו פגישות. כשמשימה נסגרת, לפעמים מישהו קופץ לבקר.', en:'No visits yet. When a task closes, someone sometimes drops by.'},
   world_not_yet: {he:'עוד לא נפגשנו', en:'We haven\'t met yet'},
-  world_next: {he:'עוד {n} עד הצעד הבא', en:'{n} more to the next step'},
+  world_next: {he:'עוד {n} עד הצעד הבא', en:'{n} to go to the next step'},
   world_recent: {he:'פגישות אחרונות', en:'Recent visits'},
   world_ctx_evening: {he:'בערב', en:'in the evening'},
   world_ctx_summary: {he:'בסוף היום', en:'at the end of the day'},
@@ -2745,9 +2752,9 @@ const TRANSLATIONS = {
   wg_rest: {he:'נח', en:'resting'},
   wg_watered: {he:'השקית היום', en:'Watered today'},
   wg_water: {he:'להשקות את {name}', en:'Water the {name}'},
-  wg_next: {he:'עוד {n} של {root} לשלב הבא', en:'{n} more of {root} to the next stage'},
-  wg_to_flower: {he:'עוד {n} של {root} עד פרח', en:'{n} more of {root} to a flower'},
-  wg_to_crystal: {he:'עוד {n} של {root} עד גביש', en:'{n} more of {root} to a crystal'},
+  wg_next: {he:'עוד {n} של {root} לשלב הבא', en:'{root}: {n} to go to the next stage'},
+  wg_to_flower: {he:'עוד {n} של {root} עד פרח', en:'{root}: {n} to go to a flower'},
+  wg_to_crystal: {he:'עוד {n} של {root} עד גביש', en:'{root}: {n} to go to a crystal'},
   wg_full: {he:'פרח וגביש בשולי הערוגה', en:'A flower and a crystal at the edge of the bed'},
   wg_flower: {he:'פרח', en:'Flower'},
   wg_crystal: {he:'גביש', en:'Crystal'},
@@ -3194,7 +3201,7 @@ function moodShown(m) { return !(MOOD_LIB[m] && MOOD_LIB[m].more) || currentThem
 function leadField(id, label, value) {
   return '<div style="margin-bottom:10px">' +
     '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-bottom:4px">' + label + '</div>' +
-    '<textarea id="' + id + '" style="width:100%;min-height:44px;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);resize:none;outline:none;line-height:1.5;direction:rtl;font-family:inherit">' + esc(value) + '</textarea>' +
+    '<textarea id="' + id + '" style="width:100%;min-height:44px;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:8px 10px;color:var(--tao-t1);font-size:var(--fs-md);resize:none;outline:none;line-height:1.5;font-family:inherit">' + esc(value) + '</textarea>' +
     '</div>'
 }
 function getTodayLeadershipEntry() {
@@ -5150,7 +5157,7 @@ function insightsAccordionHtml(moodPatterns) {
   const parts = insightsPanelsHtml(moodPatterns)
   if(!parts.length) return ''
   return creamPanelHtml(accordionHtml('insights',
-    {icon:'lightbulb', title:tr('home_insights'), hint:tr('home_insights_count').replace('{n}', parts.length)},
+    {icon:'lightbulb', title:tr('home_insights'), hint:parts.length === 1 ? tr('home_insights_one') : tr('home_insights_count').replace('{n}', parts.length)},
     function(){ return parts.join('') }), 'padding:12px 16px;margin-bottom:16px')
 }
 function dailyBriefingHtml() {
@@ -5372,12 +5379,12 @@ function moodTipHtml(curMood, moodDef) {
   return moodDef ? `<div style="background:${moodDef.color}12;border:1px solid ${moodDef.color}44;border-radius:var(--radius-xl);padding:14px 16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div style="font-size:var(--fs-sm);color:${moodDef.color};font-weight:700;letter-spacing:1px">${icon(moodDef.icon)} ${tr('mood_'+curMood.mood)} · ${tr('home_mood_tip_label')}</div>
-          ${moodDef.actions.length > 3 ? `<button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600">${icon('refresh')} ${tr('home_mood_tip_other')}</button>` : ''}
+          ${moodDef.actions.length > 3 ? `<button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600;white-space:nowrap;flex-shrink:0">${icon('refresh')} ${tr('home_mood_tip_other')}</button>` : ''}
         </div>
         ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
         ${moodTipLines(curMood, moodDef).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
         ${moodDef.ifthen && currentTheme === 'jungle' ? `<div data-content="he" style="margin-top:8px;padding-top:8px;border-top:1px dashed ${moodDef.color}44;font-size:var(--fs-base);color:var(--t1);line-height:1.5"><span style="font-size:var(--fs-sm);font-weight:700;color:var(--t2)">${tr('home_mood_ifthen')}</span><br>${esc(moodDef.ifthen)}</div>` : ''}
-        <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;direction:rtl;margin-top:10px"></textarea>
+        <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>
           <span id="brain-dump-saved" style="display:none;font-size:var(--fs-md);color:${moodDef.color};font-weight:600">${icon('check')} ${tr('home_braindump_saved')}</span>
@@ -9285,7 +9292,7 @@ function renderInput() {
     <div style="padding:48px 16px 24px">
       ${backHeaderHtml(tr('input_title'))}
       <div style="font-size:var(--fs-base);color:var(--t2);margin-bottom:10px;line-height:1.6">${tr('input_hint')}</div>
-      <textarea id="input-text" placeholder="${tr('input_ph')}" style="width:100%;min-height:200px;background:var(--surface);border:1px solid var(--t4);border-radius:var(--radius-lg);padding:14px;color:var(--t1);font-size:var(--fs-lg);resize:none;outline:none;line-height:1.7;direction:rtl;display:block;margin-bottom:10px"></textarea>
+      <textarea id="input-text" placeholder="${tr('input_ph')}" style="width:100%;min-height:200px;background:var(--surface);border:1px solid var(--t4);border-radius:var(--radius-lg);padding:14px;color:var(--t1);font-size:var(--fs-lg);resize:none;outline:none;line-height:1.7;display:block;margin-bottom:10px"></textarea>
       ${voiceRowHtml('input-text')}
       <div id="input-skel" style="display:none;margin-bottom:8px"></div>
       <div id="input-error" style="color:var(--red);font-size:var(--fs-base);margin-bottom:8px;display:none"></div>
@@ -10964,7 +10971,7 @@ function showStatusChangeModal(name, status) {
         </div>
         ${(!statusChangeMondayDone || !statusChangeEmailDone) ? `
         <label class="form-label">${tr('sc_desc_label')}</label>
-        <textarea id="sc-desc" placeholder="${tr('sc_desc_ph')}" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;direction:rtl;margin-bottom:10px">${site&&site.issue?esc(site.issue):''}</textarea>
+        <textarea id="sc-desc" placeholder="${tr('sc_desc_ph')}" style="width:100%;min-height:70px;background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.5;margin-bottom:10px">${site&&site.issue?esc(site.issue):''}</textarea>
         <div style="display:flex;gap:8px;margin-bottom:10px">
           ${!statusChangeMondayDone?`<button onclick="draftStatusMessage('monday')" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-md);font-weight:600">${icon('edit-3')} ${tr('sc_draft_monday')}</button>`:''}
           ${!statusChangeEmailDone?`<button onclick="draftStatusMessage('email')" style="flex:1;background:var(--surface-2);border-radius:var(--radius-md);padding:10px;color:var(--t2);font-size:var(--fs-md);font-weight:600">${icon('edit-3')} ${tr('sc_draft_email')}</button>`:''}
@@ -11833,9 +11840,9 @@ function pushStatus() {
 function pushCardBodyHtml() {
   const st = pushStatus(), prefs = notifyPrefs()
   const toggle = (id, label, on) => `<label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-base);color:var(--t1);margin-bottom:8px;cursor:pointer"><input type="checkbox" id="${id}" ${on?'checked':''} onchange="saveNotifyPrefs()" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0"/> ${label}</label>`
-  const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin:-4px 26px 10px 0;font-size:var(--fs-md);color:var(--t2)">${tr('push_at')} <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
+  const timeRow = (id, value) => `<div style="display:flex;align-items:center;gap:8px;margin-block:-4px 10px;margin-inline:26px 0;font-size:var(--fs-md);color:var(--t2)">${tr('push_at')} <input type="time" id="${id}" value="${esc(value)}" onchange="saveNotifyPrefs()" class="form-input" style="width:auto;margin:0;padding:6px 8px;direction:ltr"/></div>`
   return `<div id="push-status" style="font-size:var(--fs-base);color:${st.ok?'var(--green)':'var(--t2)'};margin-bottom:12px;line-height:1.6">${st.text}</div>
-    <ol style="font-size:var(--fs-md);color:var(--t3);margin:0 18px 12px 0;padding:0;line-height:1.7">
+    <ol style="font-size:var(--fs-md);color:var(--t3);margin-block:0 12px;margin-inline:18px 0;padding:0;line-height:1.7">
       <li>${tr('push_step_1')}</li>
       <li>${tr('push_step_2')}</li>
       <li>${tr('push_step_3')}</li>
@@ -12172,7 +12179,7 @@ function renderMonthCal(){
       monthEvs.map(function(e){
         var dayNum = parseInt((e.date||'').split('-')[2]||'0');
         var monthNum = parseInt((e.date||'').split('-')[1]||'0');
-        var dateLabel = dayNum ? dayNum+'.'+monthNum : '';
+        var dateLabel = dayNum ? (uiLang === 'en' ? CAL_NAMES.monthsShort[monthNum - 1] + ' ' + dayNum : dayNum+'.'+monthNum) : '';
         var col = esc(e.color||'var(--bamboo)');
         return '<div class="card" style="border:1px solid var(--line);padding:10px 14px;margin-bottom:6px;border-right:3px solid '+col+'" id="evc-'+esc(e.id)+'">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start">'+
