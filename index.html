@@ -2425,7 +2425,7 @@ const TRANSLATIONS = {
   push_sent: {he:'נשלחה — אמורה להופיע תוך כמה שניות.', en:'Sent. It should appear within a few seconds.'},
   push_send_failed: {he:'השרת לא הצליח לשלוח', en:'The server couldn\'t send it'},
   push_status_n: {he:'(סטטוס {s})', en:'(status {s})'},
-  push_not_registered: {he:'— המכשיר הזה לא רשום בשרת, נסה לבטל ולהפעיל מחדש', en:'— this device isn\'t registered on the server. Try turning it off and on again.'},
+  push_not_registered: {he:'— המכשיר הזה לא רשום בשרת, נסה לבטל ולהפעיל מחדש', en:'(this device isn\'t registered on the server; try turning notifications off and on again)'},
   push_no_vapid: {he:'בשרת עדיין לא הוגדרו מפתחות VAPID (ראה הוראות הפריסה).', en:'VAPID keys aren\'t set on the server yet (see the deploy instructions).'},
   voice_lang_he: {he:'עב', en:'HE'},
   voice_record: {he:'הקלט', en:'Record'},
@@ -2813,7 +2813,7 @@ const TRANSLATIONS = {
   quote_other: {he:'אחר', en:'Another'},
   quote_add_ph: {he:'הוסף ציטוט משלך...', en:'Add a quote of your own…'},
   weekly_focus_colon: {he:'מוקד השבוע:', en:'This week\'s focus:'},
-  tool_related_in: {he:'כלי קשור ב-', en:'Related tool in'},
+  tool_related_in: {he:'כלי קשור ב-{x}', en:'Related tool in {x}'},
   tools_from_books: {he:'כלים מהספרים', en:'Book tools'},
   lead_daily: {he:'פיתוח מנהיגות יומי', en:'Daily leadership practice'},
   lead_q_why: {he:'מה ה\'למה\' שהוביל אותי היום?', en:'What was the \'why\' that led me today?'},
@@ -4006,7 +4006,7 @@ function renderTaoChapter(el, idx) {
     '<div style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b)">' + wf.text + '</div>' +
     (relatedCard ? (
       '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:var(--tao-bg2);border:1px solid var(--tao-line2);border-radius:var(--radius-md);padding:10px 12px;margin-top:12px">' +
-      '<div style="font-size:var(--fs-2xs);color:var(--tao-t3);margin-bottom:2px">' + icon('link') + ' ' + tr('tool_related_in') + ' ' + (relatedTab==='lead'?tr('tools_from_books'):'ADHD') + '</div>' +
+      '<div style="font-size:var(--fs-2xs);color:var(--tao-t3);margin-bottom:2px">' + icon('link') + ' ' + trv('tool_related_in', {x: relatedTab==='lead'?tr('tools_from_books'):'ADHD'}) + '</div>' +
       '<div style="font-size:var(--fs-md);color:var(--tao-t1);font-weight:600">' + icon(relatedCard.icon) + ' ' + relatedCard.title + '</div>' +
       '</button>'
     ) : '')
@@ -12269,7 +12269,7 @@ function renderEvCard(e){
 
 function showDayEvents(dk){
   var parts=dk.split('-');
-  var label=trv('cal_day_label', {d: parseInt(parts[2], 10), m: CAL_NAMES.months[parseInt(parts[1])-1], y: parts[0]});
+  var label=trv('cal_day_label', {d: uiLang === 'en' ? parseInt(parts[2], 10) : parts[2], m: CAL_NAMES.months[parseInt(parts[1])-1], y: parts[0]});
   var evs=getEventsForDate(dk);
   openModal(
     '<div class="modal-handle"></div>'+
