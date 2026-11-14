@@ -3194,6 +3194,47 @@ Object.assign(MOOD_LIB, {
   sad:       {label:'עצוב', icon:'cloud', color:'#4A5A85', taskLimit:2, more:true, ifthen:"אם עצוב לי, אעשה דבר קטן אחד שהיה לי טוב בו בעבר.", actions:["אם בא לך, דבר קטן אחד, נעים או משמעותי.", "אם בא לך, לתייג בשקט, או לפנות למישהו.", "אם בא לך, להשאיר החלטות גדולות למחר."]}
 })
 // i18n-exempt-end
+// English mood lines (stage 3), in the same shape as MOOD_LIB and at the same positions: actions[i] here is
+// actions[i] there. A logged mood keeps its picked lines in Hebrew on the record, so moodLine() finds each
+// one's place in the Hebrew library and shows the English at that place; a mood or line not here stays Hebrew.
+const MOOD_LIB_EN = {
+  overwhelmed: {
+    ifthen: "If I feel overwhelmed, I'll pick one task and start it for five minutes.",
+    actions: [
+      "Write down everything running through your head, here below or on paper. Don't solve it. Just get it out.",
+      "One breath: in for four seconds, hold for seven, out for eight. Again if you need it.",
+      "Look only at the one task shown below. Nothing else exists right now.",
+      "Say one sentence out loud, or write it: \"Right now I'm only doing X.\" That's it.",
+      "Get up for a minute, move your body, drink some water. Your head settles when your body moves.",
+      "Ask yourself: what is the one thing that would change the most if it got done today? Just that."
+    ]},
+  tired: {
+    ifthen: "If I'm tired, I'll drink some water and then do one easy thing.",
+    actions: [
+      "Drink some water and eat something small. Sometimes you're just low on fuel.",
+      "Walk or stretch for five minutes before you go on.",
+      "Push back anything that doesn't have to happen today. Keep only what matters.",
+      "If you can, close your eyes for five minutes. Not to sleep, just to rest.",
+      "Move the hardest task to tomorrow morning, and do only easy things now.",
+      "Check when you last ate or drank. Sometimes that's all the tiredness is."
+    ]},
+  calm: {
+    ifthen: "When I'm calm, I'll do the task that needs patience.",
+    actions: [
+      "If you like, use the calm for a task that needs quiet.",
+      "If you like, leave the calm as it is. Don't fill it up with more."
+    ]}
+}
+// A mood line (one of its actions, or its if-then line) in the interface language: the English at the same
+// place when there is one, else the line as given.
+function moodLine(mood, text) {
+  const he = MOOD_LIB[mood], en = MOOD_LIB_EN[mood]
+  if(uiLang !== 'en' || !he || !en) return text
+  if(text === he.ifthen) return en.ifthen || text
+  const i = he.actions.indexOf(text)
+  return (i >= 0 && en.actions[i]) || text
+}
+function moodLineLang(mood, text) { return moodLine(mood, text) === text ? 'he' : 'en' }
 // a mood is seen everywhere, except one of the more feelings outside the jungle (an unknown key is left as it was)
 function moodShown(m) { return !(MOOD_LIB[m] && MOOD_LIB[m].more) || currentTheme === 'jungle' }
 
@@ -3708,6 +3749,29 @@ const TAO_TITLES = ['הדרך','הכל חלקי','מחוץ לזמן','חוק א�
   'ספר הטאו א','ספר הטאו ב','ספר הטאו ג','ספר הטאו ד','ספר הטאו ה',
   'ספר הטאו ו','ספר הטאו ז','ספר הטאו ח','ספר הטאו ט','סיכום'];
 
+// English Tao (stage 3). New English written from the meaning of the classical text: not a translation of
+// the Hebrew above and not based on any published English version. Same index as TAO_CHAPTERS; an index
+// that is not here yet falls back to the Hebrew. Index 0 holds classical chapters 1 and 2 (as the Hebrew
+// does), and index i after it holds classical chapter i + 2, so each one sits where the Hebrew topic sits.
+const TAO_CHAPTERS_EN = [
+  "A Way you can explain\nis not the Way that lasts.\nA name you can give\nis not the name that stays.\nBefore anything had a name,\nheaven and earth began from it.\nOnce it was named,\nit became the mother of everything.\nWhen you want nothing,\nyou see how deep it goes.\nWhen you want something,\nyou see only where it ends.\nBoth come from one place.\nOnly their names are different.\nBoth are a mystery.\nGo into the mystery\nand there is more of it.\nThat is the door\nevery wonder comes through.\n\n· · ·\n\nOnce we agree on what is beautiful,\nthe ugly shows up beside it.\nOnce we agree on what is good,\nthe bad is there too.\nSomething and nothing\ngive rise to each other.\nHard and easy\ncomplete each other.\nLong and short\nmeasure each other.\nHigh and low\nlean toward each other.\nA note and a voice\nanswer each other.\nFront and back\ntake turns.\nSo the sage\ngets things done without pushing\nand teaches without a word.\nThings rise and fall,\nand the sage lets them.\nMakes, and does not keep.\nWorks, and lets go of the outcome.\nFinishes, and walks on.\nHolding on to nothing,\nthe sage loses nothing.",
+  "Stop praising the clever,\nand people stop fighting to be first.\nStop treasuring rare things,\nand people stop stealing.\nDon't parade what others crave,\nand their hearts stay quiet.\nSo the sage leads like this:\nclears the mind,\nfills the belly,\neases the drive to get ahead,\nkeeps the body strong.\nHelp people want less\nand scheme less,\nand the schemers\nhave nothing to work with.\nAct without forcing,\nand everything finds its place.",
+  "The Way is like an empty bowl.\nYou can draw from it forever\nand it never needs filling.\nIt goes down so deep\nit looks like the source\nof everything.\nIt dulls the sharp edge.\nIt loosens the knot.\nIt softens the glare.\nIt settles with the dust.\nHidden,\nand still somehow always there.\nI don't know whose child it is.\nIt was here\nbefore anything we could call first.",
+  "Heaven and earth\nhave no favorites.\nThey treat everything\nlike the straw figures at a festival:\nhonored for a day, then let go.\nThe sage is the same with people.\nBetween heaven and earth,\nthe space is like a bellows.\nEmpty, yet it never runs out.\nThe more it moves,\nthe more it gives.\nToo many words\nand you run dry.\nBetter to stay\nclose to the center.",
+  "The spirit of the valley never dies.\nCall it the hidden mother.\nHer open gate\nis the root of heaven and earth.\nFaint, like a thread,\nand always there.\nDraw on it as much as you like.\nIt never tires.",
+  "Heaven and earth go on and on.\nWhy do they last so long?\nThey don't live for themselves.\nThat is why they keep going.\nSo the sage steps back\nand finds the way forward,\ndoesn't worry about staying safe,\nand stays safe.\nWanting nothing for the self,\nthe self is complete.",
+  "The best way to be good\nis to be like water.\nWater helps everything grow\nand argues with no one.\nIt goes to the low places\nnobody wants,\nand that is why\nit is so close to the Way.\nAt home, stay near the ground.\nIn the heart, go deep.\nWith others, be kind.\nIn speech, keep your word.\nIn leading, keep things clear.\nIn work, do it well.\nIn action, pick the moment.\nDon't compete,\nand no one can fault you.",
+  "Keep pouring\nand the cup runs over.\nBetter to stop in time.\nKeep grinding the blade\nand the edge chips.\nA house full of gold\nis a house you have to guard.\nMoney and pride\nset up their own fall.\nWhen the work is done,\nwalk away from it quietly.\nThat is how heaven moves.",
+  "Can you hold body and mind as one\nand not drift apart?\nCan you let your breath go soft,\nlike a baby's?\nCan you wipe the inner mirror\nuntil nothing is left on it?\nCan you love people\nand lead them without tricks?\nWhen things open and close in you,\ncan you stay gentle and let them?\nCan you see clearly all around\nand not rely on what you know?\nBring things to life and feed them.\nMake them, but don't own them.\nHelp, but don't keep score.\nGuide, but don't take over.\nThis is the quiet strength\nthat runs deepest.",
+  "Thirty spokes run into one hub.\nThe hole in the middle\nis what lets the wheel turn.\nA potter works clay into a jar.\nThe hollow inside\nis what lets it hold water.\nCut a door and windows\ninto the walls of a house.\nThe open space\nis what you live in.\nWhat is there\ngives a thing its shape.\nWhat is not there\nis what makes it useful."
+]
+const TAO_TITLES_EN = ['The Way','Keeping it simple','Older than time','No favorites','The valley spirit',
+  'Not for itself','Like water','Knowing when to stop','Can you?','The use of empty space']
+// The chapter text and its title in the interface language: the English when it exists, else the Hebrew.
+function taoEnReady(i) { return uiLang === 'en' && typeof TAO_CHAPTERS_EN[i] === 'string' && TAO_CHAPTERS_EN[i].trim() !== '' }
+function taoChapter(i) { return taoEnReady(i) ? TAO_CHAPTERS_EN[i] : (TAO_CHAPTERS[i] || '') }
+function taoTitle(i) { return taoEnReady(i) ? (TAO_TITLES_EN[i] || trv('tao_chapter_n', {n: i + 1})) : TAO_TITLES[i] }
+
 const MEDITATIONS = [
   {title:'נשימת הטאו',duration:5,icon:'waves',desc:'נשום עם זרם הטאו',steps:['שאיפה עמוקה 4 שניות','עצירה 4 שניות','נשיפה איטית 6 שניות','השהייה 2 שניות']},
   {title:'ישיבת זן',duration:7,icon:'flower',desc:'שב בשקט — כמו הר',steps:['גב ישר, עיניים חצי עצומות','שים לב לנשימה הטבעית','כשמחשבה עולה — חזור לנשימה','אין מטרה — רק להיות']},
@@ -3961,8 +4025,8 @@ function renderTao() {
 function renderTaoChapter(el, idx) {
   idx = Math.max(0, Math.min(79, idx));
   var taoMode = localStorage.getItem('fieldy_tao_mode') || 'tao';
-  var chapter = TAO_CHAPTERS[idx] || '';
-  var title = TAO_TITLES[idx] || trv('tao_chapter_n', {n: idx + 1});
+  var chapter = taoChapter(idx);
+  var title = taoTitle(idx) || trv('tao_chapter_n', {n: idx + 1});
   var lines = chapter.split('\n').filter(function(l) { return l.trim(); });
   var prevIdx = (idx - 1 + 80) % 80;
   var nextIdx = (idx + 1) % 80;
@@ -5382,8 +5446,8 @@ function moodTipHtml(curMood, moodDef) {
           ${moodDef.actions.length > 3 ? `<button onclick="rerollMoodTip()" style="background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-sm);padding:4px 10px;color:${moodDef.color};font-size:var(--fs-sm);font-weight:600;white-space:nowrap;flex-shrink:0">${icon('refresh')} ${tr('home_mood_tip_other')}</button>` : ''}
         </div>
         ${QUICK_CALM_MOODS.indexOf(curMood.mood) >= 0 ? `<button onclick="startQuickCalm()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;padding:12px;border-radius:var(--radius-lg);border:1px solid ${moodDef.color}55;background:var(--surface);color:${moodDef.color};font-size:var(--fs-base);font-weight:700">${icon('wind')} ${tr('qc_button')}</button>` : ''}
-        ${moodTipLines(curMood, moodDef).map(a=>`<div data-content="he" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(a)}</div>`).join('')}
-        ${moodDef.ifthen && currentTheme === 'jungle' ? `<div data-content="he" style="margin-top:8px;padding-top:8px;border-top:1px dashed ${moodDef.color}44;font-size:var(--fs-base);color:var(--t1);line-height:1.5"><span style="font-size:var(--fs-sm);font-weight:700;color:var(--t2)">${tr('home_mood_ifthen')}</span><br>${esc(moodDef.ifthen)}</div>` : ''}
+        ${moodTipLines(curMood, moodDef).map(a=>`<div data-content="${moodLineLang(curMood.mood, a)}" style="font-size:var(--fs-base);color:var(--t1);margin-bottom:6px;line-height:1.5">• ${esc(moodLine(curMood.mood, a))}</div>`).join('')}
+        ${moodDef.ifthen && currentTheme === 'jungle' ? `<div data-content="${moodLineLang(curMood.mood, moodDef.ifthen)}" style="margin-top:8px;padding-top:8px;border-top:1px dashed ${moodDef.color}44;font-size:var(--fs-base);color:var(--t1);line-height:1.5"><span style="font-size:var(--fs-sm);font-weight:700;color:var(--t2)">${tr('home_mood_ifthen')}</span><br>${esc(moodLine(curMood.mood, moodDef.ifthen))}</div>` : ''}
         <textarea id="brain-dump-input" placeholder="${tr('home_braindump_placeholder')}" style="width:100%;min-height:70px;background:var(--surface);border:1px solid ${moodDef.color}44;border-radius:var(--radius-md);padding:10px 12px;font-size:var(--fs-base);resize:none;outline:none;line-height:1.6;margin-top:10px"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
           <button onclick="saveBrainDump()" style="background:${moodDef.color};border-radius:var(--radius-sm);padding:8px 16px;color:var(--surface);font-size:var(--fs-md);font-weight:600">${tr('home_braindump_save')}</button>

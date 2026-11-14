@@ -170,5 +170,65 @@ const uniq = [...new Set(leftovers)].sort((a, b) => a - b)
 for(const ln of uniq) fail('line ' + ln + ': Hebrew outside TRANSLATIONS: ' + lines[ln - 1].trim().slice(0, 110))
 if(!uniq.length) console.log('  ✓ none outside TRANSLATIONS and the marked exceptions')
 
+// ── English content libraries (stage 3) ─────────────────────────────────────
+console.log('\n4. English content libraries are filled in and parallel to the Hebrew')
+function grabLiteral(name) {
+  const at = src.indexOf('const ' + name + ' = ')
+  if(at < 0) return undefined
+  const open = src.indexOf(name.endsWith('_LIB_EN') ? '{' : '[', at)
+  const toks = lex(src.slice(open), open)   // skip strings so brackets inside them don't count
+  let depth = 0, i = open, end = -1, ti = 0
+  while(i < src.length) {
+    while(ti < toks.length && toks[ti].at < i) ti++
+    if(ti < toks.length && toks[ti].at === i) { i += toks[ti].text.length; continue }
+    const c = src[i]
+    if(c === '[' || c === '{') depth++
+    else if(c === ']' || c === '}') { depth--; if(!depth) { end = i; break } }
+    i++
+  }
+  // eslint-disable-next-line no-new-func
+  return new Function('return ' + src.slice(open, end + 1))()
+}
+let bad4 = 0
+const TAO = grabLiteral('TAO_CHAPTERS'), TAO_EN = grabLiteral('TAO_CHAPTERS_EN')
+if(!Array.isArray(TAO_EN)) { fail('TAO_CHAPTERS_EN not found'); bad4++ }
+else {
+  if(TAO_EN.length > TAO.length) { fail('TAO_CHAPTERS_EN has more entries than TAO_CHAPTERS'); bad4++ }
+  TAO_EN.forEach((t, i) => {
+    if(typeof t !== 'string' || !t.trim()) { fail('TAO_CHAPTERS_EN[' + i + '] is empty'); bad4++ }
+    else if(t === TAO[i]) { fail('TAO_CHAPTERS_EN[' + i + '] is the same as the Hebrew'); bad4++ }
+    else if(HEB.test(t)) { fail('TAO_CHAPTERS_EN[' + i + '] holds Hebrew letters'); bad4++ }
+  })
+  const TT_EN = grabLiteral('TAO_TITLES_EN')
+  if(Array.isArray(TT_EN) && TT_EN.some(t => !t || HEB.test(t))) { fail('TAO_TITLES_EN has an empty or Hebrew title'); bad4++ }
+}
+const MOOD_EN = grabLiteral('MOOD_LIB_EN')
+if(MOOD_EN) {
+  // the Hebrew lines of each mood, read from its own entry in MOOD_LIB (first definition of the key)
+  for(const k of Object.keys(MOOD_EN)) {
+    const m = new RegExp('\\n\\s*' + k + ':\\s*\\{').exec(src)
+    const he = m && grabLiteralAt(m.index + m[0].length - 1)
+    const en = MOOD_EN[k]
+    if(!he) { fail('MOOD_LIB_EN.' + k + ': no such mood in MOOD_LIB'); bad4++; continue }
+    if(!en.actions || en.actions.length !== he.actions.length) { fail('MOOD_LIB_EN.' + k + ': ' + (en.actions || []).length + ' lines, the Hebrew has ' + he.actions.length); bad4++ }
+    ;[en.ifthen].concat(en.actions || []).forEach((t, i) => { if(typeof t !== 'string' || !t.trim() || HEB.test(t)) { fail('MOOD_LIB_EN.' + k + ' line ' + i + ' is empty or holds Hebrew'); bad4++ } })
+  }
+}
+function grabLiteralAt(open) {
+  const toks = lex(src.slice(open, open + 20000), open)
+  let depth = 0, i = open, ti = 0
+  while(i < src.length) {
+    while(ti < toks.length && toks[ti].at < i) ti++
+    if(ti < toks.length && toks[ti].at === i) { i += toks[ti].text.length; continue }
+    const c = src[i]
+    if(c === '{' || c === '[') depth++
+    else if(c === '}' || c === ']') { depth--; if(!depth) break }
+    i++
+  }
+  // eslint-disable-next-line no-new-func
+  try { return new Function('return ' + src.slice(open, i + 1))() } catch(e) { return null }
+}
+if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + Object.keys(MOOD_EN || {}).length + ' moods')
+
 console.log('\n' + (failures ? '✕ ' + failures + ' problem(s)' : '✓ i18n coverage passed'))
 process.exit(failures ? 1 : 0)
