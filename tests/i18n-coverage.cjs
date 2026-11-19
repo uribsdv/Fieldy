@@ -233,7 +233,21 @@ if(Array.isArray(CW_EN)) {
   if(CW_EN.length !== CW.length) { fail('CALM_WHISPER_EN has ' + CW_EN.length + ' lines, the Hebrew has ' + CW.length); bad4++ }
   CW_EN.forEach((t, i) => { if(typeof t !== 'string' || !t.trim() || HEB.test(t) || t === CW[i]) { fail('CALM_WHISPER_EN[' + i + '] is empty, Hebrew or the same as the Hebrew'); bad4++ } })
 }
-if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + Object.keys(MOOD_EN || {}).length + ' moods, ' + (CW_EN ? CW_EN.length : 0) + ' calm whispers')
+// item lists: every English item sits over a Hebrew one, each English string is filled in and Hebrew-free,
+// and an English array (meditation steps) has as many lines as the Hebrew one
+let items4 = 0
+for(const [heName, enName] of [['MEDITATIONS', 'MEDITATIONS_EN'], ['WEEKLY_FOCUS', 'WEEKLY_FOCUS_EN'], ['TALK_SCENARIOS', 'TALK_SCENARIOS_EN']]) {
+  const he = grabLiteral(heName), en = grabLiteral(enName)
+  if(!Array.isArray(en)) continue
+  if(en.length !== he.length) { fail(enName + ' has ' + en.length + ' items, ' + heName + ' has ' + he.length); bad4++ }
+  en.forEach((it, i) => { for(const k in it) {
+    const v = it[k], h = he[i] && he[i][k]
+    if(Array.isArray(v)) { if(!Array.isArray(h) || v.length !== h.length) { fail(enName + '[' + i + '].' + k + ': ' + v.length + ' lines, the Hebrew has ' + (h ? h.length : 0)); bad4++ }
+      v.forEach((x, j) => { if(typeof x !== 'string' || !x.trim() || HEB.test(x)) { fail(enName + '[' + i + '].' + k + '[' + j + '] is empty or Hebrew'); bad4++ } }) }
+    else if(typeof v !== 'string' || !v.trim() || HEB.test(v) || v === h) { fail(enName + '[' + i + '].' + k + ' is empty, Hebrew or the same as the Hebrew'); bad4++ }
+  } items4++ })
+}
+if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + items4 + ' list items, ' + Object.keys(MOOD_EN || {}).length + ' moods, ' + (CW_EN ? CW_EN.length : 0) + ' calm whispers')
 
 console.log('\n' + (failures ? '✕ ' + failures + ' problem(s)' : '✓ i18n coverage passed'))
 process.exit(failures ? 1 : 0)
