@@ -2826,6 +2826,14 @@ const TRANSLATIONS = {
   tab_tao: {he:'טאו', en:'Tao'},
   tab_lead: {he:'מנהיגות', en:'Leadership'},
   tab_talk: {he:'שיחה', en:'Talk'},
+  tab_ease: {he:'בקלות', en:'Ease'},
+  ease_inspired: {he:'בהשראת אלן ווטס', en:'Inspired by Alan Watts'},
+  ease_week_idea: {he:'רעיון השבוע', en:'Idea of the week'},
+  ease_whatif: {he:'מה אם, השבוע', en:'This week, what if'},
+  ease_all_ideas: {he:'כל הרעיונות', en:'All the ideas'},
+  ease_q_label: {he:'שאלה לעצמך', en:'Ask yourself'},
+  ease_try_label: {he:'לנסות', en:'Try'},
+  ease_footnote: {he:'נכתב במילים של Fieldy, בהשראת אלן ווטס.', en:"Written in Fieldy's own words, inspired by Alan Watts. No quotations."},
   tao_chapter_of: {he:'פרק {n} מתוך {t}', en:'Chapter {n} of {t}'},
   prev: {he:'הקודם', en:'Previous'},
   next: {he:'הבא', en:'Next'},
@@ -2873,6 +2881,183 @@ const TRANSLATIONS = {
   state_err_retry: {he:'נסה לטעון שוב', en:'Try loading again'},
   state_err_reset: {he:'התחל מחדש עם נתונים ריקים (העותק הפגום יישמר בגיבוי במכשיר)', en:'Start over with empty data (the damaged copy is kept as a backup on this device)'},
   state_err_reset_confirm: {he:'להתחיל מחדש עם נתונים ריקים? העותק הפגום יישמר במכשיר תחת מפתח גיבוי ולא יימחק.', en:'Start over with empty data? The damaged copy is kept on this device under a backup key and is not deleted.'},
+}
+// ── EASE (בקלות): the Watts section's content ──
+// Inspired by Alan Watts, written fresh in Fieldy's own words: no quotations, none of his examples, nothing
+// put in his mouth (docs/watts-ideas-map.md, docs/watts-proposal.md). Each language is written on its own,
+// neither is a translation of the other. Same i18n layer as TRANSLATIONS: read through trw(), which falls
+// back to the Hebrew exactly as tr() does. A card is {he: {title, line, idea, q, try}, en: {...}}; `idea`
+// splits into paragraphs on "\n". Keys are stable (they never change, so nothing saved can point at a wrong
+// card); WATTS_CARD_KEYS and WATTS_WHATIF_KEYS give the order. Nothing here is counted or marked as read.
+// tests/i18n-coverage.cjs reads this object like TRANSLATIONS: every field in both languages, the English
+// different from the Hebrew and free of Hebrew letters.
+const WATTS_CONTENT = {
+  watts_ease_up: {
+    he: {title: "מתאמצים פחות, רואים יותר", line: "כשדוחפים חזק, חצי מהכוח הולך על הדחיפה.",
+      idea: "משאבה תקועה, והקבלן כבר מחכה. הגוף אומר: להתכווץ, להילחם, לפתור עכשיו. אבל כשמתאמצים בכוח להתרכז, חצי מהקשב הולך על המאמץ עצמו. דווקא מי שמגיע רפוי שומע מאיפה בא הרעש.\nזו לא עצלות. גם לעץ יש סיבים, ומי שחותך לאורכם מתעייף פחות ומגיע רחוק יותר.",
+      q: "איפה היום דחפת חזק, ומה היה קורה אילו רק הסתכלת עוד רגע?",
+      try: "במשימה הכי קשה ברשימה, \"חמש דקות רכות\". לפתוח, לקרוא פעם אחת, לכתוב בהערה מה אתה רואה, ולא להתחייב לסיים."},
+    en: {title: "Ease up, see more", line: "Force your focus and half of it goes into the forcing.",
+      idea: "A pump is stuck and the contractor is already waiting. Your body says: tense up, fight it, fix it now. But when you force yourself to focus, half your attention goes into the forcing. The one who shows up loose is the one who hears where the noise is coming from.\nThis isn't laziness. Wood has a grain, and if you cut with it you tire less and get further.",
+      q: "Where did you push hard today, and what might have happened if you'd just looked a moment longer?",
+      try: "On the hardest task on your list, take five soft minutes. Open it, read it once, write one note about what you see, and don't promise to finish."}},
+  watts_true_now: {
+    he: {title: "מה נכון עכשיו", line: "לפני \"מה היה צריך להיות\", יש את מה שיש.",
+      idea: "המשאבה לא תתחיל לעבוד כי כעסנו עליה. מי שנלחם בעייפות שלו מתעייף פעמיים, ומי שכועס על הכעס משלם כפול. לקבל את מה שקורה זה לא להרים ידיים. זו נקודת ההתחלה: רק כשמודים שהאתר באמת תקוע, אפשר לבחור את הצעד הבא בלי לבזבז כוח על ויכוח עם המציאות.",
+      q: "מה נכון עכשיו, לפני \"מה היה צריך להיות\"?",
+      try: "בסקירת המשימות של היום, ליד משימה תקועה: שורה אחת בהערת השוליים, \"מה נכון עכשיו\", ורק אחר כך להחליט אם להזיז אותה."},
+    en: {title: "What's true right now", line: "Before \"it shouldn't be like this,\" there's what is.",
+      idea: "Glaring at a dead pump has never once restarted it. Fight your tiredness and you end up tired twice; get angry at being angry and you've doubled the bill. Accepting what's happening isn't giving up. It's the ground you stand on to take the next step. Once you admit the site really is stuck, the energy you were spending arguing with it is free for something useful.",
+      q: "What's actually true right now, before what should have been?",
+      try: "In today's task review, next to a stuck task, add one side note: \"what's true now.\" Decide whether to move it only after that."}},
+  watts_opposites: {
+    he: {title: "אור וצל צריכים זה את זה", line: "אין אתר שנפתח בלי שקודם היה תקוע.",
+      idea: "אין גל בלי שקע, ואין \"סוף סוף עובד\" בלי שבוע של \"עדיין לא\" לפניו. הם נראים כמו אויבים, אבל הם שני קצוות של אותו חבל. מי שמנסה שהצד הטוב ינצח לתמיד, רק ימים טובים ורק אתרים ירוקים, נכנס למשחק שאף אחד עוד לא ניצח בו. יום רע לא מוחק שבוע טוב. הוא חלק מאותו גל.",
+      q: "מה היה הצד השני של הדבר הכי מעצבן היום?",
+      try: "כשאתר תקוע סוף סוף נפתח, לפני שמסמנים אותו, לכתוב בתיאור המקרה שלו מה התקיעה לימדה. ככה שני החצאים נשמרים באותו מקום."},
+    en: {title: "Light needs shade", line: "No site ever got unstuck without being stuck first.",
+      idea: "There's no wave without a trough, and no \"finally, it's running\" without the week of \"still not running\" before it. They look like enemies, but they're two ends of the same rope. Trying to make the good side win for good, only green sites and only good days, is a game nobody has won yet. A bad day doesn't cancel a good week. It's part of the same wave.",
+      q: "What was the other side of the most annoying thing today?",
+      try: "When a stuck site finally opens up, before you mark it, write in its case description what the stuck part taught you. Both halves end up in the same place."}},
+  watts_weave: {
+    he: {title: "חוט אחד במארג", line: "אתה לא עומד מעל המערכת. אתה ארוג בתוכה.",
+      idea: "קל לדמיין את עצמך יושב במרכז ומזיז את כולם. אבל מנהל אזור קיים רק יחד עם האתרים, הקבלנים, המשאבות והגשם. כולם משפיעים זה על זה באותו רגע, ואף אחד לא מושך בחוטים לבד. מי שרואה ככה מפסיק לחפש אשם, ומתחיל לחפש איפה החוט נשחק.",
+      q: "מי עוד היה חלק מההצלחה של היום, גם אם השם שלו לא כתוב במשימה?",
+      try: "כשסוגרים משימה שמישהו אחר עזר בה, להוסיף בהערת השוליים מה הוא הביא. שורה אחת מספיקה."},
+    en: {title: "One thread in the weave", line: "You're not standing above the system. You're woven into it.",
+      idea: "It's tempting to picture yourself at the center, moving everyone else around. But an area manager only exists together with the sites, the contractors, the pumps and the rain. They all shape each other at the same moment, and nobody is pulling the strings alone. Seen that way, you stop hunting for someone to blame and start looking for the thread that's wearing thin.",
+      q: "Who else was part of today's win, even if their name isn't on the task?",
+      try: "When you close a task someone else helped with, add a side note about what they brought. One line is plenty."}},
+  watts_not_a_chore: {
+    he: {title: "לא להפוך את השקט למשימה", line: "\"להירגע\" הוא לא עוד סעיף ברשימה.",
+      idea: "ברגע ש\"להיות רגוע\" נכנס לרשימה, הוא נהיה משימה, ובמשימה אפשר להיכשל. ואז כבר לא רגועים, וגם אשמים. לכן הלשונית הזו לא סופרת כמה כרטיסים קראת. מה שכבר עובד היום לא צריך מעקב. הוא רק צריך שמישהו ישים לב אליו.",
+      q: "מה כבר עבד היום בלי שעשית בשבילו כלום?",
+      try: "לעבור על המשימות שנסגרו היום ולבחור אחת שהלכה בקלות. לא לרשום כלום, רק לראות אותה."},
+    en: {title: "Don't turn calm into a chore", line: "Relaxing doesn't belong on the to-do list.",
+      idea: "The moment \"be calm\" goes on the list, it becomes a task, and tasks can be failed. Now you're not calm and you feel guilty about it. That's why nothing on this tab counts how many cards you've read. Whatever is already working today doesn't need tracking. It just needs someone to notice it.",
+      q: "What worked today without you doing anything for it?",
+      try: "Look over the tasks you closed today and pick one that went easily. Don't write anything down. Just see it."}},
+  watts_play_now: {
+    he: {title: "עבודה כמשחק, זמן כעכשיו", line: "העבודה קורית רק עכשיו. גם הכיף.",
+      idea: "אף אחד לא משקה גן כדי לגמור אותו. גם רוב העבודה קורית רק עכשיו: השיחה הזו, האתר הזה, הכביש הזה. מי שרץ ממשימה למשימה אף פעם לא באמת נמצא באף אחת מהן. תוכניות זה טוב, כל עוד הן משרתות את היום ולא בולעות אותו.",
+      q: "איזה רגע היום היה טוב כשלעצמו, לא בגלל מה שהוא הביא?",
+      try: "לבחור משימה אחת מהרשימה של היום ולעשות אותה לאט, בשבילה. אחרי שסוגרים אותה, לחכות נשימה אחת לפני שפותחים את הבאה."},
+    en: {title: "Work as play, time as now", line: "Work only happens now. So does the fun.",
+      idea: "Nobody waters a garden to get it finished. Most of the work happens only now, too: this call, this site, this stretch of road. Rushing from task to task means never quite being at any of them. Plans are great, as long as they serve the day instead of swallowing it.",
+      q: "What moment today was good in itself, not for what it led to?",
+      try: "Pick one task on today's list and do it slowly, for its own sake. When you close it, wait one breath before opening the next."}},
+  watts_role: {
+    he: {title: "לשחק את התפקיד", line: "אפשר לשחק ברצינות, ולזכור שזו הצגה.",
+      idea: "מנהל אזור, קבלן, נציג החברה: כולם תפקידים, עם תלבושת וטקסט. אפשר לשחק אותם היטב ובמלוא הרצינות, ועדיין לזכור שמתחת יש בן אדם. כשקבלן צועק על \"החברה\", הוא לא באמת צועק עליך. וכשאתה עונה בתור \"החברה\", כדאי לזכור שגם הוא לא רק \"הקבלן\".",
+      q: "באיזה תפקיד היית היום הכי \"בדמות\", ומה היית אומר אילו יצאת ממנו לרגע?",
+      try: "בלשונית \"שיחה\", אחרי תרחיש: מה היה התפקיד שלך, ומי היה האדם שמולך?"},
+    en: {title: "Play the role, know it's a role", line: "You can play it straight and still know it's a play.",
+      idea: "Area manager, contractor, the company rep: they're all parts, with a costume and lines. You can play yours well and completely seriously, and still remember there's a person underneath. When a contractor yells at \"the company,\" he isn't really yelling at you. And when you answer as \"the company,\" it helps to remember he isn't only \"the contractor\" either.",
+      q: "Where were you most in character today, and what would you have said if you'd stepped out for a moment?",
+      try: "In Talk, after a scenario, ask yourself: what was your role, and who was the person across from you?"}},
+  watts_with_nature: {
+    he: {title: "לעבוד עם הטבע, לא נגדו", line: "מי שנלחם בגשם מפסיד. מי שמתכנן איתו מרוויח יום.",
+      idea: "מערכת סולארית היא בעצם עסקה עם השמש, ומשאבה היא הסכם עם מים שכבר נמצאים באדמה. אפשר לקחת את הגשם כעלבון אישי, ואפשר לבנות איתו את השבוע. הטבע לא נגדך. הוא פשוט עסוק בשלו, ועם מי שעסוק בשלו הכי קל לעבוד.",
+      q: "במה נלחמת היום שאפשר היה לשתף איתו פעולה?",
+      try: "לפני שמשבצים יום שטח ביומן, להציץ בתחזית ולבחור את היום בגלל מזג האוויר, לא למרות."},
+    en: {title: "Work with nature, not against it", line: "Fight the rain and you lose. Plan with it and you gain a day.",
+      idea: "A solar system is really a deal with the sun, and a pump is an agreement with water that was already in the ground. You can take the rain personally, or you can build the week around it. Nature isn't against you. It's just busy with its own business, and someone minding their own business is the easiest partner there is.",
+      q: "What did you fight today that you could have worked with?",
+      try: "Before you put a field day in the calendar, check the forecast and pick the day because of the weather, not in spite of it."}},
+  watts_hide_seek: {
+    he: {title: "מחבואים", line: "ללכת לאיבוד ביום זה חצי מהמשחק.",
+      idea: "בבוקר אתה הולך לאיבוד: שלוש שיחות, קבלן שלא עונה, רשימה שגדלה מעצמה. ואז, איפשהו בנסיעה לקאוואיאן, אתה פתאום שוב שם. מכיר את הרגע הזה?\nבמשחק מחבואים, להיעלם זה חצי מהכיף. בלי מישהו שמתחבא אין מה למצוא. היום לא נכשל כי הלכת בו לאיבוד. ככה המשחק הולך, וזה שחוזר בערב הוא אותו אחד שיצא בבוקר.",
+      q: "איפה מצאת את עצמך היום?",
+      try: "בערב, כשלוקי מדליק את הפנס, שורה אחת: \"חזרתי לעצמי כש...\""},
+    en: {title: "Hide and seek", line: "Getting lost in the day is half the game.",
+      idea: "In the morning you get lost: three calls, a contractor who won't pick up, a list that keeps growing on its own. Then somewhere on the drive to Cauayan, you're suddenly back. You know that moment?\nIn hide and seek, vanishing is half the fun. If nobody hides, there's nothing to find. The day didn't fail because you got lost in it. That's how the game goes, and the one who comes home in the evening is the same one who left in the morning.",
+      q: "Where did you find yourself today?",
+      try: "In the evening, when Loki lights his lamp, write one line: \"I came back to myself when...\""}},
+  watts_list_not_day: {
+    he: {title: "הרשימה היא לא היום", line: "\"תקוע\" זו שורה. המשאבה נמצאת בחוץ.",
+      idea: "רשימות, סטטוסים ודוחות הם מפה, ומפה טובה שווה הרבה. אבל משאבה בסטטוס \"תקוע\" היא לא המשאבה, היא שורה. הבלבול מתחיל כשמנהלים את המפה במקום את השטח. גם \"יום מוצלח\" ו\"מנהל טוב\" הם הגדרות שמישהו המציא. מותר להשתמש בהן, ולא חייבים להאמין להן.",
+      q: "איזו שורה ברשימה שלך כבר לא מתארת את מה שקורה באמת?",
+      try: "בביקור הבא באתר תקוע, להוסיף לתיאור המקרה שלו משהו שראית ושמעת בעצמך, לא משהו שדווח לך."},
+    en: {title: "The list is not the day", line: "\"Stuck\" is a line of text. The pump is outside.",
+      idea: "Lists, statuses and reports are a map, and a good map is worth a lot. But a pump marked \"stuck\" isn't the pump; it's a row in a table. The trouble starts when you manage the map instead of the ground. Even \"a good day\" and \"a good manager\" are definitions somebody made up. Use them freely. You don't have to believe them.",
+      q: "Which line on your list has stopped describing what's really going on?",
+      try: "Next time you visit a stuck site, add something you saw or heard yourself to its case description, not something that was reported to you."}},
+  watts_spotlight: {
+    he: {title: "זרקור ואור רחב", line: "יש אור צר ויש אור רחב. צריך את שניהם.",
+      idea: "הרשימה שלך היא זרקור: היא מאירה משימה אחת, חדה ובהירה, וכל השאר בחושך. זה טוב, ככה עושים דברים. אבל יש עוד אור, רחב, שקולט את כל האתר בבת אחת: הקבלן שמחייך קצת מהר מדי, המשאבה שמזמזמת בטון אחר, האדמה שיבשה מדי ליד הקו.\nהזרקור רואה תווים. האור הרחב שומע מנגינה, כולל ההפסקות שבין הצלילים. גם הרווח הריק ביומן הוא חלק מהיום.",
+      q: "מה ראית היום רק כי לא חיפשת כלום?",
+      try: "באתר הבא, דקה של עמידה לפני שאתה פותח אותו באפליקציה. אחר כך הערה אחת על משהו שלא היה ברשימה."},
+    en: {title: "Spotlight and floodlight", line: "There's a narrow light and a wide one. You need both.",
+      idea: "Your list is a spotlight. It lights one task, sharp and bright, and leaves everything else dark. That's fine; it's how things get done. But there's another kind of light, a wide one, that takes in the whole site at once: the contractor smiling a little too quickly, the pump humming in a different key, the ground too dry near the line.\nThe spotlight sees notes. The wide light hears the tune, including the pauses between them. The empty slot in your calendar is part of the day too.",
+      q: "What did you notice today only because you weren't looking for anything?",
+      try: "At the next site, stand for a minute before you open it in the app. Then add one note about something that wasn't on the list."}},
+  watts_breath: {
+    he: {title: "הנשימה שנושמת את עצמה", line: "לא צריך לנשום נכון. היא יודעת לבד.",
+      idea: "נשימה היא הדבר היחיד שאתה גם עושה וגם קורה לך. אפשר לנהל אותה, והיא גם ממשיכה לבד כל היום, בזמן שאתה עסוק בקבלנים. הגוף יודע לעשות המון בלי שיתנו לו הוראות. לפעמים הוא גם יודע לפני הראש: הכתפיים מתכווצות עוד לפני שהשיחה הקשה מתחילה.",
+      q: "מה הגוף שלך ידע היום לפני שהראש הבין?",
+      try: "לפני האירוע הבא ביומן, שלוש נשימות בלי לספור ובלי לתקן. רק לראות איך הן יוצאות."},
+    en: {title: "The breath does itself", line: "No need to breathe correctly. It knows how.",
+      idea: "Breathing is the one thing you do that also just happens to you. You can steer it, and it also keeps going all day on its own while you're busy with contractors. Your body runs a lot without instructions. Sometimes it even knows first: your shoulders tighten before the hard call has started.",
+      q: "What did your body know today before your head caught up?",
+      try: "Before the next event in your calendar, take three breaths without counting or fixing them. Just notice how they come out."}},
+  watts_flow: {
+    he: {title: "מה שזורם", line: "אתרים נסגרים, אנשים עוברים, עונות מתחלפות.",
+      idea: "אתר שעובד מושלם, צוות שלא משתנה, עונה טובה בגן: מתחשק להקפיא אותם. אבל אתרים נסגרים, קבלנים עוברים לפרויקט הבא, וגם העונה הזו תיגמר. מה שמחזיקים חזק מדי מפסיק לנשום. מי שנהנה ממשהו בזמן שהוא כאן, ונותן לו ללכת כשהוא הולך, מקבל ממנו יותר.",
+      q: "מה מסתיים עכשיו, ואיך אפשר להיפרד ממנו יפה?",
+      try: "כשאתר נפתר, לפני שמסמנים אותו, להשאיר בתיאור המקרה דבר אחד שלמדת שם, בשביל מי שיבוא אחריך."},
+    en: {title: "What flows", line: "Sites close, people move on, seasons turn.",
+      idea: "A site running perfectly, a crew that never changes, a good season in the garden: you want to freeze them. But sites close, contractors move to the next job, and this season will end too. Grip something too tightly and it stops breathing. Enjoy it while it's here, let it go when it goes, and you'll get more out of it.",
+      q: "What's ending right now, and how could you say goodbye to it well?",
+      try: "When a site is resolved, before you mark it, leave one thing you learned there in its case description, for whoever comes next."}},
+  watts_practice: {
+    he: {title: "מתאמנים כדי לשחרר", line: "משמעת היא הדרך. הקלות היא לאן שהיא מובילה.",
+      idea: "טכנאי ותיק מזהה תקלה מהצליל, בלי לפתוח מדריך. זה לא קסם, אלה אלף הפעמים שהוא כן פתח. משמעת בלי חופש נהיית נוקשות, וחופש בלי תרגול נשאר ניחוש. מתאמנים בשגרה כדי שביום המוזר יהיה ממה לאלתר. ובבטיחות, דרך אגב, לא מאלתרים אף פעם.",
+      q: "מה אתה כבר יודע לעשות כל כך טוב שאתה לא צריך לחשוב, ומה עוד דורש תרגול?",
+      try: "כשתקלת SPIS נפתרת, לפתוח את המדריך שלה ולבדוק: איזה שלב כבר עשית בלי להסתכל?"},
+    en: {title: "Practice, then let go", line: "Discipline is the road. Ease is where it leads.",
+      idea: "A veteran technician can name the fault from the sound, without opening a manual. That's not magic; it's the thousand times he did open it. Discipline without freedom turns rigid, and freedom without practice is just guessing. You drill the routine so that on the strange day you have something to improvise with. Safety, by the way, is never the place to improvise.",
+      q: "What can you already do so well you don't have to think, and what still needs practice?",
+      try: "When an SPIS fault gets fixed, open its guide and check which step you did without looking."}},
+  watts_love_whole: {
+    he: {title: "לאהוב את כל העסק", line: "גם בפעם המאה, מים שעולים מהאדמה הם פלא.",
+      idea: "לאהוב את העבודה זה לא לאהוב רק את הגרסה הערוכה שלה. זה כולל את הימים המעצבנים, ואת התשוקה והכעס, שיש בהם חום שאפשר לעשות איתו משהו. ויש דרך פשוטה להתחיל: להתפלא שוב על הרגיל. מים שעולים מבאר אל שדה יבש הם פלא קטן, גם בפעם המאה.",
+      q: "מה בעבודה שלך היה מדהים אותך אילו ראית אותו בפעם הראשונה?",
+      try: "בשאלת ה\"למה\" היומית בלשונית מנהיגות, לכתוב פעם אחת השבוע דבר רגיל אחד שהוא בעצם מדהים."},
+    en: {title: "Love the whole thing", line: "Water climbing out of the ground is still a small miracle.",
+      idea: "Loving the work doesn't mean loving only the edited version. It includes the maddening days, and the passion and the anger too, which carry a heat you can put to use. There's an easy way in: be surprised by the ordinary again. Water rising out of a well into a dry field is a small miracle, even the hundredth time you see it.",
+      q: "What part of your work would amaze you if you saw it for the first time?",
+      try: "In Leadership, use the daily \"why\" question once this week to name one ordinary thing that's actually amazing."}},
+  watts_double_bind: {
+    he: {title: "הוראות שסותרות את עצמן", line: "\"תחליט לבד, אבל תתקשר אליי קודם.\"",
+      idea: "יש בקשות שאי אפשר למלא, כי הציות עצמו סותר אותן. \"תיקח יוזמה, אבל בדיוק כמו שאמרתי.\" \"תחליט לבד, אבל תעדכן אותי לפני כל דבר.\" מי שמקבל אותן תקוע, ויוצא אשם בכל מקרה. ואנחנו עושים את זה גם לעצמנו, בכל פעם שאנחנו פוקדים על עצמנו להפסיק לדאוג, ומיד.",
+      q: "איזו הוראה נתת השבוע שאי אפשר באמת לבצע?",
+      try: "כשאתה מגדיר אחראי למשימה, להוסיף בהערת השוליים שורה אחת: מה מותר לו להחליט לבד."},
+    en: {title: "Orders that cancel themselves", line: "\"Decide on your own, but call me first.\"",
+      idea: "Some requests can't be carried out, because obeying them breaks them. \"Take the initiative, but do it exactly my way.\" \"Decide on your own, but run everything by me first.\" Whoever gets one is stuck, and wrong either way. We do it to ourselves too, every time we order ourselves to stop worrying this minute.",
+      q: "What instruction did you give this week that nobody could actually follow?",
+      try: "When you give a task an owner, add one side note saying what they're free to decide alone."}},
+  // "what if" of the week: one convention held lightly, as a question about the work
+  watts_whatif_two_sides: {he: "מה אם האתר התקוע והקבלן האיטי הם לא שתי בעיות, אלא אותה בעיה משני צדדים?", en: "What if the stuck site and the slow contractor aren't two problems, but one problem seen from two sides?"},
+  watts_whatif_nobody_alone: {he: "מה אם ההצלחה של השבוע לא שייכת לאף אחד לבד, כולל לך?", en: "What if this week's win doesn't belong to anyone alone, you included?"},
+  watts_whatif_other_half: {he: "מה אם יום תקוע הוא לא ההפך של יום טוב, אלא החצי השני שלו?", en: "What if a stuck day isn't the opposite of a good day, but its other half?"},
+  watts_whatif_ending: {he: "מה אם אתר שנסגר הוא לא הפסד, אלא סוף טבעי של משהו שעבד?", en: "What if a site that closes isn't a loss, but the natural end of something that worked?"},
+  watts_whatif_forecast: {he: "מה אם התחזית היא לא מכשול בדרך של התוכנית, אלא חלק ממנה?", en: "What if the forecast isn't in the plan's way, but part of the plan?"},
+  watts_whatif_off_list: {he: "מה אם לא כל דבר טוב שקרה היום צריך להופיע ברשימה?", en: "What if not every good thing that happened today needs to be on the list?"},
+  watts_whatif_good_manager: {he: "מה אם \"מנהל טוב\" זו הגדרה שמותר לך לכתוב מחדש?", en: "What if \"a good manager\" is a definition you're allowed to rewrite?"},
+  // the fixed card at the bottom: no button, nothing to tick
+  watts_nothing: {
+    he: {title: "מותר לא לעשות כלום", idea: "הכרטיס הזה לא מבקש ממך כלום. אין בו כפתור, אין מה לסמן, ואף אחד לא סופר. אם בא לך לשבת רגע ולא לעשות שום דבר, גם זה נחשב."},
+    en: {title: "You're allowed to do nothing", idea: "This card doesn't ask anything of you. There's no button, nothing to tick, and nobody's counting. If you'd like to just sit for a moment and do nothing at all, that counts too."}}
+}
+const WATTS_CARD_KEYS = ['watts_ease_up', 'watts_true_now', 'watts_opposites', 'watts_weave', 'watts_not_a_chore', 'watts_play_now', 'watts_role', 'watts_with_nature',
+  'watts_hide_seek', 'watts_list_not_day', 'watts_spotlight', 'watts_breath', 'watts_flow', 'watts_practice', 'watts_love_whole', 'watts_double_bind']
+const WATTS_WHATIF_KEYS = ['watts_whatif_two_sides', 'watts_whatif_nobody_alone', 'watts_whatif_other_half', 'watts_whatif_ending', 'watts_whatif_forecast', 'watts_whatif_off_list', 'watts_whatif_good_manager']
+// One field of a WATTS_CONTENT entry in the interface language, falling back to the Hebrew as tr() does.
+function trw(key, field) {
+  const e = WATTS_CONTENT[key]
+  if(!e) { console.warn('trw(): missing key', key); return key }
+  const pick = lang => { const v = e[lang]; return v == null ? '' : field ? (v[field] || '') : (typeof v === 'string' ? v : '') }
+  return pick(uiLang) || pick('he')
 }
 // Named tr() (not t()) on purpose — `t` is already used everywhere in this
 // file as the loop variable for "task" (map(t=>...), function taskCard(t),
@@ -3952,6 +4137,72 @@ const playWater = () => {
   } catch(e) {}
 };
 
+// ── EASE tab (בקלות), inspired by Alan Watts: content in WATTS_CONTENT ──
+// The idea and the "what if" of the week follow the week number alone (the same week count as the weekly focus),
+// so nothing is stored. Which cards are open lives only in memory, for this visit: no "read" marks, no counters.
+let easeOpen = new Set()
+function easeWeek() { return Math.floor(Math.floor(new Date(getToday()).getTime() / 86400000) / 7) }
+function easeWeekCard(week) { return WATTS_CARD_KEYS[(week == null ? easeWeek() : week) % WATTS_CARD_KEYS.length] }
+function easeWeekWhatif(week) { return WATTS_WHATIF_KEYS[(week == null ? easeWeek() : week) % WATTS_WHATIF_KEYS.length] }
+// opened and closed in place: the button keeps its focus, and the rest of the screen does not move
+function easeToggle(key) {
+  const card = document.querySelector('.ease-card[data-key="' + key + '"]'); if(!card) return
+  if(easeOpen.has(key)) easeOpen.delete(key); else easeOpen.add(key)
+  const open = easeOpen.has(key), btn = card.querySelector('.ease-toggle'), body = card.querySelector('.ease-body'), chev = card.querySelector('.ease-chev')
+  if(btn) btn.setAttribute('aria-expanded', String(open))
+  if(chev) chev.style.transform = 'rotate(' + (open ? 180 : 0) + 'deg)'
+  if(open && !body) card.insertAdjacentHTML('beforeend', easeBodyWrapHtml(key)); else if(!open && body) body.remove()
+}
+function easeBodyWrapHtml(key) { return '<div class="ease-body" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--tao-line)">' + easeBodyHtml(key) + '</div>' }
+function easeIdeaHtml(key) {
+  return trw(key, 'idea').split('\n').map(function(p){ return '<p style="margin:0 0 8px;font-size:var(--fs-md);line-height:1.65;color:var(--tao-t1b)">' + esc(p) + '</p>' }).join('')
+}
+function easeBodyHtml(key) {
+  return easeIdeaHtml(key) +
+    '<div style="margin-top:10px;font-size:var(--fs-2xs);color:var(--tao-gold);font-weight:600;letter-spacing:1px">' + icon('compass') + ' ' + tr('ease_q_label') + '</div>' +
+    '<div class="ease-q" style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1);font-style:italic;margin-top:2px">' + esc(trw(key, 'q')) + '</div>' +
+    '<div style="margin-top:10px;font-size:var(--fs-2xs);color:var(--tao-gold);font-weight:600;letter-spacing:1px">' + icon('feather') + ' ' + tr('ease_try_label') + '</div>' +
+    '<div class="ease-try" style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b);margin-top:2px">' + esc(trw(key, 'try')) + '</div>'
+}
+function easeCardHtml(key) {
+  const open = easeOpen.has(key)
+  return '<div class="ease-card" data-key="' + key + '" style="background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px">' +
+    '<button class="ease-toggle" data-key="' + key + '" aria-expanded="' + open + '" style="display:flex;align-items:flex-start;gap:10px;width:100%;background:none;border:0;padding:0;text-align:start;cursor:pointer;color:inherit;font:inherit">' +
+      '<span style="flex:1;min-width:0">' +
+        '<span class="ease-title" style="display:block;font-size:var(--fs-md);font-weight:600;color:var(--tao-t1);margin-bottom:3px">' + esc(trw(key, 'title')) + '</span>' +
+        '<span class="ease-line" style="display:block;font-size:var(--fs-sm);color:var(--tao-t2);line-height:1.5">' + esc(trw(key, 'line')) + '</span>' +
+      '</span>' +
+      '<span class="ease-chev" style="flex-shrink:0;color:var(--tao-gold2);transition:transform .2s;transform:rotate(' + (open ? 180 : 0) + 'deg)">' + icon('chevron-down') + '</span>' +
+    '</button>' +
+    (open ? easeBodyWrapHtml(key) : '') +
+    '</div>'
+}
+function easeTabHtml() {
+  const wk = easeWeekCard(), wi = easeWeekWhatif()
+  return '<div id="ease-tab">' +
+    '<div style="text-align:center;margin-bottom:16px">' +
+      '<div style="font-size:var(--fs-2xl);font-weight:600;color:var(--tao-t1)">' + icon('feather') + ' ' + tr('tab_ease') + '</div>' +
+      '<div style="font-size:var(--fs-xs);color:var(--tao-t3);margin-top:3px">' + tr('ease_inspired') + '</div>' +
+    '</div>' +
+    taoPanelHtml(
+      taoLabelHtml(icon('sun') + ' ' + tr('ease_week_idea')) +
+      '<div id="ease-week" data-key="' + wk + '">' +
+        '<div style="font-size:var(--fs-xl);font-weight:600;color:var(--tao-t1);margin-bottom:10px">' + esc(trw(wk, 'title')) + '</div>' +
+        easeBodyHtml(wk) +
+      '</div>') +
+    taoPanelHtml(
+      taoLabelHtml(icon('lightbulb') + ' ' + tr('ease_whatif')) +
+      '<div id="ease-whatif" data-key="' + wi + '" style="font-size:var(--fs-lg);line-height:1.6;color:var(--tao-t1);font-style:italic;text-align:center">' + esc(trw(wi)) + '</div>') +
+    taoLabelHtml(icon('leaf') + ' ' + tr('ease_all_ideas')) +
+    '<div id="ease-cards">' + WATTS_CARD_KEYS.map(easeCardHtml).join('') + '</div>' +
+    '<div id="ease-nothing" style="background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:12px 14px;margin:16px 0 8px;text-align:center">' +
+      '<div style="font-size:var(--fs-md);font-weight:600;color:var(--tao-t1);margin-bottom:6px">' + icon('cloud') + ' ' + esc(trw('watts_nothing', 'title')) + '</div>' +
+      '<div style="font-size:var(--fs-sm);color:var(--tao-t2);line-height:1.6">' + esc(trw('watts_nothing', 'idea')) + '</div>' +
+    '</div>' +
+    '<div id="ease-footnote" style="font-size:var(--fs-2xs);color:var(--tao-t3);text-align:center;margin:14px 8px 4px;line-height:1.5">' + tr('ease_footnote') + '</div>' +
+    '</div>'
+}
+
 function renderTao() {
   const el = document.getElementById('screen-tao');
   const idx = getTaoChapter();
@@ -4034,11 +4285,12 @@ function renderTaoChapter(el, idx) {
 
   var subnavHtml =
     '<div style="display:flex;gap:6px;margin-bottom:18px;background:var(--tao-bg2);border-radius:var(--radius-lg);padding:4px">' +
-    ['tao','lead','adhd','talk'].map(function(m){
-      var labels = {tao:icon('yin-yang') + ' ' + tr('tab_tao') + '', lead:icon('target') + ' ' + tr('tab_lead') + '', adhd:icon('brain') + ' ADHD', talk:icon('message-circle') + ' ' + tr('tab_talk') + ''}
+    ['tao','lead','adhd','talk','ease'].map(function(m){
+      // five tabs: the icon above the word, so even "Leadership" fits a 360px phone
+      var labels = {tao:[icon('yin-yang'), tr('tab_tao')], lead:[icon('target'), tr('tab_lead')], adhd:[icon('brain'), 'ADHD'], talk:[icon('message-circle'), tr('tab_talk')], ease:[icon('feather'), tr('tab_ease')]}
       var active = m===taoMode
-      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;padding:9px 2px;border-radius:9px;font-size:var(--fs-sm);font-weight:600;' +
-        (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--tao-panel)' : 'background:transparent;color:var(--tao-t2)') + '">' + labels[m] + '</button>'
+      return '<button class="tao-subnav-btn" data-mode="'+m+'" style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 1px;border-radius:9px;font-size:var(--fs-2xs);font-weight:600;line-height:1.2;' +
+        (active ? 'background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--tao-panel)' : 'background:transparent;color:var(--tao-t2)') + '">' + labels[m][0] + '<span style="white-space:nowrap">' + labels[m][1] + '</span></button>'
     }).join('') +
     '</div>';
 
@@ -4052,6 +4304,8 @@ function renderTaoChapter(el, idx) {
     modeContentHtml = adhdHtml;
   } else if(taoMode==='talk') {
     modeContentHtml = renderTalkTab();
+  } else if(taoMode==='ease') {
+    modeContentHtml = easeTabHtml();
   } else {
     modeContentHtml =
       '<div style="font-size:var(--fs-xs);color:var(--tao-gold2);font-weight:600;letter-spacing:2px;margin-bottom:12px;text-align:center">' + trv('tao_chapter_of', {n: idx + 1, t: 80}) + '</div>' +
@@ -4091,6 +4345,10 @@ function renderTaoChapter(el, idx) {
       localStorage.setItem('fieldy_tao_mode', btn.getAttribute('data-mode'))
       renderTaoChapter(el, idx)
     }
+  });
+
+  document.querySelectorAll('.ease-toggle').forEach(function(btn){
+    btn.onclick = function(){ easeToggle(btn.getAttribute('data-key')) }
   });
 
   var prevBtn = document.getElementById('tao-prev');
