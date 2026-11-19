@@ -66,7 +66,7 @@ function serve() { return new Promise(res => { const s = http.createServer((q, r
   ok(await pg.evaluate(() => { const w = document.getElementById('ease-week'); return !!w.querySelector('.ease-q') && !!w.querySelector('.ease-try') }), 'the idea of the week is open in full')
   ok(await pg.evaluate(() => document.querySelectorAll('#ease-cards .ease-card').length === 16 && document.querySelectorAll('#ease-cards .ease-body').length === 0), 'sixteen cards, all closed')
   ok(await pg.evaluate(() => [...document.querySelectorAll('#ease-cards .ease-card')].every(c => c.querySelector('.ease-title').textContent.trim() && c.querySelector('.ease-line').textContent.trim())), 'a closed card shows a title and one line')
-  ok(await pg.evaluate(() => document.getElementById('ease-tab').textContent.includes('בהשראת אלן ווטס') && document.getElementById('ease-footnote').textContent.includes('נכתב במילים של Fieldy')), 'subtitle and footnote in Hebrew')
+  ok(await pg.evaluate(() => document.getElementById('ease-tab').textContent.includes('בהשראת אלן ווטס') && document.getElementById('ease-footnote').textContent.trim() === 'נכתב במילים של Fieldy, בהשראת אלן ווטס. אין כאן ציטוטים.'), 'subtitle and footnote in Hebrew')
   await pg.click('.ease-toggle[data-key="watts_breath"]'); await pg.waitForTimeout(100)
   ok(await pg.evaluate(() => { const c = document.querySelector('.ease-card[data-key="watts_breath"]'); return c.querySelector('.ease-toggle').getAttribute('aria-expanded') === 'true' && !!c.querySelector('.ease-body .ease-q') && !!c.querySelector('.ease-body .ease-try') && document.querySelectorAll('#ease-cards .ease-body').length === 1 }), 'a tap opens the full card (idea, question, practice)')
   await pg.click('.ease-toggle[data-key="watts_breath"]'); await pg.waitForTimeout(100)
@@ -79,6 +79,8 @@ function serve() { return new Promise(res => { const s = http.createServer((q, r
   const COUNT = /\d+\s*(\/|מתוך|of)\s*\d+|נקרא|קראת|רצף|streak|\bread\b|completed|הושלמ/i
   const heText = await pg.evaluate(() => document.getElementById('ease-tab').innerText)
   ok(!COUNT.test(heText) && !/\d/.test(heText.replace(/SPIS/g, '')), 'no counters, read marks or streaks in the Hebrew tab' + (COUNT.test(heText) ? ': ' + heText.match(COUNT)[0] : ''))
+  const lamp = await pg.evaluate(() => { const t0 = currentTheme, out = {}; for(const th of ['jungle', 'nachal', 'original']) { currentTheme = th; out[th] = easeTry('watts_hide_seek') } currentTheme = t0; return out })
+  ok(/פנס/.test(lamp.jungle) && !/פנס|לוקי/.test(lamp.nachal) && !/פנס|לוקי/.test(lamp.original), 'the hide-and-seek practice mentions Loki\'s lamp only in the jungle, where he is on screen')
   ok(pg.errs.length === 0, 'no page errors' + (pg.errs.length ? ': ' + pg.errs.join('|') : ''))
 
   console.log('\nthe tab (English, 360px)')
