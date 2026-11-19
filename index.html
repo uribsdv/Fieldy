@@ -3236,6 +3236,15 @@ const MOOD_LIB_EN = {
       "Turn off notifications that aren't urgent for half an hour, and stay in the flow.",
       "Finish one thing all the way before you jump to the next."
     ]},
+  motivated: {
+    ifthen: "If I feel like starting something new, I'll finish one open thing first.",
+    actions: [
+      "This is the time to go after the task you've put off the longest. This energy won't always be here.",
+      "Before you jump into something new, finish one thing that's already in progress. High motivation tends to open a lot and close little.",
+      "Write a short list of two or three things you want to push today, so the energy goes somewhere focused instead of scattering.",
+      "Save some of this energy for tomorrow. You don't have to burn it all in one day.",
+      "It's a good moment to move forward on personal growth or leadership too, not just field tasks."
+    ]},
   calm: {
     ifthen: "When I'm calm, I'll do the task that needs patience.",
     actions: [
@@ -3245,23 +3254,119 @@ const MOOD_LIB_EN = {
   stressed: {
     ifthen: "If there's too much, I'll pick one thing and start it for five minutes.",
     actions: [
-      "If you like, pick one thing that matters today and move the rest to \"Later\".",
-      "If you like, breathe out longer than you breathe in, a few times.",
-      "If you like, write down what really matters today."
+      "Pick one thing that matters today and move the rest to \"Later\", if you like.",
+      "Try a few breaths where the out-breath is longer than the in-breath.",
+      "Maybe write down what really matters today."
     ]},
   drained: {
     ifthen: "If I'm drained, I'll rest for 10 minutes and then do one small thing.",
     actions: [
-      "If you like, set the bar as low as it goes for today.",
-      "If you like, start with water, food and a 10-minute break.",
-      "If you like, then do the smallest task."
+      "For today, it's fine to set the bar as low as it goes.",
+      "Start with water, food and a 10-minute break.",
+      "Then, if you feel up to it, the smallest task."
+    ]},
+  inspired: {
+    ifthen: "When I have an idea, I'll write it in one line and go back to work.",
+    actions: [
+      "Jot the idea down in one line, then go back to the task.",
+      "Or give it 15 set minutes, if you like."
     ]},
   stuck: {
     ifthen: "If I'm stuck, I'll start with just two minutes and then decide.",
     actions: [
-      "If you like, shrink it down to a two-minute step.",
-      "If you like, switch to a different kind of task.",
-      "If you like, write down the smallest next step."
+      "You could shrink it down to a two-minute step.",
+      "Or switch to a different kind of task for a while.",
+      "It can help to write down the smallest next step."
+    ]},
+  anxious: {
+    ifthen: "If the thought keeps coming back, I'll write it in one sentence and go back to the task.",
+    actions: [
+      "Try two short breaths in and one long breath out, for a minute or two.",
+      "The 5-4-3-2-1 exercise can help: what you see, hear and feel around you.",
+      "If it helps, name it in one sentence: \"I'm anxious about…\""
+    ]},
+  connected: {
+    ifthen: "When I feel connected, I'll send someone a short thank-you.",
+    actions: [
+      "Write a thank-you or a warm message to one person.",
+      "Or set up something to do together, if you like."
+    ]},
+  content: {
+    ifthen: "When something works out, I'll write one line about what I did.",
+    actions: [
+      "Write down in one line what went well.",
+      "Notice it and name it, if you like: \"I'm content.\""
+    ]},
+  loaded: {
+    ifthen: "If I'm swamped, I'll pick one task and push back the rest.",
+    actions: [
+      "Just one thing right now.",
+      "The rest can move to \"Later\".",
+      "Try to keep \"Now\" at three tasks or fewer."
+    ]},
+  sick: {
+    ifthen: "If I'm unwell, I'll keep only one essential thing.",
+    actions: [
+      "Rest and water come first.",
+      "Move anything that isn't urgent to \"Later\", if you like.",
+      "One essential thing at most."
+    ]},
+  angry: {
+    ifthen: "If I want to send a message, I'll wait 10 minutes first.",
+    actions: [
+      "Name it, if you like: \"I'm angry because…\"",
+      "A walk or some movement, 5 to 10 minutes.",
+      "Wait 10 minutes before you send any message."
+    ]},
+  proud: {
+    ifthen: "When I'm proud, I'll write down what worked.",
+    actions: [
+      "Write down what worked, so you can do it again.",
+      "Or share it with someone, if you like."
+    ]},
+  restless: {
+    ifthen: "If I can't sit still, I'll get up and do one task on the move.",
+    actions: [
+      "Move for 5 to 10 minutes, then come back.",
+      "A physical task, or a call while you walk.",
+      "Or a short task you can do standing up."
+    ]},
+  curious: {
+    ifthen: "When I'm curious, I'll give it 10 minutes and then go back to the task.",
+    actions: [
+      "Set aside 10 minutes for it, then stop.",
+      "Or make a list of your questions, if you like."
+    ]},
+  lonely: {
+    ifthen: "If I'm lonely, I'll send one person a short message now.",
+    actions: [
+      "One short message to one person. The People screen can help.",
+      "Calling instead of typing can feel closer.",
+      "A small social step works too, like a thank-you or a question."
+    ]},
+  loving: {
+    ifthen: "When I feel love, I'll send a message without waiting.",
+    actions: [
+      "Send someone a short message now, if you like."
+    ]},
+  surprised: {
+    ifthen: "When something surprises me, I'll check whether the plan needs updating.",
+    actions: [
+      "Take one deep breath.",
+      "Check whether this changes today's plan.",
+      "Update your three tasks if it does."
+    ]},
+  patient: {
+    ifthen: "When I'm patient, I'll take on the task I keep putting off.",
+    actions: [
+      "A good time for that slow or boring thing you've been putting off."
+    ]},
+  sad: {
+    ifthen: "If I'm sad, I'll do one small thing I used to feel good doing.",
+    actions: [
+      "One small thing, something pleasant or something that matters.",
+      "Name it quietly, or reach out to someone.",
+      "Big decisions can wait until tomorrow."
     ]}
 }
 // A mood line (one of its actions, or its if-then line) in the interface language: the English at the same
@@ -9772,6 +9877,14 @@ const CALM_WHISPER = ['נרשם.', 'עוד אחת מאחוריך.', 'זה נעש
   'היער שם לב.', 'טיפה נוספה לנחל.', 'אחת פחות על הכתפיים.', 'זה מספיק לרגע הזה.', 'עשית את זה.', 'רגע של שקט, מגיע לך.',
   'עוד עלה נפתח.', 'משהו זז היום.', 'אפשר להניח את זה.', 'בקצב שלך.', 'זה נחשב.', 'המים ממשיכים לזרום.', 'נקודה קטנה של אור.', 'טוב. הלאה, כשתרצה.']
   // i18n-exempt-end
+// English, at the same places as CALM_WHISPER (stage 3). The round keeps picking the Hebrew line by its place, and calmLine()
+// shows the English at that place when the interface is English; a line with no English stays Hebrew.
+const CALM_WHISPER_EN = ["Noted.", "One more behind you.", "Done. You can breathe.", "The stream heard.", "A small step, a real one.", "Closed. No need to rush.", "The forest noticed.", "One more drop in the stream.", "One less on your shoulders.", "That's enough for this moment.", "You did it.", "A quiet moment. You earned it.", "Another leaf opens.", "Something moved today.", "You can set it down.", "At your own pace.", "It counts.", "The water keeps flowing.", "A small point of light.", "Good. On to the next, when you're ready."]
+function calmLine(t) {
+  if(uiLang !== 'en') return t
+  const i = CALM_WHISPER.indexOf(t)
+  return (i >= 0 && CALM_WHISPER_EN[i]) || t
+}
 const CALM_RULES = {gap: 10000, show: 4000}
 let calmLast = 0
 // before the close reaches the screen: what the garden brought, and whether Loki answers it where it can be seen now
@@ -9809,7 +9922,7 @@ function calmPick() {
 // a small line just above the nav, where the closed task was (a task closed leaves the list it was in, on Home and on the tasks screen)
 function calmWhisper() {
   document.querySelectorAll('.calm-w').forEach(e => e.remove())
-  const el = document.createElement('div'); el.className = 'calm-w'; el.setAttribute('role', 'status'); el.textContent = calmPick()
+  const el = document.createElement('div'); el.className = 'calm-w'; el.setAttribute('role', 'status'); el.textContent = calmLine(calmPick())
   document.body.appendChild(el)
   setTimeout(function() { el.remove() }, CALM_RULES.show)
 }

@@ -228,7 +228,12 @@ function grabLiteralAt(open) {
   // eslint-disable-next-line no-new-func
   try { return new Function('return ' + src.slice(open, i + 1))() } catch(e) { return null }
 }
-if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + Object.keys(MOOD_EN || {}).length + ' moods')
+const CW = grabLiteral('CALM_WHISPER'), CW_EN = grabLiteral('CALM_WHISPER_EN')
+if(Array.isArray(CW_EN)) {
+  if(CW_EN.length !== CW.length) { fail('CALM_WHISPER_EN has ' + CW_EN.length + ' lines, the Hebrew has ' + CW.length); bad4++ }
+  CW_EN.forEach((t, i) => { if(typeof t !== 'string' || !t.trim() || HEB.test(t) || t === CW[i]) { fail('CALM_WHISPER_EN[' + i + '] is empty, Hebrew or the same as the Hebrew'); bad4++ } })
+}
+if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + Object.keys(MOOD_EN || {}).length + ' moods, ' + (CW_EN ? CW_EN.length : 0) + ' calm whispers')
 
 console.log('\n' + (failures ? '✕ ' + failures + ' problem(s)' : '✓ i18n coverage passed'))
 process.exit(failures ? 1 : 0)
