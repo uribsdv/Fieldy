@@ -8,6 +8,8 @@
  *      matches no key at all;
  *   2. a TRANSLATIONS entry has no English, or English identical to the
  *      Hebrew (allowed only when the Hebrew holds no Hebrew letters, e.g. REMO);
+ *      the same for every field of WATTS_CONTENT (the Ease tab's cards), which
+ *      also must not leave out a field in either language;
  *   3. Hebrew is left inside a string, template or regex in the scripts, or in
  *      the static HTML outside an element that carries data-i18n — unless it
  *      sits in a region marked as an exception:
@@ -70,6 +72,37 @@ for(const k of keys) {
   else if(HEB.test(e.en)) { fail(k + ': English holds Hebrew letters'); bad++ }
 }
 if(!bad) console.log('  ✓ all ' + keys.length + ' keys')
+
+// ── WATTS_CONTENT (the Ease tab) ────────────────────────────────────────────
+// Same layer as TRANSLATIONS, read through trw(): an entry is {he, en}, each a
+// string or an object of fields ({title, line, idea, q, try}). Every field
+// must exist in both languages, with English of its own and no Hebrew in it.
+console.log('\n2b. every Ease (WATTS_CONTENT) entry has its own English')
+const wStart = src.indexOf('const WATTS_CONTENT = {')
+let wEnd = -1
+if(wStart < 0) fail('WATTS_CONTENT not found')
+else {
+  const wBodyStart = src.indexOf('{', wStart)
+  wEnd = src.indexOf('\n}\n', wBodyStart)
+  // eslint-disable-next-line no-new-func
+  const W = new Function('return ' + src.slice(wBodyStart, wEnd + 2))()
+  let wBad = 0, fields = 0
+  for(const k of Object.keys(W)) {
+    const e = W[k]
+    if(!e || e.he == null || e.en == null) { fail(k + ': needs both he and en'); wBad++; continue }
+    const pairs = typeof e.he === 'string' ? [[k, e.he, e.en]] : Object.keys(e.he).map(f => [k + '.' + f, e.he[f], e.en[f]])
+    if(typeof e.he !== 'string') for(const f of Object.keys(e.en)) if(!(f in e.he)) pairs.push([k + '.' + f, undefined, e.en[f]])
+    for(const [name, he, en] of pairs) {
+      fields++
+      if(typeof he !== 'string' || !he.trim() || !HEB.test(he)) { fail(name + ': no Hebrew'); wBad++; continue }
+      if(typeof en !== 'string' || !en.trim()) { fail(name + ': no English'); wBad++; continue }
+      if(en === he) { fail(name + ': English is the same as the Hebrew'); wBad++ }
+      else if(HEB.test(en)) { fail(name + ': English holds Hebrew letters'); wBad++ }
+    }
+  }
+  for(const m of code.matchAll(/\btrw\(\s*'([a-z][a-z0-9_]*)'/g)) if(!(m[1] in W)) { fail('trw key used but not defined: ' + m[1]); wBad++ }
+  if(!wBad) console.log('  ✓ ' + Object.keys(W).length + ' entries, ' + fields + ' fields')
+}
 
 // ── Hebrew left in the code ─────────────────────────────────────────────────
 console.log('\n3. no Hebrew left in interface strings')
@@ -149,6 +182,7 @@ for(const m of src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)
   for(const t of lex(body, base)) {
     if(!HEB.test(t.text)) continue
     if(t.at >= tStart && t.at < tEnd) continue
+    if(wStart >= 0 && t.at >= wStart && t.at < wEnd) continue
     const first = lineOf(t.at), last = lineOf(t.at + t.text.length - 1)
     let ok = true
     for(let ln = first; ln <= last; ln++) if(!exempt[ln]) {

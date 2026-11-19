@@ -103,6 +103,7 @@ const SCENES = [
   ['tao-tao', () => { localStorage.setItem('fieldy_tao_mode', 'tao'); navigateTo('tao') }],
   ['tao-lead', () => { localStorage.setItem('fieldy_tao_mode', 'lead'); navigateTo('tao') }],
   ['tao-adhd', () => { localStorage.setItem('fieldy_tao_mode', 'adhd'); navigateTo('tao') }],
+  ['tao-ease', () => { easeOpen = new Set(['watts_breath']); localStorage.setItem('fieldy_tao_mode', 'ease'); navigateTo('tao') }],
   ['tao-talk', () => { talkScenario = null; talkMessages = []; talkBusy = false; localStorage.setItem('fieldy_tao_mode', 'talk'); navigateTo('tao') }],
   ['tao-talk-chat', () => { talkScenario = TALK_SCENARIOS[0]; talkMessages = [{ role: 'assistant', content: 'היי! אני דנה, נעים מאוד.\nמה הביא אותך לכנס?' }, { role: 'user', content: 'באתי בשביל ההרצאה על משאבות סולאריות' }]; talkBusy = true; navigateTo('tao') }],
   ['input', () => navigateTo('input')],
