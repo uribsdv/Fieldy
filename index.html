@@ -3208,6 +3208,16 @@ const MOOD_LIB_EN = {
       "Get up for a minute, move your body, drink some water. Your head settles when your body moves.",
       "Ask yourself: what is the one thing that would change the most if it got done today? Just that."
     ]},
+  scattered: {
+    ifthen: "If I'm scattered, I'll set a 10-minute timer for one task.",
+    actions: [
+      "Pick one small task and set a timer for 10 minutes. Just that one.",
+      "Close extra tabs and apps for a while. Less noise, more focus.",
+      "Tell someone what you're starting now. Saying it out loud helps you stick to it.",
+      "Write three words for what's distracting you right now. Sometimes that's enough to let it go.",
+      "Move somewhere else, another room or another chair, before you start something new.",
+      "Pick the smallest task on the list, not the most important one. Just to get moving."
+    ]},
   tired: {
     ifthen: "If I'm tired, I'll drink some water and then do one easy thing.",
     actions: [
@@ -3218,11 +3228,40 @@ const MOOD_LIB_EN = {
       "Move the hardest task to tomorrow morning, and do only easy things now.",
       "Check when you last ate or drank. Sometimes that's all the tiredness is."
     ]},
+  focused: {
+    ifthen: "If something interrupts me, I'll write it down and go back to the block.",
+    actions: [
+      "This is the time for the hardest or most important task. Use it now.",
+      "Put off interruptions by 30 to 45 minutes if you can, and stretch this block.",
+      "Turn off notifications that aren't urgent for half an hour, and stay in the flow.",
+      "Finish one thing all the way before you jump to the next."
+    ]},
   calm: {
     ifthen: "When I'm calm, I'll do the task that needs patience.",
     actions: [
       "If you like, use the calm for a task that needs quiet.",
       "If you like, leave the calm as it is. Don't fill it up with more."
+    ]},
+  stressed: {
+    ifthen: "If there's too much, I'll pick one thing and start it for five minutes.",
+    actions: [
+      "If you like, pick one thing that matters today and move the rest to \"Later\".",
+      "If you like, breathe out longer than you breathe in, a few times.",
+      "If you like, write down what really matters today."
+    ]},
+  drained: {
+    ifthen: "If I'm drained, I'll rest for 10 minutes and then do one small thing.",
+    actions: [
+      "If you like, set the bar as low as it goes for today.",
+      "If you like, start with water, food and a 10-minute break.",
+      "If you like, then do the smallest task."
+    ]},
+  stuck: {
+    ifthen: "If I'm stuck, I'll start with just two minutes and then decide.",
+    actions: [
+      "If you like, shrink it down to a two-minute step.",
+      "If you like, switch to a different kind of task.",
+      "If you like, write down the smallest next step."
     ]}
 }
 // A mood line (one of its actions, or its if-then line) in the interface language: the English at the same
@@ -3752,7 +3791,7 @@ const TAO_TITLES = ['הדרך','הכל חלקי','מחוץ לזמן','חוק א�
 // English Tao (stage 3). New English written from the meaning of the classical text: not a translation of
 // the Hebrew above and not based on any published English version. Same index as TAO_CHAPTERS; an index
 // that is not here yet falls back to the Hebrew. Index 0 holds classical chapters 1 and 2 (as the Hebrew
-// does), and index i after it holds classical chapter i + 2, so each one sits where the Hebrew topic sits.
+// does), and index i after it holds classical chapter i + 2 (index 19 = classical 21), so each one sits where the Hebrew topic sits.
 const TAO_CHAPTERS_EN = [
   "A Way you can explain\nis not the Way that lasts.\nA name you can give\nis not the name that stays.\nBefore anything had a name,\nheaven and earth began from it.\nOnce it was named,\nit became the mother of everything.\nWhen you want nothing,\nyou see how deep it goes.\nWhen you want something,\nyou see only where it ends.\nBoth come from one place.\nOnly their names are different.\nBoth are a mystery.\nGo into the mystery\nand there is more of it.\nThat is the door\nevery wonder comes through.\n\n· · ·\n\nOnce we agree on what is beautiful,\nthe ugly shows up beside it.\nOnce we agree on what is good,\nthe bad is there too.\nSomething and nothing\ngive rise to each other.\nHard and easy\ncomplete each other.\nLong and short\nmeasure each other.\nHigh and low\nlean toward each other.\nA note and a voice\nanswer each other.\nFront and back\ntake turns.\nSo the sage\ngets things done without pushing\nand teaches without a word.\nThings rise and fall,\nand the sage lets them.\nMakes, and does not keep.\nWorks, and lets go of the outcome.\nFinishes, and walks on.\nHolding on to nothing,\nthe sage loses nothing.",
   "Stop praising the clever,\nand people stop fighting to be first.\nStop treasuring rare things,\nand people stop stealing.\nDon't parade what others crave,\nand their hearts stay quiet.\nSo the sage leads like this:\nclears the mind,\nfills the belly,\neases the drive to get ahead,\nkeeps the body strong.\nHelp people want less\nand scheme less,\nand the schemers\nhave nothing to work with.\nAct without forcing,\nand everything finds its place.",
@@ -3762,11 +3801,22 @@ const TAO_CHAPTERS_EN = [
   "Heaven and earth go on and on.\nWhy do they last so long?\nThey don't live for themselves.\nThat is why they keep going.\nSo the sage steps back\nand finds the way forward,\ndoesn't worry about staying safe,\nand stays safe.\nWanting nothing for the self,\nthe self is complete.",
   "The best way to be good\nis to be like water.\nWater helps everything grow\nand argues with no one.\nIt goes to the low places\nnobody wants,\nand that is why\nit is so close to the Way.\nAt home, stay near the ground.\nIn the heart, go deep.\nWith others, be kind.\nIn speech, keep your word.\nIn leading, keep things clear.\nIn work, do it well.\nIn action, pick the moment.\nDon't compete,\nand no one can fault you.",
   "Keep pouring\nand the cup runs over.\nBetter to stop in time.\nKeep grinding the blade\nand the edge chips.\nA house full of gold\nis a house you have to guard.\nMoney and pride\nset up their own fall.\nWhen the work is done,\nwalk away from it quietly.\nThat is how heaven moves.",
-  "Can you hold body and mind as one\nand not drift apart?\nCan you let your breath go soft,\nlike a baby's?\nCan you wipe the inner mirror\nuntil nothing is left on it?\nCan you love people\nand lead them without tricks?\nWhen things open and close in you,\ncan you stay gentle and let them?\nCan you see clearly all around\nand not rely on what you know?\nBring things to life and feed them.\nMake them, but don't own them.\nHelp, but don't keep score.\nGuide, but don't take over.\nThis is the quiet strength\nthat runs deepest.",
-  "Thirty spokes run into one hub.\nThe hole in the middle\nis what lets the wheel turn.\nA potter works clay into a jar.\nThe hollow inside\nis what lets it hold water.\nCut a door and windows\ninto the walls of a house.\nThe open space\nis what you live in.\nWhat is there\ngives a thing its shape.\nWhat is not there\nis what makes it useful."
+  "Can you hold body and mind as one\nand not drift apart?\nCan you let your breath go soft,\nlike a baby's?\nCan you wipe the inner mirror\nuntil nothing is left on it?\nCan you care for people\nand guide them without scheming?\nWhen things open and close in you,\ncan you stay gentle and let them?\nCan you see clearly all around\nand not rely on what you know?\nBring things to life and feed them.\nMake them, but don't own them.\nHelp, but don't keep score.\nGuide, but don't take over.\nThis is the quiet strength\nthat runs deepest.",
+  "Thirty spokes run into one hub.\nThe hole in the middle\nis what lets the wheel turn.\nA potter works clay into a jar.\nThe hollow inside\nis what lets it hold water.\nCut a door and windows\ninto the walls of a house.\nThe open space\nis what you live in.\nWhat is there\ngives a thing its shape.\nWhat is not there\nis what makes it useful.",
+  "Too many colors,\nand the eyes stop seeing.\nToo many sounds,\nand the ears stop hearing.\nToo many flavors,\nand the tongue stops tasting.\nRacing and hunting\ndrive the heart wild.\nRare and costly things\npull you off your path.\nSo the sage\nfeeds the belly, not the eyes,\nlets go of that\nand keeps this.",
+  "Praise and blame\nboth keep you on edge.\nBig trouble weighs on you\nthe way your body does.\nWhat does that mean?\nPraise lifts you\nonly to set you down.\nYou tremble to get it.\nYou tremble to lose it.\nAnd trouble weighs on you\nbecause you have a self to guard.\nWith no self to guard,\nwhat trouble is left?\nCare for the world\nas you care for your body,\nand you can be trusted with it.\nLove the world\nas you love yourself,\nand it can be put in your hands.",
+  "You look for it\nand there is nothing to see.\nYou listen for it\nand there is nothing to hear.\nYou reach for it\nand there is nothing to hold.\nThese three can't be pulled apart.\nThey blur into one.\nIts top gives no light.\nIts bottom casts no shadow.\nIt runs on and on, past naming,\nand slips back into nothing.\nA shape with no shape,\na picture of no thing,\nalways just out of focus.\nWalk toward it: no face.\nWalk behind it: no back.\nHold to the old Way\nto handle what is here now.\nKnowing where it all began\nis the thread you follow.",
+  "The wise ones of old\nwere subtle and deep,\ntoo deep to be known.\nSince they can't be known,\nall I can do is describe them.\nCareful, like someone crossing\na river in winter.\nAlert, as if danger\nwere on every side.\nPolite, like a guest.\nLoose, like ice starting to melt.\nPlain, like wood not yet carved.\nOpen, like a valley.\nMurky, like a stream after rain.\nWho can be still\nand let the cloudy water clear?\nWho can stay calm,\nthen slowly start to move?\nHolding to the Way,\nthey don't try to be full.\nNever full,\nthey can wear out\nand begin again.",
+  "Go all the way to empty.\nStay steady in the quiet.\nEverything rises at once,\nand I watch it come back.\nThings grow and bloom,\nand each one goes home\nto its root.\nGoing home to the root\nis stillness.\nStillness is coming back\nto what you are.\nThat is what lasts.\nTo know what lasts\nis to see clearly.\nNot knowing it,\nyou act blindly and get hurt.\nKnowing it,\nyou make room for everything.\nMaking room, you are fair.\nBeing fair, you are whole.\nWhole, you are like the sky.\nLike the sky, you are on the Way.\nOn the Way, you last.\nThe body ends,\nand there is nothing to fear.",
+  "The best leaders\nare barely noticed.\nThe next best\nare loved and praised.\nThen come the ones people fear,\nand then the ones they mock.\nIf you don't trust people enough,\nthey won't trust you.\nThe good leader is unhurried\nand careful with words.\nWhen the work is done,\npeople say,\n\"It just came about on its own.\"",
+  "Once people leave the great Way,\nthey start talking about\nkindness and duty.\nWhen cleverness shows up,\nso does pretending.\nWhen families fall out,\npeople start praising\ngood sons and loving parents.\nWhen a country falls into chaos,\nloyal ministers appear.",
+  "Drop the show of wisdom\nand the pile of know-how,\nand people are far better off.\nDrop the speeches about\nkindness and duty,\nand families care\nfor each other again.\nDrop the clever schemes\nand the hunger for profit,\nand thieves disappear.\nBut these three are only surface.\nThey are not enough.\nSo give people something to hold:\nlook plain,\nstay simple,\nthink less about yourself,\nwant less.",
+  "Give up all the studying\nand the worry goes with it.\n\"Yes\" and \"uh-huh\":\nhow different are they really?\nGood and bad:\nhow far apart are they?\nWhat others fear,\nI suppose I should fear too.\nBut where does it end?\nEveryone is cheerful,\nas if at a big feast,\nor climbing a lookout in spring.\nI alone sit quiet\nand give no sign,\nlike a baby who hasn't smiled yet,\ndrifting,\nwith no home to go back to.\nEveryone has more than enough.\nI seem to be the one left out.\nMy mind is like a simpleton's,\nall muddled.\nOther people are bright and sure.\nI am hazy.\nOther people are quick and sharp.\nI am slow.\nI roll like the sea.\nI move like wind\nthat never stops.\nEveryone has a purpose.\nI alone seem stubborn and plain.\nI am different from the rest:\nI live on what the mother gives.",
+  "The deepest goodness\nsimply follows the Way.\nAnd the Way, as a thing,\nis dim and hard to hold.\nDim and hard to hold,\nyet there is an image in it.\nHard to hold and dim,\nyet there is something in it.\nDeep and dark,\nyet there is a seed of life in it.\nThat seed is real.\nYou can rely on it.\nFrom long ago until now\nits name has never faded.\nThrough it we see\nhow everything begins.\nHow do I know\nhow everything begins?\nThrough this."
 ]
 const TAO_TITLES_EN = ['The Way','Keeping it simple','Older than time','No favorites','The valley spirit',
-  'Not for itself','Like water','Knowing when to stop','Can you?','The use of empty space']
+  'Not for itself','Like water','Knowing when to stop','Can you?','The use of empty space',
+  'Enough to see','Praise and blame','What cannot be seen','The old masters','Back to the root','Leading lightly','When the Way is lost','Plain and simple','Apart from the crowd','Inside the dim']
 // The chapter text and its title in the interface language: the English when it exists, else the Hebrew.
 function taoEnReady(i) { return uiLang === 'en' && typeof TAO_CHAPTERS_EN[i] === 'string' && TAO_CHAPTERS_EN[i].trim() !== '' }
 function taoChapter(i) { return taoEnReady(i) ? TAO_CHAPTERS_EN[i] : (TAO_CHAPTERS[i] || '') }
