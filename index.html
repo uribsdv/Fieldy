@@ -2832,7 +2832,7 @@ const TRANSLATIONS = {
   ease_whatif: {he:'מה אם, השבוע', en:'This week, what if'},
   ease_all_ideas: {he:'כל הרעיונות', en:'All the ideas'},
   ease_q_label: {he:'שאלה לעצמך', en:'Ask yourself'},
-  ease_try_label: {he:'לנסות', en:'Try'},
+  ease_try_label: {he:'ניסוי קטן', en:'A small experiment'},
   ease_footnote: {he:'נכתב במילים של Fieldy, בהשראת אלן ווטס. אין כאן ציטוטים.', en:"Written in Fieldy's own words, inspired by Alan Watts. No quotations."},
   tao_chapter_of: {he:'פרק {n} מתוך {t}', en:'Chapter {n} of {t}'},
   prev: {he:'הקודם', en:'Previous'},
@@ -2883,177 +2883,177 @@ const TRANSLATIONS = {
   state_err_reset_confirm: {he:'להתחיל מחדש עם נתונים ריקים? העותק הפגום יישמר במכשיר תחת מפתח גיבוי ולא יימחק.', en:'Start over with empty data? The damaged copy is kept on this device under a backup key and is not deleted.'},
 }
 // ── EASE (בקלות): the Watts section's content ──
-// Inspired by Alan Watts, written fresh in Fieldy's own words: no quotations, none of his examples, nothing
-// put in his mouth (docs/watts-ideas-map.md, docs/watts-proposal.md). Each language is written on its own,
-// neither is a translation of the other. Same i18n layer as TRANSLATIONS: read through trw(), which falls
-// back to the Hebrew exactly as tr() does. A card is {he: {title, line, idea, q, try}, en: {...}} (and `tryJungle`, said only in the jungle theme); `idea`
-// splits into paragraphs on "\n". Keys are stable (they never change, so nothing saved can point at a wrong
-// card); WATTS_CARD_KEYS and WATTS_WHATIF_KEYS give the order. Nothing here is counted or marked as read.
-// tests/i18n-coverage.cjs reads this object like TRANSLATIONS: every field in both languages, the English
-// different from the Hebrew and free of Hebrew letters.
+// Inspired by Alan Watts and about life itself, not about work: each card rests on one central idea of his books
+// (The Book, The Way of Zen, The Meaning of Happiness, The Essential Alan Watts, Philosophies of Asia, the lectures,
+// the early writings), and may lean on his images, but every sentence is written fresh in Fieldy's own words: no
+// quotations, no translated passages, nothing put in his mouth. Each language is written on its own, neither is a
+// translation of the other. Nothing here points to another screen of the app. Same i18n layer as TRANSLATIONS: read
+// through trw(), which falls back to the Hebrew exactly as tr() does. A card is {he: {title, line, idea, q, try},
+// en: {...}}; `idea` splits into paragraphs on "\n". Keys are stable; WATTS_CARD_KEYS and WATTS_WHATIF_KEYS give
+// the order. Nothing here is counted or marked as read. tests/i18n-coverage.cjs reads this object like TRANSLATIONS
+// (every field in both languages, the English its own and free of Hebrew), and tests/watts-tab.cjs keeps work words
+// and references to other screens out of it.
 const WATTS_CONTENT = {
-  watts_ease_up: {
-    he: {title: "מתאמצים פחות, רואים יותר", line: "כשדוחפים חזק, חצי מהכוח הולך על הדחיפה.",
-      idea: "משאבה תקועה, והקבלן כבר מחכה. הגוף אומר: להתכווץ, להילחם, לפתור עכשיו. אבל כשמתאמצים בכוח להתרכז, חצי מהקשב הולך על המאמץ עצמו. דווקא מי שמגיע רפוי שומע מאיפה בא הרעש.\nזו לא עצלות. גם לעץ יש סיבים, ומי שחותך לאורכם מתעייף פחות ומגיע רחוק יותר.",
-      q: "איפה היום דחפת חזק, ומה היה קורה אילו רק הסתכלת עוד רגע?",
-      try: "במשימה הכי קשה ברשימה, \"חמש דקות רכות\". לפתוח, לקרוא פעם אחת, לכתוב בהערת השוליים מה אתה רואה, ולא להתחייב לסיים."},
-    en: {title: "Ease up, see more", line: "Force your focus and half of it goes into the forcing.",
-      idea: "A pump is stuck and the contractor is already waiting. Your body says: tense up, fight it, fix it now. But when you force yourself to focus, half your attention goes into the forcing. The one who shows up loose is the one who hears where the noise is coming from.\nThis isn't laziness. Wood has a grain, and if you cut with it you tire less and get further.",
-      q: "Where did you push hard today, and what might have happened if you'd just looked a moment longer?",
-      try: "On the hardest task on your list, take five soft minutes. Open it, read it once, write one side note about what you see, and don't promise to finish."}},
-  watts_true_now: {
-    he: {title: "מה נכון עכשיו", line: "לפני \"מה היה צריך להיות\", יש את מה שיש.",
-      idea: "המשאבה לא תתחיל לעבוד כי כעסנו עליה. מי שנלחם בעייפות שלו מתעייף פעמיים, ומי שכועס על הכעס משלם כפול. לקבל את מה שקורה זה לא להרים ידיים. זו נקודת ההתחלה: רק כשמודים שהאתר באמת תקוע, אפשר לבחור את הצעד הבא בלי לבזבז כוח על ויכוח עם המציאות.",
-      q: "מה נכון עכשיו, לפני \"מה היה צריך להיות\"?",
-      try: "בסקירת המשימות של היום, כשמגיעים למשימה תקועה: לפתוח אותה ולכתוב בהערת השוליים שורה אחת, \"מה נכון עכשיו\". רק אחר כך להחליט אם להעביר אותה ל\"אחר כך\"."},
-    en: {title: "What's true right now", line: "Before \"it shouldn't be like this,\" there's what is.",
-      idea: "Glaring at a dead pump has never once restarted it. Fight your tiredness and you end up tired twice; get angry at being angry and you've doubled the bill. Accepting what's happening isn't giving up. It's the ground you stand on to take the next step. Once you admit the site really is stuck, the energy you were spending arguing with it is free for something useful.",
-      q: "What's actually true right now, before what should have been?",
-      try: "In today's task review, when you reach a stuck task, open it and add one side note: \"what's true now.\" Only then decide whether to move it to Later."}},
-  watts_opposites: {
-    he: {title: "אור וצל צריכים זה את זה", line: "אין אתר שנפתח בלי שקודם היה תקוע.",
-      idea: "אין גל בלי שקע, ואין \"סוף סוף עובד\" בלי שבוע של \"עדיין לא\" לפניו. הם נראים כמו אויבים, אבל הם שני קצוות של אותו חבל. מי שמנסה שהצד הטוב ינצח לתמיד, רק ימים טובים ורק אתרים ירוקים, נכנס למשחק שאף אחד עוד לא ניצח בו. יום רע לא מוחק שבוע טוב. הוא חלק מאותו גל.",
-      q: "מה היה הצד השני של הדבר הכי מעצבן היום?",
-      try: "כשאתר תקוע סוף סוף זז, לפני שלוחצים \"בטל תקוע\", לכתוב בתיאור המקרה המפורט שלו מה התקיעה לימדה. ככה שני החצאים נשמרים באותו מקום."},
-    en: {title: "Light needs shade", line: "No site ever got unstuck without being stuck first.",
-      idea: "There's no wave without a trough, and no \"finally, it's running\" without the week of \"still not running\" before it. They look like enemies, but they're two ends of the same rope. Trying to make the good side win for good, only green sites and only good days, is a game nobody has won yet. A bad day doesn't cancel a good week. It's part of the same wave.",
-      q: "What was the other side of the most annoying thing today?",
-      try: "When a stuck site finally moves, before you tap \"Not stuck,\" write in its detailed case description what the stuck part taught you. Both halves end up in the same place."}},
-  watts_weave: {
-    he: {title: "חוט אחד במארג", line: "אתה לא עומד מעל המערכת. אתה ארוג בתוכה.",
-      idea: "קל לדמיין את עצמך יושב במרכז ומזיז את כולם. אבל מנהל אזור קיים רק יחד עם האתרים, הקבלנים, המשאבות והגשם. כולם משפיעים זה על זה באותו רגע, ואף אחד לא מושך בחוטים לבד. מי שרואה ככה מפסיק לחפש אשם, ומתחיל לחפש איפה החוט נשחק.",
-      q: "מי עוד היה חלק מההצלחה של היום, גם אם השם שלו לא כתוב במשימה?",
-      try: "כשסוגרים משימה שמישהו אחר עזר בה, להוסיף בהערת השוליים מה הוא הביא. שורה אחת מספיקה."},
-    en: {title: "One thread in the weave", line: "You're not standing above the system. You're woven into it.",
-      idea: "It's tempting to picture yourself at the center, moving everyone else around. But an area manager only exists together with the sites, the contractors, the pumps and the rain. They all shape each other at the same moment, and nobody is pulling the strings alone. Seen that way, you stop hunting for someone to blame and start looking for the thread that's wearing thin.",
-      q: "Who else was part of today's win, even if their name isn't on the task?",
-      try: "When you close a task someone else helped with, add a side note about what they brought. One line is plenty."}},
-  watts_not_a_chore: {
-    he: {title: "לא להפוך את השקט למשימה", line: "\"להירגע\" הוא לא עוד סעיף ברשימה.",
-      idea: "ברגע ש\"להיות רגוע\" נכנס לרשימה, הוא נהיה משימה, ובמשימה אפשר להיכשל. ואז כבר לא רגועים, וגם אשמים. לכן הלשונית הזו לא סופרת כמה כרטיסים קראת. מה שכבר עובד היום לא צריך מעקב. הוא רק צריך שמישהו ישים לב אליו.",
-      q: "מה כבר עבד היום בלי שעשית בשבילו כלום?",
-      try: "במסך המשימות, לעבור על מה שסימנת היום כבוצע ולבחור משימה אחת שהלכה בקלות. לא לרשום כלום, רק לראות אותה."},
-    en: {title: "Don't turn calm into a chore", line: "Relaxing doesn't belong on the to-do list.",
-      idea: "The moment \"be calm\" goes on the list, it becomes a task, and tasks can be failed. Now you're not calm and you feel guilty about it. That's why nothing on this tab counts how many cards you've read. Whatever is already working today doesn't need tracking. It just needs someone to notice it.",
-      q: "What worked today without you doing anything for it?",
-      try: "In Tasks, look over what you marked done today and pick one task that went easily. Don't write anything down. Just see it."}},
-  watts_play_now: {
-    he: {title: "עבודה כמשחק, זמן כעכשיו", line: "העבודה קורית רק עכשיו. גם הכיף.",
-      idea: "אף אחד לא משקה גן כדי לגמור אותו. גם רוב העבודה קורית רק עכשיו: השיחה הזו, האתר הזה, הכביש הזה. מי שרץ ממשימה למשימה אף פעם לא באמת נמצא באף אחת מהן. תוכניות זה טוב, כל עוד הן משרתות את היום ולא בולעות אותו.",
-      q: "איזה רגע היום היה טוב כשלעצמו, לא בגלל מה שהוא הביא?",
-      try: "לבחור משימה אחת מהרשימה של היום ולעשות אותה לאט, בשבילה. אחרי שסוגרים אותה, לחכות נשימה אחת לפני שפותחים את הבאה."},
-    en: {title: "Work as play, time as now", line: "Work only happens now. So does the fun.",
-      idea: "Nobody waters a garden to get it finished. Most of the work happens only now, too: this call, this site, this stretch of road. Rushing from task to task means never quite being at any of them. Plans are great, as long as they serve the day instead of swallowing it.",
-      q: "What moment today was good in itself, not for what it led to?",
-      try: "Pick one task on today's list and do it slowly, for its own sake. When you close it, wait one breath before opening the next."}},
-  watts_role: {
-    he: {title: "לשחק את התפקיד", line: "אפשר לשחק ברצינות, ולזכור שזו הצגה.",
-      idea: "מנהל אזור, קבלן, נציג החברה: כולם תפקידים, עם תלבושת וטקסט. אפשר לשחק אותם היטב ובמלוא הרצינות, ועדיין לזכור שמתחת יש בן אדם. כשקבלן צועק על \"החברה\", זה לא תמיד אישי. זה לא אומר שצריך לספוג השפלה או התעללות, רק שלא כל צעקה מכוונת אליך. וכשאתה עונה בתור \"החברה\", כדאי לזכור שגם הוא לא רק \"הקבלן\".",
-      q: "באיזה תפקיד היית היום הכי \"בדמות\", ומה היית אומר אילו יצאת ממנו לרגע?",
-      try: "בלשונית \"שיחה\", אחרי תרחיש: מה היה התפקיד שלך, ומי היה האדם שמולך?"},
-    en: {title: "Play the role, know it's a role", line: "You can play it straight and still know it's a play.",
-      idea: "Area manager, contractor, the company rep: they're all parts, with a costume and lines. You can play yours well and completely seriously, and still remember there's a person underneath. When a contractor yells at \"the company,\" it isn't always personal. That doesn't mean you have to take abuse or humiliation, only that not every shout is aimed at you. And when you answer as \"the company,\" it helps to remember he isn't only \"the contractor\" either.",
-      q: "Where were you most in character today, and what would you have said if you'd stepped out for a moment?",
-      try: "In Talk, after a scenario, ask yourself: what was your role, and who was the person across from you?"}},
-  watts_with_nature: {
-    he: {title: "לעבוד עם הטבע, לא נגדו", line: "מי שנלחם בגשם מפסיד. מי שמתכנן איתו מרוויח יום.",
-      idea: "מערכת סולארית היא בעצם עסקה עם השמש, ומשאבה היא הסכם עם מים שכבר נמצאים באדמה. אפשר לקחת את הגשם כעלבון אישי, ואפשר לבנות איתו את השבוע. הטבע לא נגדך. הוא פשוט עסוק בשלו, ועם מי שעסוק בשלו הכי קל לעבוד.",
-      q: "במה נלחמת היום שאפשר היה לשתף איתו פעולה?",
-      try: "לפני שמשבצים יום שטח בלוח, להציץ בתחזית ולבחור את היום בגלל מזג האוויר, לא למרות."},
-    en: {title: "Work with nature, not against it", line: "Fight the rain and you lose. Plan with it and you gain a day.",
-      idea: "A solar system is really a deal with the sun, and a pump is an agreement with water that was already in the ground. You can take the rain personally, or you can build the week around it. Nature isn't against you. It's just busy with its own business, and someone minding their own business is the easiest partner there is.",
-      q: "What did you fight today that you could have worked with?",
-      try: "Before you put a field day in the calendar, check the forecast and pick the day because of the weather, not in spite of it."}},
+  watts_backwards: {
+    he: {title: "ככל שמסתכלים חזק יותר", line: "מי שמתאמץ לראות, רואה מטושטש.",
+      idea: "נסה להסתכל במשהו בכוח, והעיניים מצטמצמות והקצוות מיטשטשים. נסה להקשיב בכוח, והלסת מתהדקת, וזה לא קשור לשמיעה. לחרוק שיניים זה לא אומץ, בדיוק כמו שמשיכה בחגורת הבטיחות לא עוזרת למטוס להמריא. הרבה ממה שאנחנו מרגישים כ\"אני\" הוא בדיוק הכיווץ המיותר הזה. העיניים רואות הכי טוב כשהן נותנות לאור להגיע אליהן.",
+      q: "באיזו חגורה אתה מושך עכשיו?",
+      try: "להסתכל בכוח על משהו רחוק כמה שניות. אחר כך לעצום עיניים, לנשום פעמיים, ולפקוח אותן בעצלות. לראות מה מגיע מעצמו."},
+    en: {title: "The harder you look", line: "Straining to see is the surest way to blur the view.",
+      idea: "Try to look hard at something and you squint, and the edges go fuzzy. Try to listen hard and your jaw tightens, though a tight jaw adds nothing to hearing. Gritting your teeth isn't courage, any more than tugging on your seatbelt helps a plane leave the runway. Much of what we feel as \"me\" is exactly this kind of useless clenching. The eyes see best when they let the light come to them.",
+      q: "Which seatbelt are you tugging on right now?",
+      try: "Stare at something far away for a few seconds. Then close your eyes, breathe twice, and open them lazily. Notice what arrives on its own."}},
+  watts_leaf: {
+    he: {title: "יוצאים מהעולם, לא נכנסים אליו", line: "צמחת מתוך העולם כמו שעלה צומח מתוך עץ.",
+      idea: "אנחנו מדברים כאילו הגענו לכאן ממקום אחר, זרים שהונחו בארץ לא להם. אבל אף אחד לא נכנס לעולם; יצאנו ממנו, כמו גל שעולה מתוך הים. העור הוא לא רק חומה: הוא נושם, הוא חש, הוא מכניס ומוציא את העולם כל היום. אי אפשר אפילו לתאר הליכה בלי לתאר את האדמה, כמו שאין דבורים בלי פרחים. מה שאתה קורא לו \"אני\" ממשיך הרבה מעבר לקצה הגוף.",
+      q: "איפה בדיוק אתה נגמר?",
+      try: "לעמוד דקה בשקט ולהרגיש את כפות הרגליים על הרצפה. לשים לב שעמידה היא משהו שאתה והאדמה עושים ביחד."},
+    en: {title: "Out of the world, not into it", line: "You grew out of the world the way a leaf grows out of a tree.",
+      idea: "We talk as if we arrived here from somewhere else, strangers dropped into a foreign place. But nobody came into the world; we came out of it, the way a wave rises out of the sea. Your skin isn't only a wall: it breathes, it senses, it lets the world in and out all day. You can't even describe walking without describing the ground, just as there are no bees without flowers. What you call \"me\" carries on far past the edge of your body.",
+      q: "Where, exactly, do you stop?",
+      try: "Stand still for a minute and feel your feet on the floor. Notice that standing is something you and the ground are doing together."}},
+  watts_black_white: {
+    he: {title: "אין דלוק בלי כבוי", line: "אין צליל בלי שקט, ואין שיא של גל בלי שקע.",
+      idea: "לכל גל יש חלק גבוה וחלק נמוך, ואי אפשר לשמור אחד ולזרוק את השני. מוזיקה נשמעת במרווחים שבין הצלילים, וכוכב מאיר רק על רקע החושך. ציירו עיגול, ורוב האנשים יראו כדור; כמעט אף אחד לא יראה קיר עם חור, ושניהם שם. אור וחושך, הנאה וכאב, נראים כמו אויבים, אבל המאבק ביניהם מבוים: הם שני הקצוות של אותו דבר. הניסיון לגרום לצד אחד לנצח לתמיד הוא משחק שאי אפשר לסיים.",
+      q: "מה היו הימים הטובים שלך בלי האחרים?",
+      try: "להקשיב דקה אחת, לא לצלילים, אלא לשקט שממנו הם יוצאים ואליו הם חוזרים."},
+    en: {title: "On goes with off", line: "No sound without silence, no crest without a trough.",
+      idea: "Every wave has a high part and a low part, and you can't keep one and throw the other away. Music lives in the gaps between the notes, and a star shines only against the dark. Draw a circle and most people see a ball; hardly anyone sees a wall with a round gap cut into it, though both are there. Light and dark, pleasure and pain, look like enemies, but the fight is staged: they are the two ends of one thing. Trying to make one side win for good is a game that can never be finished.",
+      q: "What would your good days be without the other ones?",
+      try: "Listen for one minute, not to the sounds, but to the quiet they come out of and fall back into."}},
   watts_hide_seek: {
-    he: {title: "מחבואים", line: "ללכת לאיבוד ביום זה חצי מהמשחק.",
-      idea: "בבוקר אתה הולך לאיבוד: שלוש שיחות, קבלן שלא עונה, רשימה שגדלה מעצמה. ואז, איפשהו בנסיעה לקאוואיאן, אתה פתאום שוב שם. מכיר את הרגע הזה?\nבמשחק מחבואים, להיעלם זה חצי מהכיף. בלי מישהו שמתחבא אין מה למצוא. היום לא נכשל כי הלכת בו לאיבוד. ככה המשחק הולך, וזה שחוזר בערב הוא אותו אחד שיצא בבוקר.",
-      q: "איפה מצאת את עצמך היום?",
-      try: "בערב, לפני שסוגרים את היום, שורה אחת לעצמך: \"חזרתי לעצמי כש...\"",
-      tryJungle: "בערב, כשלוקי מדליק את הפנס, שורה אחת לעצמך: \"חזרתי לעצמי כש...\""},
-    en: {title: "Hide and seek", line: "Getting lost in the day is half the game.",
-      idea: "In the morning you get lost: three calls, a contractor who won't pick up, a list that keeps growing on its own. Then somewhere on the drive to Cauayan, you're suddenly back. You know that moment?\nIn hide and seek, vanishing is half the fun. If nobody hides, there's nothing to find. The day didn't fail because you got lost in it. That's how the game goes, and the one who comes home in the evening is the same one who left in the morning.",
-      q: "Where did you find yourself today?",
-      try: "In the evening, before you call it a day, write yourself one line: \"I came back to myself when...\"",
-      tryJungle: "In the evening, when Loki lights his lamp, write yourself one line: \"I came back to myself when...\""}},
-  watts_list_not_day: {
-    he: {title: "הרשימה היא לא היום", line: "\"תקוע\" זו שורה. המשאבה נמצאת בחוץ.",
-      idea: "רשימות, סטטוסים ודוחות הם מפה, ומפה טובה שווה הרבה. אבל משאבה בסטטוס \"תקוע\" היא לא המשאבה, היא שורה. הבלבול מתחיל כשמנהלים את המפה במקום את השטח. גם \"יום מוצלח\" ו\"מנהל טוב\" הם הגדרות שמישהו המציא. מותר להשתמש בהן, ולא חייבים להאמין להן.",
-      q: "איזו שורה ברשימה שלך כבר לא מתארת את מה שקורה באמת?",
-      try: "בביקור הבא באתר תקוע, להוסיף לתיאור המקרה המפורט שלו משהו שראית ושמעת בעצמך, לא משהו שדווח לך."},
-    en: {title: "The list is not the day", line: "\"Stuck\" is a line of text. The pump is outside.",
-      idea: "Lists, statuses and reports are a map, and a good map is worth a lot. But a pump marked \"stuck\" isn't the pump; it's a row in a table. The trouble starts when you manage the map instead of the ground. Even \"a good day\" and \"a good manager\" are definitions somebody made up. Use them freely. You don't have to believe them.",
-      q: "Which line on your list has stopped describing what's really going on?",
-      try: "Next time you visit a stuck site, add something you saw or heard yourself to its detailed case description, not something that was reported to you."}},
+    he: {title: "מחבואים", line: "הכול מתחבא מעצמו, בשביל השמחה של להימצא.",
+      idea: "דמיין משחק שכל הקיום משחק, בלי אף אחד מבחוץ לשחק איתו. כדי שיהיה את מי למצוא, הוא מעמיד פנים שהוא הרבה מישהו נפרדים, ושוכח שהוא מעמיד פנים. השכחה הזו היא ההתחבאות, והיא חייבת להיות משכנעת, אחרת אין במשחק טעם. אז ללכת לאיבוד בתוך החיים שלך זו לא תקלה בתוכנית. זה חצי מהתוכנית, והחזרה היא החצי השני.",
+      q: "מתי חזרת לעצמך בפעם האחרונה, ומה החזיר אותך?",
+      try: "בפעם הבאה שאתה עולה מתוך משהו שבלע אותך, שיר, ספר, שיחה, להישאר רגע ברגע החזרה. רק לשים לב אליו."},
+    en: {title: "Hide and seek", line: "The whole thing hides from itself, for the fun of being found.",
+      idea: "Imagine a game played by all of existence, with no one outside it to play with. To have someone to find, it pretends to be many separate someones, and forgets that it's pretending. That forgetting is the hiding, and it has to be convincing, or there's no fun in the game. So getting lost in your own life isn't a mistake in the plan. It's half of the plan, and coming back is the other half.",
+      q: "When did you last come back to yourself, and what brought you back?",
+      try: "The next time you surface from something that swallowed you, a song, a book, a talk with a friend, stay a moment in that instant of return. Just notice it."}},
+  watts_officer: {
+    he: {title: "אין אף אחד מאחורי העיניים", line: "הראייה לא צריכה עוד מישהו שיצפה בה.",
+      idea: "רובנו מרגישים כמו קצין קטן שיושב בתוך הראש, מול טלוויזיה שמחוברת לעיניים ואוזניות שמחוברות לאוזניים. או כמו נהג בתוך מכונית שכל הזמן מתקלקלת. אבל לראות מראה זה פשוט לראות, ולשמוע צליל זה פשוט לשמוע. אם היה מישהו בפנים שצופה, הוא היה צריך עוד מישהו בתוכו, וכך הלאה בלי סוף. עין לא רואה את עצמה וסכין לא חותכת את עצמה, וזה לא פגם; ככה הן עובדות.",
+      q: "מי שומע עכשיו את הצלילים שסביבך, והאם יש מישהו ששומע אותו?",
+      try: "דקה אחת לתת לצלילים פשוט לקרות, בלי להוסיף להם \"אני שומע\". מכונית, ציפור, הנשימה שלך: רק הצלילים."},
+    en: {title: "Nobody behind the eyes", line: "Seeing doesn't need a second someone to watch it.",
+      idea: "Most of us feel like a little officer sitting in the head, facing a television wired to the eyes, with headphones wired to the ears. Or like a driver inside a car that keeps breaking down. But seeing a sight is simply seeing, and hearing a sound is simply hearing. If there were someone inside doing the watching, he would need someone inside him too, and so on without end. An eye doesn't see itself and a blade doesn't cut itself, and that's no flaw; it's how they work.",
+      q: "Who is hearing the sounds around you right now, and is anyone hearing that one?",
+      try: "For one minute, let sounds simply happen, without adding \"I hear\" to them. A car, a bird, your own breath: just the sounds."}},
+  watts_now: {
+    he: {title: "השובל לא מנווט את הספינה", line: "העבר נגרר מאחוריך. הוא לא דוחף.",
+      idea: "אנחנו מרגישים שהעבר מניע אותנו, כאילו מה שקרה קודם קובע מה יקרה עכשיו. אבל השובל לא מניע את הספינה; הוא רק מראה איפה היא עברה, והוא נמוג. לחיות לפי העבר זה כמו לנהוג כשהעיניים נעוצות במראה האחורית. הכול מתחיל כאן, ברגע הזה, ונגרר משם אחורה. אפילו ערימת הכלים שבראש לא באמת קיימת: תמיד יש רק הכלי שמולך.",
+      q: "מה אתה נותן לשובל להחליט?",
+      try: "לשטוף כוס אחת לאט, כאילו זו הכוס היחידה שתשטוף אי פעם. להרגיש את המים ואת המשקל שלה."},
+    en: {title: "The wake doesn't steer the ship", line: "The past trails behind you. It doesn't push.",
+      idea: "We feel driven by the past, as though whatever happened before decides what happens next. But a ship's wake isn't what moves the ship; it only marks the path behind it, and then it fades. Living by the past is like driving with your eyes fixed on the rear-view mirror. Everything starts here, in this moment, and trails off behind. Even the stack of dishes in your head isn't real: there is only ever the one in your hands.",
+      q: "What are you letting the wake decide?",
+      try: "Wash a single cup slowly, as if it were the only cup you'll ever wash. Feel the water and the weight of it."}},
+  watts_dance: {
+    he: {title: "הריקוד לא הולך לשום מקום", line: "אף אחד לא מנגן שיר כדי להגיע לצליל האחרון.",
+      idea: "אם הטעם של מוזיקה היה הסוף, המלחינים הטובים היו כותבים רק סיומים. אנחנו לא רוקדים כדי להגיע לנקודה מסוימת ברצפה. ובכל זאת אנחנו מתייחסים לחיים כמו לסולם, שלב אחרי שלב, ומחכים לדבר האמיתי שמחכה למעלה, ומפספסים שכל הזמן זה היה שיר. במחשבה ההודית העתיקה העולם הוא משחק, ריקוד שאין לו מטרה מחוץ לעצמו. מותר להועיל; להיות חי לא צריך להרוויח את זה.",
+      q: "מה אתה מעביר מהר כדי להגיע לחלק ש\"נחשב\"?",
+      try: "לחצות את החדר לאט, כמו שחתול הולך: לא כדי להגיע לצד השני, רק בשביל ההליכה."},
+    en: {title: "The dance isn't going anywhere", line: "Nobody plays a song to get to its last note.",
+      idea: "If the point of music were the ending, the best composers would write nothing but finales. We don't dance to reach a particular spot on the floor. Yet we treat life like a ladder, rung after rung, waiting for the real thing at the top, and miss that it was a song all along. In old Indian thought the world is play, a dance with no purpose outside itself. Being useful is fine; being alive doesn't have to earn its keep.",
+      q: "What are you hurrying through to get to the part that counts?",
+      try: "Cross the room slowly, the way a cat walks: not to get to the other side, just for the walking."}},
+  watts_net: {
+    he: {title: "הרשת והמים", line: "מילים תופסות את העולם כמו שרשת תופסת מים.",
+      idea: "פעם מישהו גילה שאפשר לתפוס דגים ברשת, ואחר כך למדנו לפרוש רשת של מילים ומספרים על הכול. זה כלי נפלא: משבצות, שמות, שעות וסנטימטרים מאפשרים לנו להיפגש ולדבר. אבל הקווים שלנו, לא של העולם. אי אפשר לקשור חבילה בקו המשווה, והמילה \"מים\" עוד לא הרטיבה אף אחד. העולם האמיתי מתפתל, והוא חומק מכל רשת שנזרוק עליו.",
+      q: "מה אתה מכיר רק לפי השם שלו?",
+      try: "להסתכל דקה על עץ, צמח או שמיים בלי לתת שם לשום דבר. כשמילה מופיעה, לשחרר אותה ולהמשיך להסתכל."},
+    en: {title: "The net and the water", line: "Words catch the world the way a net catches water.",
+      idea: "Someone once found that fish could be caught in a net, and in time we learned to throw a net of words and numbers over everything. It's a marvelous tool: grids, names, hours and inches let us meet and talk. But the lines are ours, not the world's. Nobody has ever tied up a parcel with the equator, and the word \"water\" has never made anyone wet. The real world wriggles, and it slips through every net we cast.",
+      q: "What do you know only by its name?",
+      try: "Look at a tree, a plant or the sky for one minute without naming anything you see. When a word turns up, let it go and keep looking."}},
   watts_spotlight: {
-    he: {title: "זרקור ואור רחב", line: "יש אור צר ויש אור רחב. צריך את שניהם.",
-      idea: "הרשימה שלך היא זרקור: היא מאירה משימה אחת, חדה ובהירה, וכל השאר בחושך. זה טוב, ככה עושים דברים. אבל יש עוד אור, רחב, שקולט את כל האתר בבת אחת: הקבלן שמחייך קצת מהר מדי, המשאבה שמזמזמת בטון אחר, האדמה שיבשה מדי ליד הקו.\nהזרקור רואה תווים. האור הרחב שומע מנגינה, כולל ההפסקות שבין הצלילים. גם הרווח הריק ביומן הוא חלק מהיום.",
-      q: "מה ראית היום רק כי לא חיפשת כלום?",
-      try: "באתר הבא, דקה של עמידה לפני שאתה פותח אותו באפליקציה. אחר כך להוסיף לתיאור המקרה המפורט שלו דבר אחד שלא היה ברשימה."},
-    en: {title: "Spotlight and floodlight", line: "There's a narrow light and a wide one. You need both.",
-      idea: "Your list is a spotlight. It lights one task, sharp and bright, and leaves everything else dark. That's fine; it's how things get done. But there's another kind of light, a wide one, that takes in the whole site at once: the contractor smiling a little too quickly, the pump humming in a different key, the ground too dry near the line.\nThe spotlight sees notes. The wide light hears the tune, including the pauses between them. The empty slot in your calendar is part of the day too.",
-      q: "What did you notice today only because you weren't looking for anything?",
-      try: "At the next site, stand for a minute before you open it in the app. Then add one thing that wasn't on the list to its detailed case description."}},
+    he: {title: "זרקור ואור רחב", line: "הקשב הוא קרן צרה. יש גם אור רחב.",
+      idea: "הקשב המודע עובד כמו פנס בחדר חשוך: בהיר, חד, ורק כתם אחד בכל פעם. כשמסתכלים חלק אחרי חלק, מתחילים להאמין שהעולם עשוי מחלקים. מי שרואה חתול עובר מאחורי סדק צר בגדר רואה קודם ראש ואחר כך זנב, ועלול להחליט שהראש גורם לזנב. יש גם דרך רחבה ורכה לראות, כזו שעובדת הכי טוב בחושך, מזווית העין. היא רואה את כל החתול בבת אחת.",
+      q: "מה נמצא עכשיו בקצה שדה הראייה שלך?",
+      try: "להניח את העיניים על נקודה אחת, ולמשך דקה לתת לקשב להתפשט לכל מה שבשוליים: צורות, אור, תנועה, הכול ביחד."},
+    en: {title: "Spotlight and floodlight", line: "Attention is a narrow beam. There's a wider light too.",
+      idea: "Conscious attention works like a flashlight in a dark room: bright, sharp, and one patch at a time. Looking bit by bit, we come to believe the world is made of bits. Someone watching a cat pass behind a narrow gap in a fence sees first a head, then a tail, and might decide that heads cause tails. There's also a wide, soft way of seeing, the kind that works best in the dark, out of the corner of the eye. It sees all of the cat in one go.",
+      q: "What is at the edge of your vision right now?",
+      try: "Rest your eyes on one point, and for a minute let your attention spread to everything at the edges: shapes, light, movement, all at once."}},
   watts_breath: {
-    he: {title: "הנשימה שנושמת את עצמה", line: "לא צריך לנשום נכון. היא יודעת לבד.",
-      idea: "נשימה היא הדבר היחיד שאתה גם עושה וגם קורה לך. אפשר לנהל אותה, והיא גם ממשיכה לבד כל היום, בזמן שאתה עסוק בקבלנים. הגוף יודע לעשות המון בלי שיתנו לו הוראות. לפעמים הוא גם יודע לפני הראש: הכתפיים מתכווצות עוד לפני שהשיחה הקשה מתחילה.",
-      q: "מה הגוף שלך ידע היום לפני שהראש הבין?",
-      try: "לפני האירוע הבא בלוח, שלוש נשימות בלי לספור ובלי לתקן. רק לראות איך הן יוצאות."},
-    en: {title: "The breath does itself", line: "No need to breathe correctly. It knows how.",
-      idea: "Breathing is the one thing you do that also just happens to you. You can steer it, and it also keeps going all day on its own while you're busy with contractors. Your body runs a lot without instructions. Sometimes it even knows first: your shoulders tighten before the hard call has started.",
-      q: "What did your body know today before your head caught up?",
-      try: "Before the next event in your calendar, take three breaths without counting or fixing them. Just notice how they come out."}},
-  watts_flow: {
-    he: {title: "מה שזורם", line: "אתרים נסגרים, אנשים עוברים, עונות מתחלפות.",
-      idea: "אתר שעובד מושלם, צוות שלא משתנה, עונה טובה בגן: מתחשק להקפיא אותם. אבל אתרים נסגרים, קבלנים עוברים לפרויקט הבא, וגם העונה הזו תיגמר. מה שמחזיקים חזק מדי מפסיק לנשום. מי שנהנה ממשהו בזמן שהוא כאן, ונותן לו ללכת כשהוא הולך, מקבל ממנו יותר.",
-      q: "מה מסתיים עכשיו, ואיך אפשר להיפרד ממנו יפה?",
-      try: "כשאתר נפתר, לפני שמסמנים אותו \"נפתר\", להשאיר בתיאור המקרה המפורט שלו דבר אחד שלמדת שם, בשביל מי שיבוא אחריך."},
-    en: {title: "What flows", line: "Sites close, people move on, seasons turn.",
-      idea: "A site running perfectly, a crew that never changes, a good season in the garden: you want to freeze them. But sites close, contractors move to the next job, and this season will end too. Grip something too tightly and it stops breathing. Enjoy it while it's here, let it go when it goes, and you'll get more out of it.",
-      q: "What's ending right now, and how could you say goodbye to it well?",
-      try: "When a site is fixed, before you mark it Resolved, leave one thing you learned there in its detailed case description, for whoever comes next."}},
-  watts_practice: {
-    he: {title: "מתאמנים כדי לשחרר", line: "משמעת היא הדרך. הקלות היא לאן שהיא מובילה.",
-      idea: "טכנאי ותיק מזהה תקלה מהצליל, בלי לפתוח מדריך. זה לא קסם, אלה אלף הפעמים שהוא כן פתח. משמעת בלי חופש נהיית נוקשות, וחופש בלי תרגול נשאר ניחוש. מתאמנים בשגרה כדי שביום המוזר יהיה ממה לאלתר. ובבטיחות, דרך אגב, לא מאלתרים אף פעם.",
-      q: "מה אתה כבר יודע לעשות כל כך טוב שאתה לא צריך לחשוב, ומה עוד דורש תרגול?",
-      try: "כשתקלת SPIS נפתרת, לפתוח את \"אבחון תקלות SPIS\" ולבדוק: איזה שלב כבר עשית בלי להסתכל?"},
-    en: {title: "Practice, then let go", line: "Discipline is the road. Ease is where it leads.",
-      idea: "A veteran technician can name the fault from the sound, without opening a manual. That's not magic; it's the thousand times he did open it. Discipline without freedom turns rigid, and freedom without practice is just guessing. You drill the routine so that on the strange day you have something to improvise with. Safety, by the way, is never the place to improvise.",
-      q: "What can you already do so well you don't have to think, and what still needs practice?",
-      try: "When an SPIS fault gets fixed, open SPIS troubleshooting and check which step you did without looking."}},
-  watts_love_whole: {
-    he: {title: "לאהוב את כל העסק", line: "גם בפעם המאה, מים שעולים מהאדמה הם פלא.",
-      idea: "לאהוב את העבודה זה לא לאהוב רק את הגרסה הערוכה שלה. זה כולל את הימים המעצבנים, ואת התשוקה והכעס, שיש בהם חום שאפשר לעשות איתו משהו. ויש דרך פשוטה להתחיל: להתפלא שוב על הרגיל. מים שעולים מבאר אל שדה יבש הם פלא קטן, גם בפעם המאה.",
-      q: "מה בעבודה שלך היה מדהים אותך אילו ראית אותו בפעם הראשונה?",
-      try: "בלשונית מנהיגות, בפיתוח המנהיגות היומי, לענות פעם אחת השבוע על שאלת ה\"למה\" עם דבר רגיל אחד שהוא בעצם מדהים."},
-    en: {title: "Love the whole thing", line: "Water climbing out of the ground is still a small miracle.",
-      idea: "Loving the work doesn't mean loving only the edited version. It includes the maddening days, and the passion and the anger too, which carry a heat you can put to use. There's an easy way in: be surprised by the ordinary again. Water rising out of a well into a dry field is a small miracle, even the hundredth time you see it.",
-      q: "What part of your work would amaze you if you saw it for the first time?",
-      try: "In Leadership, under Daily leadership practice, use the \"why\" question once this week to name one ordinary thing that's actually amazing."}},
-  watts_double_bind: {
-    he: {title: "הוראות שסותרות את עצמן", line: "\"תחליט לבד, אבל תתקשר אליי קודם.\"",
-      idea: "יש בקשות שאי אפשר למלא, כי הציות עצמו סותר אותן. \"תיקח יוזמה, אבל בדיוק כמו שאמרתי.\" \"תחליט לבד, אבל תעדכן אותי לפני כל דבר.\" מי שמקבל אותן תקוע, ויוצא אשם בכל מקרה. ואנחנו עושים את זה גם לעצמנו, בכל פעם שאנחנו פוקדים על עצמנו להפסיק לדאוג, ומיד.",
-      q: "איזו הוראה נתת השבוע שאי אפשר באמת לבצע?",
-      try: "כשאתה מגדיר אחראי למשימה, להוסיף בהערת השוליים שורה אחת: מה מותר לו להחליט לבד."},
-    en: {title: "Orders that cancel themselves", line: "\"Decide on your own, but call me first.\"",
-      idea: "Some requests can't be carried out, because obeying them breaks them. \"Take the initiative, but do it exactly my way.\" \"Decide on your own, but run everything by me first.\" Whoever gets one is stuck, and wrong either way. We do it to ourselves too, every time we order ourselves to stop worrying this minute.",
-      q: "What instruction did you give this week that nobody could actually follow?",
-      try: "When you give a task an owner, add one side note saying what they're free to decide alone."}},
-  // "what if" of the week: one convention held lightly, as a question about the work
-  watts_whatif_two_sides: {he: "מה אם האתר התקוע והקבלן האיטי הם לא שתי בעיות, אלא אותה בעיה משני צדדים?", en: "What if the stuck site and the slow contractor aren't two problems, but one problem seen from two sides?"},
-  watts_whatif_nobody_alone: {he: "מה אם ההצלחה של השבוע לא שייכת לאף אחד לבד, כולל לך?", en: "What if this week's win doesn't belong to anyone alone, you included?"},
-  watts_whatif_other_half: {he: "מה אם יום תקוע הוא לא ההפך של יום טוב, אלא החצי השני שלו?", en: "What if a stuck day isn't the opposite of a good day, but its other half?"},
-  watts_whatif_ending: {he: "מה אם אתר שנסגר הוא לא הפסד, אלא סוף טבעי של משהו שעבד?", en: "What if a site that closes isn't a loss, but the natural end of something that worked?"},
-  watts_whatif_forecast: {he: "מה אם התחזית היא לא מכשול בדרך של התוכנית, אלא חלק ממנה?", en: "What if the forecast isn't in the plan's way, but part of the plan?"},
-  watts_whatif_off_list: {he: "מה אם לא כל דבר טוב שקרה היום צריך להופיע ברשימה?", en: "What if not every good thing that happened today needs to be on the list?"},
-  watts_whatif_good_manager: {he: "מה אם \"מנהל טוב\" זו הגדרה שמותר לך לכתוב מחדש?", en: "What if \"a good manager\" is a definition you're allowed to rewrite?"},
+    he: {title: "אני עושה, או שזה קורה?", line: "הנשימה יושבת בדיוק במקום שבו עשייה והתרחשות נפגשות.",
+      idea: "אפשר לנשום עמוק בכוונה, ואתה גם נושם כל הלילה בלי לנסות. אתה גם מפעים את הלב ומגדל את השיער, ואתה יודע איך, במובן שאתה עושה את זה, אף שלעולם לא תצליח להסביר. המילה העתיקה קארמה פירושה פשוט עשייה. שרטט את הקו של \"אני\" צר, והחיים קורים לך; שרטט אותו רחב, והכול הוא העשייה שלך. בנשימה אפשר להרגיש את שניהם בבת אחת.",
+      q: "האם אתה נושם עכשיו, או שנושמים אותך?",
+      try: "להתבונן דקה בנשימה בלי לשנות אותה. לשים לב לרגעים שבהם היא מרגישה שלך, ולרגעים שבהם היא פשוט ממשיכה לבד."},
+    en: {title: "Who is doing the breathing?", line: "Breath sits right where doing and happening meet.",
+      idea: "You can take a deep breath on purpose, and you also breathe all night without trying. Your heart beats and your hair grows, and in a way you know how, since it's you doing it, though you could never put it into words. The old word karma simply means doing. Draw the line around \"me\" small, and life happens to you; draw it wide, and you are the one doing all of it. In the breath you can feel both at once.",
+      q: "Are you breathing right now, or being breathed?",
+      try: "Watch your breath for a minute without changing it. Notice the moments it feels like yours and the moments it just carries on by itself."}},
+  watts_grown: {
+    he: {title: "גדל, לא נעשה", line: "מה שגדל לא צריך שידחפו אותו.",
+      idea: "כד עושים מבחוץ פנימה; פרח גדל מבפנים החוצה, ואף אחד לא מרכיב אותו. המילה הסינית העתיקה לטבע פירושה בערך \"מה שקורה מעצמו\", כמו פעימת לב. לא לכפות זה לא אומר לא לעשות כלום. זה אומר לנוע כמו מים: לא להילחם בסלע, תמיד למצוא את המקומות הנמוכים, ועם הזמן לשחוק את הסלע. הרבה ממה שחשוב בחיים גדל טוב יותר כשלא מושכים בו.",
+      q: "מה בחיים שלך היה גדל טוב יותר אילו הפסקת למשוך בו?",
+      try: "למזוג כוס מים לאט ולראות איך הם מקבלים את צורת הכוס, בלי שום מאמץ. אחר כך לשתות אותם לאט."},
+    en: {title: "Grown, not made", line: "Things that grow don't need to be pushed.",
+      idea: "A pot is made from the outside in; a flower grows from the inside out, and nobody assembles it. The old Chinese word for nature means roughly \"what happens by itself,\" like a heartbeat. Not forcing doesn't mean doing nothing at all. It means moving the way water moves: never fighting the rock, always finding the low places, and in time wearing the rock away. A lot of what matters in a life grows better when nobody yanks on it.",
+      q: "What in your life might grow better if you stopped pulling on it?",
+      try: "Pour a glass of water slowly and watch it take the shape of the glass, without any effort at all. Then drink it slowly."}},
+  watts_falling: {
+    he: {title: "נופלים, לא נאחזים", line: "כולנו נופלים מאז שנולדנו. גם האבנים נופלות.",
+      idea: "להיוולד זה קצת כמו להידחף מצוק: מהרגע הראשון, הכול בדרך למקום אחר. להיאחז באבנים שנופלות לצידך לא מאט כלום; זה רק הופך את הנפילה למפחידה. בלי סופים העולם היה קופא, ריקוד בלי צעדים. מי שמנסה לשמור רגע יפה לתמיד מועך אותו, כמו מי שסוגר אגרוף על קצת מים. ואם המחשבה על מוות מעבירה בך צמרמורת, לא צריך להעמיד פנים; אפשר לתת לצמרמורת להיות, ולהסתכל על מה שיש כאן.",
+      q: "במה אתה נאחז, שנופל איתך בכל מקרה?",
+      try: "להתבונן דקה בלהבה של נר, בענן או במים זורמים. לשים לב שהם שומרים על הצורה שלהם רק כי הם אף פעם לא נשארים אותו דבר."},
+    en: {title: "Falling, not clinging", line: "We've all been falling since birth. The rocks are falling too.",
+      idea: "Being born is a bit like being pushed off a cliff: from the very first moment, everything is on its way somewhere else. Grabbing at the rocks that fall beside you doesn't slow anything down; it only makes the fall frightening. Without endings the world would freeze, a dance with no steps. Trying to keep a lovely moment forever is the surest way to crush it, like closing your fist on a little water. And if the thought of death sends a shiver through you, there's no need to pretend; let the shiver be, and look at what's here.",
+      q: "What are you clinging to that is falling with you anyway?",
+      try: "Watch a candle flame, a cloud or running water for a minute. Notice that it keeps its shape only by never staying the same."}},
+  watts_be_afraid: {
+    he: {title: "אם מפחדים, מפחדים", line: "להילחם ברגש זו הדרך הבטוחה להשאיר אותו.",
+      idea: "תגיד לעצמך לא לחשוב על קוף, והנה הוא, מחייך. תדאג מזה שאתה דואג, ויש לך שתי דאגות. מוח שמתקן כל הזמן את התיקונים של עצמו דומה לתרמוסטט שמחובר לעצמו, נדלק ונכבה עד שהוא רועד. תינוק בוכה כשהוא נולד, ואף אחד לא חושב שזה כישלון. לתת לרגש להיות מה שהוא, פחד כפחד ואבל כאבל, זה פעמים רבות מה שמאפשר לו לעבור.",
+      q: "איזה רגש אתה משתדל מאוד לא להרגיש?",
+      try: "דקה אחת למצוא איפה רגש יושב בגוף, ולתת לו להישאר בדיוק שם. בלי לתקן, בלי לתת שם, רק להיות איתו."},
+    en: {title: "If you're afraid, be afraid", line: "Fighting a feeling is the best way to keep it around.",
+      idea: "Try hard to keep a monkey out of your mind, and there it is, grinning at you. Worry about worrying and you have two worries. A mind that keeps correcting its own corrections is like a thermostat wired to itself, clicking on and off until it shudders. A baby cries the moment it's born, and nobody calls that a failure. Letting a feeling be what it is, fear as fear and grief as grief, is often what lets it pass through.",
+      q: "Which feeling are you working hard not to have?",
+      try: "For one minute, find where a feeling sits in your body and let it stay exactly there. No fixing, no naming, just keeping it company."}},
+  watts_head: {
+    he: {title: "מחפש את הראש של עצמו", line: "מה שאתה מחפש הוא זה שמחפש.",
+      idea: "סיפור בודהיסטי עתיק מספר על אדם שרץ בכל העולם בחיפוש אחר הראש שלו, שכל הזמן ישב לו על הכתפיים. המרדף אחרי אושר או שלווה עובד אותו דבר: עצם המרדף מניח שאתה נמצא במקום אחר ממה שאתה. אין סולם שמוביל להיות עצמך, ואי אפשר להרים את עצמך בשרוכי הנעליים. לפעמים החיפוש צריך להשלים את כל המעגל לפני ששמים לב שהוא נגמר במקום שבו התחיל.",
+      q: "מה אתה מחפש, שאולי הוא זה שמחפש?",
+      try: "להניח יד על הראש לרגע. החיפוש הסתיים. עכשיו לשבת דקה בלי לחפש שום דבר."},
+    en: {title: "Looking for your own head", line: "What you're searching for is doing the searching.",
+      idea: "An old Buddhist story tells of a man who ran all over the world looking for his head, which sat on his shoulders the whole time. Chasing happiness or calm works the same way: the chase assumes you are somewhere other than where you are. There's no ladder that climbs to being yourself, and nobody has ever lifted themselves by their own bootstraps. Sometimes the search has to go all the way round before you notice it ends right where it started.",
+      q: "What are you looking for that might be the one doing the looking?",
+      try: "Put a hand on top of your head for a moment. Search over. Now sit for a minute without looking for anything."}},
+  watts_wonder: {
+    he: {title: "הרגיל מוזר מאוד", line: "עצם זה שמשהו קיים, זה מוזר מספיק.",
+      idea: "את ההשתאות אנחנו שומרים לדרקונים ולניסים, ועוברים ליד העובדה שיש עולם בכלל. ג'ירפה מוזרה יותר מכל חד-קרן, כי היא באמת קיימת. התחושה שהרגיל הוא מופלא היא לא בלבול; היא סוג של התעוררות. פליאה היא לא בעיה שהסבר צריך לרפא. אולי זה אחד הדברים האנושיים ביותר שאנחנו עושים.",
+      q: "איזה דבר רגיל היה מדהים אותך אילו ראית אותו בפעם הראשונה?",
+      try: "להסתכל דקה על כף היד שלך כאילו מעולם לא ראית אחת. הקווים, הציפורניים, איך היא זזה כשאתה מבקש."},
+    en: {title: "The ordinary is very odd", line: "That anything exists at all is strange enough.",
+      idea: "We save our amazement for dragons and miracles, and walk right past the fact that there's a world at all. A giraffe is stranger than any unicorn, because it actually exists. Sensing that the usual is uncanny isn't confusion; it's a kind of waking up. Wonder isn't a problem waiting for an explanation to cure it. It may be one of the most human things we do.",
+      q: "What ordinary thing would astonish you if you saw it for the first time?",
+      try: "Look at your own hand for a minute as if you'd never seen one. The lines, the nails, the way it moves when you ask it to."}},
+  watts_mask: {
+    he: {title: "המסכה שדרכה מדברים", line: "התפקיד הוא מסכה. מאחוריה יש יותר.",
+      idea: "בתיאטרון העתיק שחקנים לבשו מסכות שנבנו כך שיישאו את הקול, ומהמילה הלטינית למסכה הזו הגיעה המילה \"פרסונה\". מילדות אומרים לנו מי אנחנו: החכם, השקט, החזק, ואנחנו לומדים לדבר דרך המסכה הזו. תפקידים מועילים, כמו ששעות וסנטימטרים מועילים. הצרה מתחילה כששוכחים שזו מסכה ומגינים עליה כאילו היא הפנים. אפשר לשחק את התפקיד עד הסוף, ועדיין לדעת שיש בך יותר מהתפקיד.",
+      q: "על איזה תפקיד אתה מגן כאילו הוא הפנים שלך?",
+      try: "בשיחה הבאה עם מישהו קרוב, לשים לב לדקה מאיזה תפקיד אתה מדבר. לא לשנות, רק לראות."},
+    en: {title: "The mask you speak through", line: "A role is a mask. There's more of you behind it.",
+      idea: "In the old theater, actors wore masks shaped to carry the voice, and the Latin name for that mask gave us the word \"person.\" From childhood we're told who we are, the clever one, the quiet one, the strong one, and we learn to speak through that mask. Roles are useful, the way hours and inches are useful. The trouble starts when we forget it's a mask and defend it as if it were our face. You can play your part all the way, and still know there's more of you than the part.",
+      q: "Which role do you defend as if it were your face?",
+      try: "Next time you talk with someone close, notice for a minute which role you're speaking from. Don't change it, just see it."}},
+  // "what if" of the week: one habit of thought held lightly, as a question about life
+  watts_whatif_grew: {he: "מה אם לא נכנסת לעולם, אלא צמחת מתוכו?", en: "What if you didn't arrive in the world, but grew out of it?"},
+  watts_whatif_other_half: {he: "מה אם יום רע הוא לא האויב של יום טוב, אלא החצי השני שלו?", en: "What if a bad day isn't the enemy of a good one, but its other half?"},
+  watts_whatif_dark_sky: {he: "מה אם החושך שבין הכוכבים הוא חלק מהשמיים בדיוק כמו הכוכבים?", en: "What if the dark between the stars is as much the sky as the stars are?"},
+  watts_whatif_endings: {he: "מה אם סופים הם לא אויבים, אלא הקצב שמשאיר את הכול בתנועה?", en: "What if endings aren't enemies, but the beat that keeps everything moving?"},
+  watts_whatif_body: {he: "מה אם הטבע הוא לא משהו לכבוש, אלא הגוף הגדול שלך?", en: "What if nature isn't something to conquer, but your larger body?"},
+  watts_whatif_one_movement: {he: "מה אם העולם לא עשוי מדברים נפרדים, אלא מתנועה אחת שאנחנו רואים בחלקים?", en: "What if the world isn't made of separate things, but of one movement we see in pieces?"},
+  watts_whatif_useless: {he: "מה אם משהו לא צריך להיות מועיל כדי להיות שווה?", en: "What if something doesn't have to be useful to be worth doing?"},
   // the fixed card at the bottom: no button, nothing to tick
   watts_nothing: {
     he: {title: "מותר לא לעשות כלום", idea: "הכרטיס הזה לא מבקש ממך כלום. אין בו כפתור, אין מה לסמן, ואף אחד לא סופר. אם בא לך לשבת רגע ולא לעשות שום דבר, גם זה נחשב."},
     en: {title: "You're allowed to do nothing", idea: "This card doesn't ask anything of you. There's no button, nothing to tick, and nobody's counting. If you'd like to just sit for a moment and do nothing at all, that counts too."}}
 }
-const WATTS_CARD_KEYS = ['watts_ease_up', 'watts_true_now', 'watts_opposites', 'watts_weave', 'watts_not_a_chore', 'watts_play_now', 'watts_role', 'watts_with_nature',
-  'watts_hide_seek', 'watts_list_not_day', 'watts_spotlight', 'watts_breath', 'watts_flow', 'watts_practice', 'watts_love_whole', 'watts_double_bind']
-const WATTS_WHATIF_KEYS = ['watts_whatif_two_sides', 'watts_whatif_nobody_alone', 'watts_whatif_other_half', 'watts_whatif_ending', 'watts_whatif_forecast', 'watts_whatif_off_list', 'watts_whatif_good_manager']
+const WATTS_CARD_KEYS = ['watts_backwards', 'watts_leaf', 'watts_black_white', 'watts_hide_seek', 'watts_officer', 'watts_now', 'watts_dance', 'watts_net',
+  'watts_spotlight', 'watts_breath', 'watts_grown', 'watts_falling', 'watts_be_afraid', 'watts_head', 'watts_wonder', 'watts_mask']
+const WATTS_WHATIF_KEYS = ['watts_whatif_grew', 'watts_whatif_other_half', 'watts_whatif_dark_sky', 'watts_whatif_endings', 'watts_whatif_body', 'watts_whatif_one_movement', 'watts_whatif_useless']
 // One field of a WATTS_CONTENT entry in the interface language, falling back to the Hebrew as tr() does.
 function trw(key, field) {
   const e = WATTS_CONTENT[key]
@@ -4378,14 +4378,12 @@ function easeBodyWrapHtml(key) { return '<div class="ease-body" style="margin-to
 function easeIdeaHtml(key) {
   return trw(key, 'idea').split('\n').map(function(p){ return '<p style="margin:0 0 8px;font-size:var(--fs-md);line-height:1.65;color:var(--tao-t1b)">' + esc(p) + '</p>' }).join('')
 }
-// the practice; a card may say it differently in the jungle, where Loki and his lamp are on screen (`tryJungle`)
-function easeTry(key) { return (currentTheme === 'jungle' && trw(key, 'tryJungle')) || trw(key, 'try') }
 function easeBodyHtml(key) {
   return easeIdeaHtml(key) +
     '<div style="margin-top:10px;font-size:var(--fs-2xs);color:var(--tao-gold);font-weight:600;letter-spacing:1px">' + icon('compass') + ' ' + tr('ease_q_label') + '</div>' +
     '<div class="ease-q" style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1);font-style:italic;margin-top:2px">' + esc(trw(key, 'q')) + '</div>' +
     '<div style="margin-top:10px;font-size:var(--fs-2xs);color:var(--tao-gold);font-weight:600;letter-spacing:1px">' + icon('feather') + ' ' + tr('ease_try_label') + '</div>' +
-    '<div class="ease-try" style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b);margin-top:2px">' + esc(easeTry(key)) + '</div>'
+    '<div class="ease-try" style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b);margin-top:2px">' + esc(trw(key, 'try')) + '</div>'
 }
 function easeCardHtml(key) {
   const open = easeOpen.has(key)

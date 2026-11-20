@@ -43,6 +43,15 @@ function serve() { return new Promise(res => { const s = http.createServer((q, r
   ok(nothing.he && nothing.en && nothing.he.title && nothing.en.title && nothing.he.title !== nothing.en.title && !HEB.test(nothing.en.idea || 'א'), 'the "allowed to do nothing" card in both languages')
   const ideaLines = content.cards.filter(k => { const n = content.W[k].he.idea.split(/(?<=[.?!])\s+/).length; return n < 3 })
   ok(!ideaLines.length, 'each idea runs at least three sentences' + (ideaLines.length ? ': ' + ideaLines.join(', ') : ''))
+  // about life, not work: no work words, no pointer to another screen of the app (the same lists as i18n-coverage)
+  const WORK_EN = /\b(sites?|contractors?|tasks?|projects?|meetings?|SPIS|screens?|tabs?|apps?|Loki|leadership|calendar)\b/i
+  const WORK_HE = /(^|[^\u05D0-\u05EA])[והבלמשכ]{0,2}(אתר|אתרים|קבלן|קבלנים|משימה|משימות|פרויקט|פרויקטים|פגישה|פגישות|מסך|מסכים|לשונית|אפליקציה|לוקי|מנהיגות|לוח)(?![\u05D0-\u05EA])/
+  const allKeys = content.cards.concat(content.whatifs, ['watts_nothing']), workHits = []
+  for(const k of allKeys) { const e = content.W[k], vals = l => typeof e[l] === 'string' ? [e[l]] : Object.values(e[l] || {})
+    for(const v of vals('en')) { const m = String(v).match(WORK_EN); if(m) workHits.push(k + ' (en): ' + m[0]) }
+    for(const v of vals('he')) { const m = String(v).match(WORK_HE); if(m) workHits.push(k + ' (he): ' + m[0].trim()) } }
+  ok(!workHits.length, 'no work words (site, contractor, task, project, meeting, SPIS…) and no pointer to another screen' + (workHits.length ? ': ' + workHits.join(', ') : ''))
+  ok(content.cards.every(k => ['title', 'line', 'idea', 'q', 'try'].every(f => Object.keys(content.W[k].he).includes(f)) && !('tryJungle' in content.W[k].he) && !('tryJungle' in content.W[k].en)), 'no theme-dependent practice (every card reads the same everywhere)')
   const named = content.cards.concat(content.whatifs, ['watts_nothing']).filter(k => /watts|ווטס/i.test(JSON.stringify(content.W[k])))
   ok(!named.length, 'no card puts words in Watts\'s mouth (his name is only in the subtitle and footnote)' + (named.length ? ': ' + named.join(', ') : ''))
 
@@ -72,15 +81,14 @@ function serve() { return new Promise(res => { const s = http.createServer((q, r
   await pg.click('.ease-toggle[data-key="watts_breath"]'); await pg.waitForTimeout(100)
   ok(await pg.evaluate(() => document.querySelectorAll('#ease-cards .ease-body').length === 0 && document.querySelector('.ease-toggle[data-key="watts_breath"]').getAttribute('aria-expanded') === 'false'), 'a second tap closes it')
   ok(await pg.evaluate(() => [...document.querySelectorAll('#ease-tab button')].every(b => b.classList.contains('ease-toggle'))), 'no buttons on the tab but open and close')
+  ok(await pg.evaluate(() => document.querySelectorAll('#ease-tab a, #ease-tab [onclick], #ease-tab [data-mode], #ease-tab [data-go]').length === 0), 'nothing on the tab links to another screen')
   ok(await pg.evaluate(() => document.querySelectorAll('#ease-nothing button, #ease-nothing input, #ease-nothing a').length === 0), 'the "nothing" card has no control at all')
-  for(const k of ['watts_hide_seek', 'watts_flow', 'watts_breath']) await pg.click('.ease-toggle[data-key="' + k + '"]')
+  for(const k of ['watts_hide_seek', 'watts_falling', 'watts_breath']) await pg.click('.ease-toggle[data-key="' + k + '"]')
   const after = await pg.evaluate(() => JSON.stringify(Object.keys(localStorage).sort().map(k => [k, k === 'fieldy_tao_mode' ? '' : localStorage.getItem(k)])))
   ok(before === after, 'opening the tab and its cards stores nothing (no read marks, no counters)')
   const COUNT = /\d+\s*(\/|מתוך|of)\s*\d+|נקרא|קראת|רצף|streak|\bread\b|completed|הושלמ/i
   const heText = await pg.evaluate(() => document.getElementById('ease-tab').innerText)
-  ok(!COUNT.test(heText) && !/\d/.test(heText.replace(/SPIS/g, '')), 'no counters, read marks or streaks in the Hebrew tab' + (COUNT.test(heText) ? ': ' + heText.match(COUNT)[0] : ''))
-  const lamp = await pg.evaluate(() => { const t0 = currentTheme, out = {}; for(const th of ['jungle', 'nachal', 'original']) { currentTheme = th; out[th] = easeTry('watts_hide_seek') } currentTheme = t0; return out })
-  ok(/פנס/.test(lamp.jungle) && !/פנס|לוקי/.test(lamp.nachal) && !/פנס|לוקי/.test(lamp.original), 'the hide-and-seek practice mentions Loki\'s lamp only in the jungle, where he is on screen')
+  ok(!COUNT.test(heText) && !/\d/.test(heText), 'no counters, read marks or streaks in the Hebrew tab' + (COUNT.test(heText) ? ': ' + heText.match(COUNT)[0] : ''))
   ok(pg.errs.length === 0, 'no page errors' + (pg.errs.length ? ': ' + pg.errs.join('|') : ''))
 
   console.log('\nthe tab (English, 360px)')
