@@ -269,5 +269,51 @@ if(Array.isArray(CW_EN)) {
 }
 if(!bad4) console.log('  ✓ ' + (TAO_EN ? TAO_EN.length : 0) + ' Tao chapters, ' + Object.keys(MOOD_EN || {}).length + ' moods, ' + (CW_EN ? CW_EN.length : 0) + ' calm whispers')
 
+// ── The Tao, cut into its 81 chapters ────────────────────────────────────────
+console.log('\n5. The Tao: 81 chapters, aligned, without the edition\'s appendices and commentary')
+let bad5 = 0
+const f5 = m => { fail(m); bad5++ }
+const TAO5 = grabLiteral('TAO_CHAPTERS'), TAO5_EN = grabLiteral('TAO_CHAPTERS_EN') || []
+const TT5 = grabLiteral('TAO_TITLES'), TT5_EN = grabLiteral('TAO_TITLES_EN') || []
+if(TAO5.length !== 81) f5('TAO_CHAPTERS has ' + TAO5.length + ' chapters, not 81')
+if(!/const TAO_CHAPTER_COUNT = TAO_CHAPTERS\.length/.test(src)) f5('TAO_CHAPTER_COUNT is not taken from the array')
+TAO5.forEach((t, i) => { if(typeof t !== 'string' || !t.split('\n').some(l => l.trim())) f5('Hebrew chapter ' + (i + 1) + ' is empty') })
+if(TT5.length !== TAO5.length) f5(TT5.length + ' Hebrew titles for ' + TAO5.length + ' chapters')
+TT5.forEach((t, i) => { if(TAO5[i] && t !== TAO5[i].split('\n')[0].trim()) f5('Hebrew title ' + (i + 1) + ' ("' + t + '") is not the first line of its chapter') })
+// the English runs alongside the Hebrew, index for index, as far as it goes, and so do its titles
+if(TAO5_EN.length > TAO5.length) f5('more English chapters than Hebrew ones')
+if(TT5_EN.length !== TAO5_EN.length) f5(TT5_EN.length + ' English titles for ' + TAO5_EN.length + ' English chapters')
+if(TAO5_EN.length === TAO5.length && TAO5.length !== 81) f5('the English is complete but the count is not 81')
+// chapter 1 and chapter 2 are separate in both languages (they used to share entry 0)
+if(TAO5[1] && !TAO5[1].startsWith('הכל חלקי מלבד אחד')) f5('Hebrew chapter 2 does not open with its heading')
+if(TAO5_EN[0] && /· · ·/.test(TAO5_EN[0])) f5('English chapter 1 still holds chapter 2')
+// no appendices, address or editor's lines
+const allHe = TAO5.join('\n')
+for(const w of ['nissimamon', 'www.', 'נספח', 'סוקרטס', 'עמוס עוז', 'גורדג', 'בתרגום אחר', 'החכם הסיני', 'פתגם זן', 'תוספת מאוחרת', 'הוסיפו חכמים', 'בזן בודהיזם'])
+  if(allHe.includes(w)) f5('the Hebrew Tao still holds "' + w + '"')
+if(/nissimamon/.test(src)) f5('index.html still mentions nissimamon')
+// nothing counts the chapters by hand any more
+for(const [re, what] of [[/%\s*80\b/, '% 80'], [/Math\.min\(79/, 'Math.min(79'], [/t:\s*80\b/, 't: 80'], [/' \/ 80</, "' / 80'"]])
+  if(re.test(src)) f5('a hard-coded chapter count is left: ' + what)
+// the day's chapter: from 2026-11-20 on, for a month, it is the chapter the 80-entry count showed that day
+// (the old entry i held chapter i + 2, which is now index i + 1)
+{
+  const m = src.match(/const getTaoChapter = \(\) => \{([\s\S]*?)\n\};/)
+  if(!m) f5('getTaoChapter not found')
+  else {
+    const RealDate = Date
+    for(let k = 0; k < 31; k++) {
+      const day = new RealDate(RealDate.UTC(2026, 10, 20, 4) + k * 86400000)
+      // eslint-disable-next-line no-new-func
+      const fn = new Function('Date', 'TAO_CHAPTER_COUNT', m[1])
+      const FakeDate = function(x) { return x === undefined ? new RealDate(day) : new RealDate(x) }
+      const now = fn(FakeDate, 81)
+      const oldIdx = Math.floor((day - new RealDate('2025-01-01')) / 86400000) % 80
+      if(now !== oldIdx + 1) { f5('day ' + day.toISOString().slice(0, 10) + ': chapter index ' + now + ', the old count showed ' + oldIdx + ' (= ' + (oldIdx + 1) + ' now)'); break }
+    }
+  }
+}
+if(!bad5) console.log('  ✓ 81 Hebrew chapters with their titles, ' + TAO5_EN.length + ' English ones alongside, no appendices or commentary')
+
 console.log('\n' + (failures ? '✕ ' + failures + ' problem(s)' : '✓ i18n coverage passed'))
 process.exit(failures ? 1 : 0)
