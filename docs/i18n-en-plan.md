@@ -23,8 +23,8 @@ Status: plan only. No code changed. Based on `origin/main` at `b9b6666`.
 - The briefing and Ask Fieldy prompts contradict themselves ("answer in Hebrew" and "write in English").
 - The server does not know the language. `worker.js` and `sw.js` send notifications in Hebrew.
 - `tests/lokitest.cjs` compares Loki's lines word for word against main. Add parallel English tables with the same structure and leave the Hebrew untouched.
-- TAO_CHAPTERS has 80 entries, not 81 (chapters 1 and 2 are merged) and the titles are not aligned with the text. The number 80 is hard-coded in 6 places.
-- The Tao array ends with appendices, an editor's commentary and a URL (nissimamon.com). It looks like a published Hebrew edition. This is a legal risk to Uri independent of translation. Recommendation: remove the commentary, appendices and URL now, and consider writing new Hebrew later. Not legal advice.
+- Done (branch `claude/tao-recut`): the Tao is cut into its 81 chapters. TAO_CHAPTERS and TAO_CHAPTERS_EN both use index i for chapter i + 1 (TAO_CHAPTERS has 81 entries; the English holds chapters 1-21 so far). The old 80 entries cut across chapter boundaries; the new cuts follow the printed edition's numbered chapter pages, and every kept line is unchanged and in order. Each chapter's title is its own heading (its first line). The edition prints classical chapters 42 and 43 in swapped order (its 42 is classical 43, "כמו תינוק"); the app keeps the edition's order, so the English for indexes 41 and 42 must follow it. The count comes from the array (TAO_CHAPTER_COUNT); no hard-coded 80 is left.
+- Done (same branch): the edition's appendices, its editor's commentary inside the chapters (43 lines) and the publisher's web address are removed, and the old copies in `app.js` and `index-1.html` are deleted. The chapter text itself is still the edition's Hebrew translation, so the recommendation to consider new Hebrew later stands. Not legal advice.
 
 ## Glossary (for approval)
 
