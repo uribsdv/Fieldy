@@ -9,7 +9,9 @@
  *   2. a TRANSLATIONS entry has no English, or English identical to the
  *      Hebrew (allowed only when the Hebrew holds no Hebrew letters, e.g. REMO);
  *      the same for every field of WATTS_CONTENT (the Ease tab's cards), which
- *      also must not leave out a field in either language;
+ *      also must not leave out a field in either language, nor hold a work word
+ *      (site, contractor, task, project, meeting, SPIS…) or point to another
+ *      screen of the app: the Ease tab is about life, not about work;
  *   3. Hebrew is left inside a string, template or regex in the scripts, or in
  *      the static HTML outside an element that carries data-i18n — unless it
  *      sits in a region marked as an exception:
@@ -101,6 +103,15 @@ else {
     }
   }
   for(const m of code.matchAll(/\btrw\(\s*'([a-z][a-z0-9_]*)'/g)) if(!(m[1] in W)) { fail('trw key used but not defined: ' + m[1]); wBad++ }
+  // The tab is about life, not work: no work words and no pointer to another screen of the app, in either language.
+  const WORK_EN = /\b(sites?|contractors?|tasks?|projects?|meetings?|SPIS|screens?|tabs?|apps?|Loki|leadership|calendar)\b/i
+  const WORK_HE = /(^|[^\u05D0-\u05EA])[והבלמשכ]{0,2}(אתר|אתרים|קבלן|קבלנים|משימה|משימות|פרויקט|פרויקטים|פגישה|פגישות|מסך|מסכים|לשונית|אפליקציה|לוקי|מנהיגות|לוח)(?![\u05D0-\u05EA])/
+  for(const k of Object.keys(W)) {
+    const e = W[k], vals = l => typeof e[l] === 'string' ? [e[l]] : Object.values(e[l] || {})
+    for(const v of vals('en')) { const m = String(v).match(WORK_EN); if(m) { fail(k + ': a work or app word in the English: ' + m[0]); wBad++ } }
+    for(const v of vals('he')) { const m = String(v).match(WORK_HE); if(m) { fail(k + ': a work or app word in the Hebrew: ' + m[0].trim()); wBad++ } }
+    if(/SPIS/.test(JSON.stringify(e))) { fail(k + ': mentions SPIS'); wBad++ }
+  }
   if(!wBad) console.log('  ✓ ' + Object.keys(W).length + ' entries, ' + fields + ' fields')
 }
 
