@@ -4195,7 +4195,8 @@ function renderTalkTab() {
   var toolkitBox = taoPanelHtml(taoLabelHtml(icon('book-open') + ' ' + tr('talk_toolkit_title') + '') + TALK_TOOLKIT.map(function(c){ return toolkitCardHtml(c, false) }).join(''));
 
   if(!talkScenario) {
-    var scenarioBtns = TALK_SCENARIOS.map(function(s,i){
+    var scenarioBtns = TALK_SCENARIOS.map(function(s0,i){
+      var s = talkScenarioShown(s0);
       return '<button class="talk-scenario-btn" data-idx="'+i+'" style="width:100%;text-align:right;background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;cursor:pointer">' +
         '<div style="font-size:var(--fs-base);font-weight:600;color:var(--tao-t1)">'+s.label+'</div>' +
         '<div style="font-size:var(--fs-sm);color:var(--tao-t2);margin-top:3px">'+s.desc+'</div>' +
@@ -4219,7 +4220,7 @@ function renderTalkTab() {
 
   return toolkitBox + taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:700">' + icon('smile') + ' ' + esc(talkScenario.label) + '</span>' +
+    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:700">' + icon('smile') + ' ' + esc(talkScenarioShown(talkScenario).label) + '</span>' +
     '<button id="talk-restart-btn" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-sm);padding:4px 10px;color:var(--tao-t2);font-size:var(--fs-xs);cursor:pointer">' + icon('rotate-ccw') + ' ' + tr('talk_new') + '</button>' +
     '</div>' +
     '<div id="talk-chat-log" style="max-height:340px;overflow-y:auto;margin-bottom:10px">' + bubbles +
@@ -4302,6 +4303,46 @@ const WEEKLY_FOCUS = [
   {theme:'ויסות לפני ביצוע',book:'Self-Regulation & Mindfulness · Gibbs',text:'השבוע: לפני פגישה או שיחה קשה - קח שתי דקות לוויסות (נשימה, תנועה) לפני שאתה נכנס אליה.',relatedAdhd:0}
 ];
 // i18n-exempt-end
+// English for the meditations, the weekly focus and the talk scenarios (stage 3), at the same places as the
+// Hebrew lists above. localItem() lays the English fields over the Hebrew item when the interface is English;
+// a field, a step or an item with no English stays Hebrew. The AI prompts keep the Hebrew (stage 4).
+const MEDITATIONS_EN = [
+  {title:'Tao breathing', desc:'Breathe with the flow of the Tao', steps:['Breathe in deeply for four seconds','Hold for four seconds','Breathe out slowly for six seconds','Rest for two seconds']},
+  {title:'Zen sitting', desc:'Sit quietly, like a mountain', steps:['Back straight, eyes half closed','Notice your natural breathing','When a thought comes up, come back to the breath','Nothing to reach for. Just be here.']},
+  {title:'Body scan', desc:'Let the tension go', steps:['Start at the top of your head','Move down slowly','Notice each place that feels tight','Let it go as you breathe out']},
+  {title:'Mushin walking', desc:'Walk with full attention', steps:['Stand tall, feet steady','Make each step full and whole','Feel the soles of your feet','Let thoughts pass like clouds']},
+  {title:'Water visualization', desc:'Be like water, soft and flowing', steps:['Picture a quiet river','You are the river, flowing around stones','No pushing back, only flowing','Every obstacle becomes part of the way']},
+  {title:'Closer to emptiness', desc:'The wisdom of emptiness', steps:['Sit comfortably and close your eyes','Picture an empty space in your chest','Each breath out makes it wider','Emptiness is where strength comes from']}
+]
+const WEEKLY_FOCUS_EN = [
+  {theme:'My why', text:'This week: remind yourself why you took on this role in the first place. With every small decision, check whether it lines up with that "why".'},
+  {theme:'The infinite game', text:'This week: stop measuring success only against yesterday. Ask yourself: am I playing to win today, or to stay in the game for the long run?'},
+  {theme:'The circle of safety', text:"This week: notice when someone on your team felt safe coming to you with a problem, and when they didn't."},
+  {theme:'Identity before habit', text:'This week: before you act, ask "Is this what the leader I want to be would do?" and not only "Is this necessary?"'},
+  {theme:'A worthy rival', text:'This week: think of the person or situation that challenges you most at work. What is it actually teaching you about yourself?'},
+  {theme:'Your battery', text:'This week: track sleep, movement and food day by day, and see whether they connect to the days when leading feels harder.'},
+  {theme:'Outside structure', text:'This week: pick one failure point that keeps coming back (forgetting, running late, clutter) and build one outside tool for it: a note, a reminder, a checklist.'},
+  {theme:'Regulate before you act', text:'This week: before a meeting or a hard conversation, take two minutes to regulate (breathing, movement) before you walk in.'}
+]
+const TALK_SCENARIOS_EN = [
+  {label:'A colleague at a conference', desc:'Small talk with someone new during a coffee break at a conference'},
+  {label:'A wedding guest', desc:'Sitting next to a stranger at a wedding table'},
+  {label:'Waiting in line for coffee', desc:'A light chat with a stranger waiting in the same line'},
+  {label:'A woman at a bar', desc:"Starting a conversation with a woman you don't know at a bar or an evening social event"}
+]
+function localItem(list, enList, i) {
+  const he = list[i], en = uiLang === 'en' && i >= 0 && enList[i]
+  if(!he || !en) return he
+  const out = Object.assign({}, he)
+  for(const k in en) {
+    if(Array.isArray(he[k]) && Array.isArray(en[k])) out[k] = he[k].map((x, j) => en[k][j] || x)
+    else if(typeof en[k] === 'string' && en[k].trim()) out[k] = en[k]
+  }
+  return out
+}
+function meditationShown(i) { return localItem(MEDITATIONS, MEDITATIONS_EN, i) }
+function weeklyFocusShown(wf) { return (wf && localItem(WEEKLY_FOCUS, WEEKLY_FOCUS_EN, WEEKLY_FOCUS.indexOf(wf))) || wf }
+function talkScenarioShown(sc) { return (sc && localItem(TALK_SCENARIOS, TALK_SCENARIOS_EN, TALK_SCENARIOS.indexOf(sc))) || sc }
 function getWeeklyFocus() {
   var days = Math.floor(new Date(getToday()).getTime()/86400000)
   var weekNum = Math.floor(days/7)
@@ -4482,7 +4523,8 @@ function renderTaoChapter(el, idx) {
     return '<div style="padding:4px 0">' + l + '</div>';
   }).join('');
 
-  var medHtml = MEDITATIONS.map(function(m, i) {
+  var medHtml = MEDITATIONS.map(function(m0, i) {
+    var m = meditationShown(i);
     return '<div id="med-btn-' + i + '" style="background:var(--tao-panel);border:1px solid var(--tao-line);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
       '<div style="font-size:var(--fs-lg);font-weight:600;color:var(--tao-t1)">' + icon(m.icon) + ' ' + m.title + '</div>' +
@@ -4505,16 +4547,16 @@ function renderTaoChapter(el, idx) {
     '</div>'
   ) : '';
 
-  var wf = getWeeklyFocus()
+  var wf = getWeeklyFocus(), wfShown = weeklyFocusShown(wf)
   var relatedCard = null, relatedTab = null
   if(wf && wf.relatedSinek !== undefined) { relatedCard = SINEK_TOOLKIT[wf.relatedSinek]; relatedTab = 'lead' }
   else if(wf && wf.relatedAdhd !== undefined) { relatedCard = ADHD_TOOLKIT[wf.relatedAdhd]; relatedTab = 'adhd' }
   var weekHtml = wf ? taoPanelHtml(
     '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
-    '<span style="font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:600">' + icon('book') + ' ' + tr('weekly_focus_colon') + ' ' + wf.theme + '</span>' +
+    '<span style="font-size:var(--fs-xs);color:var(--tao-gold);letter-spacing:1.5px;font-weight:600">' + icon('book') + ' ' + tr('weekly_focus_colon') + ' ' + wfShown.theme + '</span>' +
     '<span style="font-size:var(--fs-2xs);color:var(--tao-t3)">' + wf.book + '</span>' +
     '</div>' +
-    '<div style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b)">' + wf.text + '</div>' +
+    '<div style="font-size:var(--fs-md);line-height:1.6;color:var(--tao-t1b)">' + wfShown.text + '</div>' +
     (relatedCard ? (
       '<button class="tao-subnav-btn" data-mode="' + relatedTab + '" style="width:100%;text-align:right;background:var(--tao-bg2);border:1px solid var(--tao-line2);border-radius:var(--radius-md);padding:10px 12px;margin-top:12px">' +
       '<div style="font-size:var(--fs-2xs);color:var(--tao-t3);margin-bottom:2px">' + icon('link') + ' ' + trv('tool_related_in', {x: relatedTab==='lead'?tr('tools_from_books'):'ADHD'}) + '</div>' +
@@ -4585,7 +4627,7 @@ function renderTaoChapter(el, idx) {
   var threadHtml = (wf && taoMode!=='lead') ? (
     '<button class="tao-subnav-btn" data-mode="lead" style="width:100%;text-align:right;display:flex;justify-content:space-between;align-items:center;background:var(--tao-bg2);border:1px solid var(--tao-line);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:14px">' +
     '<span style="font-size:var(--fs-xs);color:var(--tao-t3)">' + icon('book') + ' ' + tr('weekly_focus') + '</span>' +
-    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:600">' + wf.theme + ' ' + icon('arrow-left') + '</span>' +
+    '<span style="font-size:var(--fs-sm);color:var(--tao-gold);font-weight:600">' + wfShown.theme + ' ' + icon('arrow-left') + '</span>' +
     '</button>'
   ) : '';
 
@@ -4673,7 +4715,7 @@ function renderTaoChapter(el, idx) {
 
 
 function startMeditation(idx) {
-  const med = MEDITATIONS[idx];
+  const med = meditationShown(idx);
   medTotal = med.duration * 60;
   medSeconds = medTotal;
 
@@ -5704,7 +5746,7 @@ function dailyBriefingHtml() {
         </div>` : ''}
       </div>
       ${f.sites.length ? `<div style="margin-bottom:8px">${f.sites.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--t1);margin-bottom:4px"><span style="color:${s.stuck?'var(--stuck)':'var(--blue)'}">${icon(s.stuck?'alert-triangle':'map-pin')}</span><span style="font-weight:600">${esc(s.name)}</span><span class="muted" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.why)}</span></div>`).join('')}</div>` : ''}
-      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span data-content="he"><b style="color:var(--t1)">${esc(f.lead.theme)}</b> · ${esc(f.lead.text)}</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:var(--fs-md);color:var(--t2);line-height:1.5;margin-bottom:${cached||briefingBusy||briefingError||!serverConfigured()?'10px':'0'}"><span style="color:var(--purple);flex-shrink:0">${icon('book')}</span><span data-content="he"><b style="color:var(--t1)">${esc(weeklyFocusShown(f.lead).theme)}</b> · ${esc(weeklyFocusShown(f.lead).text)}</span></div>
       ${briefingBusy ? skeletonHtml(3, tr('home_briefing_writing_status')) :
         cached ? accordionHtml('briefing-full', {icon:'file-text', title:tr('home_briefing_full'), hint:briefingTeaser(cached)}, function(){
           return `<div id="briefing-text" data-content="he" style="font-size:var(--fs-base);color:var(--t1);line-height:1.65;white-space:pre-line;background:var(--accent-soft);border-radius:var(--radius-md);padding:10px 12px">${esc(cached)}</div>`
@@ -6439,7 +6481,8 @@ function gnItems(greet, askOk) {
   if(f.focus) brief.push({kind: 'focus', label: tr('gn_k_focus'), text: f.focus, pose: 'stand', edit: true})
   else brief.push({kind: 'focus', label: tr('gn_k_focus'), text: tr('gn_focus_add'), pose: 'stand', edit: true})
   f.sites.slice(0, 2).forEach(s => brief.push({kind: 'site', label: tr('gn_k_site'), text: s.name + ' · ' + s.why, pose: 'point'}))
-  if(f.lead && f.lead.theme) brief.push({kind: 'habit', label: tr('gn_k_habit'), text: f.lead.theme + (String(f.lead.text || '').length <= 34 ? ' · ' + f.lead.text : ''), pose: 'read'})
+  const ld = weeklyFocusShown(f.lead)
+  if(ld && ld.theme) brief.push({kind: 'habit', label: tr('gn_k_habit'), text: ld.theme + (String(ld.text || '').length <= 34 ? ' · ' + ld.text : ''), pose: 'read'})
   if(cached) brief.push({kind: 'ai', label: tr('gn_k_ai'), text: (cached.replace(/\s+/g, ' ').trim().split(/(?<=[.!?…])\s/)[0]), pose: 'read'})
   const wis = L.wisdom && !L.poof ? L.wisdom : null
   brief.length = Math.min(brief.length, Math.min(5, LOKI_MAX - opening.length - (wis ? 1 : 0)))   // what is cut is in the full briefing ("tell me more")
